@@ -5,6 +5,18 @@ const BOT_TOKEN = process.env.BOT_TOKEN || "";
 let lastUpdate = null;
 let lastError = null;
 
+async function dbLogWebhook(type, payload, errorMsg) {
+  try {
+    await db.query(
+      `INSERT INTO webhook_logs (type, payload, error)
+       VALUES ($1, $2, $3)`,
+      [type, JSON.stringify(payload || {}), errorMsg || null]
+    );
+  } catch (e) {
+    console.error("Failed to log webhook to database:", e.message);
+  }
+}
+
 async function tgApi(method, body) {
   if (!BOT_TOKEN) {
     lastError = "tgApi: BOT_TOKEN is empty";
@@ -81,17 +93,25 @@ module.exports = async (req, res) => {
     // Parse query manually since req.url is a relative path in some environments
     const url = new URL(req.url || "", "http://localhost");
     if (url.searchParams.get("diag") === "1") {
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      return res.end(JSON.stringify({
-        has_bot_token: !!process.env.BOT_TOKEN,
-        bot_token_length: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.length : 0,
-        bot_token_prefix: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.substring(0, 10) : "",
-        has_database_url: !!process.env.DATABASE_URL,
-        lastUpdate,
-        lastError,
-        env_keys: Object.keys(process.env).filter(k => !k.toLowerCase().includes("secret") && !k.toLowerCase().includes("key") && !k.toLowerCase().includes("pass"))
-      }, null, 2));
+      try {
+        const { rows } = await db.query(
+          "SELECT id, type, payload, error, created_at FROM webhook_logs ORDER BY id DESC LIMIT 20"
+        );
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({
+          has_bot_token: !!process.env.BOT_TOKEN,
+          bot_token_length: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.length : 0,
+          bot_token_prefix: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.substring(0, 10) : "",
+          has_database_url: !!process.env.DATABASE_URL,
+          webhook_logs: rows,
+          env_keys: Object.keys(process.env).filter(k => !k.toLowerCase().includes("secret") && !k.toLowerCase().includes("key") && !k.toLowerCase().includes("pass"))
+        }, null, 2));
+      } catch (dbErr) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ error: `Database diag query failed: ${dbErr.message}` }));
+      }
     }
     res.statusCode = 405;
     return res.end(JSON.stringify({ error: "Method not allowed" }));
@@ -119,6 +139,7 @@ module.exports = async (req, res) => {
   }
 
   lastUpdate = upd;
+  await dbLogWebhook("incoming_update", upd, lastError);
 
   try {
     // 1. Process Messages (e.g. /start command)
@@ -144,6 +165,9 @@ module.exports = async (req, res) => {
         });
         if (tgRes && !tgRes.ok) {
           lastError = `Telegram API Error: ${JSON.stringify(tgRes)}`;
+          await dbLogWebhook("start_command_error", upd, lastError);
+        } else {
+          await dbLogWebhook("start_command_success", upd, null);
         }
         res.statusCode = 200;
         return res.end("ok");
@@ -152,10 +176,13 @@ module.exports = async (req, res) => {
 
     // 2. Answer PreCheckout Query
     if (upd.pre_checkout_query) {
-      await tgApi("answerPreCheckoutQuery", {
+      const tgRes = await tgApi("answerPreCheckoutQuery", {
         pre_checkout_query_id: upd.pre_checkout_query.id,
         ok: true
       });
+      if (tgRes && !tgRes.ok) {
+        await dbLogWebhook("precheckout_error", upd, JSON.stringify(tgRes));
+      }
       res.statusCode = 200;
       return res.end("ok");
     }
@@ -176,6 +203,7 @@ module.exports = async (req, res) => {
 
       if (payerId) {
         await dbCreditPurchase(payerId, chargeId, starsAmount, payload);
+        await dbLogWebhook("successful_payment", upd, null);
       }
     }
     
@@ -183,6 +211,7 @@ module.exports = async (req, res) => {
     return res.end("ok");
   } catch (err) {
     console.error("[webhook] Error processing update:", err.message);
+    await dbLogWebhook("processing_exception", upd, err.message);
     res.statusCode = 500;
     return res.end("error");
   }
