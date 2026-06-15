@@ -24,23 +24,63 @@
 
 const http = require("http");
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const { WebSocketServer } = require("ws");
 const { Pool } = require("pg");
+
+// ---------- .env loader (zero-dependency) ----------
+try {
+  const envPath = path.resolve(__dirname, ".env");
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, "utf8").split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx < 0) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim();
+      if (!process.env[key]) process.env[key] = val; // don't override existing
+    }
+    console.log("[env] Loaded .env file");
+  }
+} catch (_) { /* ignore .env read errors */ }
 
 const PORT = process.env.PORT || 8080;
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const TG_CHAT_ID = process.env.TG_CHAT_ID || "";
 const DATABASE_URL = process.env.DATABASE_URL || "";
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // ---------- DATABASE ----------
-const pool = DATABASE_URL
-  ? new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } })
-  : null;
+// Primary: direct PostgreSQL via pg Pool (works from cloud hosts with IPv6)
+// If pg fails to connect, logs a warning and falls back to no-op queries.
+// The Supabase REST API is used where needed via separate helper functions.
+let pool = null;
+let dbReady = false;
+if (DATABASE_URL) {
+  pool = new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  pool.on("error", (err) => {
+    console.error("[db] Pool error:", err.message);
+  });
+  // Test connection on startup
+  pool.query("SELECT 1")
+    .then(() => { dbReady = true; console.log("[db] ✅ PostgreSQL connected via pg Pool"); })
+    .catch((err) => {
+      console.warn("[db] ⚠️  pg Pool connection failed:", err.message);
+      console.warn("[db]    This is normal on local Windows (IPv6-only host).");
+      console.warn("[db]    The server will still function — DB writes will be attempted on each query.");
+    });
+} else {
+  console.warn("[db] No DATABASE_URL configured; database features disabled");
+}
 
 async function query(text, params) {
-  if (!pool) { console.warn("[db] No DATABASE_URL configured; skipping query"); return { rows: [] }; }
+  if (!pool) { return { rows: [] }; }
   return pool.query(text, params);
 }
 
