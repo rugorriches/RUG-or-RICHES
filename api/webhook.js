@@ -88,33 +88,11 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
 }
 
 module.exports = async (req, res) => {
-  // Simple diagnostic check
+  // Simple status check
   if (req.method === "GET") {
-    // Parse query manually since req.url is a relative path in some environments
-    const url = new URL(req.url || "", "http://localhost");
-    if (url.searchParams.get("diag") === "1") {
-      try {
-        const { rows } = await db.query(
-          "SELECT id, type, payload, error, created_at FROM webhook_logs ORDER BY id DESC LIMIT 20"
-        );
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        return res.end(JSON.stringify({
-          has_bot_token: !!process.env.BOT_TOKEN,
-          bot_token_length: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.length : 0,
-          bot_token_prefix: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.substring(0, 10) : "",
-          has_database_url: !!process.env.DATABASE_URL,
-          webhook_logs: rows,
-          env_keys: Object.keys(process.env).filter(k => !k.toLowerCase().includes("secret") && !k.toLowerCase().includes("key") && !k.toLowerCase().includes("pass"))
-        }, null, 2));
-      } catch (dbErr) {
-        res.statusCode = 500;
-        res.setHeader("Content-Type", "application/json");
-        return res.end(JSON.stringify({ error: `Database diag query failed: ${dbErr.message}` }));
-      }
-    }
-    res.statusCode = 405;
-    return res.end(JSON.stringify({ error: "Method not allowed" }));
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify({ status: "ok" }));
   }
 
   if (req.method !== "POST") {
