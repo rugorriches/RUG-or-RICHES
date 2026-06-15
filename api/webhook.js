@@ -73,7 +73,33 @@ module.exports = async (req, res) => {
   const upd = req.body || {};
   
   try {
-    // 1. Answer PreCheckout Query
+    // 1. Process Messages (e.g. /start command)
+    if (upd.message && upd.message.text) {
+      const text = upd.message.text.trim();
+      const chatId = upd.message.chat.id;
+      
+      if (text.startsWith("/start")) {
+        const webappUrl = `https://rug-or-riches-seven.vercel.app/play`;
+        await tgApi("sendMessage", {
+          chat_id: chatId,
+          text: `Welcome to RUG OR RICHES ($MOON) — the press-your-luck crypto simulator! 📈💀\n\nTap to pump the chart, accumulate $MOON points, and cash out before the rug pull wipes your position.\n\nInvite friends to earn massive bonuses and compete on the global leaderboard!`,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "▶ Play RUG OR RICHES",
+                  web_app: { url: webappUrl }
+                }
+              ]
+            ]
+          }
+        });
+        res.statusCode = 200;
+        return res.end("ok");
+      }
+    }
+
+    // 2. Answer PreCheckout Query
     if (upd.pre_checkout_query) {
       await tgApi("answerPreCheckoutQuery", {
         pre_checkout_query_id: upd.pre_checkout_query.id,

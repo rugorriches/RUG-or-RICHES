@@ -33,10 +33,37 @@ fetch(apiURL, {
   .then(res => {
     if (res.ok) {
       console.log(`[webhook] Success! Webhook set successfully: ${res.description}`);
+      
+      // Set Chat Menu Button as Web App
+      const menuApiURL = `https://api.telegram.org/bot${BOT_TOKEN}/setChatMenuButton`;
+      const webappUrl = WEBHOOK_URL.replace("/api/webhook", "/play");
+      console.log(`[menu-button] Setting Telegram Menu Button to launch: ${webappUrl}...`);
+      
+      return fetch(menuApiURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          menu_button: {
+            type: "web_app",
+            text: "Play",
+            web_app: {
+              url: webappUrl
+            }
+          }
+        })
+      });
     } else {
-      console.error(`[webhook] Failed to set webhook:`, res.description || res);
+      throw new Error(res.description || JSON.stringify(res));
+    }
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.ok) {
+      console.log(`[menu-button] Success! Chat menu button configured.`);
+    } else {
+      console.error(`[menu-button] Failed to configure menu button:`, res.description || res);
     }
   })
   .catch(err => {
-    console.error(`[webhook] Network error calling Telegram api:`, err.message);
+    console.error(`[webhook] Error:`, err.message);
   });
