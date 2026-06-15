@@ -32,6 +32,17 @@ function genRefCode() {
   return s;
 }
 
+// Deterministic referral code tied to the Telegram account — MUST stay identical to the client's refFromId() in moontap.html
+function refFromId(id) {
+  let h = 2166136261 >>> 0;
+  const str = "moon-" + id;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  const c = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < 6; i++) { h = Math.imul(h, 16777619) >>> 0; s += c[h % c.length]; }
+  return s;
+}
+
 // Map username/name to deterministic negative ID
 function nameToId(name) {
   let hash = 0;
@@ -131,7 +142,7 @@ module.exports = async (req, res) => {
     const { rows: players } = await db.query("SELECT id FROM players WHERE id = $1", [tgUser.id]);
     
     if (players.length === 0) {
-      const refCode = genRefCode();
+      const refCode = refFromId(tgUser.id);
       const name = String(tgUser.username || tgUser.first_name || "degen" + Math.floor(Math.random() * 9000 + 1000)).slice(0, 18);
       
       // Check for start_param (referral code)

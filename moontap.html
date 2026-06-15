@@ -12,7 +12,7 @@
     --bg:#05010f; --bg2:#140826; --neon:#ff2bd6; --cyan:#23f0ff; --gold:#ffd400;
     --green:#1dff8f; --red:#ff3b5c; --purple:#9b5cff; --ink:#fff;
     --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.1);
-    --card:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.025));
+    --card:linear-gradient(180deg,rgba(124,77,255,.09),rgba(8,4,20,.34));
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
   html,body{height:100%;}
@@ -21,7 +21,7 @@
   body::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:50; opacity:.22;
     background:repeating-linear-gradient(0deg, rgba(0,0,0,.3) 0 1px, transparent 1px 3px); mix-blend-mode:overlay;}
   /* the whole app is a self-contained device frame */
-  #app{position:relative; max-width:460px; margin:0 auto; height:100%; display:flex; flex-direction:column; overflow:hidden;
+  #app{position:relative; max-width:440px; margin:0 auto; height:var(--app-h,100dvh); display:flex; flex-direction:column; overflow:hidden;
     background:radial-gradient(135% 95% at 50% -10%, #34125e 0%, var(--bg2) 44%, var(--bg) 84%);
     padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);}
   @media (min-width:430px) and (min-height:720px){
@@ -30,6 +30,11 @@
       border:1px solid rgba(255,255,255,.14);
       box-shadow:0 30px 90px rgba(0,0,0,.65), 0 0 0 10px rgba(15,6,30,.6), inset 0 0 0 1px rgba(255,255,255,.05);}
   }
+  /* scrollable trade area — header/season pinned, nav fixed; cards keep readable size and scroll instead of squishing on short (Telegram) viewports */
+  #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
+  #gameScroll::-webkit-scrollbar{width:0; height:0;}
+  #gameScroll>*{flex-shrink:0;}
+  #gameScroll>.coin-stage{flex:1 0 auto; min-height:140px;}
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -68,7 +73,7 @@
     backdrop-filter:blur(6px); border-radius:13px; padding:6px 4px; text-align:center;
     box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .15s;}
   .stat:active{transform:translateY(-2px) scale(1.02);}
-  .stat .v{font-size:15px; font-weight:800;}
+  .stat .v{font-size:15px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
   .stat .l{font-size:8px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase;}
   #balance{color:var(--gold);}
 
@@ -87,7 +92,7 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; height:124px; display:block;}
+  #chart{width:100%; height:150px; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
@@ -120,17 +125,24 @@
   .pot .lab{font-size:9px; letter-spacing:1.5px; color:#8fdcff; text-transform:uppercase;}
   .combo{font-size:12px; color:var(--neon); font-weight:800; height:15px;}
   .coin-stage{flex:1; display:flex; align-items:center; justify-content:center; position:relative; min-height:74px;}
-  #coin{width:112px; height:112px; border-radius:50%; cursor:pointer; position:relative;
-    background:radial-gradient(circle at 35% 30%, #fff6c0, var(--gold) 45%, #b8860b 100%);
-    box-shadow:0 0 32px rgba(255,212,0,.5), inset 0 -8px 22px rgba(0,0,0,.35), inset 0 8px 16px rgba(255,255,255,.5);
-    display:flex; align-items:center; justify-content:center; transition:transform .05s;}
-  #coin:active{transform:scale(.92);}
-  #coin::before{content:""; position:absolute; inset:-13px; border-radius:50%; z-index:-1;
-    background:radial-gradient(circle,rgba(255,212,0,.38),transparent 70%); animation:aura 2.2s ease-in-out infinite;}
-  @keyframes aura{50%{transform:scale(1.18); opacity:.55;}}
-  #coin .sym{font-size:44px; font-weight:900; color:#7a5c00; text-shadow:0 2px 0 rgba(255,255,255,.4);}
-  #coin .ring{position:absolute; inset:-7px; border-radius:50%; border:2px dashed rgba(255,255,255,.35); animation:spin 14s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
+  /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
+  #coin{width:min(90%,330px); min-height:96px; height:96px; border-radius:28px; cursor:pointer; position:relative; overflow:hidden;
+    background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
+    display:flex; align-items:center; gap:13px; padding:0 20px; transition:transform .07s, box-shadow .2s;
+    box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--gold);}
+  #coin:active{transform:scale(.97) translateY(1px); box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1), 0 0 44px -4px var(--gold);}
+  #coin::before{content:""; position:absolute; inset:0; border-radius:28px; padding:1.6px; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude;
+    animation:borderflow 5s linear infinite; opacity:.9;}
+  #coin::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:28px;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%); transform:translateX(-120%); animation:buyshine 3.4s ease-in-out infinite;}
+  @keyframes buyshine{0%,55%{transform:translateX(-120%);} 100%{transform:translateX(120%);}}
+  #coin .coin-ico{font-size:26px; line-height:1; color:var(--gold); filter:drop-shadow(0 0 7px var(--gold)); z-index:2;}
+  #coin .coin-cta{display:flex; flex-direction:column; align-items:flex-start; line-height:1.08; z-index:2; flex:1;}
+  #coin .coin-cta b{font-size:20px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
+  #coin .coin-cta span{font-size:9px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
+  #coin .coin-val{z-index:2; font-size:14px; font-weight:900; color:var(--gold); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
   #boostBadge{position:absolute; top:4px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,var(--neon),var(--gold));
     color:#13002a; font-weight:900; font-size:12px; padding:4px 12px; border-radius:20px; display:none; animation:pulse .6s infinite alternate;}
   @keyframes pulse{to{transform:translateX(-50%) scale(1.08);}}
@@ -157,8 +169,8 @@
   #cashout:disabled{filter:grayscale(.8) brightness(.6); cursor:not-allowed; animation:none;}
 
   /* nav */
-  nav{display:flex; border-top:1px solid var(--line); background:rgba(5,1,15,.92); backdrop-filter:blur(8px);}
-  nav button{flex:1; position:relative; background:none; border:none; color:#9a82c9; padding:8px 0 10px; font-size:9.5px; font-weight:700; cursor:pointer; transition:color .2s, transform .1s;}
+  nav{flex:0 0 auto; display:flex; min-height:64px; border-top:1px solid var(--line); background:rgba(5,1,15,.92); backdrop-filter:blur(8px); padding-bottom:env(safe-area-inset-bottom);}
+  nav button{flex:1; position:relative; background:none; border:none; color:#9a82c9; padding:10px 0 12px; font-size:9.5px; font-weight:700; cursor:pointer; transition:color .2s, transform .1s;}
   nav button:active{transform:scale(.92);}
   nav button.on{color:var(--cyan); text-shadow:0 0 8px var(--cyan);}
   nav button.on::after{content:""; position:absolute; top:3px; left:50%; transform:translateX(-50%); width:36px; height:30px; border-radius:11px; z-index:-1; background:radial-gradient(circle,rgba(35,240,255,.28),transparent 72%);}
@@ -167,13 +179,14 @@
   nav button.alert .dot{display:block;}
 
   /* panels */
-  .panel{position:absolute; inset:0 0 52px 0; background:linear-gradient(180deg,var(--bg2),var(--bg)); z-index:30; padding:15px 14px 24px; overflow-y:auto; display:none;}
+  .panel{position:absolute; inset:0 0 calc(64px + env(safe-area-inset-bottom)) 0; background:linear-gradient(180deg,var(--bg2),var(--bg)); z-index:30; padding:15px 14px calc(24px + env(safe-area-inset-bottom)); overflow-y:auto; display:none;}
   .panel.show{display:block; animation:panelIn .28s ease;}
   @keyframes panelIn{from{transform:translateY(18px); opacity:0;}to{transform:none; opacity:1;}}
   .panel h2{font-size:18px; margin-bottom:2px; color:var(--neon);}
   .panel h2 .sm{font-size:11px; color:#a78fd6; font-weight:600;}
   .panel p.sub{font-size:12px; color:#a78fd6; margin-bottom:13px;}
-  .sec-h{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8fdcff; margin:16px 2px 8px; font-weight:800;}
+  .sec-h{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8fdcff; margin:16px 2px 8px; font-weight:800; display:flex; align-items:center; gap:8px;}
+  .sec-h::before{content:""; width:4px; height:13px; border-radius:2px; background:linear-gradient(180deg,var(--cyan),var(--neon)); box-shadow:0 0 8px var(--cyan); flex-shrink:0;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:11px 12px; margin-bottom:10px;
     box-shadow:0 4px 14px rgba(0,0,0,.25); transition:transform .15s;}
   .row{display:flex; align-items:center; gap:11px;}
@@ -198,19 +211,44 @@
   .vipcard.t2{background:linear-gradient(135deg,#3a4a55,#1a2228);}
   .vipcard.t3{background:linear-gradient(135deg,#5a4a12,#2a2208);}
   .vipcard.t4{background:linear-gradient(135deg,#2a4a6a,#3a1a5a);}
-  .vipcard.active{box-shadow:0 0 0 2px var(--gold), 0 0 24px rgba(255,212,0,.4);}
+  .vipcard.active{border-color:transparent; box-shadow:0 0 26px -4px var(--gold), inset 0 0 0 1.5px rgba(255,212,0,.55);}
+  .vipcard.active::after{content:""; position:absolute; inset:0; border-radius:14px; padding:1.6px; pointer-events:none;
+    background:linear-gradient(120deg,var(--gold),var(--neon),var(--cyan),var(--gold)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
   .vipcard .vtag{position:absolute; top:10px; right:12px; font-size:10px; font-weight:900; letter-spacing:1px; opacity:.8;}
+  /* upgrade rows — neon edge accent */
+  .upcard{position:relative; overflow:hidden;}
+  .upcard::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg,var(--cyan),var(--neon)); border-radius:3px 0 0 3px;}
+  .upcard:active{transform:scale(.99);}
+  /* daily-combo highlight (airdrop) */
+  #comboCard{position:relative; overflow:hidden; border:1px solid transparent;
+    background:linear-gradient(rgba(14,8,38,.65),rgba(14,8,38,.65)) padding-box, linear-gradient(120deg,var(--gold),var(--neon),var(--cyan)) border-box;
+    box-shadow:0 0 20px -8px var(--gold);}
 
   /* ranks */
-  .rankrow{display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:11px; margin-bottom:6px; background:var(--glass); font-size:13px; opacity:.5;}
+  .rankrow{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:12px; margin-bottom:7px; background:rgba(255,255,255,.04); border:1px solid var(--line); font-size:13px; opacity:.5;}
   .rankrow.done{opacity:1;}
-  .rankrow.cur{opacity:1; border:1px solid var(--gold); background:rgba(255,212,0,.1);}
+  .rankrow.cur{opacity:1; border:1px solid transparent; background:linear-gradient(rgba(14,8,38,.92),rgba(14,8,38,.92)) padding-box, linear-gradient(120deg,var(--gold),var(--neon),var(--cyan)) border-box; box-shadow:0 0 22px -6px var(--gold);}
   .rankrow .e{font-size:22px;}
-  .lb-row{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; margin-bottom:6px; background:var(--glass); font-size:13px;}
-  .lb-row .rk{width:22px; font-weight:900; color:var(--gold);}
-  .lb-row .nm{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  /* crypto airdrop-pass hero (rank + crew) */
+  .rank-hero{position:relative; overflow:hidden; border-radius:20px; padding:16px; margin-bottom:12px;
+    background:linear-gradient(180deg,rgba(124,77,255,.12),rgba(0,0,0,.28)), repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 14px),
+      radial-gradient(120% 120% at 0% 0%, rgba(255,212,0,.18), transparent 55%), radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.20), transparent 55%), #0e0826;
+    box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--gold);}
+  .rank-hero::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,var(--gold),var(--neon),var(--cyan),var(--gold)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
+  .rank-hero>*{position:relative; z-index:2;}
+  .rh-top{display:flex; align-items:center; gap:13px;}
+  .rh-emo{font-size:40px; line-height:1; filter:drop-shadow(0 0 10px rgba(255,212,0,.55));}
+  .rh-tag{font-size:9px; letter-spacing:2px; font-weight:800; color:#8fdcff;}
+  .rh-name{font-size:22px; font-weight:900; color:#fff; line-height:1.05;}
+  .rh-next{font-size:11px; color:#b9a7e8; margin-top:9px;}
+  .lb-row{display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:11px; margin-bottom:6px; background:rgba(255,255,255,.04); border:1px solid var(--line); font-size:13px;}
+  .lb-row .rk{width:24px; text-align:center; font-weight:900; color:var(--gold);}
+  .lb-row .nm{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fff; font-weight:700;}
   .lb-row .sc{font-weight:800; color:var(--cyan);}
-  .lb-row.me{border:1px solid var(--neon); background:rgba(255,43,214,.12);}
+  .lb-row.me{border:1px solid transparent; background:linear-gradient(rgba(14,8,38,.92),rgba(14,8,38,.92)) padding-box, linear-gradient(120deg,var(--neon),var(--cyan)) border-box; box-shadow:0 0 18px -5px var(--neon);}
 
   /* quests / ach */
   .qclaim{border:none; border-radius:10px; padding:8px 12px; font-weight:800; font-size:11px; color:#13002a; background:linear-gradient(90deg,var(--green),#0bd47a); cursor:pointer;}
@@ -219,16 +257,50 @@
   .ach{opacity:.4;} .ach.on{opacity:1;}
 
   /* invite */
-  .invhero{text-align:center; border-radius:16px; padding:16px; margin-bottom:12px; position:relative; overflow:hidden;
-    background:linear-gradient(135deg,rgba(255,43,214,.18),rgba(35,240,255,.14)); border:1px solid var(--line);}
+  .invhero{text-align:center; border-radius:20px; padding:16px; margin-bottom:12px; position:relative; overflow:hidden;
+    background:linear-gradient(180deg,rgba(124,77,255,.12),rgba(0,0,0,.28)), repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 14px),
+      radial-gradient(120% 120% at 0% 0%, rgba(255,43,214,.20), transparent 55%), radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.20), transparent 55%), #0e0826;
+    box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--neon);}
+  .invhero::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
+  .invhero>*{position:relative; z-index:2;}
   .invhero .big{font-size:34px; font-weight:900; color:var(--gold); line-height:1;}
   .invhero .lab{font-size:11px; color:#cbb6ff; letter-spacing:1px; text-transform:uppercase;}
   .codebox{display:flex; align-items:center; gap:8px; justify-content:center; margin-top:10px;}
   .codebox .code{font-size:20px; font-weight:900; letter-spacing:3px; color:#fff; background:rgba(0,0,0,.3); padding:6px 12px; border-radius:10px; border:1px dashed var(--cyan);}
   .mini-copy{border:none; background:var(--cyan); color:#022; border-radius:9px; padding:8px 11px; font-weight:800; font-size:12px; cursor:pointer;}
+  /* invite hero — holographic crypto airdrop pass */
+  .inv-hero2{border-radius:20px; padding:16px; margin-bottom:11px; position:relative; overflow:hidden;
+    background:linear-gradient(180deg,rgba(124,77,255,.12),rgba(0,0,0,.28)),
+      repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 14px),
+      radial-gradient(120% 120% at 0% 0%, rgba(255,43,214,.22), transparent 55%),
+      radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.22), transparent 55%), #0e0826;
+    box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--neon);}
+  .inv-hero2::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude;
+    animation:borderflow 6s linear infinite;}
+  .inv-hero2::after{content:""; position:absolute; top:0; left:-60%; width:45%; height:100%; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,.10),transparent); transform:skewX(-20deg); animation:shine 4.5s ease-in-out infinite;}
+  .inv-hero2>*{position:relative; z-index:2;}
+  .inv-pass{display:inline-flex; align-items:center; gap:6px; font-size:9px; font-weight:900; letter-spacing:1.5px; color:#0e0826; background:linear-gradient(90deg,var(--gold),#ffae00); padding:3px 10px; border-radius:20px; margin-bottom:12px; box-shadow:0 0 14px -2px var(--gold);}
+  .inv-id{display:flex; align-items:center; gap:11px; margin-bottom:13px;}
+  .inv-av{width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:900; color:#0e0826; background:linear-gradient(135deg,var(--cyan),var(--neon)); background-size:cover; background-position:center; box-shadow:0 0 0 2px rgba(255,255,255,.16), 0 0 18px -2px var(--cyan);}
+  .inv-name{font-size:15px; font-weight:900; color:#fff; line-height:1.15;}
+  .inv-sub{font-size:10.5px; color:#b9a7e8;}
+  .inv-codewrap{position:relative; background:linear-gradient(180deg,rgba(35,240,255,.08),rgba(0,0,0,.38)); border:1px dashed rgba(35,240,255,.6); border-radius:13px; padding:11px 12px; text-align:center; box-shadow:inset 0 0 22px rgba(35,240,255,.12);}
+  .inv-codelabel{font-size:9px; letter-spacing:2.5px; color:#8fdcff; font-weight:800;}
+  .inv-code{font-family:"Courier New",ui-monospace,monospace; font-size:27px; font-weight:900; letter-spacing:6px; color:#fff; line-height:1.28; text-shadow:0 0 12px rgba(35,240,255,.75);}
+  .inv-share{display:block; width:100%; border:none; border-radius:13px; padding:13px; margin-top:11px; font-weight:900; font-size:14px; color:#06121f; background:linear-gradient(90deg,var(--cyan),var(--neon)); cursor:pointer; box-shadow:0 0 22px -4px var(--neon); animation:cashpulse 2.6s ease-in-out infinite;}
+  .inv-share:active{transform:scale(.98); animation:none;}
+  .inv-progress{background:var(--glass); border:1px solid var(--line); border-radius:14px; padding:12px 13px; margin-bottom:11px;}
+  .inv-prow{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#cbb6ff;}
+  .inv-prow b{font-size:20px; color:var(--gold); font-weight:900;}
   .twocol{display:flex; gap:9px; margin-bottom:11px;}
-  .twocol .card{flex:1; margin:0; text-align:center;}
-  .twocol .v{font-size:18px; font-weight:900; color:var(--cyan);}
+  .twocol .card{flex:1; margin:0; text-align:center; position:relative; overflow:hidden;}
+  .twocol .card::before, .psum .card::before{content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--neon));}
+  .twocol .v{font-size:18px; font-weight:900; color:var(--cyan); text-shadow:0 0 10px rgba(35,240,255,.45);}
   .twocol .l{font-size:9px; color:#a78fd6; text-transform:uppercase; letter-spacing:.5px;}
   .mile{display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:11px; margin-bottom:6px; background:var(--glass); font-size:13px;}
   .mile.done{background:rgba(29,255,143,.08);}
@@ -238,6 +310,15 @@
 
   .big-btn{display:block; width:100%; position:relative; overflow:hidden; border:none; border-radius:14px; padding:14px; font-weight:900; font-size:15px; color:#13002a; background:linear-gradient(90deg,var(--neon),var(--cyan)); cursor:pointer; margin-bottom:10px;}
   .big-btn:active{transform:scale(.98);}
+  /* crypto flex-card button */
+  .flexbtn{position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; gap:2px; width:100%; border:none; border-radius:15px; padding:13px; margin-bottom:11px; cursor:pointer;
+    background:radial-gradient(120% 140% at 50% -20%, #2b1a5c, #0e0826); box-shadow:0 12px 28px rgba(0,0,0,.5), 0 0 24px -8px var(--gold);}
+  .flexbtn::before{content:""; position:absolute; inset:0; border-radius:15px; padding:1.5px; pointer-events:none;
+    background:linear-gradient(120deg,var(--gold),var(--neon),var(--cyan),var(--gold)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
+  .flexbtn b{position:relative; z-index:1; font-size:15px; font-weight:900; color:var(--gold); text-shadow:0 0 10px rgba(255,212,0,.5);}
+  .flexbtn small{position:relative; z-index:1; font-size:10px; font-weight:800; color:#b9a7e8;}
+  .flexbtn:active{transform:scale(.98);}
   .big-btn::after{content:""; position:absolute; top:0; left:-60%; width:45%; height:100%; background:linear-gradient(120deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:shine 3.6s ease-in-out infinite;}
 
   /* profile */
@@ -309,29 +390,31 @@
   .vh-ben{display:flex; flex-wrap:wrap; gap:6px;}
   .bchip{font-size:10px; font-weight:700; padding:4px 8px; border-radius:9px; background:rgba(255,255,255,.08); border:1px solid var(--line); color:#e7dcff;}
   .utag{font-size:9px; font-weight:800; padding:2px 7px; border-radius:8px; background:rgba(155,92,255,.22); color:#c9b3ff; margin-left:5px;}
-  .card.best{border-color:rgba(255,212,0,.7); box-shadow:0 0 18px rgba(255,212,0,.25);}
+  .card.best{position:relative; border-color:transparent; box-shadow:0 0 22px -6px var(--gold);}
+  .card.best::after{content:""; position:absolute; inset:0; border-radius:13px; padding:1.5px; pointer-events:none;
+    background:linear-gradient(120deg,var(--gold),var(--neon),var(--cyan),var(--gold)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
   .psum{display:flex; gap:8px; margin-bottom:12px;}
-  .psum .card{flex:1; margin:0; text-align:center; padding:9px 4px;}
-  .psum .v{font-size:17px; font-weight:900; color:var(--cyan);}
+  .psum .card{flex:1; margin:0; text-align:center; padding:9px 4px; position:relative; overflow:hidden;}
+  .psum .v{font-size:17px; font-weight:900; color:var(--cyan); text-shadow:0 0 10px rgba(35,240,255,.45);}
   .psum .l{font-size:9px; color:#a78fd6; text-transform:uppercase; letter-spacing:.5px;}
   .qsum{font-size:11px; color:#a78fd6; text-align:center; margin-bottom:9px; font-weight:700;}
   .lb-row .rk .medal{font-size:16px;}
   .rtabs{display:flex; gap:6px; margin:2px 0 12px;}
-  .rtab{flex:1; background:var(--glass); border:1px solid var(--line); color:#a78fd6; border-radius:10px; padding:8px 3px; font-size:10.5px; font-weight:800; cursor:pointer; transition:.15s;}
-  .rtab.on{color:#06121f; background:linear-gradient(90deg,var(--cyan),var(--neon));}
-  .crewrow{display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:11px; margin-bottom:6px; background:var(--glass); font-size:13px;}
-  .crewrow.me{border:1px solid var(--gold); background:rgba(255,212,0,.1);}
+  .rtab{flex:1; background:rgba(255,255,255,.05); border:1px solid var(--line); color:#b9a7e8; border-radius:11px; padding:9px 3px; font-size:10.5px; font-weight:800; cursor:pointer; transition:.15s;}
+  .rtab.on{color:#06121f; background:linear-gradient(90deg,var(--cyan),var(--neon)); border-color:transparent; box-shadow:0 0 16px -3px var(--neon);}
+  .crewrow{display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; margin-bottom:6px; background:rgba(255,255,255,.04); border:1px solid var(--line); font-size:13px;}
+  .crewrow.me{border:1px solid transparent; background:linear-gradient(rgba(14,8,38,.92),rgba(14,8,38,.92)) padding-box, linear-gradient(120deg,var(--gold),var(--neon),var(--cyan)) border-box; box-shadow:0 0 20px -6px var(--gold);}
   .crewrow .rk{width:22px; font-weight:900; color:var(--gold);}
   .crewrow .nm{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .crewrow .sc{font-weight:800; color:var(--cyan);}
-  .crewhero{text-align:center; border-radius:16px; padding:16px; margin-bottom:12px; background:linear-gradient(135deg,rgba(255,43,214,.16),rgba(35,240,255,.12)); border:1px solid var(--line);}
+  .crewhero{position:relative; overflow:hidden; text-align:center; border-radius:20px; padding:16px; margin-bottom:12px;
+    background:linear-gradient(180deg,rgba(124,77,255,.12),rgba(0,0,0,.28)), radial-gradient(120% 120% at 0% 0%, rgba(255,43,214,.20), transparent 55%), radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.20), transparent 55%), #0e0826; box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--neon);}
+  .crewhero::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1; background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%; -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
+  .crewhero>*{position:relative; z-index:2;}
   .crewhero .big{font-size:22px; font-weight:900; color:#fff;} .crewhero .v{font-size:20px; font-weight:900; color:var(--gold);}
   /* coin scene: futuristic crypto icons + hop */
   .coin-stage{padding-bottom:4px;}
-  #cryptoIcons{position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
-  #cryptoIcons .ci{position:absolute; opacity:.16; text-shadow:0 0 12px currentColor; animation:ciDrift 7s ease-in-out infinite; transition:transform .18s ease;}
-  @keyframes ciDrift{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(10deg);}}
-  .coin-stage.jolt #cryptoIcons .ci{transform:scale(1.3); opacity:.32;}
   #coin{z-index:2;}
   #coin.hop{animation:hop .26s ease;}
   @keyframes hop{0%{transform:translateY(0);}45%{transform:translateY(-16px) scale(1.05);}100%{transform:translateY(0);}}
@@ -363,11 +446,13 @@
   @media (max-width:360px){ .logo{font-size:12px;} .iconbtn{width:27px; height:27px; font-size:12px;} .rankpill{padding:5px 7px 5px 6px; font-size:10px;} .hbtns{gap:3px;} }
   :focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
   .shareRow{display:flex; gap:8px; justify-content:center; margin-top:13px;}
-  .sicon{width:46px; height:46px; border-radius:13px; border:1px solid var(--line); background:rgba(255,255,255,.08); color:#fff; font-size:19px; font-weight:800; cursor:pointer; transition:transform .1s, background .15s;}
+  .sicon{display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:13px; border:1px solid var(--line); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; transition:transform .1s, background .15s, border-color .15s;}
+  .sicon svg{width:20px; height:20px; display:block;}
+  .sicon:hover{border-color:rgba(35,240,255,.5);}
   .sicon:active{transform:scale(.88); background:rgba(255,255,255,.16);}
   /* trade console (cleaner bet area) */
   .console{margin:2px 10px 7px; padding:7px 11px 8px; border-radius:16px; border:1px solid var(--line);
-    background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); box-shadow:0 -6px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.07);}
+    background:radial-gradient(120% 140% at 50% 0%, rgba(124,77,255,.12), rgba(8,4,20,.5)); box-shadow:0 -6px 22px rgba(0,0,0,.4), inset 0 1px 0 rgba(124,77,255,.35);}
   .console .energy-row{margin-bottom:6px;}
   .betbar{display:flex; align-items:center; gap:10px;}
   .betchips{display:flex; gap:6px; margin-top:6px;}
@@ -408,6 +493,7 @@
   </header>
   <div class="season">⏳ Airdrop Season 1 ends in <b id="seasonTimer">--</b></div>
 
+  <div id="gameScroll">
   <div class="stats">
     <div class="stat"><div class="v" id="balance">0</div><div class="l">Banked $MOON</div></div>
     <div class="stat"><div class="v" id="airdrop">0</div><div class="l">Airdrop Pts</div></div>
@@ -440,9 +526,8 @@
   </div>
 
   <div class="coin-stage">
-    <div id="cryptoIcons" aria-hidden="true"></div>
-    <div id="coin" role="button" tabindex="0" aria-label="Tap to pump the price"><div class="ring"></div><div id="boostBadge">🚀 2x BOOST</div><span class="sym">$</span></div>
-    <div class="hint" id="hint">TAP to pump 📈 — sell before it rugs</div>
+    <div id="coin" role="button" tabindex="0" aria-label="Tap to buy and pump the price"><div id="boostBadge">🚀 2x BOOST</div><div class="coin-ico">▲</div><div class="coin-cta"><b>BUY $MOON</b><span>+ TAP TO STACK</span></div><div class="coin-val" id="coinVal">+100</div></div>
+    <div class="hint" id="hint">TAP to buy 📈 — sell before it rugs</div>
   </div>
 
   <div class="console">
@@ -455,6 +540,7 @@
     <div class="betchips" id="betChips"></div>
     <div class="actions"><button class="btn half" id="sellHalf">✂️ HALF</button><button class="btn sell" id="cashout">💰 SELL ALL</button></div>
   </div>
+  </div><!-- /gameScroll -->
 
   <!-- PANELS -->
   <div class="panel" id="panel-shop"><h2>🛠️ Upgrades</h2><p class="sub">Spend banked $MOON. Build your degen empire.</p><div id="shopList"></div></div>
@@ -534,8 +620,15 @@
       <button class="rtab" data-rt="mycrew">My Crew</button>
     </div>
     <div class="rt" id="rt-rank">
-      <div class="card"><div class="row"><div class="emo" id="myRankEmo">🦐</div><div class="grow"><div class="nm" id="myRankName">Shrimp</div><div class="ds" id="myRankNext">—</div><div class="pbar2"><i id="myRankBar" style="width:0%"></i></div></div></div></div>
-      <div class="sec-h">All Tiers</div><div id="rankList"></div>
+      <div class="rank-hero">
+        <div class="rh-top">
+          <div class="rh-emo" id="myRankEmo">🦐</div>
+          <div style="flex:1"><div class="rh-tag">YOUR RANK · LIFETIME $MOON</div><div class="rh-name" id="myRankName">Shrimp</div></div>
+        </div>
+        <div class="rh-next" id="myRankNext">—</div>
+        <div class="pbar2" style="margin-top:7px"><i id="myRankBar" style="width:0%"></i></div>
+      </div>
+      <div class="sec-h">All tiers</div><div id="rankList"></div>
     </div>
     <div class="rt" id="rt-players" style="display:none"><div class="sec-h">Season Leaderboard</div><div id="boardList"></div></div>
     <div class="rt" id="rt-crews" style="display:none"><div class="sec-h">Top Crews</div><div id="crewBoard"></div></div>
@@ -543,27 +636,38 @@
   </div>
 
   <div class="panel" id="panel-invite">
-    <h2>🤝 Invite & Earn</h2><p class="sub">You + your friend both get 5,000 $MOON. Premium friends = 25,000.</p>
-    <div class="card" style="background:rgba(35,240,255,.07)"><div class="ds" style="line-height:1.7">📋 <b style="color:var(--cyan)">How it works</b><br>1️⃣ Copy your code &nbsp; 2️⃣ Share it &nbsp; 3️⃣ Friend joins with it → <b style="color:var(--gold)">you both get 5,000 $MOON</b></div></div>
-    <div class="invhero">
-      <div class="lab">Friends invited</div><div class="big" id="invBig">0</div>
-      <div class="pbar2" style="max-width:230px;margin:8px auto 0"><i id="invBar" style="width:0%"></i></div>
-      <div class="ds" id="invNextTxt" style="margin-top:5px"></div>
-      <div class="codebox" style="margin-top:11px"><span class="code" id="refCode">------</span><button class="mini-copy" id="copyCode">Copy</button></div>
+    <h2>🤝 Invite & Earn</h2><p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join with your link — premium friends are worth <b style="color:var(--gold)">25,000</b>.</p>
+
+    <div class="inv-hero2">
+      <div class="inv-pass">⛓️ $MOON AIRDROP · REFERRAL PASS</div>
+      <div class="inv-id">
+        <div class="inv-av" id="invAv">🦐</div>
+        <div><div class="inv-name" id="invName">Your invite link</div><div class="inv-sub">Auto-credits you both — no codes to type</div></div>
+      </div>
+      <div class="inv-codewrap">
+        <div class="inv-codelabel">YOUR REFERRAL CODE</div>
+        <div class="inv-code" id="refCode">------</div>
+      </div>
+      <button class="inv-share" id="copyCode">🔗 Copy my invite link</button>
       <div class="shareRow">
-        <button class="sicon" data-s="x" aria-label="Share on X">𝕏</button>
-        <button class="sicon" data-s="tg" aria-label="Share on Telegram">✈️</button>
-        <button class="sicon" data-s="wa" aria-label="Share on WhatsApp">🟢</button>
-        <button class="sicon" data-s="ig" aria-label="Copy for Instagram">📸</button>
-        <button class="sicon" data-s="copy" aria-label="Copy link">🔗</button>
+        <button class="sicon" data-s="tg" aria-label="Share on Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.94 4.6 18.9 19.2c-.22 1.02-.83 1.27-1.68.79l-4.64-3.42-2.24 2.16c-.25.25-.46.46-.94.46l.33-4.74 8.62-7.79c.37-.33-.08-.51-.58-.18L7.42 13.1l-4.58-1.43c-1-.31-1.02-1 .22-1.49l17.9-6.9c.83-.31 1.56.2 1.29 1.32z"/></svg></button>
+        <button class="sicon" data-s="x" aria-label="Share on X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23zm-1.16 17.52h1.83L7.08 4.13H5.12L17.08 19.77z"/></svg></button>
+        <button class="sicon" data-s="ig" aria-label="Copy for Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
+        <button class="sicon" data-s="copy" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9.5 13.5a4 4 0 0 0 5.66 0l3-3a4 4 0 1 0-5.66-5.66l-1.5 1.5"/><path d="M14.5 10.5a4 4 0 0 0-5.66 0l-3 3a4 4 0 1 0 5.66 5.66l1.5-1.5"/></svg></button>
       </div>
     </div>
+
+    <div class="inv-progress">
+      <div class="inv-prow"><span>👥 Friends invited</span><b id="invBig">0</b></div>
+      <div class="pbar2" style="margin-top:9px"><i id="invBar" style="width:0%"></i></div>
+      <div class="ds" id="invNextTxt" style="margin-top:7px"></div>
+    </div>
+
     <div class="twocol">
       <div class="card"><div class="v" id="invEarned">0</div><div class="l">$MOON earned</div></div>
       <div class="card"><div class="v" id="invNext">—</div><div class="l">Next reward at</div></div>
     </div>
-    <button class="big-btn" id="simInvite" style="background:linear-gradient(90deg,var(--green),#0bd47a)">😈 Simulate a friend joining</button>
-    <button class="big-btn" id="cardBtn" style="background:linear-gradient(90deg,var(--gold),#ffae00)">🖼️ Make my flex card</button>
+    <button class="flexbtn" id="cardBtn"><b>🪂 Mint my flex card</b><small>Share your stats + invite link as an image</small></button>
     <div class="sec-h">🎁 Milestone rewards</div><div id="mileList"></div>
     <div class="sec-h">👥 Friends you invited</div><div id="friendList"><div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div></div>
   </div>
@@ -762,6 +866,8 @@
         if (!S.friends.some(sf => sf.n === df.n)) S.friends.push(df);
       });
     }
+    // adopt the server's canonical referral code so invite links actually attribute
+    if (db.ref_code) { S.refCode = db.ref_code; const rc = document.getElementById("refCode"); if (rc) rc.textContent = S.refCode; }
     localStorage.setItem("moontap", JSON.stringify(S));
   }
 
@@ -775,6 +881,9 @@
     }
   }
   function genCode(){let s="";const c="ABCDEFGHJKMNPQRSTUVWXYZ23456789";for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+  // deterministic profile-tied referral code — MUST stay identical to api/sync.js refFromId()
+  function refFromId(id){let h=2166136261>>>0;const str="moon-"+id;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+    const c="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<6;i++){h=Math.imul(h,16777619)>>>0;s+=c[h%c.length];}return s;}
   if(!S.refCode)S.refCode=genCode();
   if(!S.name)S.name="degen"+Math.floor(Math.random()*9000+1000);
   if(!S.friends)S.friends=[]; if(!S.refMiles)S.refMiles=[]; if(!S.social)S.social={x:0,tg:0,ig:0};
@@ -782,7 +891,8 @@
   else { S.balance=500; S.airdrop=500; S.lifetime=0; }   // start small — players build up from here
   if(!S.bet)S.bet=100; if(S.betCur!=="pts")S.betCur="moon";
 
-  try{const inRef=new URLSearchParams(location.search).get("ref");
+  try{const sp=new URLSearchParams(location.search);const _tg=window.Telegram&&window.Telegram.WebApp;
+    const inRef=(_tg&&_tg.initDataUnsafe&&_tg.initDataUnsafe.start_param)||sp.get("startapp")||sp.get("tgWebAppStartParam")||sp.get("ref");
     if(inRef && !localStorage.getItem("moontap_referred")){localStorage.setItem("moontap_referred",inRef);
       bank(5000); save(); setTimeout(()=>toast("🎁","Welcome bonus!","Invited by "+inRef+" — +5,000 $MOON"),700);}}catch(e){}
 
@@ -1169,6 +1279,7 @@
   function stepBet(dir){clampBet();let i=BET_STEPS.findIndex(v=>v>=S.bet);if(i<0)i=BET_STEPS.length-1;i=clamp(i+dir,0,BET_STEPS.length-1);S.bet=Math.min(BET_STEPS[i],betMax());save();renderBetHUD();renderDash();sendSettings({bet:S.bet});}
   function setCur(c){S.betCur=c;if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();sendSettings({bet_cur:S.betCur});}
   function renderBetHUD(){clampBet();const a=$("betAmt");if(!a)return;a.textContent=fmt(S.bet);$("betCurTxt").textContent=S.betCur==="pts"?"pts":"$MOON";
+    const cv=$("coinVal");if(cv)cv.textContent="+"+fmt(S.bet)+(S.betCur==="pts"?" pts":"");
     const mh=$("betMaxHud");if(mh)mh.textContent=fmt(betMax());
     const bc=$("betCount");if(bc)bc.textContent=roundClicks+"/"+betsPerRound();
     const up=$("betUp");if(up)up.classList.toggle("maxed",S.bet>=betMax());
@@ -1177,10 +1288,10 @@
     [100,500,1000,5000,25000].filter(v=>v<=mx).forEach(v=>{const b=document.createElement("button");b.className="chip";b.textContent=fmt(v);
       b.addEventListener("click",()=>{S.bet=v;save();renderBetHUD();sendSettings({bet:S.bet});});wrap.appendChild(b);});
     const mb=document.createElement("button");mb.className="chip max";mb.textContent="MAX";
-    mb.addEventListener("click",()=>{S.bet=Math.min(mx,Math.max(10,Math.floor(curBal(S.betCur))||10));save();renderBetHUD();sendSettings({bet:S.bet});});wrap.appendChild(mb);}
+    mb.addEventListener("click",()=>{S.bet=mx;save();renderBetHUD();sendSettings({bet:S.bet});});wrap.appendChild(mb);}
   function renderPresets(){const pr=$("presets");if(!pr)return;pr.innerHTML="";const mx=betMax();
     [50,100,500,1000,5000,25000,100000,500000].filter(v=>v<=mx).forEach(v=>{const b=document.createElement("button");b.textContent=fmt(v);b.addEventListener("click",()=>{S.bet=v;save();renderBetHUD();renderDash();sendSettings({bet:S.bet});});pr.appendChild(b);});
-    const mb=document.createElement("button");mb.textContent="MAX";mb.addEventListener("click",()=>{S.bet=Math.min(mx,Math.max(10,Math.floor(curBal(S.betCur))||10));save();renderBetHUD();renderDash();sendSettings({bet:S.bet});});pr.appendChild(mb);}
+    const mb=document.createElement("button");mb.textContent="MAX";mb.addEventListener("click",()=>{S.bet=mx;save();renderBetHUD();renderDash();sendSettings({bet:S.bet});});pr.appendChild(mb);}
   function renderDash(){if(!$("d-moon"))return;
     $("d-moon").textContent=fmt(S.balance);$("d-pts").textContent=fmt(S.airdrop);
     $("d-clicks").textContent=roundClicks+" / "+betsPerRound();$("d-invested").textContent=fmt(invested)+" "+((roundCur||S.betCur)==="pts"?"pts":"$");
@@ -1237,7 +1348,7 @@
   function renderShop(){const wrap=$("shopList");const tot=Object.values(S.up).reduce((a,b)=>a+b,0);
     wrap.innerHTML='<div class="psum"><div class="card"><div class="v">'+tot+'</div><div class="l">levels owned</div></div><div class="card"><div class="v">'+fmt(S.balance)+'</div><div class="l">$MOON to spend</div></div></div>';
     UP.forEach(u=>{const c=upCost(u),can=S.balance>=c,L=lvl(u.k),e=upEffect(u,L);
-      const d=document.createElement("div");d.className="card";d.style.cursor="pointer";
+      const d=document.createElement("div");d.className="card upcard";d.style.cursor="pointer";
       d.innerHTML='<div class="row"><div class="emo">'+u.emo+'</div><div class="grow"><div class="nm">'+u.nm+' <span class="lvl">Lv.'+L+'</span><span class="utag">'+UPCAT[u.k]+'</span></div><div class="ds">'+u.ds+'</div></div><button class="buy"'+(can?"":" disabled")+'>'+fmt(c)+' ▸</button></div><div class="upstats"><span class="pill">Now: '+e.now+'</span><span class="arrowi">→</span><span class="pill next">Lv.'+(L+1)+': '+e.next+'</span></div>';
       d.addEventListener("click",()=>openUpgrade(u.k));
       wrap.appendChild(d);});}
@@ -1383,11 +1494,12 @@
   function renderCombo(){const wrap=$("comboCard");if(!wrap)return;const today=new Date().toDateString();const done=S.comboDay===today;
     wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">A free bonus every day you check in</div></div><button class="qclaim '+(done?"done":"")+'"'+(done?" disabled":"")+'>'+(done?"✓":"Claim 10K")+'</button>';
     if(!done)wrap.querySelector("button").addEventListener("click",()=>{
+      if(S.comboDay===today)return;
       if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
         window._moonWS.send(JSON.stringify({ t: "claim_combo" }));
         return;
       }
-      S.comboDay=today;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");});}
+      S.comboDay=today;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");},{once:true});}
 
   // ---------- RANKS + LEADERBOARD ----------
   function renderRanks(){const ri=rankIdx();const cur=RANKS[ri],next=RANKS[ri+1];
@@ -1475,11 +1587,13 @@
  
   // ---------- INVITE ----------
   $("refCode").textContent=S.refCode;
-  const inviteLink=()=>location.origin+location.pathname+"?ref="+S.refCode;
+  const BOT_USER="RugorRiches", APP_NAME="play";   // @BotFather web-app short name
+  // Telegram-native referral: startapp=<refCode> arrives server-side as start_param and is attributed in /api/sync
+  const inviteLink=()=>"https://t.me/"+BOT_USER+"/"+APP_NAME+"?startapp="+encodeURIComponent(S.refCode);
   function nextMile(){return REF_MILE.find(m=>S.friends.length<m.n);}
   function renderInvite(){const n=S.friends.length;$("invBig").textContent=n;
     $("invEarned").textContent=fmt(S.friends.reduce((a,f)=>a+(f.b||0),0));
-    const nm=nextMile();$("invNext").textContent=nm?nm.n+" friends":"All done 👑";
+    const nm=nextMile();$("invNext").textContent=nm?(nm.n+(nm.n===1?" friend":" friends")):"All done 👑";
     if(nm){const idx=REF_MILE.indexOf(nm);const lo=idx>0?REF_MILE[idx-1].n:0;
       $("invBar").style.width=clamp((n-lo)/(nm.n-lo)*100,0,100)+"%";$("invNextTxt").textContent=(nm.n-n)+" more → "+fmt(nm.r)+" $MOON";}
     else{$("invBar").style.width="100%";$("invNextTxt").textContent="All milestones claimed 👑";}
@@ -1503,7 +1617,7 @@
     bank(r);bumpQuest("invites",1,"add");save();}
 
   $("copyCode").addEventListener("click",doShare);
-  function shareTo(p){const url=inviteLink();const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Use code "+S.refCode+" — we both get 5,000 $MOON:";
+  function shareTo(p){const url=inviteLink();const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
     const t=encodeURIComponent(txt),u=encodeURIComponent(url);
     if(p==="x")window.open("https://twitter.com/intent/tweet?text="+t+"&url="+u,"_blank");
     else if(p==="tg")window.open("https://t.me/share/url?url="+u+"&text="+t,"_blank");
@@ -1511,12 +1625,9 @@
     else if(p==="ig"){if(navigator.clipboard)navigator.clipboard.writeText(txt+" "+url);toast("📸","Copied for Instagram","Paste it in your story or bio");}
     else{if(navigator.clipboard)navigator.clipboard.writeText(txt+" "+url);toast("🔗","Link copied!","Paste it anywhere 👀");}}
   document.querySelectorAll(".sicon").forEach(b=>b.addEventListener("click",()=>shareTo(b.dataset.s)));
-  async function doShare(){const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Use code "+S.refCode+" — we BOTH get 5,000 $MOON:";const url=inviteLink();
+  async function doShare(){const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we BOTH get 5,000 $MOON:";const url=inviteLink();
     if(navigator.share){try{await navigator.share({title:"RUG OR RICHES",text:txt,url});return;}catch(e){}}
     try{await navigator.clipboard.writeText(txt+" "+url);toast("📋","Link copied!","Paste it in your group chat 👀");}catch(e){toast("🔗","Your link",url);}}
-  $("simInvite").addEventListener("click",()=>{addFriend();renderInvite();renderLive();renderStats();achCheck();
-    const last=S.friends[S.friends.length-1];toast("🤝","Friend joined!","+"+fmt(last.b)+" $MOON"+(last.prem?" (premium fren!)":""));});
-
   // ---------- FLEX CARD ----------
   $("cardBtn").addEventListener("click",makeCard);
   function makeCard(){const c=$("card"),g=c.getContext("2d");const W=1080,H=1350;const ri=rankIdx();
@@ -1541,10 +1652,19 @@
     // code box
     g.fillStyle="rgba(0,0,0,.35)";roundRect(g,W/2-300,1070,600,150,24);g.fill();
     g.strokeStyle="#23f0ff";g.lineWidth=3;g.setLineDash([12,10]);roundRect(g,W/2-300,1070,600,150,24);g.stroke();g.setLineDash([]);
-    g.fillStyle="#cbb6ff";g.font="700 30px Segoe UI";g.fillText("USE MY CODE — WE BOTH GET 5,000 🪙",W/2,1120);
-    g.fillStyle="#ffd400";g.font="900 64px Segoe UI";g.fillText(S.refCode,W/2,1190);
-    c.toBlob(b=>{const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="moon-flex.png";a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),2000);toast("🖼️","Flex card saved!","Post it. Tag a friend. 👀");});}
+    g.fillStyle="#cbb6ff";g.font="700 30px Segoe UI";g.fillText("JOIN WITH MY CODE — WE BOTH GET 5,000 🪙",W/2,1118);
+    g.fillStyle="#ffd400";g.font="900 70px Segoe UI";g.fillText(S.refCode,W/2,1192);
+    g.fillStyle="#8fdcff";g.font="700 30px Segoe UI";g.fillText("t.me/RugorRiches/play",W/2,1272);
+    g.fillStyle="#b9a7e8";g.font="700 26px Segoe UI";g.fillText("shared by @"+S.name,W/2,1315);
+    c.toBlob(b=>{
+      const link=inviteLink(),txt="My $MOON run on RUG OR RICHES 🪙💀 — tap my link, we both get 5,000:";
+      try{const file=new File([b],"moon-flex.png",{type:"image/png"});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          navigator.share({files:[file],text:txt,url:link}).then(()=>toast("🚀","Shared!","Nice flex 👀")).catch(()=>{});return;}
+      }catch(e){}
+      const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="moon-flex.png";a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),2000);toast("🖼️","Flex card saved!","Post it & drop your link 👀");
+    });}
   function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
 
   // ---------- SOUND / RENAME / RESET ----------
@@ -1586,12 +1706,6 @@
     p.style.left=(40+Math.random()*20)+"%";p.style.top="18%";p.style.background=cols[i%4];app.appendChild(p);
     const dx=(Math.random()-0.5)*280,dy=220+Math.random()*240,rot=Math.random()*540;
     requestAnimationFrame(()=>{p.style.transform="translate("+dx+"px,"+dy+"px) rotate("+rot+"deg)";p.style.opacity="0";});setTimeout(()=>p.remove(),900);}}
-  const GLY=["₿","Ξ","◈","⬡","⟠","₮","◇","✦","⬢","∞"];
-  function spawnCryptoIcons(){const c=$("cryptoIcons");if(!c)return;c.innerHTML="";
-    for(let i=0;i<9;i++){const s=document.createElement("div");s.className="ci";s.textContent=GLY[i%GLY.length];
-      s.style.left=(6+Math.random()*86)+"%";s.style.top=(8+Math.random()*80)+"%";
-      s.style.fontSize=(16+Math.random()*24)+"px";s.style.animationDelay=(-Math.random()*7)+"s";
-      s.style.color=i%2?"var(--neon)":"var(--cyan)";c.appendChild(s);}}
   function flashEnergy(){const e=$("energyFill");e.style.background="var(--red)";setTimeout(()=>e.style.background="linear-gradient(90deg,var(--cyan),var(--neon))",250);}
   let toastTO;function toast(big,t,s){$("toastBig").textContent=big;$("toastT").textContent=t;$("toastS").textContent=s;
     $("toast").classList.add("show");clearTimeout(toastTO);toastTO=setTimeout(()=>$("toast").classList.remove("show"),1900);}
@@ -1622,9 +1736,23 @@
     isOnline = false;
     syncWithCloud().catch(() => {});
   }
-  function initTelegram(){const tg=window.Telegram&&window.Telegram.WebApp;if(!tg)return;
+  function fitViewport(){const tg=window.Telegram&&window.Telegram.WebApp;
+    const h=(tg&&(tg.viewportStableHeight||tg.viewportHeight))||window.innerHeight;
+    if(h>120)document.documentElement.style.setProperty("--app-h",h+"px");
+    if(typeof sizeChart==="function")sizeChart();}
+  function initTelegram(){const tg=window.Telegram&&window.Telegram.WebApp;if(!tg){fitViewport();return;}
     try{tg.ready();tg.expand&&tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#05010f");tg.setBackgroundColor&&tg.setBackgroundColor("#05010f");
-      const u=tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u&&!HADSAVE){S.name=String(u.username||u.first_name||S.name).slice(0,18);save();}}catch(e){}}
+      tg.onEvent&&tg.onEvent("viewportChanged",fitViewport);fitViewport();
+      const u=tg.initDataUnsafe&&tg.initDataUnsafe.user;
+      if(u){
+        if(u.id)S.refCode=refFromId(u.id);                 // referral code tied to the Telegram account
+        if(!HADSAVE)S.name=String(u.username||u.first_name||S.name).slice(0,18);
+        const rc=$("refCode");if(rc)rc.textContent=S.refCode;
+        const nm=$("invName");if(nm)nm.textContent=u.username?("@"+u.username):(u.first_name||S.name);
+        const av=$("invAv");if(av){if(u.photo_url){av.style.backgroundImage="url('"+u.photo_url+"')";av.textContent="";}else av.textContent=String(u.first_name||u.username||"D").charAt(0).toUpperCase();}
+        save();
+      }
+      }catch(e){}}
   // in-browser smoke test: validates core wiring on load (see console; add ?test to the URL for an on-screen badge)
   function selfTest(){let pass=0,fail=0;const errs=[];const ck=(c,m)=>{if(c)pass++;else{fail++;errs.push(m);}};
     ["panel-shop","panel-vip","panel-store","panel-dash","panel-help","panel-airdrop","panel-ranks","panel-invite","panel-profile","coin","chart","cashout","sellHalf","rugBar","dashSpark","nameModal","upModal","socialList","adPoints"].forEach(id=>ck(!!$(id),"#"+id));
@@ -1635,10 +1763,11 @@
     if(/[?&]test/.test(location.search)){const b=document.createElement("div");b.textContent=fail?("⚠ "+fail+" FAIL"):("✅ "+pass+" checks OK");
       b.style.cssText="position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:90;font:700 11px sans-serif;padding:3px 9px;border-radius:8px;color:#06121f;background:"+(fail?"#ff3b5c":"#1dff8f");$("app").appendChild(b);}
     return fail===0;}
-  function init(){initTelegram();sizeChart();spawnCryptoIcons();renderLive();renderBetChips();renderStats();updateQuestDot();connectBackend();selfTest();
+  function init(){initTelegram();sizeChart();renderLive();renderBetChips();renderBetHUD();renderStats();updateQuestDot();connectBackend();selfTest();
     if(!lsGet("moontap_tut")){$("tut").classList.add("show");renderTut();}
     requestAnimationFrame(loop);}
-  window.addEventListener("resize",sizeChart);
+  window.addEventListener("resize",fitViewport);
+  window.addEventListener("orientationchange",()=>setTimeout(fitViewport,250));
   setInterval(achCheck,2000);seasonTick();setInterval(seasonTick,30000);
   init();
 })();
