@@ -2,10 +2,9 @@
   "name": "rug-or-riches-backend",
   "version": "2.0.0",
   "description": "Authoritative real-time backend for RUG OR RICHES ($MOON) — Supabase + Telegram Stars",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start-local": "node server.js",
+    "dev-local": "node --watch server.js"
   },
   "dependencies": {
     "ws": "^8.18.0",

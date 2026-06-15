@@ -646,7 +646,7 @@
   // If null, the client falls back to local simulation mode (unless overridden via ?server=local in the URL).
   const PRODUCTION_BACKEND_URL = null; 
   const CONFIG={ heatHazard:0.06, tapHazard:0.05, tapHazardFloor:65, warnHeat:90,
-    fakeoutChance:0.15, softChance:0.55, vipEarn:[1,1.12,1.3,1.6,2.2], serverUrl:PRODUCTION_BACKEND_URL, invoiceEndpoint:null, verifyEndpoint:null };
+    fakeoutChance:0.15, softChance:0.55, vipEarn:[1,1.12,1.3,1.6,2.2], serverUrl:PRODUCTION_BACKEND_URL, invoiceEndpoint:"/api/invoice", verifyEndpoint:"/api/verify" };
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
@@ -655,13 +655,125 @@
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,
     streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,comboDay:null,
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
-    ach:[], friends:[], refMiles:[], social:{x:0,tg:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
+    ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
   let S=load();
   function load(){try{const r=JSON.parse(localStorage.getItem("moontap"));
-    if(r)return Object.assign({},DEF,r,{up:Object.assign({},DEF.up,r.up||{}),quests:Object.assign({},DEF.quests,r.quests||{})});}catch(e){}
+    if(r) {
+      const merged = Object.assign({},DEF,r,{up:Object.assign({},DEF.up,r.up||{}),quests:Object.assign({},DEF.quests,r.quests||{}),social:Object.assign({},DEF.social,r.social||{})});
+      if (r.social && r.social.tg && !merged.social.tg_channel) {
+        merged.social.tg_channel = r.social.tg;
+      }
+      return merged;
+    }
+    }catch(e){}
     return JSON.parse(JSON.stringify(DEF));}
-  function save(){try{localStorage.setItem("moontap",JSON.stringify(S));}catch(e){}}
+
+  let hasCloudAuth = false;
+  let syncInProgress = false;
+  let syncTimeout = null;
+
+  async function syncWithCloud(stateToSave = null) {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (!tg || !tg.initData) return;
+    if (syncInProgress) return;
+    syncInProgress = true;
+    try {
+      const body = { initData: tg.initData };
+      if (stateToSave) body.state = stateToSave;
+      const r = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (data && data.player) {
+          hasCloudAuth = true;
+          mergeState(data.player);
+          renderLive();
+          renderStats();
+        }
+      }
+    } catch (e) {
+      console.warn("[moontap] Cloud sync failed:", e);
+    } finally {
+      syncInProgress = false;
+    }
+  }
+
+  function mergeState(db) {
+    if (!db) return;
+    if (db.name) S.name = db.name;
+    S.vip = Math.max(S.vip, db.vip_tier || 0);
+    S.streak = Math.max(S.streak, db.streak || 0);
+    S.starsSpent = Math.max(S.starsSpent, db.stars_spent || 0);
+    
+    S.balance = Math.max(S.balance, db.balance || 0);
+    S.airdrop = Math.max(S.airdrop, db.airdrop_pts || 0);
+    S.lifetime = Math.max(S.lifetime, db.lifetime_banked || 0);
+    
+    S.bestPot = Math.max(S.bestPot, db.best_pot || 0);
+    S.bestPrice = Math.max(S.bestPrice, db.best_price || 1);
+    S.rugs = Math.max(S.rugs, db.rugs || 0);
+    S.cashouts = Math.max(S.cashouts, db.cashouts || 0);
+    S.taps = Math.max(S.taps, db.taps || 0);
+    
+    if (db.up) {
+      for (const k in db.up) {
+        S.up[k] = Math.max(S.up[k] || 0, db.up[k] || 0);
+      }
+    }
+    if (Array.isArray(db.ach)) {
+      db.ach.forEach(a => { if (S.ach.indexOf(a) < 0) S.ach.push(a); });
+    }
+    if (Array.isArray(db.ref_milestones)) {
+      db.ref_milestones.forEach(m => { if (S.refMiles.indexOf(m) < 0) S.refMiles.push(m); });
+    }
+    if (db.crew_name) S.crew = db.crew_name;
+    if (db.sound !== undefined) S.sound = db.sound;
+    if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
+    if (db.bet_cur !== undefined) S.betCur = db.bet_cur;
+    if (db.auto_sell !== undefined) S.autoSell = db.auto_sell;
+    if (db.stop_loss !== undefined) S.stopLoss = db.stop_loss;
+    
+    if (db.social) {
+      S.social.x = Math.max(S.social.x || 0, db.social.x || 0);
+      S.social.tg_channel = Math.max(S.social.tg_channel || 0, db.social.tg_channel || 0);
+      S.social.tg_group = Math.max(S.social.tg_group || 0, db.social.tg_group || 0);
+      S.social.ig = Math.max(S.social.ig || 0, db.social.ig || 0);
+    }
+    
+    if (db.questsObj) {
+      if (db.questsObj.claimed) {
+        db.questsObj.claimed.forEach(id => {
+          if (S.quests.claimed.indexOf(id) < 0) S.quests.claimed.push(id);
+        });
+      }
+      if (db.questsObj.prog) {
+        for (const k in db.questsObj.prog) {
+          S.quests.prog[k] = Math.max(S.quests.prog[k] || 0, db.questsObj.prog[k] || 0);
+        }
+      }
+      if (db.questsObj.date) S.quests.date = db.questsObj.date;
+    }
+    if (Array.isArray(db.friends)) {
+      db.friends.forEach(df => {
+        if (!S.friends.some(sf => sf.n === df.n)) S.friends.push(df);
+      });
+    }
+    localStorage.setItem("moontap", JSON.stringify(S));
+  }
+
+  function save(){
+    try{localStorage.setItem("moontap",JSON.stringify(S));}catch(e){}
+    if (hasCloudAuth) {
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        syncWithCloud(S).catch(() => {});
+      }, 1500);
+    }
+  }
   function genCode(){let s="";const c="ABCDEFGHJKMNPQRSTUVWXYZ23456789";for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
   if(!S.refCode)S.refCode=genCode();
   if(!S.name)S.name="degen"+Math.floor(Math.random()*9000+1000);
@@ -1232,9 +1344,10 @@
     ACH.forEach(a=>{const on=S.ach.indexOf(a.id)>=0;const d=document.createElement("div");d.className="card row ach"+(on?" on":"");
       d.innerHTML='<div class="emo">'+a.emo+'</div><div class="grow"><div class="nm">'+a.nm+' '+(on?"✓":"")+'</div><div class="ds">'+a.ds+'</div></div>';wrap.appendChild(d);});}
   // ---------- AIRDROP HUB + SOCIAL QUESTS ----------
-  const SOCIAL=[{id:"x",emo:"𝕏",label:"Follow on X",url:"https://x.com/",reward:5000},
-    {id:"tg",emo:"✈️",label:"Join our Telegram",url:"https://t.me/",reward:5000},
-    {id:"ig",emo:"📸",label:"Follow on Instagram",url:"https://instagram.com/",reward:5000}];
+  const SOCIAL=[{id:"x",emo:"𝕏",label:"Follow on X",url:"https://x.com/rugorriches",reward:5000},
+    {id:"tg_channel",emo:"📢",label:"Join Telegram Channel",url:"https://t.me/rugorricheslounge",reward:5000},
+    {id:"tg_group",emo:"💬",label:"Join Telegram Group",url:"https://t.me/rugorriches_HQ",reward:5000},
+    {id:"ig",emo:"📸",label:"Follow on Instagram",url:"https://instagram.com/rugorriches",reward:5000}];
   function renderSocial(){const wrap=$("socialList");if(!wrap)return;wrap.innerHTML="";
     SOCIAL.forEach(q=>{const st=S.social[q.id]||0;const d=document.createElement("div");d.className="card row";
       let btn,sub="+"+fmt(q.reward)+" airdrop pts & $MOON";
@@ -1285,13 +1398,38 @@
     const rl=$("rankList");rl.innerHTML="";
     RANKS.forEach((r,i)=>{const d=document.createElement("div");d.className="rankrow"+(i===ri?" cur":(i<ri?" done":""));
       d.innerHTML='<div class="e">'+r.e+'</div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'');rl.appendChild(d);});
+    
     const BOTS=[["0xWhaleKing",8.4e6],["satoshi_jr",5.1e6],["rugproof.eth",3.9e6],["DiamondHandz",2.7e6],["paperhands99",1.4e6],["moonboy_420",920000],["anon_degen",610000],["ngmi_chad",340000],["frenly_fox",180000],["tap_tap_rev",96000]];
     const list=BOTS.map(x=>({n:x[0],b:x[1]*(0.8+Math.random()*0.4),me:false}));
     list.push({n:S.name+" (you)",b:S.balance,me:true});list.sort((a,b)=>b.b-a.b);
-    const wrap=$("boardList");wrap.innerHTML="";
-    list.forEach((x,i)=>{const d=document.createElement("div");d.className="lb-row"+(x.me?" me":"");
-      const rk=i===0?'<span class="medal">🥇</span>':i===1?'<span class="medal">🥈</span>':i===2?'<span class="medal">🥉</span>':(i+1);
-      d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+x.n+'</div><div class="sc">'+fmt(x.b)+'</div>';wrap.appendChild(d);});}
+    
+    const renderList = (data) => {
+      const wrap=$("boardList");wrap.innerHTML="";
+      data.forEach((x,i)=>{const d=document.createElement("div");d.className="lb-row"+(x.me?" me":"");
+        const rk=i===0?'<span class="medal">🥇</span>':i===1?'<span class="medal">🥈</span>':i===2?'<span class="medal">🥉</span>':(i+1);
+        d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+x.n+'</div><div class="sc">'+fmt(x.b)+'</div>';wrap.appendChild(d);});
+    };
+    
+    if (hasCloudAuth) {
+      fetch("/api/leaderboard")
+        .then(r => r.json())
+        .then(dbList => {
+          if (Array.isArray(dbList) && dbList.length > 0) {
+            const formatted = dbList.map(r => ({ n: r.name, b: r.banked, me: r.name === S.name }));
+            if (!formatted.some(x => x.me)) {
+              formatted.push({ n: S.name + " (you)", b: S.balance, me: true });
+            }
+            formatted.sort((a,b)=>b.b-a.b);
+            renderList(formatted);
+          } else {
+            renderList(list);
+          }
+        })
+        .catch(() => renderList(list));
+    } else {
+      renderList(list);
+    }
+  }
   // ---------- CREWS (teams) ----------
   const CREWS=["Moon Mafia","Diamond Dogs","Rug Survivors","Degen Squad","Whale Watchers","Paperhand Patrol"];
   const CMEM=["0xVibe","jeetslayer","moonfren","ngmi_no","ser_hodl","pumpqueen","degenDan","aper.eth","frostbyte","lunabull"];
@@ -1481,290 +1619,8 @@
   window.addEventListener("error",function(e){if(window.console&&console.warn)console.warn("[moontap] error:",e&&e.message);});
   // optional real-time backend (off by default; set CONFIG.serverUrl to enable). Safe no-op when null.
   function connectBackend(){
-    // Support URL query param override for server url: e.g. ?server=local or ?server=ws://...
-    try {
-      const urlParams = new URLSearchParams(location.search);
-      if (urlParams.has("server")) {
-        const val = urlParams.get("server");
-        CONFIG.serverUrl = val === "local" ? "ws://localhost:8080" : val;
-      }
-    } catch(e) {}
-
-    if(!CONFIG.serverUrl) {
-      isOnline = false;
-      return;
-    }
-    
-    try{
-      const httpUrl = CONFIG.serverUrl.replace(/^ws/, "http");
-      resolvedInvoiceEndpoint = httpUrl + "/invoice";
-      resolvedVerifyEndpoint = httpUrl + "/verify";
-
-      const ws = new WebSocket(CONFIG.serverUrl);
-      ws.onopen = () => {
-        const tg = window.Telegram && window.Telegram.WebApp;
-        ws.send(JSON.stringify({ t: "auth", initData: tg ? tg.initData : "" }));
-      };
-      
-      ws.onmessage = ev => {
-        try {
-          const m = JSON.parse(ev.data);
-          
-          if (m.t === "auth_ok") {
-            isOnline = true;
-            console.log("[moontap] server auth success:", m);
-            
-            // Sync local state S from server player state
-            S.name = m.player.name;
-            S.balance = m.player.balance;
-            S.airdrop = m.player.airdrop_pts;
-            S.lifetime = m.player.lifetime;
-            S.vip = m.player.vip_tier;
-            S.streak = m.player.streak;
-            energy = m.player.energy;
-            S.up = m.player.up;
-            S.ach = m.player.ach;
-            S.quests = m.player.quests || S.quests;
-            S.social = m.player.social || S.social;
-            S.refMiles = m.player.ref_milestones || S.refMiles;
-            S.crew = m.player.crew || S.crew;
-            S.bet = m.player.bet || S.bet;
-            S.betCur = m.player.bet_cur || S.betCur;
-            S.autoSell = m.player.auto_sell || S.autoSell;
-            S.stopLoss = m.player.stop_loss || S.stopLoss;
-            S.starsSpent = m.player.stars_spent || S.starsSpent;
-            S.sound = m.player.sound !== undefined ? m.player.sound : S.sound;
-            
-            // Sync market
-            price = m.market.price;
-            ath = m.market.ath;
-            heat = m.market.heat;
-            holders = m.market.holders;
-            liq = m.market.liq;
-            mktBuy = m.market.mktBuy;
-            
-            pushTick();
-            renderLive();
-            if (panelOpen === "ranks") renderRanks();
-          } else if (m.t === "auth_error") {
-            console.error("[moontap] server auth failed:", m.error);
-            isOnline = false;
-            toast("❌", "Auth Failed", m.error);
-          } else if (m.t === "state") {
-            S.balance = m.balance;
-            S.airdrop = m.airdrop_pts;
-            S.vip = m.vip_tier;
-            S.starsSpent = m.stars_spent;
-            renderLive();
-            renderStats();
-            if (panelOpen === "vip") renderVip();
-            if (panelOpen === "store") renderStore();
-          } else if (m.t === "tick") {
-            if (!busting) {
-              price = m.price;
-              ath = m.ath;
-              heat = m.heat;
-              holders = m.holders;
-              liq = m.liq;
-              mktBuy = m.mktBuy;
-              pushTick();
-            }
-          } else if (m.t === "rug") {
-            if (m.lost !== undefined) {
-              busting = true;
-              bustFrames = 14;
-              S.rugs++;
-              bustType = m.hard ? "hard" : "soft";
-              bustTarget = m.price || (bustType === "soft" ? price * 0.45 : price * 0.12);
-              
-              const cur = roundCur || S.betCur;
-              const rescued = m.rescued || 0;
-              const lost = m.lost || 0;
-              sessLost += lost;
-              
-              if (panelOpen === "game") {
-                $("rugOverlay").style.opacity = (bustType === "soft" ? ".5" : ".78");
-                setTimeout(() => $("rugOverlay").style.opacity = "0", 170);
-                $("app").classList.add("shake");
-                setTimeout(() => $("app").classList.remove("shake"), 400);
-                toast(bustType === "soft" ? "🩸" : "💀", bustType === "soft" ? "SOFT RUG" : "RUGGED!", 
-                  (bustType === "soft" ? "Saved " + fmt(rescued) + " · lost " : "Lost ") + fmt(lost) + " " + (cur === "pts" ? "pts" : "$MOON")
-                );
-                sfxRug();
-                if (navigator.vibrate) navigator.vibrate(bustType === "soft" ? [40, 30, 60] : [60, 40, 140]);
-              }
-              
-              pot = 0;
-              invested = 0;
-              roundClicks = 0;
-              roundCur = null;
-              combo = 0;
-              winStreak = 0;
-              heat = 0;
-              pumpVel = 0;
-              dumpWarn = 0;
-              $("combo").textContent = "";
-              renderLive();
-              renderStats();
-              renderDash();
-            } else {
-              if (!busting) {
-                busting = true;
-                bustFrames = 14;
-                bustType = m.hard ? "hard" : "soft";
-                bustTarget = m.price || (bustType === "soft" ? price * 0.45 : price * 0.12);
-                if (panelOpen === "game") sfxRug();
-              }
-            }
-          } else if (m.t === "tap_ok") {
-            S.balance = m.balance;
-            S.airdrop = m.airdrop_pts;
-            pot = m.pot;
-            invested = m.invested;
-            energy = m.energy;
-            combo = m.combo;
-            comboTimer = 1.2;
-            price = m.price;
-            roundClicks = m.roundClicks;
-            if (combo > 3) $("combo").textContent = "🔥 x" + combo + " combo · " + price.toFixed(2) + "x";
-            renderLive();
-          } else if (m.t === "cashout_ok" || m.t === "sell_half_ok") {
-            const isHalf = m.t === "sell_half_ok";
-            S.balance = m.balance;
-            S.airdrop = m.airdrop_pts;
-            pot = m.pot;
-            invested = m.invested;
-            
-            if (!isHalf) {
-              const profit = m.profit;
-              if (profit > 0) {
-                sessWon += profit;
-                winStreak++;
-                S.lifetime = m.lifetime || (S.lifetime + profit);
-              } else {
-                sessLost += -profit;
-                winStreak = 0;
-              }
-              toast("💰", "SOLD", "+" + fmt(m.payout) + " " + ((roundCur || S.betCur) === "pts" ? "pts" : "$MOON") + " · profit " + (profit >= 0 ? "+" : "") + fmt(profit) + (winStreak > 1 ? " · 🏆x" + winStreak : ""));
-              sfxCash();
-              if (navigator.vibrate) navigator.vibrate(40);
-              if (profit > 0 && risk() >= 0.5) confetti();
-              
-              roundClicks = 0;
-              roundCur = null;
-              combo = 0;
-              heat = 0;
-              pumpVel = 0;
-              dumpWarn = 0;
-              $("combo").textContent = "";
-              price = m.price;
-              ath = price;
-              roundPeak = price;
-            } else {
-              const profit = m.profit;
-              if (profit > 0) {
-                sessWon += profit;
-                S.lifetime += Math.floor(profit);
-              }
-              heat = Math.max(0, heat - 25);
-              toast("✂️", "Sold half", "+" + fmt(m.payout) + " " + ((roundCur || S.betCur) === "pts" ? "pts" : "$MOON") + " · riding the rest");
-              sfxCash();
-              if (navigator.vibrate) navigator.vibrate(25);
-            }
-            renderLive();
-            renderStats();
-            renderDash();
-          } else if (m.t === "upgrade_ok") {
-            S.balance = m.balance;
-            S.up[m.key] = m.level;
-            sfxBuy();
-            if (m.key === "energy") {
-              energy = Math.min(maxEnergy(), energy + 40);
-            }
-            renderLive();
-            renderStats();
-            renderShop();
-            openUpgrade(m.key);
-            toast(UP.find(x => x.k === m.key).emo, UP.find(x => x.k === m.key).nm + " → Lv." + lvl(m.key), "Upgraded!");
-          } else if (m.t === "claim_combo_ok") {
-            S.balance = m.balance;
-            S.airdrop = m.airdrop_pts;
-            S.comboDay = m.combo_day;
-            renderAirdrop();
-            renderLive();
-            renderStats();
-            confetti();
-            toast("🔥", "Daily Combo!", "+10,000 $MOON");
-          } else if (m.t === "claim_vip_daily_ok") {
-            S.balance = m.balance;
-            S.vipDay = m.vip_day;
-            renderVip();
-            renderLive();
-            renderStats();
-            toast("🛋️", "VIP daily bonus!", "+" + fmt(S.vip * 50000) + " $MOON");
-          } else if (m.t === "refill_vip_energy_ok") {
-            energy = m.energy;
-            renderLive();
-            toast("⚡", "Energy refilled!", "VIP perk used");
-          } else if (m.t === "join_crew_ok") {
-            S.crew = m.name;
-            renderMyCrew();
-            renderCrews();
-            toast("🤝", "Joined " + m.name + "!", "Climb the crew board together");
-          } else if (m.t === "leave_crew_ok") {
-            S.crew = null;
-            renderMyCrew();
-            renderCrews();
-          } else if (m.t === "claim_social_ok") {
-            S.social[m.id] = 3;
-            S.balance = m.balance;
-            S.airdrop = m.airdrop_pts;
-            renderSocial();
-            renderAirdrop();
-            renderLive();
-            renderStats();
-            confetti();
-            toast(SOCIAL.find(x => x.id === m.id).emo, "Reward claimed!", "+5,000 $MOON & points");
-          } else if (m.t === "claim_quest_ok") {
-            S.quests.claimed = m.claimed;
-            S.balance = m.balance;
-            renderQuests();
-            renderLive();
-            renderStats();
-            updateQuestDot();
-            const q = QUESTS.find(x => x.id === m.id);
-            toast("🎯", "Quest complete!", "+" + fmt(q.reward) + " $MOON");
-          } else if (m.t === "claim_milestone_ok") {
-            S.refMiles.push(m.n);
-            S.balance = m.balance;
-            renderInvite();
-            renderLive();
-            renderStats();
-            const milestone = REF_MILE.find(x => x.n === m.n);
-            toast("🎁", "Milestone reward!", "+" + fmt(milestone.r) + " $MOON");
-          } else if (m.t === "error") {
-            toast("❌", "Error", m.error);
-          }
-        } catch(e) {
-          console.warn("[moontap] WS message parsing error:", e);
-        }
-      };
-      
-      ws.onclose = () => {
-        isOnline = false;
-        console.warn("[moontap] WS connection closed, falling back to local simulation.");
-        setTimeout(connectBackend, 5000);
-      };
-      
-      ws.onerror = () => {
-        isOnline = false;
-      };
-      
-      window._moonWS = ws;
-    } catch(e) {
-      isOnline = false;
-      console.warn("[moontap] WS connect exception:", e);
-    }
+    isOnline = false;
+    syncWithCloud().catch(() => {});
   }
   function initTelegram(){const tg=window.Telegram&&window.Telegram.WebApp;if(!tg)return;
     try{tg.ready();tg.expand&&tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#05010f");tg.setBackgroundColor&&tg.setBackgroundColor("#05010f");
