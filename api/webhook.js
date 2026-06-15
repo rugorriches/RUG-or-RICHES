@@ -65,6 +65,25 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
 }
 
 module.exports = async (req, res) => {
+  // Simple diagnostic check
+  if (req.method === "GET") {
+    // Parse query manually since req.url is a relative path in some environments
+    const url = new URL(req.url || "", "http://localhost");
+    if (url.searchParams.get("diag") === "1") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      return res.end(JSON.stringify({
+        has_bot_token: !!process.env.BOT_TOKEN,
+        bot_token_length: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.length : 0,
+        bot_token_prefix: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.substring(0, 10) : "",
+        has_database_url: !!process.env.DATABASE_URL,
+        env_keys: Object.keys(process.env).filter(k => !k.toLowerCase().includes("secret") && !k.toLowerCase().includes("key") && !k.toLowerCase().includes("pass"))
+      }, null, 2));
+    }
+    res.statusCode = 405;
+    return res.end(JSON.stringify({ error: "Method not allowed" }));
+  }
+
   if (req.method !== "POST") {
     res.statusCode = 405;
     return res.end(JSON.stringify({ error: "Method not allowed" }));
