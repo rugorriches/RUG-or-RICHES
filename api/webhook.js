@@ -2,16 +2,27 @@ const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 
+let lastUpdate = null;
+let lastError = null;
+
 async function tgApi(method, body) {
-  if (!BOT_TOKEN) return null;
+  if (!BOT_TOKEN) {
+    lastError = "tgApi: BOT_TOKEN is empty";
+    return null;
+  }
   try {
     const r = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/" + method, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body || {})
     });
-    return await r.json();
+    const data = await r.json();
+    if (!data.ok) {
+      lastError = `tgApi ${method} returned error: ${JSON.stringify(data)}`;
+    }
+    return data;
   } catch (e) {
+    lastError = `tgApi fetch error: ${e.message}`;
     return null;
   }
 }
@@ -77,6 +88,8 @@ module.exports = async (req, res) => {
         bot_token_length: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.length : 0,
         bot_token_prefix: process.env.BOT_TOKEN ? process.env.BOT_TOKEN.substring(0, 10) : "",
         has_database_url: !!process.env.DATABASE_URL,
+        lastUpdate,
+        lastError,
         env_keys: Object.keys(process.env).filter(k => !k.toLowerCase().includes("secret") && !k.toLowerCase().includes("key") && !k.toLowerCase().includes("pass"))
       }, null, 2));
     }
@@ -89,8 +102,24 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "Method not allowed" }));
   }
 
-  const upd = req.body || {};
+  let upd = req.body || {};
   
+  if (typeof upd === "string") {
+    try {
+      upd = JSON.parse(upd);
+    } catch (e) {
+      lastError = `Failed to parse body string: ${e.message}`;
+    }
+  } else if (Buffer.isBuffer(upd)) {
+    try {
+      upd = JSON.parse(upd.toString("utf-8"));
+    } catch (e) {
+      lastError = `Failed to parse body Buffer: ${e.message}`;
+    }
+  }
+
+  lastUpdate = upd;
+
   try {
     // 1. Process Messages (e.g. /start command)
     if (upd.message && upd.message.text) {
@@ -99,7 +128,7 @@ module.exports = async (req, res) => {
       
       if (text.startsWith("/start")) {
         const webappUrl = `https://rug-or-riches-seven.vercel.app/play`;
-        await tgApi("sendMessage", {
+        const tgRes = await tgApi("sendMessage", {
           chat_id: chatId,
           text: `Welcome to RUG OR RICHES ($MOON) — the press-your-luck crypto simulator! 📈💀\n\nTap to pump the chart, accumulate $MOON points, and cash out before the rug pull wipes your position.\n\nInvite friends to earn massive bonuses and compete on the global leaderboard!`,
           reply_markup: {
@@ -113,6 +142,9 @@ module.exports = async (req, res) => {
             ]
           }
         });
+        if (tgRes && !tgRes.ok) {
+          lastError = `Telegram API Error: ${JSON.stringify(tgRes)}`;
+        }
         res.statusCode = 200;
         return res.end("ok");
       }
