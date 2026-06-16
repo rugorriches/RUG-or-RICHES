@@ -960,6 +960,8 @@
     }
     // adopt the server's canonical referral code so invite links actually attribute
     if (db.ref_code) { S.refCode = db.ref_code; const rc = document.getElementById("refCode"); if (rc) rc.textContent = S.refCode; }
+    if (typeof questCheck === "function") questCheck();
+    if (typeof updateQuestDot === "function") updateQuestDot();
     localStorage.setItem("moontap", JSON.stringify(S));
   }
 
@@ -1113,14 +1115,17 @@
     {id:"invite",emo:"🤝",label:"Invite a friend",goal:1,reward:3000,track:"invites"},
     {id:"vbig",emo:"💎",label:"VIP: Bank 100K in one sell",goal:100000,reward:25000,track:"bigSell",vip:1},
     {id:"vmoon",emo:"🌕",label:"VIP: Pump price to 10x",goal:10,reward:40000,track:"maxPrice",vip:2}];
-  function questCheck(){const t=new Date().toDateString();if(S.quests.date!==t){S.quests={date:t,prog:{},claimed:[]};save();}}
+  function normalizeQuestState(){if(!S.quests)S.quests={date:null,prog:{},claimed:[]};
+    if(!S.quests.prog)S.quests.prog={};
+    if(!Array.isArray(S.quests.claimed))S.quests.claimed=[];}
+  function questCheck(){normalizeQuestState();const t=new Date().toDateString();if(S.quests.date!==t){S.quests={date:t,prog:{},claimed:[]};save();}}
   questCheck();
   const qprog=id=>S.quests.prog[id]||0;
   function bumpQuest(track,val,mode){QUESTS.filter(q=>q.track===track).forEach(q=>{const c=S.quests.prog[q.id]||0;S.quests.prog[q.id]=mode==="max"?Math.max(c,val):c+val;});updateQuestDot();}
-  function hasQuestClaim(){return QUESTS.some(q=>effVip()>=(q.vip||0)&&qprog(q.id)>=q.goal&&S.quests.claimed.indexOf(q.id)<0);}
-  function hasSocialClaim(){return SOCIAL.some(q=>(S.social[q.id]||0)===2);}
+  function hasQuestClaim(){questCheck();return QUESTS.some(q=>effVip()>=(q.vip||0)&&qprog(q.id)>=q.goal&&S.quests.claimed.indexOf(q.id)<0);}
+  function hasSocialClaim(){return SOCIAL.some(q=>Number((S.social||{})[q.id]||0)===2);}
   function updateQuestDot(){const any=hasQuestClaim()||hasSocialClaim();
-    const nb=document.querySelector('nav button[data-p="airdrop"]');if(nb)nb.classList.toggle("alert",any&&panelOpen!=="airdrop");}
+    const nb=document.querySelector('nav button[data-p="airdrop"]');if(nb)nb.classList.toggle("alert",!!any&&panelOpen!=="airdrop");}
 
   // ---------- ACHIEVEMENTS ----------
   const ACH=[{id:"first",emo:"💀",nm:"Rekt",ds:"Get rugged for the first time"},
