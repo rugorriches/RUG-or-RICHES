@@ -893,6 +893,7 @@
 
   function mergeState(db) {
     if (!db) return;
+    const dbDay=v=>{if(!v)return null;const d=new Date(v);return Number.isFinite(d.getTime())?d.toDateString():String(v);};
     if (db.name) S.name = db.name;
     S.vip = Math.max(S.vip, db.vip_tier || 0);
     S.streak = Math.max(S.streak, db.streak || 0);
@@ -916,9 +917,8 @@
     if (Array.isArray(db.ach)) {
       db.ach.forEach(a => { if (S.ach.indexOf(a) < 0) S.ach.push(a); });
     }
-    if (Array.isArray(db.ref_milestones)) {
-      db.ref_milestones.forEach(m => { if (S.refMiles.indexOf(m) < 0) S.refMiles.push(m); });
-    }
+    const refMiles = Array.isArray(db.ref_milestones) ? db.ref_milestones : (Array.isArray(db.refMiles) ? db.refMiles : []);
+    refMiles.forEach(m => { if (S.refMiles.indexOf(m) < 0) S.refMiles.push(m); });
     if (db.crew_name) S.crew = db.crew_name;
     if (db.sound !== undefined) S.sound = db.sound;
     if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
@@ -928,8 +928,18 @@
     if (db.first_buy_used !== undefined) S.firstBuyUsed = !!db.first_buy_used;
     if (db.starter_bought !== undefined) S.starterBought = !!db.starter_bought;
     if (db.season_pass !== undefined) S.seasonPass = !!db.season_pass;
+    if (db.season_claim_day) S.seasonClaimDay = dbDay(db.season_claim_day);
     if (db.vip_sub_until !== undefined) S.vipSubUntil = Math.max(S.vipSubUntil || 0, Number(db.vip_sub_until) || 0);
-    if (db.deal_day) S.dealDay = db.deal_day;
+    if (db.vip_day) S.vipDay = dbDay(db.vip_day);
+    if (db.combo_day) S.comboDay = dbDay(db.combo_day);
+    if (db.last_day) S.lastDay = dbDay(db.last_day);
+    if (db.deal_day) S.dealDay = dbDay(db.deal_day);
+    if (db.piggy !== undefined) S.piggy = Math.max(S.piggy || 0, Number(db.piggy) || 0);
+    if (db.coin_level !== undefined) S.coinLevel = Math.max(S.coinLevel || 1, Number(db.coin_level) || 1);
+    if (db.coin_xp !== undefined) S.coinXp = Math.max(S.coinXp || 0, Number(db.coin_xp) || 0);
+    if (db.war_week) S.warWeek = db.war_week;
+    if (db.war_score !== undefined) S.warScore = Math.max(S.warScore || 0, Number(db.war_score) || 0);
+    if (db.war_claim !== undefined) S.warClaim = !!db.war_claim;
     if (Array.isArray(db.skins)) db.skins.forEach(s => { if (S.skins.indexOf(s) < 0) S.skins.push(s); });
     if (db.skin && S.skins.indexOf(db.skin) >= 0) S.skin = db.skin;
     

@@ -29,6 +29,7 @@ CREATE TABLE public.players (
     vip_tier        INT             DEFAULT 0      NOT NULL,     -- 0=None 1=Bronze 2=Silver 3=Gold 4=Diamond
     vip_day         DATE,                                        -- last VIP lounge daily claim
     combo_day       DATE,                                        -- last Daily Combo claim
+    last_day        DATE,                                        -- last daily streak claim
     energy          DOUBLE PRECISION DEFAULT 100.0 NOT NULL,
     last_energy_sync TIMESTAMPTZ    DEFAULT now()  NOT NULL,
     streak          INT             DEFAULT 1      NOT NULL,
@@ -45,6 +46,20 @@ CREATE TABLE public.players (
     crew_id         UUID,
     sound           BOOLEAN         DEFAULT TRUE   NOT NULL,
     name            VARCHAR(18),                                 -- display name
+    starter_bought  BOOLEAN         DEFAULT FALSE  NOT NULL,
+    season_pass     BOOLEAN         DEFAULT FALSE  NOT NULL,
+    season_claim_day DATE,
+    vip_sub_until   BIGINT          DEFAULT 0      NOT NULL,
+    first_buy_used  BOOLEAN         DEFAULT FALSE  NOT NULL,
+    deal_day        DATE,
+    piggy           BIGINT          DEFAULT 0      NOT NULL,
+    coin_level      INT             DEFAULT 1      NOT NULL,
+    coin_xp         INT             DEFAULT 0      NOT NULL,
+    skin            VARCHAR(40)     DEFAULT 'gold',
+    skins           JSONB           DEFAULT '["gold"]'::jsonb,
+    war_week        VARCHAR(20),
+    war_score       BIGINT          DEFAULT 0      NOT NULL,
+    war_claim       BOOLEAN         DEFAULT FALSE  NOT NULL,
     created_at      TIMESTAMPTZ     DEFAULT now()  NOT NULL
 );
 
@@ -78,7 +93,12 @@ CREATE TABLE public.quests (
     player_id       BIGINT PRIMARY KEY REFERENCES public.players(id) ON DELETE CASCADE,
     social_x        BOOLEAN          DEFAULT FALSE        NOT NULL,
     social_tg       BOOLEAN          DEFAULT FALSE        NOT NULL,
+    social_tg_group BOOLEAN          DEFAULT FALSE        NOT NULL,
     social_ig       BOOLEAN          DEFAULT FALSE        NOT NULL,
+    social_x_state  INT              DEFAULT 0            NOT NULL,
+    social_tg_state INT              DEFAULT 0            NOT NULL,
+    social_tg_group_state INT        DEFAULT 0            NOT NULL,
+    social_ig_state INT              DEFAULT 0            NOT NULL,
     daily_taps      INT              DEFAULT 0            NOT NULL,
     daily_max_price DOUBLE PRECISION DEFAULT 1.0          NOT NULL,
     daily_big_sell  BIGINT           DEFAULT 0            NOT NULL,

@@ -3,6 +3,41 @@ const db = require("./db");
 const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
+let schemaReady;
+
+async function ensureSchema() {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await db.query(`
+        ALTER TABLE players
+          ADD COLUMN IF NOT EXISTS last_day DATE,
+          ADD COLUMN IF NOT EXISTS starter_bought BOOLEAN DEFAULT FALSE NOT NULL,
+          ADD COLUMN IF NOT EXISTS season_pass BOOLEAN DEFAULT FALSE NOT NULL,
+          ADD COLUMN IF NOT EXISTS season_claim_day DATE,
+          ADD COLUMN IF NOT EXISTS vip_sub_until BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS first_buy_used BOOLEAN DEFAULT FALSE NOT NULL,
+          ADD COLUMN IF NOT EXISTS deal_day DATE,
+          ADD COLUMN IF NOT EXISTS piggy BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS coin_level INT DEFAULT 1 NOT NULL,
+          ADD COLUMN IF NOT EXISTS coin_xp INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS skin VARCHAR(40) DEFAULT 'gold',
+          ADD COLUMN IF NOT EXISTS skins JSONB DEFAULT '["gold"]'::jsonb,
+          ADD COLUMN IF NOT EXISTS war_week VARCHAR(20),
+          ADD COLUMN IF NOT EXISTS war_score BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL
+      `);
+      await db.query(`
+        ALTER TABLE quests
+          ADD COLUMN IF NOT EXISTS social_tg_group BOOLEAN DEFAULT FALSE NOT NULL,
+          ADD COLUMN IF NOT EXISTS social_x_state INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS social_tg_state INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS social_tg_group_state INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS social_ig_state INT DEFAULT 0 NOT NULL
+      `);
+    })();
+  }
+  return schemaReady;
+}
 
 // Verify Telegram initData
 function verifyInitData(initData) {
@@ -59,6 +94,44 @@ function clampNumber(value, min, max, fallback) {
   return Math.max(min, Math.min(max, n));
 }
 
+function clampInt(value, min, max, fallback) {
+  return Math.round(clampNumber(value, min, max, fallback));
+}
+
+function cleanDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (!Number.isFinite(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+function cleanString(value, maxLen) {
+  const raw = String(value || "").replace(/[^\w .@:-]/g, "").trim();
+  return raw ? raw.slice(0, maxLen) : null;
+}
+
+function cleanIdArray(value, allowed) {
+  if (!Array.isArray(value)) return [];
+  const allow = new Set(allowed);
+  return [...new Set(value.map(v => String(v || "").trim()).filter(v => allow.has(v)))];
+}
+
+function cleanMilestones(value) {
+  const allowed = new Set([1, 3, 5, 10, 25]);
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.map(v => Number(v)).filter(v => allowed.has(v)))];
+}
+
+function cleanSkins(value) {
+  const skins = Array.isArray(value) ? value : ["gold"];
+  const cleaned = [...new Set(skins.map(v => String(v || "").replace(/[^\w-]/g, "").slice(0, 40)).filter(Boolean))];
+  return cleaned.length ? cleaned : ["gold"];
+}
+
+function cleanSocialState(value) {
+  return clampInt(value, 0, 3, 0);
+}
+
 function cleanName(value, fallback) {
   const raw = String(value || fallback || "degen").replace(/[^\w .@-]/g, "").trim();
   return (raw || "degen").slice(0, 18);
@@ -107,7 +180,16 @@ async function loadPlayerProfile(playerId) {
   );
   if (players.length === 0) return null;
   const player = players[0];
-  Object.assign(player, await loadPurchaseEntitlements(playerId));
+  const entitlements = await loadPurchaseEntitlements(playerId);
+  const dbSkins = cleanSkins(player.skins);
+  const entSkins = cleanSkins(entitlements.skins);
+  player.first_buy_used = !!player.first_buy_used || entitlements.first_buy_used;
+  player.starter_bought = !!player.starter_bought || entitlements.starter_bought;
+  player.season_pass = !!player.season_pass || entitlements.season_pass;
+  player.vip_sub_until = Math.max(Number(player.vip_sub_until) || 0, entitlements.vip_sub_until || 0);
+  player.deal_day = player.deal_day ? new Date(player.deal_day).toDateString() : entitlements.deal_day;
+  player.skins = [...new Set([...dbSkins, ...entSkins])];
+  player.skin = player.skin && player.skins.includes(player.skin) ? player.skin : (entitlements.skin || "gold");
 
   // Upgrades
   const { rows: upRows } = await db.query("SELECT * FROM upgrades WHERE player_id = $1", [playerId]);
@@ -131,10 +213,10 @@ async function loadPlayerProfile(playerId) {
     claimed: q.claimed_ids || []
   };
   player.social = {
-    x: q.social_x ? 3 : 0,
-    tg_channel: q.social_tg ? 3 : 0,
-    tg_group: q.social_tg_group ? 3 : 0,
-    ig: q.social_ig ? 3 : 0
+    x: q.social_x ? 3 : cleanSocialState(q.social_x_state),
+    tg_channel: q.social_tg ? 3 : cleanSocialState(q.social_tg_state),
+    tg_group: q.social_tg_group ? 3 : cleanSocialState(q.social_tg_group_state),
+    ig: q.social_ig ? 3 : cleanSocialState(q.social_ig_state)
   };
 
   // Ref Milestones
@@ -183,6 +265,7 @@ module.exports = async (req, res) => {
   const tgUser = data.user;
 
   try {
+    await ensureSchema();
     // ---------------- LOAD OR CREATE PLAYER ----------------
     const { rows: players } = await db.query("SELECT id FROM players WHERE id = $1", [tgUser.id]);
     
@@ -238,28 +321,154 @@ module.exports = async (req, res) => {
           }
         }
 
-        // Update profile/settings only. Economy totals, VIP, Stars spend, upgrades,
-        // quest rewards, and referrals are credited by server-side purchase/game paths.
+        const questIds = ["taps", "price", "cash", "invite", "vbig", "vmoon"];
+        const achIds = ["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"];
+        const social = state.social || {};
+        const up = state.up || {};
+        const quests = state.quests || {};
+        const questProg = quests.prog || {};
+        const skins = cleanSkins(state.skins);
+        const skin = cleanString(state.skin, 40) || "gold";
+
+        // Persist gameplay progress for cross-device Telegram Mini App continuity.
+        // Values are clamped and keyed to verified Telegram initData identity.
         await client.query(
           `UPDATE players SET 
-             name = $2, bet = $3, bet_cur = $4, auto_sell = $5,
-             stop_loss = $6, sound = $7, crew_id = $8
+             name = $2,
+             balance = $3,
+             airdrop_pts = $4,
+             lifetime_banked = $5,
+             best_pot = $6,
+             best_price = $7,
+             rugs = $8,
+             cashouts = $9,
+             taps = $10,
+             vip_tier = GREATEST(vip_tier, $11),
+             vip_day = COALESCE($12::date, vip_day),
+             combo_day = COALESCE($13::date, combo_day),
+             last_day = COALESCE($14::date, last_day),
+             streak = GREATEST(streak, $15),
+             stars_spent = GREATEST(stars_spent, $16),
+             bet = $17,
+             bet_cur = $18,
+             auto_sell = $19,
+             stop_loss = $20,
+             sound = $21,
+             crew_id = $22,
+             starter_bought = starter_bought OR $23,
+             season_pass = season_pass OR $24,
+             season_claim_day = COALESCE($25::date, season_claim_day),
+             vip_sub_until = GREATEST(vip_sub_until, $26),
+             first_buy_used = first_buy_used OR $27,
+             deal_day = COALESCE($28::date, deal_day),
+             piggy = GREATEST(piggy, $29),
+             coin_level = GREATEST(coin_level, $30),
+             coin_xp = GREATEST(coin_xp, $31),
+             skin = CASE WHEN $32 IN (SELECT jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $33::jsonb)) THEN $32 ELSE skin END,
+             skins = (SELECT jsonb_agg(DISTINCT s) FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $33::jsonb) AS t(s)),
+             war_week = COALESCE($34, war_week),
+             war_score = GREATEST(war_score, $35),
+             war_claim = war_claim OR $36
            WHERE id = $1`,
           [
             tgUser.id,
             cleanName(state.name, tgUser.username || tgUser.first_name),
+            clampInt(state.balance, 0, 1000000000000000, 500),
+            clampInt(state.airdrop, 0, 1000000000000000, 500),
+            clampInt(state.lifetime, 0, 1000000000000000, 0),
+            clampInt(state.bestPot, 0, 1000000000000000, 0),
+            clampNumber(state.bestPrice, 0.01, 1000000, 1),
+            clampInt(state.rugs, 0, 1000000000, 0),
+            clampInt(state.cashouts, 0, 1000000000, 0),
+            clampInt(state.taps, 0, 1000000000000, 0),
+            clampInt(state.vip, 0, 4, 0),
+            cleanDate(state.vipDay),
+            cleanDate(state.comboDay),
+            cleanDate(state.lastDay),
+            clampInt(state.streak, 0, 1000000, 0),
+            clampInt(state.starsSpent, 0, 1000000000, 0),
             Math.round(clampNumber(state.bet, 10, 1000000, 100)),
             state.betCur === "pts" ? "pts" : "moon",
             clampNumber(state.autoSell, 0, 1000, 0),
             Math.round(clampNumber(state.stopLoss, 0, 95, 0)),
             state.sound !== false,
-            crewId
+            crewId,
+            !!state.starterBought,
+            !!state.seasonPass,
+            cleanDate(state.seasonClaimDay),
+            clampInt(state.vipSubUntil, 0, 4102444800000, 0),
+            !!state.firstBuyUsed,
+            cleanDate(state.dealDay),
+            clampInt(state.piggy, 0, 1000000000000000, 0),
+            clampInt(state.coinLevel, 1, 1000000, 1),
+            clampInt(state.coinXp, 0, 1000000000, 0),
+            skin,
+            JSON.stringify(skins),
+            cleanString(state.warWeek, 20),
+            clampInt(state.warScore, 0, 1000000000000000, 0),
+            !!state.warClaim
+          ]
+        );
+
+        await client.query(
+          `UPDATE upgrades SET
+             power = GREATEST(power, $2),
+             energy = GREATEST(energy, $3),
+             regen = GREATEST(regen, $4),
+             insure = GREATEST(insure, $5),
+             auto = GREATEST(auto, $6),
+             combo = GREATEST(combo, $7),
+             vault = GREATEST(vault, $8),
+             cashbonus = GREATEST(cashbonus, $9)
+           WHERE player_id = $1`,
+          [
+            tgUser.id,
+            clampInt(up.power, 0, 100000, 0),
+            clampInt(up.energy, 0, 100000, 0),
+            clampInt(up.regen, 0, 100000, 0),
+            clampInt(up.insure, 0, 100000, 0),
+            clampInt(up.auto, 0, 100000, 0),
+            clampInt(up.combo, 0, 100000, 0),
+            clampInt(up.vault, 0, 100000, 0),
+            clampInt(up.cashbonus, 0, 100000, 0)
+          ]
+        );
+
+        await client.query(
+          `UPDATE quests SET
+             daily_taps = GREATEST(daily_taps, $2),
+             daily_max_price = GREATEST(daily_max_price, $3),
+             daily_big_sell = GREATEST(daily_big_sell, $4),
+             daily_invites = GREATEST(daily_invites, $5),
+             claimed_ids = $6,
+             last_quest_reset = COALESCE($7::date, last_quest_reset),
+             social_x_state = GREATEST(social_x_state, $8),
+             social_tg_state = GREATEST(social_tg_state, $9),
+             social_tg_group_state = GREATEST(social_tg_group_state, $10),
+             social_ig_state = GREATEST(social_ig_state, $11),
+             social_x = social_x OR $8 >= 3,
+             social_tg = social_tg OR $9 >= 3,
+             social_tg_group = social_tg_group OR $10 >= 3,
+             social_ig = social_ig OR $11 >= 3
+           WHERE player_id = $1`,
+          [
+            tgUser.id,
+            clampInt(questProg.taps, 0, 1000000000, 0),
+            clampNumber(questProg.price, 0, 1000000, 1),
+            clampInt(questProg.cash, 0, 1000000000000000, 0),
+            clampInt(questProg.invite, 0, 1000000, 0),
+            cleanIdArray(quests.claimed, questIds),
+            cleanDate(quests.date),
+            cleanSocialState(social.x),
+            Math.max(cleanSocialState(social.tg_channel), cleanSocialState(social.tg)),
+            cleanSocialState(social.tg_group),
+            cleanSocialState(social.ig)
           ]
         );
 
         // Insert achievements
         if (Array.isArray(state.ach)) {
-          for (const achId of state.ach) {
+          for (const achId of cleanIdArray(state.ach, achIds)) {
             await client.query(
               `INSERT INTO achievements (player_id, achievement_id)
                VALUES ($1, $2)
@@ -267,6 +476,15 @@ module.exports = async (req, res) => {
               [tgUser.id, achId]
             );
           }
+        }
+
+        for (const milestone of cleanMilestones(state.refMiles)) {
+          await client.query(
+            `INSERT INTO ref_milestones (player_id, milestone_n)
+             VALUES ($1, $2)
+             ON CONFLICT (player_id, milestone_n) DO NOTHING`,
+            [tgUser.id, milestone]
+          );
         }
 
         await client.query("COMMIT");
