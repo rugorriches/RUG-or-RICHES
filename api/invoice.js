@@ -1,4 +1,6 @@
 const crypto = require("crypto");
+const db = require("./db");
+const { buildPurchase } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 
@@ -36,15 +38,21 @@ async function tgApi(method, body) {
   }
 }
 
-async function createInvoiceLink(userId, payload) {
-  const isVip = payload.type === "vip";
-  const title = isVip ? ("VIP Tier " + payload.tier) : (payload.moon + " $MOON");
+async function loadPurchaseHistory(userId) {
+  const { rows } = await db.query(
+    "SELECT payload, created_at FROM stars_transactions WHERE player_id = $1 ORDER BY created_at ASC",
+    [userId]
+  );
+  return rows;
+}
+
+async function createInvoiceLink(userId, purchase) {
   const d = await tgApi("createInvoiceLink", {
-    title,
-    description: "RUG OR RICHES — " + title,
-    payload: JSON.stringify({ ...payload, userId }),
+    title: purchase.title,
+    description: purchase.description,
+    payload: JSON.stringify({ ...purchase.invoicePayload, userId }),
     currency: "XTR",
-    prices: [{ label: title, amount: payload.stars || 1 }]
+    prices: [{ label: purchase.title, amount: purchase.stars }]
   });
   return d && d.ok ? d.result : null;
 }
@@ -72,7 +80,9 @@ module.exports = async (req, res) => {
 
   const userId = data.user.id;
   try {
-    const link = await createInvoiceLink(userId, payload || {});
+    const history = await loadPurchaseHistory(userId);
+    const purchase = buildPurchase(payload || {}, history);
+    const link = await createInvoiceLink(userId, purchase);
     if (!link) {
       res.statusCode = 500;
       res.setHeader("content-type", "application/json");
@@ -82,7 +92,7 @@ module.exports = async (req, res) => {
     res.setHeader("content-type", "application/json");
     return res.end(JSON.stringify({ link }));
   } catch (err) {
-    res.statusCode = 500;
+    res.statusCode = /Unknown|already|purchased/.test(err.message) ? 400 : 500;
     res.setHeader("content-type", "application/json");
     return res.end(JSON.stringify({ error: err.message }));
   }

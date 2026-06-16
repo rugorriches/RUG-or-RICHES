@@ -1,9 +1,20 @@
 const db = require("./db");
+const { buildPurchase } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 
 let lastUpdate = null;
 let lastError = null;
+
+function refFromId(id) {
+  let h = 2166136261 >>> 0;
+  const str = "moon-" + id;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  const c = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < 6; i++) { h = Math.imul(h, 16777619) >>> 0; s += c[h % c.length]; }
+  return s;
+}
 
 async function dbLogWebhook(type, payload, errorMsg) {
   try {
@@ -43,13 +54,35 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
   const client = await db.pool.connect();
   try {
     await client.query("BEGIN");
+
+    const existing = await client.query("SELECT 1 FROM stars_transactions WHERE id = $1", [chargeId]);
+    if (existing.rowCount > 0) {
+      await client.query("ROLLBACK");
+      console.log(`[stars] Duplicate charge ${chargeId} skipped.`);
+      return false;
+    }
+
+    await client.query(
+      `INSERT INTO players (id, ref_code)
+       VALUES ($1, $2)
+       ON CONFLICT (id) DO NOTHING`,
+      [payerId, refFromId(payerId)]
+    );
+
+    const { rows: history } = await client.query(
+      "SELECT payload, created_at FROM stars_transactions WHERE player_id = $1 ORDER BY created_at ASC",
+      [payerId]
+    );
+    const purchase = buildPurchase(payload, history);
+    if (starsAmount !== purchase.stars) {
+      throw new Error(`Stars amount mismatch for ${purchase.type}: paid ${starsAmount}, expected ${purchase.stars}`);
+    }
     
-    // Idempotent check
     const { rowCount } = await client.query(
       `INSERT INTO stars_transactions (id, player_id, payer_tg_id, stars_amount, payload)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (id) DO NOTHING`,
-      [chargeId, payerId, payerId, starsAmount, JSON.stringify(payload)]
+      [chargeId, payerId, payerId, starsAmount, JSON.stringify(purchase.invoicePayload)]
     );
     
     if (rowCount === 0) {
@@ -58,25 +91,59 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
       return false;
     }
     
-    // Credit player
-    if (payload.type === "moon" && payload.moon) {
+    const reward = purchase.reward || {};
+    if (purchase.type === "moon" && reward.moon) {
       await client.query(
         `UPDATE players 
          SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 
          WHERE id = $1`,
-        [payerId, parseInt(payload.moon), starsAmount]
+        [payerId, reward.moon, starsAmount]
       );
-    } else if (payload.type === "vip" && payload.tier) {
+    } else if (purchase.type === "vip" && reward.tier) {
       await client.query(
         `UPDATE players 
          SET vip_tier = GREATEST(vip_tier, $2), stars_spent = stars_spent + $3 
          WHERE id = $1`,
-        [payerId, parseInt(payload.tier), starsAmount]
+        [payerId, reward.tier, starsAmount]
+      );
+    } else if ((purchase.type === "starter" || purchase.type === "whale") && reward.moon) {
+      await client.query(
+        `UPDATE players
+         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2,
+             vip_tier = GREATEST(vip_tier, $3), stars_spent = stars_spent + $4
+         WHERE id = $1`,
+        [payerId, reward.moon, reward.vip || 0, starsAmount]
+      );
+    } else if ((purchase.type === "deal" || purchase.type === "comeback") && reward.moon) {
+      await client.query(
+        `UPDATE players
+         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3
+         WHERE id = $1`,
+        [payerId, reward.moon, starsAmount]
+      );
+    } else if (purchase.type === "season" && reward.airdrop) {
+      await client.query(
+        `UPDATE players
+         SET airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3
+         WHERE id = $1`,
+        [payerId, reward.airdrop, starsAmount]
+      );
+    } else if (purchase.type === "piggy" && reward.moon) {
+      await client.query(
+        `UPDATE players
+         SET balance = balance + $2, lifetime_banked = lifetime_banked + $2, stars_spent = stars_spent + $3
+         WHERE id = $1`,
+        [payerId, reward.moon, starsAmount]
+      );
+    } else {
+      await client.query(
+        "UPDATE players SET stars_spent = stars_spent + $2 WHERE id = $1",
+        [payerId, starsAmount]
       );
     }
     
     await client.query("COMMIT");
-    console.log(`[stars] Credited player ${payerId}: ${JSON.stringify(payload)}`);
+    console.log(`[stars] Credited player ${payerId}: ${JSON.stringify(purchase.invoicePayload)}`);
     return true;
   } catch (err) {
     await client.query("ROLLBACK");

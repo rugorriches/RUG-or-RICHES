@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const db = require("./db");
+const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 
@@ -52,6 +53,49 @@ function nameToId(name) {
   return Math.abs(hash) * -1;
 }
 
+function clampNumber(value, min, max, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function cleanName(value, fallback) {
+  const raw = String(value || fallback || "degen").replace(/[^\w .@-]/g, "").trim();
+  return (raw || "degen").slice(0, 18);
+}
+
+async function loadPurchaseEntitlements(playerId) {
+  const { rows } = await db.query(
+    "SELECT payload, created_at FROM stars_transactions WHERE player_id = $1 ORDER BY created_at ASC",
+    [playerId]
+  );
+  const entitlements = {
+    first_buy_used: false,
+    starter_bought: false,
+    season_pass: false,
+    vip_sub_until: 0,
+    deal_day: null,
+    skins: ["gold"],
+    skin: null
+  };
+  for (const row of rows) {
+    const payload = payloadOf(row);
+    if (payload.type === "moon") entitlements.first_buy_used = true;
+    if (payload.type === "starter") entitlements.starter_bought = true;
+    if (payload.type === "season") entitlements.season_pass = true;
+    if (payload.type === "deal") entitlements.deal_day = new Date(row.created_at).toDateString();
+    if (payload.type === "vipsub") {
+      const until = new Date(new Date(row.created_at).getTime() + VIPSUB.days * 86400000).getTime();
+      entitlements.vip_sub_until = Math.max(entitlements.vip_sub_until, until);
+    }
+    if (payload.type === "skin" && payload.id) {
+      if (!entitlements.skins.includes(payload.id)) entitlements.skins.push(payload.id);
+      entitlements.skin = payload.id;
+    }
+  }
+  return entitlements;
+}
+
 // Load full player profile from DB
 async function loadPlayerProfile(playerId) {
   const { rows: players } = await db.query(
@@ -63,6 +107,7 @@ async function loadPlayerProfile(playerId) {
   );
   if (players.length === 0) return null;
   const player = players[0];
+  Object.assign(player, await loadPurchaseEntitlements(playerId));
 
   // Upgrades
   const { rows: upRows } = await db.query("SELECT * FROM upgrades WHERE player_id = $1", [playerId]);
@@ -193,60 +238,24 @@ module.exports = async (req, res) => {
           }
         }
 
-        // Update core player record
+        // Update profile/settings only. Economy totals, VIP, Stars spend, upgrades,
+        // quest rewards, and referrals are credited by server-side purchase/game paths.
         await client.query(
           `UPDATE players SET 
-             name = $2, balance = $3, airdrop_pts = $4, lifetime_banked = $5,
-             best_pot = $6, best_price = $7, rugs = $8, cashouts = $9, taps = $10,
-             streak = $11, vip_tier = $12, bet = $13, bet_cur = $14, auto_sell = $15,
-             stop_loss = $16, stars_spent = $17, sound = $18, crew_id = $19
+             name = $2, bet = $3, bet_cur = $4, auto_sell = $5,
+             stop_loss = $6, sound = $7, crew_id = $8
            WHERE id = $1`,
           [
-            tgUser.id, state.name, state.balance, state.airdrop, state.lifetime,
-            state.bestPot, state.bestPrice, state.rugs, state.cashouts, state.taps,
-            state.streak, state.vip, state.bet, state.betCur, state.autoSell,
-            state.stopLoss, state.starsSpent, state.sound, crewId
+            tgUser.id,
+            cleanName(state.name, tgUser.username || tgUser.first_name),
+            Math.round(clampNumber(state.bet, 10, 1000000, 100)),
+            state.betCur === "pts" ? "pts" : "moon",
+            clampNumber(state.autoSell, 0, 1000, 0),
+            Math.round(clampNumber(state.stopLoss, 0, 95, 0)),
+            state.sound !== false,
+            crewId
           ]
         );
-
-        // Update upgrades
-        if (state.up) {
-          await client.query(
-            `UPDATE upgrades SET
-               power = $2, energy = $3, regen = $4, insure = $5, auto = $6,
-               combo = $7, vault = $8, cashbonus = $9
-             WHERE player_id = $1`,
-            [
-              tgUser.id, state.up.power || 0, state.up.energy || 0, state.up.regen || 0,
-              state.up.insure || 0, state.up.auto || 0, state.up.combo || 0,
-              state.up.vault || 0, state.up.cashbonus || 0
-            ]
-          );
-        }
-
-        // Update quests and social quest booleans
-        if (state.quests && state.social) {
-          await client.query(
-            `UPDATE quests SET
-               social_x = $2, social_tg = $3, social_ig = $4, social_tg_group = $5,
-               daily_taps = $6, daily_max_price = $7, daily_big_sell = $8, daily_invites = $9,
-               claimed_ids = $10, last_quest_reset = $11
-             WHERE player_id = $1`,
-            [
-              tgUser.id,
-              state.social.x >= 3,
-              state.social.tg_channel >= 3 || state.social.tg >= 3,
-              state.social.ig >= 3,
-              state.social.tg_group >= 3,
-              state.quests.prog?.taps || 0,
-              state.quests.prog?.price || 1.0,
-              state.quests.prog?.cash || 0,
-              state.quests.prog?.invite || 0,
-              state.quests.claimed || [],
-              state.quests.date ? new Date(state.quests.date) : new Date()
-            ]
-          );
-        }
 
         // Insert achievements
         if (Array.isArray(state.ach)) {
@@ -256,37 +265,6 @@ module.exports = async (req, res) => {
                VALUES ($1, $2)
                ON CONFLICT (player_id, achievement_id) DO NOTHING`,
               [tgUser.id, achId]
-            );
-          }
-        }
-
-        // Insert ref milestones
-        if (Array.isArray(state.refMiles)) {
-          for (const n of state.refMiles) {
-            await client.query(
-              `INSERT INTO ref_milestones (player_id, milestone_n)
-               VALUES ($1, $2)
-               ON CONFLICT (player_id, milestone_n) DO NOTHING`,
-              [tgUser.id, n]
-            );
-          }
-        }
-
-        // Insert simulated friends
-        if (Array.isArray(state.friends)) {
-          for (const f of state.friends) {
-            const friendId = nameToId(f.n);
-            await client.query(
-              `INSERT INTO players (id, ref_code, name, balance)
-               VALUES ($1, $2, $3, $4)
-               ON CONFLICT (id) DO NOTHING`,
-              [friendId, "F_" + Math.abs(friendId).toString(36), f.n, f.b || 5000]
-            );
-            await client.query(
-              `INSERT INTO friends (player_id, friend_id, is_premium)
-               VALUES ($1, $2, $3)
-               ON CONFLICT (player_id, friend_id) DO NOTHING`,
-              [tgUser.id, friendId, !!f.prem]
             );
           }
         }

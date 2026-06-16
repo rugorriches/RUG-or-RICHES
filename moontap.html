@@ -909,6 +909,13 @@
     if (db.bet_cur !== undefined) S.betCur = db.bet_cur;
     if (db.auto_sell !== undefined) S.autoSell = db.auto_sell;
     if (db.stop_loss !== undefined) S.stopLoss = db.stop_loss;
+    if (db.first_buy_used !== undefined) S.firstBuyUsed = !!db.first_buy_used;
+    if (db.starter_bought !== undefined) S.starterBought = !!db.starter_bought;
+    if (db.season_pass !== undefined) S.seasonPass = !!db.season_pass;
+    if (db.vip_sub_until !== undefined) S.vipSubUntil = Math.max(S.vipSubUntil || 0, Number(db.vip_sub_until) || 0);
+    if (db.deal_day) S.dealDay = db.deal_day;
+    if (Array.isArray(db.skins)) db.skins.forEach(s => { if (S.skins.indexOf(s) < 0) S.skins.push(s); });
+    if (db.skin && S.skins.indexOf(db.skin) >= 0) S.skin = db.skin;
     
     if (db.social) {
       S.social.x = Math.max(S.social.x || 0, db.social.x || 0);
@@ -1523,7 +1530,7 @@
     const tg=window.Telegram&&window.Telegram.WebApp;
     if(tg&&tg.openInvoice&&resolvedInvoiceEndpoint){
       try{fetch(resolvedInvoiceEndpoint,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({payload:payload,initData:tg.initData})})
-        .then(r=>r.json()).then(d=>{if(d&&d.link)tg.openInvoice(d.link,st=>{if(st==="paid")grant();});}).catch(()=>{});}catch(e){}
+        .then(r=>r.json()).then(d=>{if(d&&d.link)tg.openInvoice(d.link,st=>{if(st==="paid")grant();});else toast("⚠️","Store unavailable",(d&&d.error)||"Try again soon");}).catch(()=>toast("⚠️","Store unavailable","Try again soon"));}catch(e){toast("⚠️","Store unavailable","Try again soon");}
       return;}
     if(confirm(desc+"\n(Simulated purchase in this prototype)"))grant();}
   function buyMoon(p){const dbl=!S.firstBuyUsed;const moon=p.moon*(dbl?2:1);
@@ -1551,13 +1558,38 @@
   function equipSkin(id){S.skin=id;save();applySkin();renderStore();toast("🎨","Skin equipped!",(SKINS.find(s=>s.id===id)||{}).nm||"");}
   function buySkin(s){starsPurchase("Unlock the "+s.nm+" coin skin for "+s.stars+" ⭐?",{type:"skin",id:s.id,stars:s.stars},()=>{
     if(S.skins.indexOf(s.id)<0)S.skins.push(s.id);S.skin=s.id;S.starsSpent+=s.stars;save();applySkin();renderStore();sfxCash();confetti();toast("🎨",s.nm+" unlocked!","Equipped on your BUY button");});}
+  function pickOffer(){const today=new Date().toDateString();
+    if(!S.starterBought&&S.lifetime<50000)return{emo:"🎁",nm:"Starter Pack",ds:"Best first boost: 500K $MOON + Bronze VIP",stars:STARTER.stars,fn:buyStarter};
+    if(S.balance<5000)return{emo:"🆘",nm:"Comeback Pack",ds:"Low balance rescue: 200K $MOON",stars:COMEBACK.stars,fn:buyComeback};
+    if(S.dealDay!==today)return{emo:"⏰",nm:"Daily Deal",ds:"700K $MOON at 2× value today",stars:DEAL.stars,fn:buyDeal};
+    if((S.vipSubUntil||0)<Date.now())return{emo:"👑",nm:"VIP Pass",ds:"30 days of Diamond-level perks",stars:VIPSUB.stars,fn:buyVipSub};
+    if(S.piggy>=25000)return{emo:"🐷",nm:"Crack Piggy",ds:"Claim "+fmt(S.piggy)+" saved $MOON",stars:Math.max(20,Math.round(S.piggy/3000)),fn:crackPiggy};
+    return{emo:"⚡",nm:"Turbo Boost",ds:"Double every pump for the next rush",stars:35,fn:()=>buyBoost(BOOSTS[1])};}
+  function storeCard(wrap,o){const d=document.createElement("div");d.className="card row"+(o.best?" best":"");
+    const disabled=o.disabled?' disabled':'',label=o.label||(o.stars>0?"⭐ "+o.stars:"Free");
+    d.innerHTML='<div class="emo">'+o.emo+'</div><div class="grow"><div class="nm">'+o.nm+(o.tag?' <span class="pill">'+o.tag+'</span>':'')+'</div><div class="ds">'+o.ds+'</div></div><button class="buy"'+disabled+'>'+label+'</button>';
+    if(!o.disabled)d.querySelector(".buy").addEventListener("click",o.fn);wrap.appendChild(d);}
+  function storeSection(wrap,title){const h=document.createElement("div");h.className="sec-h";h.textContent=title;wrap.appendChild(h);}
   function renderStore(){const wrap=$("storeList");if(!wrap)return;wrap.innerHTML="";
     const ss=$("starsSpent");if(ss)ss.textContent=fmt(S.starsSpent);
     const sb=$("storeBal");if(sb)sb.textContent=fmt(S.balance);
-    STORE.forEach(p=>{const best=/BEST/.test(p.tag);const d=document.createElement("div");d.className="card row"+(best?" best":"");
-      d.innerHTML='<div class="emo">🪙</div><div class="grow"><div class="nm">'+fmt(p.moon)+' $MOON'+(p.tag?' <span class="pill">'+p.tag+'</span>':'')+'</div><div class="ds">'+fmt(Math.round(p.moon/p.stars))+' $MOON per ⭐</div></div><button class="buy">⭐ '+p.stars+'</button>';
-      d.querySelector(".buy").addEventListener("click",()=>buyMoon(p));wrap.appendChild(d);});
-    const sh=document.createElement("div");sh.className="sec-h";sh.textContent="🎨 Coin skins";wrap.appendChild(sh);
+    storeSection(wrap,"🎯 Recommended");
+    storeCard(wrap,Object.assign({tag:"For you",best:true},pickOffer()));
+    const today=new Date().toDateString();
+    storeSection(wrap,"🔥 Limited drops");
+    storeCard(wrap,{emo:"⏰",nm:"Daily Deal",ds:S.dealDay===today?"Claimed today":"700K $MOON at 2× value",stars:DEAL.stars,fn:buyDeal,disabled:S.dealDay===today,label:S.dealDay===today?"✓":"⭐ "+DEAL.stars});
+    storeCard(wrap,{emo:"🎁",nm:"Starter Pack",ds:"One-time 500K $MOON + Bronze VIP",stars:STARTER.stars,fn:buyStarter,disabled:S.starterBought,label:S.starterBought?"✓":"⭐ "+STARTER.stars});
+    storeCard(wrap,{emo:"🐋",nm:"Whale Pack",ds:"12M $MOON + Gold VIP instant unlock",stars:WHALE.stars,fn:buyWhale});
+    storeCard(wrap,{emo:"👑",nm:"VIP Pass",ds:(S.vipSubUntil>Date.now()?"Active until "+new Date(S.vipSubUntil).toLocaleDateString():"30 days of Diamond-level perks"),stars:VIPSUB.stars,fn:buyVipSub});
+    storeCard(wrap,{emo:"🎟️",nm:"Season 1 Pass",ds:S.seasonPass?"Active for this season":"+50K airdrop pts and premium season perks",stars:SEASON.stars,fn:buySeason,disabled:S.seasonPass,label:S.seasonPass?"✓":"⭐ "+SEASON.stars});
+    if(S.balance<5000)storeCard(wrap,{emo:"🆘",nm:"Comeback Pack",ds:"Low-balance rescue: 200K $MOON",stars:COMEBACK.stars,fn:buyComeback});
+    storeCard(wrap,{emo:"🐷",nm:"Piggy Bank",ds:S.piggy>0?"Crack "+fmt(S.piggy)+" saved $MOON":"Fills with 4% of profitable cash-outs",stars:Math.max(20,Math.round((S.piggy||0)/3000)),fn:crackPiggy,disabled:S.piggy<1,label:S.piggy>0?"⭐ "+Math.max(20,Math.round(S.piggy/3000)):"Empty"});
+    storeSection(wrap,"⚡ Boosts");
+    BOOSTS.forEach(b=>storeCard(wrap,{emo:b.emo,nm:b.nm,ds:b.ds,stars:b.stars,fn:()=>buyBoost(b)}));
+    storeSection(wrap,"🪙 $MOON packs");
+    if(!S.firstBuyUsed){const note=document.createElement("div");note.className="qsum";note.textContent="First $MOON pack pays 2× once.";wrap.appendChild(note);}
+    STORE.forEach(p=>storeCard(wrap,{emo:"🪙",nm:fmt(p.moon*(S.firstBuyUsed?1:2))+" $MOON",ds:fmt(Math.round(p.moon/p.stars))+" $MOON per ⭐"+(S.firstBuyUsed?"":" · first-buy 2×"),stars:p.stars,fn:()=>buyMoon(p),tag:p.tag,best:/BEST/.test(p.tag)}));
+    storeSection(wrap,"🎨 Coin skins");
     SKINS.forEach(s=>{const owned=S.skins.indexOf(s.id)>=0,eq=S.skin===s.id;const d=document.createElement("div");d.className="card row";
       d.innerHTML='<div class="emo" style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,'+s.c+' 62%,#0e0826);box-shadow:0 0 10px '+s.c+'"></div><div class="grow"><div class="nm">'+s.nm+'</div><div class="ds">'+(owned?(eq?"equipped":"owned"):s.stars+" ⭐")+'</div></div><button class="buy'+(eq?" owned":"")+'">'+(eq?"✓ On":(owned?"Equip":"⭐ "+s.stars))+'</button>';
       const b=d.querySelector("button");if(!eq){if(owned)b.addEventListener("click",()=>equipSkin(s.id));else b.addEventListener("click",()=>buySkin(s));}

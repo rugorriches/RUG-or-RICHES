@@ -28,6 +28,7 @@ const fs = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
 const { Pool } = require("pg");
+const { buildPurchase } = require("./api/products");
 
 // ---------- .env loader (zero-dependency) ----------
 try {
@@ -195,33 +196,84 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    // Idempotent insert — fails silently on duplicate charge ID
-    const { rowCount } = await client.query(
-      `INSERT INTO stars_transactions (id, player_id, payer_tg_id, stars_amount, payload)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (id) DO NOTHING`,
-      [chargeId, payerId, payerId, starsAmount, JSON.stringify(payload)]
-    );
-    if (rowCount === 0) {
-      // Already processed this charge — skip
+
+    const existing = await client.query("SELECT 1 FROM stars_transactions WHERE id = $1", [chargeId]);
+    if (existing.rowCount > 0) {
       await client.query("ROLLBACK");
       console.log(`[stars] Duplicate charge ${chargeId} — skipped`);
       return false;
     }
-    // Credit the player
-    if (payload.type === "moon" && payload.moon) {
+
+    await client.query(
+      `INSERT INTO players (id, ref_code)
+       VALUES ($1, $2)
+       ON CONFLICT (id) DO NOTHING`,
+      [payerId, genRefCode()]
+    );
+
+    const { rows: history } = await client.query(
+      "SELECT payload, created_at FROM stars_transactions WHERE player_id = $1 ORDER BY created_at ASC",
+      [payerId]
+    );
+    const purchase = buildPurchase(payload, history);
+    if (starsAmount !== purchase.stars) {
+      throw new Error(`Stars amount mismatch for ${purchase.type}: paid ${starsAmount}, expected ${purchase.stars}`);
+    }
+
+    const { rowCount } = await client.query(
+      `INSERT INTO stars_transactions (id, player_id, payer_tg_id, stars_amount, payload)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id) DO NOTHING`,
+      [chargeId, payerId, payerId, starsAmount, JSON.stringify(purchase.invoicePayload)]
+    );
+    if (rowCount === 0) {
+      await client.query("ROLLBACK");
+      console.log(`[stars] Duplicate charge ${chargeId} — skipped`);
+      return false;
+    }
+
+    const reward = purchase.reward || {};
+    if (purchase.type === "moon" && reward.moon) {
       await client.query(
         "UPDATE players SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, payload.moon, starsAmount]
+        [payerId, reward.moon, starsAmount]
       );
-    } else if (payload.type === "vip" && payload.tier) {
+    } else if (purchase.type === "vip" && reward.tier) {
       await client.query(
         "UPDATE players SET vip_tier = GREATEST(vip_tier, $2), stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, payload.tier, starsAmount]
+        [payerId, reward.tier, starsAmount]
+      );
+    } else if ((purchase.type === "starter" || purchase.type === "whale") && reward.moon) {
+      await client.query(
+        `UPDATE players
+         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2,
+             vip_tier = GREATEST(vip_tier, $3), stars_spent = stars_spent + $4
+         WHERE id = $1`,
+        [payerId, reward.moon, reward.vip || 0, starsAmount]
+      );
+    } else if ((purchase.type === "deal" || purchase.type === "comeback") && reward.moon) {
+      await client.query(
+        "UPDATE players SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.moon, starsAmount]
+      );
+    } else if (purchase.type === "season" && reward.airdrop) {
+      await client.query(
+        "UPDATE players SET airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.airdrop, starsAmount]
+      );
+    } else if (purchase.type === "piggy" && reward.moon) {
+      await client.query(
+        "UPDATE players SET balance = balance + $2, lifetime_banked = lifetime_banked + $2, stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.moon, starsAmount]
+      );
+    } else {
+      await client.query(
+        "UPDATE players SET stars_spent = stars_spent + $2 WHERE id = $1",
+        [payerId, starsAmount]
       );
     }
     await client.query("COMMIT");
-    console.log(`[stars] Credited player ${payerId}: ${JSON.stringify(payload)}`);
+    console.log(`[stars] Credited player ${payerId}: ${JSON.stringify(purchase.invoicePayload)}`);
     return true;
   } catch (e) {
     await client.query("ROLLBACK");
@@ -382,14 +434,23 @@ async function isMember(userId) {
   return ["member", "administrator", "creator"].includes(s);
 }
 
+async function loadPurchaseHistory(userId) {
+  if (!pool) return [];
+  const { rows } = await query(
+    "SELECT payload, created_at FROM stars_transactions WHERE player_id = $1 ORDER BY created_at ASC",
+    [userId]
+  );
+  return rows;
+}
+
 async function createInvoiceLink(userId, payload) {
-  const isVip = payload.type === "vip";
-  const title = isVip ? ("VIP Tier " + payload.tier) : (payload.moon + " $MOON");
+  const history = await loadPurchaseHistory(userId);
+  const purchase = buildPurchase(payload, history);
   const d = await tgApi("createInvoiceLink", {
-    title, description: "RUG OR RICHES — " + title,
-    payload: JSON.stringify({ ...payload, userId }),
+    title: purchase.title, description: purchase.description,
+    payload: JSON.stringify({ ...purchase.invoicePayload, userId }),
     currency: "XTR",
-    prices: [{ label: title, amount: payload.stars || 1 }],
+    prices: [{ label: purchase.title, amount: purchase.stars }],
   });
   return d && d.ok ? d.result : null;
 }
@@ -438,7 +499,14 @@ const server = http.createServer(async (req, res) => {
     const data = verifyInitData(body.initData);
     if (!data) { res.statusCode = 401; return res.end(JSON.stringify({ error: "bad initData" })); }
     const userId = data.user && data.user.id;
-    const link = await createInvoiceLink(userId, body.payload || {});
+    let link = null;
+    try {
+      link = await createInvoiceLink(userId, body.payload || {});
+    } catch (e) {
+      res.statusCode = /Unknown|already|purchased/.test(e.message) ? 400 : 500;
+      res.setHeader("content-type", "application/json");
+      return res.end(JSON.stringify({ error: e.message }));
+    }
     res.setHeader("content-type", "application/json");
     return res.end(JSON.stringify({ link }));
   }

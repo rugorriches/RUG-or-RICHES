@@ -7,7 +7,7 @@ There were **two parallel copies** of the game:
 1. **This repo** (`C:\Dev\RUG or RICHES`, GitHub `rug-or-riches`) — an **early snapshot** of the game that Antigravity wired to the real backend (`/api/sync`, `/api/invoice`, `/api/verify`, `/api/webhook`, Supabase). It has: $MOON packs, direct VIP unlock, daily combo, social quests, crews, ranks, achievements — and now (added this session) the crypto theme, BUY button, viewport fix, Telegram referral, prediction rounds, Crew Wars, season stakes, coin levels, coin skins.
 2. **An older working copy** where a richer **"v2" monetization economy** was built but **never merged into this repo**. That's where Starter Pack, Whale Pack, Daily Deal, Boosts, Season Pass, Comeback offer, Piggy Bank, recurring VIP, first-buy 2×, and the **personalized-offer engine** live.
 
-So the personalized-offer engine can't run here yet — it references products this repo doesn't define. The fix is to **port the v2 economy into this repo** (client-side products + buy flows), which is the task below. The backend already supports it: every Stars purchase is credited server-side in the `successful_payment` webhook, and state persists via `/api/sync`, so adding products is mostly client + a couple of webhook `payload.type` cases.
+So the personalized-offer engine couldn't run here yet — it referenced products this repo didn't define. The client-side products are now in this repo. The production requirement is that paid products must be credited from server-generated invoices and Telegram payment webhooks, never from arbitrary client state.
 
 ---
 
@@ -18,13 +18,14 @@ Add to `moontap.html`:
 - **Product definitions:** `STARTER`, `WHALE`, `DEAL` (daily), `VIPSUB` (30-day), `COMEBACK`, `BOOSTS[]`, `SEASON` pass, `PIGGY` cap, `SKINS` (done).
 - **Buy flows:** `buyStarter / buyWhale / buyDeal / buyVipSub / buyComeback / buyBoost / buySeason / crackPiggy` — all routed through the existing `starsPurchase()` → `/api/invoice` → `openInvoice`, granted only after payment.
 - **State fields:** `starterBought, seasonPass, seasonClaimDay, vipSubUntil, firstBuyUsed, dealDay, piggy, warX…` (some already added).
-- **Store render:** sections for Daily Deal, VIP Pass, Whale, Comeback (if balance<5k), Starter (one-time), Boosts, Season Pass, Piggy, $MOON packs (first-buy 2× banner), Watch-ad.
+- **Store render:** sections for Recommended, Daily Deal, VIP Pass, Whale, Comeback (if balance<5k), Starter (one-time), Boosts, Season Pass, Piggy, $MOON packs (first-buy 2× banner), and Coin Skins are now present.
 - **`effVip()`** so a 30-day VIP subscription stacks over any owned tier; bet caps / multipliers / rug-resist read from it.
-- **Personalized offer engine** (`pickOffer()`): once the products exist, surface one targeted "Recommended for you" card at the top of the Store (new player → Starter, broke → Comeback, whale → Whale/VIP/skin, mid → Daily Deal/boost).
+- **Personalized offer engine** (`pickOffer()`): now surfaces one targeted "Recommended for you" card at the top of the Store (new player → Starter, broke → Comeback, daily deal, VIP pass, piggy, or boost).
 
 ### Backend touch-ups for full credit
-- `api/webhook.js`: handle each `payload.type` (`starter`, `whale`, `deal`, `vipsub`, `boost`, `season`, `moon`, `vip`, `skin`) and credit the right reward in `successful_payment`.
-- `api/sync.js` / schema: add columns for the new persistent fields (vip_sub_until, season_pass, piggy, etc.) so they survive across devices.
+- `api/invoice.js`: canonicalizes each purchase against the server catalog before Telegram creates an invoice.
+- `api/webhook.js`: handles each `payload.type` (`starter`, `whale`, `deal`, `vipsub`, `boost`, `season`, `moon`, `vip`, `skin`, `piggy`) and credits the right reward in `successful_payment`.
+- `api/sync.js`: no longer writes client-submitted balances, VIP, Stars spend, upgrades, social quest claims, fake friends, or referral rewards. Those must come from server-side purchase/game paths.
 
 ---
 
