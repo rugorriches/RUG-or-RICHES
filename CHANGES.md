@@ -25,7 +25,7 @@
 ### Telegram auth + real referral
 - Added deterministic `refFromId(telegramId)` — **must stay identical to the copy in `api/sync.js`**.
 - On Telegram auth (`initTelegram`): set `S.refCode = refFromId(user.id)`, populate invite identity (avatar / @username), hide the dev simulate button.
-- `inviteLink()` → Telegram deep link `https://t.me/RugorRiches/play?startapp=<refCode>` (was a web `?ref=` URL).
+- `inviteLink()` → Telegram deep link `https://t.me/RugorRichesBot/play?startapp=<refCode>` (was a web `?ref=` URL).
 - Welcome-bonus detection also reads Telegram `start_param` / `startapp`.
 - `mergeState()` now adopts the server's `db.ref_code` as the canonical code.
 
@@ -48,7 +48,7 @@
 - Phone mockup: replaced the round gold coin with the obsidian BUY button (`.ph-buy`) to match the game.
 - Footer social links: emoji → SVG brand icons (X, Telegram, Instagram).
 - Feature cards: neon top-accent line (`.feat::before`) + cyan glow on hover.
-- (Earlier) "Play" CTAs point to `https://t.me/RugorRiches/play`; Telegram channel/group links set.
+- (Earlier) "Play" CTAs point to `https://t.me/RugorRichesBot/play`; Telegram channel/group links set.
 
 ---
 

@@ -1809,7 +1809,7 @@
  
   // ---------- INVITE ----------
   $("refCode").textContent=S.refCode;
-  const BOT_USER="RugorRiches", APP_NAME="play";   // @BotFather web-app short name
+  const BOT_USER="RugorRichesBot", APP_NAME="play";   // @BotFather bot username + web-app short name
   // Telegram-native referral: startapp=<refCode> arrives server-side as start_param and is attributed in /api/sync
   const inviteLink=()=>"https://t.me/"+BOT_USER+"/"+APP_NAME+"?startapp="+encodeURIComponent(S.refCode);
   function nextMile(){return REF_MILE.find(m=>S.friends.length<m.n);}
@@ -1876,7 +1876,7 @@
     g.strokeStyle="#23f0ff";g.lineWidth=3;g.setLineDash([12,10]);roundRect(g,W/2-300,1070,600,150,24);g.stroke();g.setLineDash([]);
     g.fillStyle="#cbb6ff";g.font="700 30px Segoe UI";g.fillText("JOIN WITH MY CODE — WE BOTH GET 5,000 🪙",W/2,1118);
     g.fillStyle="#ffd400";g.font="900 70px Segoe UI";g.fillText(S.refCode,W/2,1192);
-    g.fillStyle="#8fdcff";g.font="700 30px Segoe UI";g.fillText("t.me/RugorRiches/play",W/2,1272);
+    g.fillStyle="#8fdcff";g.font="700 30px Segoe UI";g.fillText("t.me/RugorRichesBot/play",W/2,1272);
     g.fillStyle="#b9a7e8";g.font="700 26px Segoe UI";g.fillText("shared by @"+S.name,W/2,1315);
     c.toBlob(b=>{
       const link=inviteLink(),txt="My $MOON run on RUG OR RICHES 🪙💀 — tap my link, we both get 5,000:";
