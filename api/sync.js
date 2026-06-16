@@ -11,6 +11,8 @@ async function ensureSchema() {
       await db.query(`
         ALTER TABLE players
           ADD COLUMN IF NOT EXISTS last_day DATE,
+          ADD COLUMN IF NOT EXISTS pnl_won BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS pnl_lost BIGINT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS starter_bought BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS season_pass BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS season_claim_day DATE,
@@ -100,9 +102,14 @@ function clampInt(value, min, max, fallback) {
 
 function cleanDate(value) {
   if (!value) return null;
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[0];
   const d = new Date(value);
   if (!Number.isFinite(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const mon = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${mon}-${day}`;
 }
 
 function cleanString(value, maxLen) {
@@ -156,7 +163,7 @@ async function loadPurchaseEntitlements(playerId) {
     if (payload.type === "moon") entitlements.first_buy_used = true;
     if (payload.type === "starter") entitlements.starter_bought = true;
     if (payload.type === "season") entitlements.season_pass = true;
-    if (payload.type === "deal") entitlements.deal_day = new Date(row.created_at).toDateString();
+    if (payload.type === "deal") entitlements.deal_day = new Date(row.created_at).toISOString().slice(0, 10);
     if (payload.type === "vipsub") {
       const until = new Date(new Date(row.created_at).getTime() + VIPSUB.days * 86400000).getTime();
       entitlements.vip_sub_until = Math.max(entitlements.vip_sub_until, until);
@@ -187,7 +194,7 @@ async function loadPlayerProfile(playerId) {
   player.starter_bought = !!player.starter_bought || entitlements.starter_bought;
   player.season_pass = !!player.season_pass || entitlements.season_pass;
   player.vip_sub_until = Math.max(Number(player.vip_sub_until) || 0, entitlements.vip_sub_until || 0);
-  player.deal_day = player.deal_day ? new Date(player.deal_day).toDateString() : entitlements.deal_day;
+  player.deal_day = player.deal_day ? new Date(player.deal_day).toISOString().slice(0, 10) : entitlements.deal_day;
   player.skins = [...new Set([...dbSkins, ...entSkins])];
   player.skin = player.skin && player.skins.includes(player.skin) ? player.skin : (entitlements.skin || "gold");
 
@@ -203,7 +210,7 @@ async function loadPlayerProfile(playerId) {
   const { rows: qRows } = await db.query("SELECT * FROM quests WHERE player_id = $1", [playerId]);
   const q = qRows[0] || {};
   player.questsObj = {
-    date: q.last_quest_reset ? q.last_quest_reset.toDateString ? q.last_quest_reset.toDateString() : String(q.last_quest_reset) : new Date().toDateString(),
+    date: q.last_quest_reset ? new Date(q.last_quest_reset).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
     prog: {
       taps: q.daily_taps || 0,
       price: q.daily_max_price || 1.0,
@@ -343,32 +350,34 @@ module.exports = async (req, res) => {
              rugs = $8,
              cashouts = $9,
              taps = $10,
-             vip_tier = GREATEST(vip_tier, $11),
-             vip_day = COALESCE($12::date, vip_day),
-             combo_day = COALESCE($13::date, combo_day),
-             last_day = COALESCE($14::date, last_day),
-             streak = GREATEST(streak, $15),
-             stars_spent = GREATEST(stars_spent, $16),
-             bet = $17,
-             bet_cur = $18,
-             auto_sell = $19,
-             stop_loss = $20,
-             sound = $21,
-             crew_id = $22,
-             starter_bought = starter_bought OR $23,
-             season_pass = season_pass OR $24,
-             season_claim_day = COALESCE($25::date, season_claim_day),
-             vip_sub_until = GREATEST(vip_sub_until, $26),
-             first_buy_used = first_buy_used OR $27,
-             deal_day = COALESCE($28::date, deal_day),
-             piggy = GREATEST(piggy, $29),
-             coin_level = GREATEST(coin_level, $30),
-             coin_xp = GREATEST(coin_xp, $31),
-             skin = CASE WHEN $32 IN (SELECT jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $33::jsonb)) THEN $32 ELSE skin END,
-             skins = (SELECT jsonb_agg(DISTINCT s) FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $33::jsonb) AS t(s)),
-             war_week = COALESCE($34, war_week),
-             war_score = GREATEST(war_score, $35),
-             war_claim = war_claim OR $36
+             pnl_won = GREATEST(pnl_won, $11),
+             pnl_lost = GREATEST(pnl_lost, $12),
+             vip_tier = GREATEST(vip_tier, $13),
+             vip_day = COALESCE($14::date, vip_day),
+             combo_day = COALESCE($15::date, combo_day),
+             last_day = COALESCE($16::date, last_day),
+             streak = GREATEST(streak, $17),
+             stars_spent = GREATEST(stars_spent, $18),
+             bet = $19,
+             bet_cur = $20,
+             auto_sell = $21,
+             stop_loss = $22,
+             sound = $23,
+             crew_id = $24,
+             starter_bought = starter_bought OR $25,
+             season_pass = season_pass OR $26,
+             season_claim_day = COALESCE($27::date, season_claim_day),
+             vip_sub_until = GREATEST(vip_sub_until, $28),
+             first_buy_used = first_buy_used OR $29,
+             deal_day = COALESCE($30::date, deal_day),
+             piggy = GREATEST(piggy, $31),
+             coin_level = GREATEST(coin_level, $32),
+             coin_xp = GREATEST(coin_xp, $33),
+             skin = CASE WHEN $34 IN (SELECT jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $35::jsonb)) THEN $34 ELSE skin END,
+             skins = (SELECT jsonb_agg(DISTINCT s) FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $35::jsonb) AS t(s)),
+             war_week = COALESCE($36, war_week),
+             war_score = GREATEST(war_score, $37),
+             war_claim = war_claim OR $38
            WHERE id = $1`,
           [
             tgUser.id,
@@ -381,6 +390,8 @@ module.exports = async (req, res) => {
             clampInt(state.rugs, 0, 1000000000, 0),
             clampInt(state.cashouts, 0, 1000000000, 0),
             clampInt(state.taps, 0, 1000000000000, 0),
+            clampInt(state.pnlWon, 0, 1000000000000000, 0),
+            clampInt(state.pnlLost, 0, 1000000000000000, 0),
             clampInt(state.vip, 0, 4, 0),
             cleanDate(state.vipDay),
             cleanDate(state.comboDay),

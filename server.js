@@ -85,12 +85,28 @@ async function query(text, params) {
   return pool.query(text, params);
 }
 
-// Generate a 6-char referral code
-function genRefCode() {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+// Deterministic referral code tied to the Telegram account — MUST stay identical to client's refFromId()
+function refFromId(id) {
+  let h = 2166136261 >>> 0;
+  const str = "moon-" + id;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  const c = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let s = "";
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 6; i++) { h = Math.imul(h, 16777619) >>> 0; s += c[h % c.length]; }
   return s;
+}
+
+// Convert a database date value (string or Date object) into a localized toDateString() timezone-safely
+function dbDay(v) {
+  if (!v) return null;
+  const str = v instanceof Date ? v.toISOString() : String(v);
+  const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) {
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return d.toDateString();
+  }
+  const d = new Date(v);
+  return Number.isFinite(d.getTime()) ? d.toDateString() : String(v);
 }
 
 // Load or create a player profile from Supabase, returning the full state object
@@ -107,7 +123,7 @@ async function loadPlayer(tgUser) {
 
   if (rows.length === 0) {
     // Create new player + upgrades + quests rows
-    const refCode = genRefCode();
+    const refCode = refFromId(uid);
     const name = String(tgUser.username || tgUser.first_name || "degen" + Math.floor(Math.random() * 9000 + 1000)).slice(0, 18);
     await query(
       `INSERT INTO players (id, username, first_name, ref_code, name)
@@ -605,9 +621,9 @@ wss.on("connection", (ws) => {
 
       // Daily streak check
       const today = new Date().toDateString();
-      if (player.last_streak_claim !== today) {
+      if (dbDay(player.last_streak_claim) !== today) {
         const yesterday = new Date(Date.now() - 86400000).toDateString();
-        player.streak = (player.last_streak_claim === yesterday) ? player.streak + 1 : 1;
+        player.streak = (dbDay(player.last_streak_claim) === yesterday) ? player.streak + 1 : 1;
         const bonus = Math.min(player.streak, 20) * 250;
         player.balance += bonus;
         player.airdrop_pts += bonus;
@@ -879,7 +895,7 @@ wss.on("connection", (ws) => {
     if (m.t === "claim_combo") {
       const today = new Date().toDateString();
       const player = await loadPlayer({ id: session.tgId });
-      if (player.combo_day === today) {
+      if (dbDay(player.combo_day) === today) {
         ws.send(JSON.stringify({ t: "error", error: "Already claimed combo today" }));
         return;
       }
@@ -909,7 +925,7 @@ wss.on("connection", (ws) => {
       }
       const today = new Date().toDateString();
       const player = await loadPlayer({ id: session.tgId });
-      if (player.vip_day === today) {
+      if (dbDay(player.vip_day) === today) {
         ws.send(JSON.stringify({ t: "error", error: "Already claimed VIP daily today" }));
         return;
       }

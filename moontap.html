@@ -219,6 +219,7 @@
     background:linear-gradient(90deg,var(--gold),#ffae00); cursor:pointer; white-space:nowrap;}
   .buy:disabled{filter:grayscale(.7) brightness(.6); cursor:not-allowed;}
   .buy.owned{background:#2c5; color:#022;}
+  .buy.sel{background:linear-gradient(90deg,var(--green),var(--cyan)) !important; box-shadow:0 0 18px rgba(35,240,255,.34), inset 0 1px 0 rgba(255,255,255,.35);}
 
   /* progress bars */
   .pbar2{height:8px; background:#1c0e36; border-radius:5px; overflow:hidden; margin-top:6px;}
@@ -390,6 +391,7 @@
   .presets{display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; justify-content:center;}
   .presets button{border:1px solid var(--line); background:var(--glass); color:#fff; border-radius:10px; padding:8px 12px; font-weight:800; font-size:12px; cursor:pointer; transition:transform .1s;}
   .presets button:active{transform:scale(.92);}
+  .presets button.on{border-color:rgba(255,212,0,.7); color:var(--gold); box-shadow:0 0 16px rgba(255,212,0,.22);}
   .betadj.maxed{opacity:.35; pointer-events:none;}
   .betsub b{color:var(--gold);}
   /* upgrade now/next */
@@ -667,7 +669,7 @@
       <div class="betrow"><button class="betadj" id="slDown">−</button><div class="betbig"><span id="slVal">Off</span></div><button class="betadj" id="slUp">+</button></div>
       <div class="ds" style="margin-top:8px">Auto-sell if price falls this % below the round's peak — escape rugs &amp; dumps before they wipe you.</div>
     </div>
-    <div class="sec-h">Session P&L (real-time)</div>
+    <div class="sec-h">Trading P&L (saved)</div>
     <div class="twocol"><div class="card"><div class="v" id="d-won" style="color:var(--green)">0</div><div class="l">Won (cash-outs)</div></div><div class="card"><div class="v" id="d-lost" style="color:var(--red)">0</div><div class="l">Lost (rugs)</div></div></div>
     <div class="card"><div class="stat-line" style="border:none"><span>Net session P&L</span><b id="d-net">0</b></div></div>
   </div>
@@ -841,7 +843,7 @@
   const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
 
   // ---------- STATE ----------
-  const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,
+  const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,pnlWon:0,pnlLost:0,
     streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
@@ -893,7 +895,16 @@
 
   function mergeState(db) {
     if (!db) return;
-    const dbDay=v=>{if(!v)return null;const d=new Date(v);return Number.isFinite(d.getTime())?d.toDateString():String(v);};
+    const dbDay = v => {
+      if (!v) return null;
+      const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) {
+        const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+        return d.toDateString();
+      }
+      const d = new Date(v);
+      return Number.isFinite(d.getTime()) ? d.toDateString() : String(v);
+    };
     if (db.name) S.name = db.name;
     S.vip = Math.max(S.vip, db.vip_tier || 0);
     S.streak = Math.max(S.streak, db.streak || 0);
@@ -908,6 +919,8 @@
     S.rugs = Math.max(S.rugs, db.rugs || 0);
     S.cashouts = Math.max(S.cashouts, db.cashouts || 0);
     S.taps = Math.max(S.taps, db.taps || 0);
+    if (db.pnl_won !== undefined) S.pnlWon = Math.max(S.pnlWon || 0, Number(db.pnl_won) || 0);
+    if (db.pnl_lost !== undefined) S.pnlLost = Math.max(S.pnlLost || 0, Number(db.pnl_lost) || 0);
     
     if (db.up) {
       for (const k in db.up) {
@@ -961,7 +974,7 @@
           S.quests.prog[k] = Math.max(S.quests.prog[k] || 0, db.questsObj.prog[k] || 0);
         }
       }
-      if (db.questsObj.date) S.quests.date = db.questsObj.date;
+      if (db.questsObj.date) S.quests.date = dbDay(db.questsObj.date);
     }
     if (Array.isArray(db.friends)) {
       db.friends.forEach(df => {
@@ -1067,7 +1080,7 @@
   let pot=0, price=1.0, ath=1.0, combo=0, comboTimer=0;
   let predActive=false, predDir=0, predLock=0, predT=0, predStake=0;   // long/short prediction round
   let dPot=0, dBal=S.balance, dAir=S.airdrop;
-  let invested=0, roundCur=null, roundClicks=0, sessWon=0, sessLost=0, winStreak=0;
+  let invested=0, roundCur=null, roundClicks=0, winStreak=0;
   let heat=0, pumpVel=0, dumpWarn=0, bustType="hard", bustTarget=0.12, roundPeak=1;   // refined rug-pressure model
   let mevent=null, eventTime=0, eventAcc=0;
   let liq=45000, holders=1500+Math.floor(Math.random()*3500), trend=0;   // market depth, holders, momentum
@@ -1267,7 +1280,7 @@
     bustType=type||"hard";bustTarget=bustType==="soft"?price*0.45:price*0.12;
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
     const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
-    const lost=Math.max(0,invested-rescued);sessLost+=lost;
+    const lost=Math.max(0,invested-rescued);S.pnlLost=(S.pnlLost||0)+lost;
     if(panelOpen==="game"){
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
@@ -1286,7 +1299,7 @@
     const streakMul=1+Math.min(winStreak,10)*0.05;
     const payout=Math.floor(pot*(1+r*cashBonus())*streakMul);addCur(cur,payout);
     const profit=payout-invested;
-    if(profit>0){sessWon+=profit;winStreak++;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{sessLost+=-profit;winStreak=0;}
+    if(profit>0){S.pnlWon=(S.pnlWon||0)+profit;winStreak++;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{S.pnlLost=(S.pnlLost||0)+(-profit);winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
     if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
     if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();}
@@ -1302,7 +1315,7 @@
     ac();
     const cur=roundCur||S.betCur;const r=risk();const half=pot*0.5;
     const payout=Math.floor(half*(1+r*cashBonus()));addCur(cur,payout);
-    const profit=payout-invested*0.5;if(profit>0){sessWon+=profit;if(cur==="moon")S.lifetime+=Math.floor(profit);}
+    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=(S.pnlWon||0)+profit;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{S.pnlLost=(S.pnlLost||0)+(-profit);}
     pot-=half;invested*=0.5;heat=Math.max(0,heat-25);   // scaling out locks profit & cools the rug heat
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
     save();renderLive();renderStats();renderDash();}
@@ -1401,8 +1414,8 @@
   // ---------- BETTING / DASHBOARD ----------
   const BET_STEPS=[10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
   function clampBet(){const mx=betMax();if(S.bet>mx)S.bet=mx;if(S.bet<10)S.bet=10;}
-  function stepBet(dir){clampBet();let i=BET_STEPS.findIndex(v=>v>=S.bet);if(i<0)i=BET_STEPS.length-1;i=clamp(i+dir,0,BET_STEPS.length-1);S.bet=Math.min(BET_STEPS[i],betMax());save();renderBetHUD();renderDash();sendSettings({bet:S.bet});}
-  function setCur(c){S.betCur=c;if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();sendSettings({bet_cur:S.betCur});}
+  function stepBet(dir){clampBet();let i=BET_STEPS.findIndex(v=>v>=S.bet);if(i<0)i=BET_STEPS.length-1;i=clamp(i+dir,0,BET_STEPS.length-1);S.bet=Math.min(BET_STEPS[i],betMax());save();renderBetHUD();renderDash();renderPresets();sendSettings({bet:S.bet});}
+  function setCur(c){S.betCur=c;if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();renderPresets();sendSettings({bet_cur:S.betCur});}
   // ---------- PREDICTION (long/short) ----------
   function startPredict(dir){
     if(predActive)return;
@@ -1429,6 +1442,7 @@
     const mh=$("betMaxHud");if(mh)mh.textContent=fmt(betMax());
     const bc=$("betCount");if(bc)bc.textContent=roundClicks+"/"+betsPerRound();
     const up=$("betUp");if(up)up.classList.toggle("maxed",S.bet>=betMax());
+    const down=$("betDown");if(down)down.classList.toggle("maxed",S.bet<=10);
     const exp=pot-invested;const pl=$("betPL");if(pl){pl.textContent="P/L "+(exp>=0?"+":"")+fmt(exp);pl.style.color=exp>=0?"var(--green)":"var(--red)";}}
   function renderBetChips(){const wrap=$("betChips");if(!wrap)return;wrap.innerHTML="";const mx=betMax();
     [100,500,1000,5000,25000].filter(v=>v<=mx).forEach(v=>{const b=document.createElement("button");b.className="chip";b.textContent=fmt(v);
@@ -1436,18 +1450,22 @@
     const mb=document.createElement("button");mb.className="chip max";mb.textContent="MAX";
     mb.addEventListener("click",()=>{S.bet=mx;save();renderBetHUD();sendSettings({bet:S.bet});});wrap.appendChild(mb);}
   function renderPresets(){const pr=$("presets");if(!pr)return;pr.innerHTML="";const mx=betMax();
-    [50,100,500,1000,5000,25000,100000,500000].filter(v=>v<=mx).forEach(v=>{const b=document.createElement("button");b.textContent=fmt(v);b.addEventListener("click",()=>{S.bet=v;save();renderBetHUD();renderDash();sendSettings({bet:S.bet});});pr.appendChild(b);});
-    const mb=document.createElement("button");mb.textContent="MAX";mb.addEventListener("click",()=>{S.bet=mx;save();renderBetHUD();renderDash();sendSettings({bet:S.bet});});pr.appendChild(mb);}
+    [50,100,500,1000,5000,25000,100000,500000].filter(v=>v<=mx).forEach(v=>{const b=document.createElement("button");b.textContent=fmt(v);b.classList.toggle("on",S.bet===v);b.addEventListener("click",()=>{S.bet=v;save();renderBetHUD();renderDash();renderPresets();sendSettings({bet:S.bet});});pr.appendChild(b);});
+    const mb=document.createElement("button");mb.textContent="MAX";mb.classList.toggle("on",S.bet===mx);mb.addEventListener("click",()=>{S.bet=mx;save();renderBetHUD();renderDash();renderPresets();sendSettings({bet:S.bet});});pr.appendChild(mb);}
   function renderDash(){if(!$("d-moon"))return;
     $("d-moon").textContent=fmt(S.balance);$("d-pts").textContent=fmt(S.airdrop);
-    $("d-clicks").textContent=roundClicks+" / "+betsPerRound();$("d-invested").textContent=fmt(invested)+" "+((roundCur||S.betCur)==="pts"?"pts":"$");
+    $("d-clicks").textContent=roundClicks+" / "+betsPerRound();$("d-invested").textContent=fmt(invested)+" "+((roundCur||S.betCur)==="pts"?"pts":"$MOON");
     $("d-pos").textContent=fmt(pot);const exp=pot-invested;const de=$("d-exp");de.textContent=(exp>=0?"+":"")+fmt(exp);de.style.color=exp>=0?"var(--green)":"var(--red)";
     $("dBetAmt").textContent=fmt(S.bet);$("dBetCur").textContent=S.betCur==="pts"?"Airdrop Pts":"$MOON";
     $("betMaxTxt").textContent="Max bet ("+VIP[S.vip].nm+"): "+fmt(betMax())+(S.vip<4?" — raise it by leveling VIP":"");
-    $("d-won").textContent=fmt(sessWon);$("d-lost").textContent=fmt(sessLost);
-    const net=sessWon-sessLost;const dn=$("d-net");dn.textContent=(net>=0?"+":"")+fmt(net);dn.style.color=net>=0?"var(--green)":"var(--red)";
+    $("d-won").textContent=fmt(S.pnlWon||0);$("d-lost").textContent=fmt(S.pnlLost||0);
+    const net=(S.pnlWon||0)-(S.pnlLost||0);const dn=$("d-net");dn.textContent=(net>=0?"+":"")+fmt(net);dn.style.color=net>=0?"var(--green)":"var(--red)";
     const av=$("autoVal");if(av)av.textContent=S.autoSell>0?S.autoSell.toFixed(1)+"x":"Off";
     const sl=$("slVal");if(sl)sl.textContent=S.stopLoss>0?"-"+S.stopLoss+"%":"Off";
+    const dbd=$("dBetDown"),dbu=$("dBetUp");if(dbd)dbd.classList.toggle("maxed",S.bet<=10);if(dbu)dbu.classList.toggle("maxed",S.bet>=betMax());
+    const curMoonBtn=$("dCurMoon"),curPtsBtn=$("dCurPts");if(curMoonBtn)curMoonBtn.classList.toggle("sel",S.betCur==="moon");if(curPtsBtn)curPtsBtn.classList.toggle("sel",S.betCur==="pts");
+    const ai=AUTO_STEPS.indexOf(S.autoSell),si=SL_STEPS.indexOf(S.stopLoss);
+    const ad=$("autoDown"),au=$("autoUp"),sd=$("slDown"),su=$("slUp");if(ad)ad.classList.toggle("maxed",ai<=0);if(au)au.classList.toggle("maxed",ai>=AUTO_STEPS.length-1);if(sd)sd.classList.toggle("maxed",si<=0);if(su)su.classList.toggle("maxed",si>=SL_STEPS.length-1);
     const sc=$("dashSpark");if(sc){const g=sc.getContext("2d");const w=sc.width=Math.max(300,(sc.clientWidth||300)*2),h=sc.height=128;
       g.clearRect(0,0,w,h);const mx=Math.max.apply(null,hist),mn=Math.min.apply(null,hist),sp=Math.max(.3,mx-mn);const yo=v=>h-((v-mn)/sp)*h*0.84-6;
       g.beginPath();g.moveTo(0,h);hist.forEach((v,i)=>g.lineTo(i/(hist.length-1)*w,yo(v)));g.lineTo(w,h);g.closePath();

@@ -26,6 +26,8 @@ CREATE TABLE public.players (
     rugs            INT             DEFAULT 0      NOT NULL,
     cashouts        INT             DEFAULT 0      NOT NULL,
     taps            BIGINT          DEFAULT 0      NOT NULL,
+    pnl_won         BIGINT          DEFAULT 0      NOT NULL,
+    pnl_lost        BIGINT          DEFAULT 0      NOT NULL,
     vip_tier        INT             DEFAULT 0      NOT NULL,     -- 0=None 1=Bronze 2=Silver 3=Gold 4=Diamond
     vip_day         DATE,                                        -- last VIP lounge daily claim
     combo_day       DATE,                                        -- last Daily Combo claim
