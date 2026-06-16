@@ -33,7 +33,7 @@
   /* scrollable trade area — header/season pinned, nav fixed; cards keep readable size and scroll instead of squishing on short (Telegram) viewports */
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
-  #gameScroll>*{flex-shrink:0;}
+  #gameScroll>*{flex-shrink:1;}
   #gameScroll>.coin-stage{flex:0 0 auto; min-height:0; padding:4px 0 2px;}   /* natural height — BUY button hugs the pot, no big gap */
 
   /* animated background */
@@ -51,7 +51,7 @@
   @keyframes gridmove{to{background-position:0 42px;}}
 
   /* header */
-  header{display:flex; align-items:center; justify-content:space-between; padding:8px 12px 4px; gap:6px;}
+  header{display:flex; align-items:center; justify-content:space-between; padding:5px 12px 2px; gap:5px;}
   .rankpill{display:flex; align-items:center; gap:5px; background:var(--glass); border:1px solid var(--line);
     border-radius:20px; padding:5px 10px 5px 7px; font-size:11px; font-weight:800; color:#fff; cursor:pointer; white-space:nowrap; flex-shrink:0;}
   .rankpill .e{font-size:15px;}
@@ -64,21 +64,21 @@
   .iconbtn{background:var(--glass); border:1px solid var(--line); color:#fff; width:29px; height:29px;
     border-radius:9px; font-size:13px; cursor:pointer; transition:transform .12s; backdrop-filter:blur(6px); padding:0;}
   .iconbtn:active{transform:scale(.9);}
-  .season{font-size:10px; color:#b79bff; text-align:center; padding:0 14px 4px;}
+  .season{font-size:9px; color:#b79bff; text-align:center; padding:0 14px 1px;}
   .season b{color:var(--gold);}
 
   /* stats */
-  .stats{display:flex; gap:7px; padding:3px 12px;}
+  .stats{display:flex; gap:5px; padding:2px 12px;}
   .stat{flex:1; position:relative; overflow:hidden; background:var(--card); border:1px solid var(--line);
-    backdrop-filter:blur(6px); border-radius:13px; padding:6px 4px; text-align:center;
+    backdrop-filter:blur(6px); border-radius:12px; padding:3px 4px; text-align:center;
     box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .15s;}
   .stat:active{transform:translateY(-2px) scale(1.02);}
-  .stat .v{font-size:15px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
-  .stat .l{font-size:8px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase;}
+  .stat .v{font-size:13px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
+  .stat .l{font-size:7px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase;}
   #balance{color:var(--gold);}
 
   /* chart */
-  .chart-card{margin:6px 11px 2px; position:relative; overflow:hidden; border-radius:17px; padding:9px 11px 6px;
+  .chart-card{margin:3px 10px 0; position:relative; overflow:hidden; border-radius:15px; padding:5px 10px 3px;
     background:linear-gradient(180deg,rgba(35,240,255,.06),rgba(255,43,214,.04));
     box-shadow:0 8px 30px rgba(35,240,255,.15), inset 0 1px 0 rgba(255,255,255,.08);}
   .chart-card::before{content:""; position:absolute; inset:0; border-radius:17px; padding:1.5px; pointer-events:none;
@@ -92,12 +92,12 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; height:104px; display:block;}
+  #chart{width:100%; height:60px; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
   @keyframes livepulse{50%{opacity:.5;}}
-  .feed{height:16px; overflow:hidden; margin-top:3px; font-size:10px; line-height:16px; position:relative;}
+  .feed{height:13px; overflow:hidden; margin-top:1px; font-size:9px; line-height:13px; position:relative;}
   .feed div{position:absolute; width:100%; animation:feedup .5s ease;}
   @keyframes feedup{from{transform:translateY(16px);opacity:0;}to{transform:none;opacity:1;}}
   .feed .b{color:var(--green);} .feed .s{color:var(--red);}
@@ -107,7 +107,7 @@
   #buyPct{height:100%; width:50%; background:linear-gradient(90deg,var(--green),#0bd47a); transition:width .4s ease;}
 
   /* rug meter */
-  .rug-wrap{padding:3px 14px 0;}
+  .rug-wrap{padding:1px 14px 0;}
   .rug-label{display:flex; justify-content:space-between; font-size:9px; letter-spacing:.5px; color:#cbb6ff; margin-bottom:2px;}
   .rug-bar{height:18px; border-radius:10px; background:#1c0e36; border:1px solid var(--line); position:relative; overflow:visible;}
   #rugFill{height:100%; width:0%; border-radius:10px; background:linear-gradient(90deg,var(--green),var(--gold) 55%,var(--red)); transition:width .12s linear; position:relative; overflow:hidden;}
@@ -120,13 +120,13 @@
   @keyframes dangerPulse{from{box-shadow:0 0 0 rgba(255,59,92,0);}to{box-shadow:0 0 18px var(--red);}}
 
   /* pot + coin */
-  .pot{text-align:center; padding:1px 0 0;}
-  .pot .amt{font-size:30px; font-weight:900; color:var(--cyan); text-shadow:0 0 12px rgba(35,240,255,.7); line-height:1;}
-  .pot .lab{font-size:9px; letter-spacing:1.5px; color:#8fdcff; text-transform:uppercase;}
-  .combo{font-size:12px; color:var(--neon); font-weight:800; height:15px;}
-  .coin-stage{flex:1; display:flex; align-items:center; justify-content:center; position:relative; min-height:74px;}
+  .pot{text-align:center; padding:0;}
+  .pot .amt{font-size:20px; font-weight:900; color:var(--cyan); text-shadow:0 0 12px rgba(35,240,255,.7); line-height:1;}
+  .pot .lab{font-size:8px; letter-spacing:1.5px; color:#8fdcff; text-transform:uppercase;}
+  .combo{font-size:10px; color:var(--neon); font-weight:800; height:12px;}
+  .coin-stage{flex:0 0 auto; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; padding:2px 0 0;}
   /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
-  #coin{width:min(92%,340px); min-height:84px; height:84px; border-radius:24px; cursor:pointer; position:relative; overflow:hidden;
+  #coin{width:min(92%,340px); min-height:54px; height:54px; border-radius:18px; cursor:pointer; position:relative; overflow:hidden;
     background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
     display:flex; align-items:center; gap:13px; padding:0 20px; transition:transform .07s, box-shadow .2s;
     box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--coin-accent,#ffd400);}
@@ -138,10 +138,10 @@
   #coin::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:28px;
     background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%); transform:translateX(-120%); animation:buyshine 3.4s ease-in-out infinite;}
   @keyframes buyshine{0%,55%{transform:translateX(-120%);} 100%{transform:translateX(120%);}}
-  #coin .coin-ico{font-size:26px; line-height:1; color:var(--coin-accent,#ffd400); filter:drop-shadow(0 0 7px var(--coin-accent,#ffd400)); z-index:2;}
+  #coin .coin-ico{font-size:20px; line-height:1; color:var(--coin-accent,#ffd400); filter:drop-shadow(0 0 7px var(--coin-accent,#ffd400)); z-index:2;}
   #coin .coin-cta{display:flex; flex-direction:column; align-items:flex-start; line-height:1.08; z-index:2; flex:1;}
-  #coin .coin-cta b{font-size:20px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
-  #coin .coin-cta span{font-size:9px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
+  #coin .coin-cta b{font-size:16px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
+  #coin .coin-cta span{font-size:8px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
   #coin .coin-val{z-index:2; font-size:14px; font-weight:900; color:var(--coin-accent,#ffd400); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
   #coin .tick{position:absolute; top:5px; left:12px; z-index:3; font-size:8px; font-weight:900; letter-spacing:.5px; color:#0e0826; background:var(--coin-accent,#ffd400); padding:1px 6px; border-radius:7px;}
   #coinRing{position:absolute; left:0; bottom:0; z-index:3; height:4px; width:var(--xp,0%); background:linear-gradient(90deg,var(--cyan),var(--coin-accent,#ffd400)); box-shadow:0 0 8px var(--coin-accent,#ffd400); transition:width .25s ease;}
@@ -166,12 +166,12 @@
   .predict-sub{font-size:10px; color:#9c92c4; text-align:center;}
 
   /* energy + actions */
-  .energy-wrap{padding:0 14px 4px;}
+  .energy-wrap{padding:0 14px 1px;}
   .energy-row{display:flex; align-items:center; gap:8px; font-size:10px; color:#cbb6ff;}
   .energy-bar{flex:1; height:9px; background:#1c0e36; border-radius:6px; overflow:hidden; border:1px solid rgba(35,240,255,.3);}
   #energyFill{height:100%; width:100%; background:linear-gradient(90deg,var(--cyan),var(--neon)); transition:width .2s;}
-  .actions{display:flex; gap:10px; padding:2px 14px 10px;}
-  .btn{flex:1; position:relative; overflow:hidden; border:none; border-radius:13px; padding:12px 8px; font-weight:900; font-size:14px; letter-spacing:.5px; cursor:pointer; color:#13002a; transition:transform .08s;}
+  .actions{display:flex; gap:8px; padding:0 14px 4px;}
+  .btn{flex:1; position:relative; overflow:hidden; border:none; border-radius:12px; padding:9px 8px; font-weight:900; font-size:13px; letter-spacing:.5px; cursor:pointer; color:#13002a; transition:transform .08s;}
   .btn:active{transform:scale(.96);}
   .btn::after{content:""; position:absolute; top:0; left:-60%; width:45%; height:100%; pointer-events:none;
     background:linear-gradient(120deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:shine 3.6s ease-in-out infinite;}
@@ -392,7 +392,7 @@
   .upstats .arrowi{color:#a78fd6; font-weight:900;}
   .pill.next{background:rgba(29,255,143,.16); color:var(--green);}
   /* pot pops more */
-  .pot .amt{font-size:26px; text-shadow:0 0 16px rgba(35,240,255,.85), 0 0 4px rgba(35,240,255,.6);}
+  .pot .amt{font-size:18px; text-shadow:0 0 16px rgba(35,240,255,.85), 0 0 4px rgba(35,240,255,.6);}
   /* help page */
   .help-sec{margin-bottom:13px;}
   .help-sec .row{align-items:flex-start;}
@@ -465,15 +465,15 @@
   .sicon:hover{border-color:rgba(35,240,255,.5);}
   .sicon:active{transform:scale(.88); background:rgba(255,255,255,.16);}
   /* trade console (cleaner bet area) */
-  .console{margin:2px 10px 7px; padding:7px 11px 8px; border-radius:16px; border:1px solid var(--line);
+  .console{margin:1px 10px 3px; padding:4px 10px 5px; border-radius:14px; border:1px solid var(--line);
     background:radial-gradient(120% 140% at 50% 0%, rgba(124,77,255,.12), rgba(8,4,20,.5)); box-shadow:0 -6px 22px rgba(0,0,0,.4), inset 0 1px 0 rgba(124,77,255,.35);}
-  .console .energy-row{margin-bottom:6px;}
-  .betbar{display:flex; align-items:center; gap:10px;}
-  .betchips{display:flex; gap:6px; margin-top:6px;}
-  .chip{flex:1; background:rgba(255,255,255,.06); border:1px solid var(--line); color:#cbb6ff; border-radius:10px; padding:6px 2px; font-size:12px; font-weight:800; cursor:pointer; transition:transform .1s, background .15s;}
+  .console .energy-row{margin-bottom:3px;}
+  .betbar{display:flex; align-items:center; gap:8px;}
+  .betchips{display:flex; gap:5px; margin-top:3px;}
+  .chip{flex:1; background:rgba(255,255,255,.06); border:1px solid var(--line); color:#cbb6ff; border-radius:9px; padding:4px 2px; font-size:11px; font-weight:800; cursor:pointer; transition:transform .1s, background .15s;}
   .chip:active{transform:scale(.92); background:rgba(255,255,255,.14);}
   .chip.max{color:var(--gold); border-color:rgba(255,212,0,.45);}
-  .actions{padding:0 !important; margin-top:6px;}
+  .actions{padding:0 !important; margin-top:3px;}
   .btn.half{flex:.6; background:linear-gradient(90deg,var(--cyan),#0bd4c4); color:#06121f;}
   /* clicker juice: tap ripple + confetti */
   .ripple{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; border:2px solid rgba(255,255,255,.65); pointer-events:none; z-index:38; animation:rip .5s ease-out forwards;}
@@ -493,6 +493,49 @@
   details.faq .a{font-size:12px; color:#cbb6ff; line-height:1.6; padding:0 0 13px;}
   .share-card{display:none;}
   @media (prefers-reduced-motion: reduce){*{animation:none !important;}}
+
+  @media (max-height: 640px) {
+    /* Compact viewport styles to prevent vertical scrolling */
+    header { padding: 3px 12px 1px; }
+    .season { padding: 0 14px 0; font-size: 8.5px; }
+    .stats { padding: 1px 12px; }
+    .stat { padding: 2px 4px; }
+    .stat .v { font-size: 12px; }
+    .chart-card { margin: 2px 10px 0; padding: 4px 8px 2px; }
+    .price-now { font-size: 22px; }
+    #chart { height: 48px; }
+    .feed { height: 11px; line-height: 11px; margin-top: 0; }
+    .pressure { margin-top: 2px; font-size: 8px; }
+    .pbar { height: 6px; }
+    .rug-wrap { padding: 0 14px 0; }
+    .rug-bar { height: 14px; border-radius: 8px; }
+    #rugSkull { font-size: 14px; }
+    #rugPct { font-size: 10px; }
+    .predict { margin: 0 12px 2px; padding: 3px 8px; border-radius: 10px; }
+    .predict-btns { gap: 6px; margin: 4px 0 3px; }
+    .pbtn { padding: 6px; font-size: 11px; border-radius: 8px; }
+    .pot .amt { font-size: 16px; }
+    .pot .lab { font-size: 7.5px; }
+    .coin-stage { padding: 1px 0 0; }
+    #coin { height: 44px; min-height: 44px; border-radius: 14px; gap: 8px; padding: 0 15px; }
+    #coin .coin-ico { font-size: 16px; }
+    #coin .coin-cta b { font-size: 14px; }
+    #coin .coin-cta span { font-size: 7.5px; }
+    #coin .coin-val { font-size: 12px; }
+    .console { margin: 0 10px 1px; padding: 3px 8px 4px; border-radius: 11px; }
+    .console .energy-row { margin-bottom: 2px; }
+    .betbar { gap: 6px; }
+    .betadj { width: 30px; height: 30px; border-radius: 8px; font-size: 16px; }
+    .betval { font-size: 14px; }
+    .betsub { font-size: 9px; }
+    .betchips { gap: 4px; margin-top: 2px; }
+    .chip { padding: 3px 2px; font-size: 10px; border-radius: 7px; }
+    .actions { margin-top: 2px; }
+    .btn { padding: 7px 6px; font-size: 11px; border-radius: 10px; }
+    nav { min-height: 52px; }
+    nav button { padding: 6px 0 8px; font-size: 8.5px; }
+    nav button .ic { font-size: 15px; }
+  }
 </style>
 </head>
 <body>
@@ -1085,7 +1128,7 @@
 
   // ---------- CHART ----------
   const cv=$("chart"), cx=cv.getContext("2d");
-  function sizeChart(){const r=cv.getBoundingClientRect();cv.width=Math.max(200,r.width*2);cv.height=304;}
+  function sizeChart(){const r=cv.getBoundingClientRect();cv.width=Math.max(200,r.width*2);cv.height=Math.max(80,r.height*2);}
   function drawChart(){const w=cv.width,h=cv.height;cx.clearRect(0,0,w,h);
     // candlesticks grouped from price history
     const G=4,cand=[];for(let i=0;i+G<=hist.length;i+=G){const s=hist.slice(i,i+G);
