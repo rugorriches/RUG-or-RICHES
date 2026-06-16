@@ -11,8 +11,8 @@
   :root{
     --bg:#05010f; --bg2:#140826; --neon:#ff2bd6; --cyan:#23f0ff; --gold:#ffd400;
     --green:#1dff8f; --red:#ff3b5c; --purple:#9b5cff; --ink:#fff;
-    --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.1);
-    --card:linear-gradient(180deg,rgba(124,77,255,.09),rgba(8,4,20,.34));
+    --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.13);
+    --card:linear-gradient(180deg,rgba(124,77,255,.11),rgba(10,5,24,.58));
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
   html,body{height:100%;}
@@ -34,7 +34,7 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:0;}
-  #gameScroll>.coin-stage{flex:1 0 auto; min-height:140px;}
+  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0; padding:4px 0 2px;}   /* natural height — BUY button hugs the pot, no big gap */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -82,7 +82,7 @@
     background:linear-gradient(180deg,rgba(35,240,255,.06),rgba(255,43,214,.04));
     box-shadow:0 8px 30px rgba(35,240,255,.15), inset 0 1px 0 rgba(255,255,255,.08);}
   .chart-card::before{content:""; position:absolute; inset:0; border-radius:17px; padding:1.5px; pointer-events:none;
-    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--coin-accent,#ffd400),var(--cyan)); background-size:300% 300%;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor;
     mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude;
     animation:borderflow 6s linear infinite; opacity:.7;}
@@ -92,7 +92,7 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; height:150px; display:block;}
+  #chart{width:100%; height:104px; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
@@ -126,23 +126,25 @@
   .combo{font-size:12px; color:var(--neon); font-weight:800; height:15px;}
   .coin-stage{flex:1; display:flex; align-items:center; justify-content:center; position:relative; min-height:74px;}
   /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
-  #coin{width:min(90%,330px); min-height:96px; height:96px; border-radius:28px; cursor:pointer; position:relative; overflow:hidden;
+  #coin{width:min(92%,340px); min-height:84px; height:84px; border-radius:24px; cursor:pointer; position:relative; overflow:hidden;
     background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
     display:flex; align-items:center; gap:13px; padding:0 20px; transition:transform .07s, box-shadow .2s;
-    box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--gold);}
-  #coin:active{transform:scale(.97) translateY(1px); box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1), 0 0 44px -4px var(--gold);}
+    box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--coin-accent,#ffd400);}
+  #coin:active{transform:scale(.97) translateY(1px); box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1), 0 0 44px -4px var(--coin-accent,#ffd400);}
   #coin::before{content:""; position:absolute; inset:0; border-radius:28px; padding:1.6px; pointer-events:none; z-index:1;
-    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--coin-accent,#ffd400),var(--cyan)); background-size:300% 300%;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude;
     animation:borderflow 5s linear infinite; opacity:.9;}
   #coin::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:28px;
     background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%); transform:translateX(-120%); animation:buyshine 3.4s ease-in-out infinite;}
   @keyframes buyshine{0%,55%{transform:translateX(-120%);} 100%{transform:translateX(120%);}}
-  #coin .coin-ico{font-size:26px; line-height:1; color:var(--gold); filter:drop-shadow(0 0 7px var(--gold)); z-index:2;}
+  #coin .coin-ico{font-size:26px; line-height:1; color:var(--coin-accent,#ffd400); filter:drop-shadow(0 0 7px var(--coin-accent,#ffd400)); z-index:2;}
   #coin .coin-cta{display:flex; flex-direction:column; align-items:flex-start; line-height:1.08; z-index:2; flex:1;}
   #coin .coin-cta b{font-size:20px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
   #coin .coin-cta span{font-size:9px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
-  #coin .coin-val{z-index:2; font-size:14px; font-weight:900; color:var(--gold); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
+  #coin .coin-val{z-index:2; font-size:14px; font-weight:900; color:var(--coin-accent,#ffd400); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
+  #coin .tick{position:absolute; top:5px; left:12px; z-index:3; font-size:8px; font-weight:900; letter-spacing:.5px; color:#0e0826; background:var(--coin-accent,#ffd400); padding:1px 6px; border-radius:7px;}
+  #coinRing{position:absolute; left:0; bottom:0; z-index:3; height:4px; width:var(--xp,0%); background:linear-gradient(90deg,var(--cyan),var(--coin-accent,#ffd400)); box-shadow:0 0 8px var(--coin-accent,#ffd400); transition:width .25s ease;}
   #boostBadge{position:absolute; top:4px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,var(--neon),var(--gold));
     color:#13002a; font-weight:900; font-size:12px; padding:4px 12px; border-radius:20px; display:none; animation:pulse .6s infinite alternate;}
   @keyframes pulse{to{transform:translateX(-50%) scale(1.08);}}
@@ -151,6 +153,17 @@
     transition:transform .55s cubic-bezier(.2,.7,.3,1), opacity .55s;}
   .hint{position:absolute; bottom:2px; width:100%; text-align:center; font-size:10px; color:#9a82c9; padding:0 12px; animation:hintglow 2.5s ease-in-out infinite;}
   @keyframes hintglow{50%{opacity:.5;}}
+  .predict{margin:0 12px 6px; padding:6px 11px; border-radius:13px; background:rgba(124,77,255,.10); border:1px solid var(--line);}
+  .predict-h{font-size:11px; font-weight:800; color:#cbb6ff; letter-spacing:.04em; display:flex; justify-content:space-between; align-items:center;}
+  .predict-h #predTimer{color:var(--gold); font-variant-numeric:tabular-nums;}
+  .predict-btns{display:flex; gap:8px; margin:6px 0 5px;}
+  .pbtn{flex:1; border:none; border-radius:10px; padding:9px; font-weight:800; font-size:13px; color:#fff; cursor:pointer; transition:transform .08s;}
+  .pbtn:active{transform:scale(.96);}
+  .pbtn.long{background:linear-gradient(180deg,#1f9a55,#127040);}
+  .pbtn.short{background:linear-gradient(180deg,#d0402f,#922a20);}
+  .pbtn:disabled{opacity:.4; cursor:default;}
+  .pbtn.picked{outline:2px solid var(--gold); outline-offset:1px;}
+  .predict-sub{font-size:10px; color:#9c92c4; text-align:center;}
 
   /* energy + actions */
   .energy-wrap{padding:0 14px 4px;}
@@ -191,6 +204,7 @@
     box-shadow:0 4px 14px rgba(0,0,0,.25); transition:transform .15s;}
   .row{display:flex; align-items:center; gap:11px;}
   .emo{font-size:24px;}
+  .emo svg{width:23px; height:23px; display:inline-block; vertical-align:middle; color:#e9e3ff;}
   .grow{flex:1; min-width:0;}
   .nm{font-weight:800; font-size:14px;}
   .ds{font-size:11px; color:#a78fd6;}
@@ -262,7 +276,7 @@
       radial-gradient(120% 120% at 0% 0%, rgba(255,43,214,.20), transparent 55%), radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.20), transparent 55%), #0e0826;
     box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--neon);}
   .invhero::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1;
-    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--coin-accent,#ffd400),var(--cyan)); background-size:300% 300%;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; animation:borderflow 6s linear infinite;}
   .invhero>*{position:relative; z-index:2;}
   .invhero .big{font-size:34px; font-weight:900; color:var(--gold); line-height:1;}
@@ -278,7 +292,7 @@
       radial-gradient(120% 120% at 100% 100%, rgba(35,240,255,.22), transparent 55%), #0e0826;
     box-shadow:0 16px 42px rgba(0,0,0,.55), 0 0 30px -10px var(--neon);}
   .inv-hero2::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.5px; pointer-events:none; z-index:1;
-    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--gold),var(--cyan)); background-size:300% 300%;
+    background:linear-gradient(120deg,var(--cyan),var(--neon),var(--coin-accent,#ffd400),var(--cyan)); background-size:300% 300%;
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude;
     animation:borderflow 6s linear infinite;}
   .inv-hero2::after{content:""; position:absolute; top:0; left:-60%; width:45%; height:100%; pointer-events:none; z-index:1;
@@ -518,6 +532,15 @@
     <div class="rug-bar" id="rugBar"><div id="rugFill"></div><div id="rugSkull">💀</div><div id="rugPct">0%</div></div>
   </div>
 
+  <div class="predict" id="predictBar">
+    <div class="predict-h">🔮 PREDICT next move <span id="predTimer"></span></div>
+    <div class="predict-btns">
+      <button class="pbtn long" id="predLong">📈 LONG</button>
+      <button class="pbtn short" id="predShort">📉 SHORT</button>
+    </div>
+    <div class="predict-sub" id="predSub">Call the next 5s — win 1.8× · stake = your bet</div>
+  </div>
+
   <div class="pot">
     <div class="lab">UNBANKED POSITION (AT RISK)</div>
     <div class="amt" id="pot">0</div>
@@ -526,7 +549,7 @@
   </div>
 
   <div class="coin-stage">
-    <div id="coin" role="button" tabindex="0" aria-label="Tap to buy and pump the price"><div id="boostBadge">🚀 2x BOOST</div><div class="coin-ico">▲</div><div class="coin-cta"><b>BUY $MOON</b><span>+ TAP TO STACK</span></div><div class="coin-val" id="coinVal">+100</div></div>
+    <div id="coin" role="button" tabindex="0" aria-label="Tap to buy and pump the price"><div id="boostBadge">🚀 2x BOOST</div><div class="tick" id="coinLvl">Lv 1</div><div class="coin-ico">▲</div><div class="coin-cta"><b>BUY $MOON</b><span>+ TAP TO STACK</span></div><div class="coin-val" id="coinVal">+100</div><div id="coinRing"></div></div>
     <div class="hint" id="hint">TAP to buy 📈 — sell before it rugs</div>
   </div>
 
@@ -598,6 +621,7 @@
       <div class="pbar2" style="max-width:240px;margin:9px auto 0"><i id="adBar" style="width:0%"></i></div>
       <div class="ds" style="margin-top:6px">Season ends in <b id="adSeason" style="color:var(--gold)">--</b></div>
     </div>
+    <div id="stakeBox"></div>
     <div class="sec-h">🔥 Daily combo</div><div class="card row" id="comboCard"></div>
     <div class="sec-h">📣 Social quests — follow & earn</div><div id="socialList"></div>
     <div class="sec-h">🎯 Daily quests</div><div id="questList"></div>
@@ -618,6 +642,7 @@
       <button class="rtab" data-rt="players">Players</button>
       <button class="rtab" data-rt="crews">Crews</button>
       <button class="rtab" data-rt="mycrew">My Crew</button>
+      <button class="rtab" data-rt="wars">⚔️ Wars</button>
     </div>
     <div class="rt" id="rt-rank">
       <div class="rank-hero">
@@ -633,6 +658,7 @@
     <div class="rt" id="rt-players" style="display:none"><div class="sec-h">Season Leaderboard</div><div id="boardList"></div></div>
     <div class="rt" id="rt-crews" style="display:none"><div class="sec-h">Top Crews</div><div id="crewBoard"></div></div>
     <div class="rt" id="rt-mycrew" style="display:none"><div id="myCrewView"></div></div>
+    <div class="rt" id="rt-wars" style="display:none"><div id="warView"></div></div>
   </div>
 
   <div class="panel" id="panel-invite">
@@ -757,7 +783,7 @@
 
   // ---------- STATE ----------
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,
-    streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,comboDay:null,
+    streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
@@ -912,15 +938,16 @@
   const upCost=u=>Math.floor(u.base*Math.pow(u.mul,S.up[u.k]));
   const lvl=k=>S.up[k]||0;
   const tapPower=()=>1+lvl("power");
-  const maxEnergy=()=>100+lvl("energy")*40 + S.vip*25;
+  const effVip=()=>Math.max(S.vip||0,(S.vipSubUntil&&Date.now()<S.vipSubUntil)?4:0);   // 30-day VIP Pass grants Diamond perks while active
+  const maxEnergy=()=>100+lvl("energy")*40 + effVip()*25;
   const regenRate=()=>1+lvl("regen")*0.6;
   const autoRate=()=>lvl("auto")*2;
   const comboCap=()=>60+lvl("combo")*25;
   const comboGain=()=>0.04+lvl("combo")*0.012;
-  const vaultPct=()=>Math.min(.6, lvl("vault")*0.06 + (S.vip>=3?0.25:0));
+  const vaultPct=()=>Math.min(.6, lvl("vault")*0.06 + (effVip()>=3?0.25:0));
   const cashBonus=()=>0.6+lvl("cashbonus")*0.15;
   // bust resistance: lower = safer (insurance + VIP shield)
-  const rugResist=()=>Math.max(.18, UP[3].val(lvl("insure")) * (1-S.vip*0.07));
+  const rugResist=()=>Math.max(.18, UP[3].val(lvl("insure")) * (1-effVip()*0.07));
 
   // ---------- VIP ----------
   const VIP=[{nm:"None"},
@@ -928,15 +955,23 @@
     {nm:"Silver VIP",emo:"🥈",cost:2000000,vstars:600,req:2,cls:"t2",perks:"+30% earnings · lower rug risk · silver badge"},
     {nm:"Gold VIP",emo:"🥇",cost:12000000,vstars:2500,req:3,buyOnly:true,cls:"t3",perks:"+60% earnings · 25% rug auto-rescue · gold badge"},
     {nm:"Diamond VIP",emo:"💎",cost:75000000,vstars:10000,req:4,buyOnly:true,cls:"t4",perks:"+120% earnings · whale shield · diamond badge"}];
-  const vipMult=()=>[1,1.12,1.3,1.6,2.2][S.vip]||1;
+  const vipMult=()=>[1,1.12,1.3,1.6,2.2][effVip()]||1;
   // ---- $MOON packs purchasable with Telegram Stars ----
   // $MOON granted = 10 x the Stars price (flat, predictable rate)
-  const STORE=[{stars:50,moon:500,tag:""},{stars:100,moon:1000,tag:""},
-    {stars:250,moon:2500,tag:""},{stars:500,moon:5000,tag:""},{stars:1000,moon:10000,tag:"BEST VALUE"}];
+  const STORE=[{stars:50,moon:50000,tag:""},{stars:100,moon:120000,tag:"MOST POPULAR"},
+    {stars:250,moon:350000,tag:""},{stars:500,moon:800000,tag:""},{stars:1000,moon:2000000,tag:"BEST VALUE"}];
+  // ---- v2 monetization products ----
+  const BOOSTS=[{id:"energy",emo:"🔋",nm:"Full energy refill",ds:"Instantly refill your energy",stars:25},
+    {id:"turbo",emo:"⚡",nm:"Turbo — 2× pumps",ds:"Double every pump for ~30s",stars:35},
+    {id:"bets",emo:"➕",nm:"+20 bets this round",ds:"Raise this round's click cap",stars:30}];
+  const STARTER={stars:150,moon:500000,vip:1}, WHALE={stars:5000,moon:12000000,vip:3},
+    VIPSUB={stars:800,days:30}, DEAL={stars:250,moon:700000}, COMEBACK={stars:50,moon:200000},
+    SEASON={stars:400}, PIGGYCAP=150000;
   // ---- betting currency + max bet (scales with VIP) ----
   const BETMAX=[1000,5000,25000,150000,1000000];
-  const betMax=()=>BETMAX[S.vip]||1000;
-  const betsPerRound=()=>20+S.vip*10;   // clicks allowed per round; VIP raises the cap (paid lever)
+  const betMax=()=>BETMAX[effVip()]||1000;
+  let bonusBets=0;   // temporary +bets from a boost (resets each round)
+  const betsPerRound=()=>20+effVip()*10+bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
   const curBal=c=>c==="pts"?S.airdrop:S.balance;
   function addCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop+=a;else S.balance+=a;}
   function subCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.max(0,S.airdrop-a);else S.balance=Math.max(0,S.balance-a);}
@@ -952,6 +987,7 @@
   // ---------- RUNTIME ----------
   let energy=maxEnergy();
   let pot=0, price=1.0, ath=1.0, combo=0, comboTimer=0;
+  let predActive=false, predDir=0, predLock=0, predT=0, predStake=0;   // long/short prediction round
   let dPot=0, dBal=S.balance, dAir=S.airdrop;
   let invested=0, roundCur=null, roundClicks=0, sessWon=0, sessLost=0, winStreak=0;
   let heat=0, pumpVel=0, dumpWarn=0, bustType="hard", bustTarget=0.12, roundPeak=1;   // refined rug-pressure model
@@ -1122,7 +1158,7 @@
       const oldP=price;
       const mult=(boost>0?2:1)*(1+Math.min(combo,comboCap())*comboGain());
       const slip=clamp(stake/liq,0,0.25);
-      price += ((0.035+price*0.009)*tapPower()*0.4 + price*slip*0.7)*(boost>0?1.6:1)*(1+(mult-1)*0.5)*vipMult()*(mevent&&mevent.pumpMul?mevent.pumpMul:1);
+      price += ((0.035+price*0.009)*tapPower()*0.4 + price*slip*0.7)*(boost>0?1.6:1)*(1+(mult-1)*0.5)*vipMult()*(1+(S.coinLevel-1)*0.03)*(mevent&&mevent.pumpMul?mevent.pumpMul:1);
       if(Math.random()<0.5)holders++;
       if(price>ath){ath=price;if(ath>S.bestPrice)S.bestPrice=ath;}
       if(pot>0)pot*=price/oldP;
@@ -1135,6 +1171,7 @@
       if(heat>CONFIG.tapHazardFloor && Math.random() < Math.pow(heat/100,4)*CONFIG.tapHazard*rugResist()) triggerRug();
       if(price>=8)unlock("moon");
       pushTick();renderLive();
+      S.coinXp++;const xpNeed=S.coinLevel*50;if(S.coinXp>=xpNeed){S.coinLevel++;S.coinXp=0;if(panelOpen==="game"){toast("⬆️","Coin Lv "+S.coinLevel,"Bigger base pumps!");confetti();}}
     }
   }
   coin.addEventListener("pointerdown",e=>{e.preventDefault();const r=stage.getBoundingClientRect();doTap(e.clientX-r.left,e.clientY-r.top);},{passive:false});
@@ -1168,9 +1205,10 @@
     const profit=payout-invested;
     if(profit>0){sessWon+=profit;winStreak++;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{sessLost+=-profit;winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
+    if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
     if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();}
     mktBuy=clamp(mktBuy-0.12,0.05,0.9);   // your sell adds sell pressure
-    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
+    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;bonusBets=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
     save();achCheck();renderLive();renderStats();renderDash();}
   $("cashout").addEventListener("click",()=>cashOut(false));
   function sellHalf(){if(pot<2||busting)return;
@@ -1186,6 +1224,8 @@
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
     save();renderLive();renderStats();renderDash();}
   $("sellHalf").addEventListener("click",sellHalf);
+  $("predLong")&&$("predLong").addEventListener("click",()=>startPredict(1));
+  $("predShort")&&$("predShort").addEventListener("click",()=>startPredict(-1));
 
   // ---------- TICKS ----------
   function pushTick(){hist.push(price);if(hist.length>64)hist.shift();}
@@ -1209,7 +1249,7 @@
     const target=over*50 + posRisk*24 + sellers*18 + frenzy*8;
     heat += (target-heat)*0.06 + pumpVel*10 + blowoff*4; pumpVel*=0.85; heat=clamp(heat,0,100);
     feedAcc++;if(feedAcc>=2){feedAcc=0;spawnTrade();}
-    const whaleSafe=S.vip>=4?0.4:1;
+    const whaleSafe=effVip()>=4?0.4:1;
     if(Math.random() < (0.003+(heat/100)*0.012)*whaleSafe){pushFeed("🐋 "+pick(WHALES)+" DUMPED",false,true);heat=Math.min(100,heat+22);price*=0.9;}
     if(pot>0 && heat>=CONFIG.warnHeat && dumpWarn<=0){dumpWarn=1.7;if(panelOpen==="game"){toast("🚨","DUMP INCOMING","Sell NOW or get rugged!");sfxRug();}}
     if(Math.random() < Math.pow(heat/100,3)*CONFIG.heatHazard*rugResist()) triggerRug();
@@ -1232,6 +1272,7 @@
     if(dumpWarn>0){dumpWarn-=dt;if(dumpWarn<=0&&pot>0&&!busting&&heat>=80)startBust("hard");}   // ignored the warning = hard rug
     if(S.autoSell>0&&pot>0&&!busting&&price>=S.autoSell)cashOut(true);
     if(S.stopLoss>0&&pot>0&&!busting&&price<=roundPeak*(1-S.stopLoss/100))cashOut(true);   // protective stop-loss
+    if(predActive){predT-=dt;if(panelOpen==="game")updatePredict();if(predT<=0)resolvePredict();}   // prediction round timer
     if(panelOpen==="game")drawChart();   // chart only drawn on Trade tab; sim runs everywhere for live stats
     renderLive();
   }catch(e){if(window.console&&console.warn)console.warn("[moontap] loop error:",e&&e.message);}}
@@ -1242,6 +1283,7 @@
     if(Math.abs(pot-dPot)<1)dPot=pot;if(Math.abs(S.balance-dBal)<1)dBal=S.balance;if(Math.abs(S.airdrop-dAir)<1)dAir=S.airdrop;
     $("pot").textContent=fmt(dPot);$("balance").textContent=fmt(dBal);$("airdrop").textContent=fmt(dAir);
     $("streak").textContent=S.streak+"🔥";
+    const cr=$("coinRing");if(cr)cr.style.setProperty("--xp",clamp(S.coinXp/(S.coinLevel*50)*100,0,100)+"%");const cl=$("coinLvl");if(cl)cl.textContent="Lv "+S.coinLevel;
     const me=maxEnergy();$("energyFill").style.width=(energy/me*100)+"%";$("energyTxt").textContent=Math.floor(energy)+"/"+Math.floor(me);
     const r=risk()*100;$("rugFill").style.width=r+"%";$("rugPct").textContent=Math.floor(r)+"%";
     $("rugSkull").style.left=clamp(r,2,98)+"%";
@@ -1278,6 +1320,27 @@
   function clampBet(){const mx=betMax();if(S.bet>mx)S.bet=mx;if(S.bet<10)S.bet=10;}
   function stepBet(dir){clampBet();let i=BET_STEPS.findIndex(v=>v>=S.bet);if(i<0)i=BET_STEPS.length-1;i=clamp(i+dir,0,BET_STEPS.length-1);S.bet=Math.min(BET_STEPS[i],betMax());save();renderBetHUD();renderDash();sendSettings({bet:S.bet});}
   function setCur(c){S.betCur=c;if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();sendSettings({bet_cur:S.betCur});}
+  // ---------- PREDICTION (long/short) ----------
+  function startPredict(dir){
+    if(predActive)return;
+    const stake=Math.max(100,Math.min(S.bet||1000,Math.floor(S.balance)));
+    if(S.balance<100){toast("💸","Not enough $MOON","Earn a bit before predicting");return;}
+    S.balance-=stake;predStake=stake;predActive=true;predDir=dir;predLock=price;predT=5;save();
+    sfxBuy();renderLive();renderStats();updatePredict();
+    if(panelOpen==="game")toast("🔮",(dir>0?"📈 LONG":"📉 SHORT")+" placed","Locked at "+predLock.toFixed(2)+"x · "+fmt(stake)+" $MOON");}
+  function resolvePredict(){
+    const up=price>predLock*1.0005, down=price<predLock*0.9995, win=(predDir>0&&up)||(predDir<0&&down);
+    predActive=false;
+    if(!up&&!down){S.balance+=predStake;if(panelOpen==="game")toast("➖","Flat — refunded","+"+fmt(predStake)+" $MOON back");}
+    else if(win){const payout=Math.floor(predStake*1.8);bank(payout);if(panelOpen==="game"){toast("🔮","Called it! "+(predDir>0?"📈":"📉"),"+"+fmt(payout)+" $MOON · 1.8×");sfxCash();confetti();}}
+    else if(panelOpen==="game"){toast("🔮","Wrong way "+(predDir>0?"📈":"📉"),"-"+fmt(predStake)+" $MOON");}
+    predDir=0;predStake=0;save();renderLive();renderStats();updatePredict();}
+  function updatePredict(){
+    const lo=$("predLong"),sh=$("predShort"),tm=$("predTimer"),sub=$("predSub");if(!lo)return;
+    lo.disabled=predActive;sh.disabled=predActive;
+    lo.classList.toggle("picked",predActive&&predDir>0);sh.classList.toggle("picked",predActive&&predDir<0);
+    if(predActive){tm.textContent="⏱ "+predT.toFixed(1)+"s";sub.textContent=(predDir>0?"📈 LONG":"📉 SHORT")+" · locked "+predLock.toFixed(2)+"x → now "+price.toFixed(2)+"x";}
+    else{tm.textContent="";sub.textContent="Call the next 5s — win 1.8× · stake = your bet";}}
   function renderBetHUD(){clampBet();const a=$("betAmt");if(!a)return;a.textContent=fmt(S.bet);$("betCurTxt").textContent=S.betCur==="pts"?"pts":"$MOON";
     const cv=$("coinVal");if(cv)cv.textContent="+"+fmt(S.bet)+(S.betCur==="pts"?" pts":"");
     const mh=$("betMaxHud");if(mh)mh.textContent=fmt(betMax());
@@ -1420,18 +1483,42 @@
         .then(r=>r.json()).then(d=>{if(d&&d.link)tg.openInvoice(d.link,st=>{if(st==="paid")grant();});}).catch(()=>{});}catch(e){}
       return;}
     if(confirm(desc+"\n(Simulated purchase in this prototype)"))grant();}
-  function buyMoon(p){starsPurchase("Buy "+fmt(p.moon)+" $MOON for "+p.stars+" ⭐ Telegram Stars?",{type:"moon",stars:p.stars,moon:p.moon},()=>{
-    addCur("moon",p.moon);S.airdrop+=p.moon;S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
-    toast("⭐","Purchase complete!","+"+fmt(p.moon)+" $MOON for "+p.stars+"⭐");});}
+  function buyMoon(p){const dbl=!S.firstBuyUsed;const moon=p.moon*(dbl?2:1);
+    starsPurchase("Buy "+fmt(moon)+" $MOON for "+p.stars+" ⭐ Telegram Stars?"+(dbl?" (first-buy 2×!)":""),{type:"moon",stars:p.stars,moon:moon},()=>{
+    S.firstBuyUsed=true;addCur("moon",moon);S.airdrop+=moon;S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
+    toast("⭐","Purchase complete!","+"+fmt(moon)+" $MOON"+(dbl?" (2× first buy!)":""));});}
+  function buyStarter(){if(S.starterBought)return;starsPurchase("Starter Pack — "+fmt(STARTER.moon)+" $MOON + Bronze VIP for "+STARTER.stars+" ⭐?",{type:"starter",stars:STARTER.stars},()=>{S.starterBought=true;addCur("moon",STARTER.moon);S.airdrop+=STARTER.moon;if(S.vip<STARTER.vip)S.vip=STARTER.vip;S.starsSpent+=STARTER.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🎁","Starter Pack!","+"+fmt(STARTER.moon)+" $MOON + Bronze VIP");});}
+  function buyWhale(){starsPurchase("Whale Pack — "+fmt(WHALE.moon)+" $MOON + Gold VIP for "+fmt(WHALE.stars)+" ⭐?",{type:"whale",stars:WHALE.stars},()=>{addCur("moon",WHALE.moon);S.airdrop+=WHALE.moon;if(S.vip<WHALE.vip)S.vip=WHALE.vip;S.starsSpent+=WHALE.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🐋","Whale Pack!","+"+fmt(WHALE.moon)+" $MOON + Gold VIP");});}
+  function buyVipSub(){starsPurchase("VIP Pass — 30 days of Diamond perks for "+VIPSUB.stars+" ⭐?",{type:"vipsub",stars:VIPSUB.stars},()=>{S.vipSubUntil=Math.max(Date.now(),S.vipSubUntil||0)+VIPSUB.days*864e5;S.starsSpent+=VIPSUB.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("👑","VIP Pass active!","30 days of Diamond-level perks");});}
+  function buyDeal(){const td=new Date().toDateString();if(S.dealDay===td)return;starsPurchase("Daily Deal — "+fmt(DEAL.moon)+" $MOON (2× value) for "+DEAL.stars+" ⭐?",{type:"deal",stars:DEAL.stars},()=>{S.dealDay=td;addCur("moon",DEAL.moon);S.airdrop+=DEAL.moon;S.starsSpent+=DEAL.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("⏰","Daily Deal!","+"+fmt(DEAL.moon)+" $MOON");});}
+  function buyComeback(){starsPurchase("Comeback Pack — "+fmt(COMEBACK.moon)+" $MOON for "+COMEBACK.stars+" ⭐?",{type:"comeback",stars:COMEBACK.stars},()=>{addCur("moon",COMEBACK.moon);S.airdrop+=COMEBACK.moon;S.starsSpent+=COMEBACK.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🆘","Comeback!","+"+fmt(COMEBACK.moon)+" $MOON");});}
+  function buyBoost(b){starsPurchase(b.nm+" for "+b.stars+" ⭐?",{type:"boost",id:b.id,stars:b.stars},()=>{
+    if(b.id==="energy")energy=maxEnergy();
+    else if(b.id==="turbo"){boost=Math.max(boost,30);const bb=$("boostBadge");if(bb)bb.style.display="block";}
+    else if(b.id==="bets")bonusBets+=20;
+    S.starsSpent+=b.stars;save();renderStore();renderLive();renderStats();renderBetHUD();sfxCash();toast(b.emo,b.nm+"!","Activated");});}
+  function buySeason(){if(S.seasonPass)return;starsPurchase("Season 1 Pass for "+SEASON.stars+" ⭐?",{type:"season",stars:SEASON.stars},()=>{S.seasonPass=true;S.airdrop+=50000;S.starsSpent+=SEASON.stars;save();renderStore();renderLive();renderStats();confetti();toast("🎟️","Season Pass!","+50,000 airdrop pts + daily rewards");});}
+  function crackPiggy(){if(S.piggy<1)return;const pcost=Math.max(20,Math.round(S.piggy/3000));starsPurchase("Crack the piggy bank — claim "+fmt(S.piggy)+" $MOON for "+pcost+" ⭐?",{type:"piggy",stars:pcost,moon:S.piggy},()=>{const amt=S.piggy;S.piggy=0;bank(amt);S.starsSpent+=pcost;save();renderStore();renderLive();renderStats();confetti();toast("🐷","Piggy cracked!","+"+fmt(amt)+" $MOON");});}
   function buyVipStars(i){const v=VIP[i];if(S.vip>=i)return;
     starsPurchase("Unlock "+v.nm+" for "+v.vstars+" ⭐ Telegram Stars?",{type:"vip",tier:i,stars:v.vstars},()=>{
       S.vip=i;S.starsSpent+=v.vstars;save();sfxCash();renderVip();renderLive();renderStats();achCheck();energy=maxEnergy();confetti();toast(v.emo,v.nm+" unlocked!","Thanks for supporting the game ⭐");});}
+  const SKINS=[{id:"gold",nm:"Classic Gold",stars:0,c:"#ffd400"},{id:"neon",nm:"Neon Pink",stars:80,c:"#ff2bd6"},{id:"ice",nm:"Ice Cyan",stars:80,c:"#23f0ff"},{id:"emerald",nm:"Emerald",stars:120,c:"#1dff8f"},{id:"diamond",nm:"Diamond",stars:250,c:"#cfe8ff"}];
+  const SKIN_ACCENT={};SKINS.forEach(s=>SKIN_ACCENT[s.id]=s.c);
+  function applySkin(){if(coin)coin.style.setProperty("--coin-accent",SKIN_ACCENT[S.skin]||"#ffd400");}
+  function equipSkin(id){S.skin=id;save();applySkin();renderStore();toast("🎨","Skin equipped!",(SKINS.find(s=>s.id===id)||{}).nm||"");}
+  function buySkin(s){starsPurchase("Unlock the "+s.nm+" coin skin for "+s.stars+" ⭐?",{type:"skin",id:s.id,stars:s.stars},()=>{
+    if(S.skins.indexOf(s.id)<0)S.skins.push(s.id);S.skin=s.id;S.starsSpent+=s.stars;save();applySkin();renderStore();sfxCash();confetti();toast("🎨",s.nm+" unlocked!","Equipped on your BUY button");});}
   function renderStore(){const wrap=$("storeList");if(!wrap)return;wrap.innerHTML="";
     const ss=$("starsSpent");if(ss)ss.textContent=fmt(S.starsSpent);
     const sb=$("storeBal");if(sb)sb.textContent=fmt(S.balance);
     STORE.forEach(p=>{const best=/BEST/.test(p.tag);const d=document.createElement("div");d.className="card row"+(best?" best":"");
       d.innerHTML='<div class="emo">🪙</div><div class="grow"><div class="nm">'+fmt(p.moon)+' $MOON'+(p.tag?' <span class="pill">'+p.tag+'</span>':'')+'</div><div class="ds">'+fmt(Math.round(p.moon/p.stars))+' $MOON per ⭐</div></div><button class="buy">⭐ '+p.stars+'</button>';
-      d.querySelector(".buy").addEventListener("click",()=>buyMoon(p));wrap.appendChild(d);});}
+      d.querySelector(".buy").addEventListener("click",()=>buyMoon(p));wrap.appendChild(d);});
+    const sh=document.createElement("div");sh.className="sec-h";sh.textContent="🎨 Coin skins";wrap.appendChild(sh);
+    SKINS.forEach(s=>{const owned=S.skins.indexOf(s.id)>=0,eq=S.skin===s.id;const d=document.createElement("div");d.className="card row";
+      d.innerHTML='<div class="emo" style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,'+s.c+' 62%,#0e0826);box-shadow:0 0 10px '+s.c+'"></div><div class="grow"><div class="nm">'+s.nm+'</div><div class="ds">'+(owned?(eq?"equipped":"owned"):s.stars+" ⭐")+'</div></div><button class="buy'+(eq?" owned":"")+'">'+(eq?"✓ On":(owned?"Equip":"⭐ "+s.stars))+'</button>';
+      const b=d.querySelector("button");if(!eq){if(owned)b.addEventListener("click",()=>equipSkin(s.id));else b.addEventListener("click",()=>buySkin(s));}
+      wrap.appendChild(d);});}
 
   // ---------- QUESTS / ACH ----------
   function renderQuests(){questCheck();const wrap=$("questList");
@@ -1459,6 +1546,11 @@
     {id:"tg_channel",emo:"📢",label:"Join Telegram Channel",url:"https://t.me/rugorricheslounge",reward:5000},
     {id:"tg_group",emo:"💬",label:"Join Telegram Group",url:"https://t.me/rugorriches_HQ",reward:5000},
     {id:"ig",emo:"📸",label:"Follow on Instagram",url:"https://instagram.com/rugorriches",reward:5000}];
+  const SOC_SVG={
+    x:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23zm-1.16 17.52h1.83L7.08 4.13H5.12L17.08 19.77z"/></svg>',
+    tg:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.94 4.6 18.9 19.2c-.22 1.02-.83 1.27-1.68.79l-4.64-3.42-2.24 2.16c-.25.25-.46.46-.94.46l.33-4.74 8.62-7.79c.37-.33-.08-.51-.58-.18L7.42 13.1l-4.58-1.43c-1-.31-1.02-1 .22-1.49l17.9-6.9c.83-.31 1.56.2 1.29 1.32z"/></svg>',
+    ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>'};
+  const socialIcon=id=>id==="x"?SOC_SVG.x:id==="ig"?SOC_SVG.ig:SOC_SVG.tg;
   function renderSocial(){const wrap=$("socialList");if(!wrap)return;wrap.innerHTML="";
     SOCIAL.forEach(q=>{const st=S.social[q.id]||0;const d=document.createElement("div");d.className="card row";
       let btn,sub="+"+fmt(q.reward)+" airdrop pts & $MOON";
@@ -1466,7 +1558,7 @@
       else if(st===2){btn='<button class="qclaim">Claim +'+fmt(q.reward)+'</button>';sub="✅ Verified — claim your reward";}
       else if(st===1){btn='<button class="buy">Verify</button>';sub="Followed? Tap Verify to confirm";}
       else btn='<button class="buy">Follow ↗</button>';
-      d.innerHTML='<div class="emo">'+q.emo+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+sub+'</div></div>'+btn;
+      d.innerHTML='<div class="emo">'+socialIcon(q.id)+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+sub+'</div></div>'+btn;
       const b=d.querySelector("button");
       if(st===0)b.addEventListener("click",()=>{try{window.open(q.url,"_blank");}catch(e){}S.social[q.id]=1;save();renderSocial();});
       else if(st===1)b.addEventListener("click",()=>verifySocial(q,b));
@@ -1490,7 +1582,16 @@
     ap.textContent=fmt(S.airdrop);$("adEst").textContent="≈ "+fmt(Math.floor(S.airdrop/100))+" $MOON tokens at listing";
     $("adSeason").textContent=$("seasonTimer").textContent;
     const ab=$("adBar");if(ab)ab.style.width=clamp(S.airdrop/1e6*100,2,100)+"%";
-    renderCombo();renderSocial();}
+    renderStakes();renderCombo();renderSocial();}
+  function renderStakes(){const box=$("stakeBox");if(!box)return;
+    const A=S.airdrop||0,rank=Math.max(1,Math.round(120000/(1+A/4000))),inZone=rank<=10000,share=(A/4.2e9*100);
+    const sr='style="display:flex;justify-content:space-between;font-size:12px;margin-top:7px;color:#cdbff0"';
+    box.innerHTML='<div class="card"><div class="sec-h" style="margin-top:0">🏆 Season 1 stakes</div>'+
+      '<div class="ds">The <b style="color:var(--gold)">top 10,000</b> point-holders split the on-chain $MOON launch pool when the season ends. Keep banking to climb.</div>'+
+      '<div '+sr+'><span>Your estimated standing</span><b style="color:'+(inZone?'var(--green)':'var(--gold)')+'">#'+fmt(rank)+'</b></div>'+
+      '<div '+sr+'><span>Status</span><b style="color:'+(inZone?'var(--green)':'var(--red)')+'">'+(inZone?'✅ In the airdrop zone':'⛏ Climb to the top 10,000')+'</b></div>'+
+      '<div '+sr+'><span>Est. pool share</span><b style="color:var(--cyan)">'+share.toFixed(4)+'%</b></div>'+
+      '<div class="pbar2" style="margin-top:9px"><i style="width:'+clamp((1-rank/120000)*100,3,100)+'%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';}
   function renderCombo(){const wrap=$("comboCard");if(!wrap)return;const today=new Date().toDateString();const done=S.comboDay===today;
     wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">A free bonus every day you check in</div></div><button class="qclaim '+(done?"done":"")+'"'+(done?" disabled":"")+'>'+(done?"✓":"Claim 10K")+'</button>';
     if(!done)wrap.querySelector("button").addEventListener("click",()=>{
@@ -1579,11 +1680,39 @@
         return;
       }
       S.crew=null;save();renderMyCrew();renderCrews();}});wrap.appendChild(leave);}
-  function resetRankTab(){document.querySelectorAll(".rtab").forEach((x,i)=>x.classList.toggle("on",i===0));["rank","players","crews","mycrew"].forEach((k,i)=>{const el=$("rt-"+k);if(el)el.style.display=i===0?"block":"none";});}
+  // ---------- CREW WARS ----------
+  function weekId(){return Math.floor(Date.now()/(7*864e5));}
+  function renderWars(){const wrap=$("warView");if(!wrap)return;wrap.innerHTML="";
+    if(!S.crew){wrap.innerHTML='<p class="sub">Join a crew in the <b>My Crew</b> tab to fight in Crew Wars.</p>';return;}
+    const wk=weekId();if(S.warWeek!==wk){S.warWeek=wk;S.warScore=0;S.warClaim=false;save();}
+    const frac=(Date.now()%(7*864e5))/(7*864e5);
+    const rivals=CREWS.filter(c=>c!==S.crew);const rival=rivals[crewSeed(S.crew)%rivals.length]||"BlackRug Capital";
+    const your=Math.floor((6000+(crewSeed(S.crew)%10)*900)*(0.5+frac))+S.warScore;
+    const rivalScore=Math.floor((9000+(crewSeed(rival)%10)*900)*(0.5+frac));
+    const winning=your>=rivalScore,maxs=Math.max(your,rivalScore,1);
+    const left=7*864e5-(Date.now()%(7*864e5)),dd=Math.floor(left/864e5),hh=Math.floor((left%864e5)/36e5);
+    const hero=document.createElement("div");hero.className="crewhero";
+    hero.innerHTML='<div class="ds">⚔️ CREW WAR · ends in '+dd+'d '+hh+'h</div><div class="big">'+S.crew+' vs '+rival+'</div><div class="v" style="color:'+(winning?"var(--green)":"var(--red)")+'">'+(winning?"WINNING 🏆":"LOSING 😤")+'</div>';
+    wrap.appendChild(hero);
+    const bars=document.createElement("div");bars.className="card";
+    bars.innerHTML='<div class="sec-h" style="margin-top:0">War score</div><div class="ds" style="display:flex;justify-content:space-between"><span style="color:var(--cyan)">'+S.crew+'</span><b>'+fmt(your)+'</b></div><div class="pbar2"><i style="width:'+(your/maxs*100)+'%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></div><div class="ds" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--red)">'+rival+'</span><b>'+fmt(rivalScore)+'</b></div><div class="pbar2"><i style="width:'+(rivalScore/maxs*100)+'%;background:linear-gradient(90deg,var(--red),#ff7a3b)"></i></div><div class="ds" style="margin-top:10px">Your contribution: <b style="color:var(--gold)">'+fmt(S.warScore)+'</b> war pts</div>';
+    wrap.appendChild(bars);
+    const rcost=1000,rgain=1500,canR=S.balance>=rcost;
+    const ra=document.createElement("div");ra.className="card row";
+    ra.innerHTML='<div class="emo">⚔️</div><div class="grow"><div class="nm">Rally the crew</div><div class="ds">spend '+fmt(rcost)+' $MOON → +'+fmt(rgain)+' war pts</div></div><button class="buy"'+(canR?"":" disabled")+'>Rally</button>';
+    wrap.appendChild(ra);
+    ra.querySelector("button").addEventListener("click",()=>{if(S.balance<rcost)return;S.balance-=rcost;S.warScore+=rgain;save();renderWars();renderLive();renderStats();sfxBuy();toast("⚔️","Rallied!","+"+fmt(rgain)+" war pts");});
+    const cl=document.createElement("div");cl.className="card row";const canClaim=winning&&!S.warClaim;
+    cl.innerHTML='<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">'+(S.warClaim?"Claimed this week ✓":(winning?"Your crew is ahead — claim it!":"Pull ahead of "+rival+" to unlock"))+'</div></div><button class="qclaim '+(S.warClaim?"done":"")+'"'+(canClaim?"":" disabled")+'>'+(S.warClaim?"✓":"Claim 20K")+'</button>';
+    wrap.appendChild(cl);
+    if(canClaim)cl.querySelector("button").addEventListener("click",()=>{S.warClaim=true;bank(20000);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+20,000 $MOON — gg");});
+    const f=document.createElement("div");f.innerHTML='<div class="sec-h">❔ How crew wars work</div><details class="faq"><summary>What is a crew war?</summary><div class="a">Each week your crew battles a rival crew. Highest war score when the timer ends wins.</div></details><details class="faq"><summary>How do I help win?</summary><div class="a">Rally (spend $MOON for war pts) to push your crew ahead — every member stacks up.</div></details><details class="faq"><summary>Reward?</summary><div class="a">If your crew is ahead, claim the weekly Victory Chest (+20,000 $MOON). Wars reset each week.</div></details>';
+    wrap.appendChild(f);}
+  function resetRankTab(){document.querySelectorAll(".rtab").forEach((x,i)=>x.classList.toggle("on",i===0));["rank","players","crews","mycrew","wars"].forEach((k,i)=>{const el=$("rt-"+k);if(el)el.style.display=i===0?"block":"none";});}
   document.querySelectorAll(".rtab").forEach(b=>{b.addEventListener("click",()=>{
     document.querySelectorAll(".rtab").forEach(x=>x.classList.remove("on"));b.classList.add("on");
-    const t=b.dataset.rt;["rank","players","crews","mycrew"].forEach(k=>{const el=$("rt-"+k);if(el)el.style.display=(k===t)?"block":"none";});
-    if(t==="crews")renderCrews();else if(t==="mycrew")renderMyCrew();});});
+    const t=b.dataset.rt;["rank","players","crews","mycrew","wars"].forEach(k=>{const el=$("rt-"+k);if(el)el.style.display=(k===t)?"block":"none";});
+    if(t==="crews")renderCrews();else if(t==="mycrew")renderMyCrew();else if(t==="wars")renderWars();});});
  
   // ---------- INVITE ----------
   $("refCode").textContent=S.refCode;
@@ -1763,7 +1892,7 @@
     if(/[?&]test/.test(location.search)){const b=document.createElement("div");b.textContent=fail?("⚠ "+fail+" FAIL"):("✅ "+pass+" checks OK");
       b.style.cssText="position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:90;font:700 11px sans-serif;padding:3px 9px;border-radius:8px;color:#06121f;background:"+(fail?"#ff3b5c":"#1dff8f");$("app").appendChild(b);}
     return fail===0;}
-  function init(){initTelegram();sizeChart();renderLive();renderBetChips();renderBetHUD();renderStats();updateQuestDot();connectBackend();selfTest();
+  function init(){initTelegram();sizeChart();applySkin();renderLive();renderBetChips();renderBetHUD();updatePredict();renderStats();updateQuestDot();connectBackend();selfTest();
     if(!lsGet("moontap_tut")){$("tut").classList.add("show");renderTut();}
     requestAnimationFrame(loop);}
   window.addEventListener("resize",fitViewport);
