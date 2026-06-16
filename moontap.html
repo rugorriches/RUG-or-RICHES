@@ -34,7 +34,7 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0; padding:4px 0 2px;}   /* natural height — BUY button hugs the pot, no big gap */
+  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0; padding:0;}   /* BUY button hugs the pot, no big gap */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -120,15 +120,19 @@
   @keyframes dangerPulse{from{box-shadow:0 0 0 rgba(255,59,92,0);}to{box-shadow:0 0 18px var(--red);}}
 
   /* pot + coin */
-  .pot{text-align:center; padding:0;}
-  .pot .amt{font-size:20px; font-weight:900; color:var(--cyan); text-shadow:0 0 12px rgba(35,240,255,.7); line-height:1;}
+  .pot{text-align:center; padding:0 0 1px;}
+  .pot .amt{font-size:22px; font-weight:900; color:var(--cyan); text-shadow:0 0 16px rgba(35,240,255,.9); line-height:.95;}
   .pot .lab{font-size:8px; letter-spacing:1.5px; color:#8fdcff; text-transform:uppercase;}
-  .combo{font-size:10px; color:var(--neon); font-weight:800; height:12px;}
-  .coin-stage{flex:0 0 auto; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; padding:2px 0 0;}
+  .combo{font-size:9px; color:var(--neon); font-weight:800; height:7px; line-height:7px;}
+  .combo:empty{height:0;}
+  .wintag{font-size:11px; font-weight:800; color:var(--gold); min-height:0; line-height:12px;}
+  .wintag:empty{height:5px;}
+  .wintag:not(:empty){height:13px;}
+  .coin-stage{flex:0 0 auto; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; padding:0; margin-top:0;}
   /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
-  #coin{width:min(92%,340px); min-height:54px; height:54px; border-radius:18px; cursor:pointer; position:relative; overflow:hidden;
+  #coin{width:min(96%,360px); min-height:64px; height:64px; border-radius:20px; cursor:pointer; position:relative; overflow:hidden;
     background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
-    display:flex; align-items:center; gap:13px; padding:0 20px; transition:transform .07s, box-shadow .2s;
+    display:flex; align-items:center; gap:15px; padding:0 22px; transition:transform .07s, box-shadow .2s;
     box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--coin-accent,#ffd400);}
   #coin:active{transform:scale(.97) translateY(1px); box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1), 0 0 44px -4px var(--coin-accent,#ffd400);}
   #coin::before{content:""; position:absolute; inset:0; border-radius:28px; padding:1.6px; pointer-events:none; z-index:1;
@@ -138,45 +142,46 @@
   #coin::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:28px;
     background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%); transform:translateX(-120%); animation:buyshine 3.4s ease-in-out infinite;}
   @keyframes buyshine{0%,55%{transform:translateX(-120%);} 100%{transform:translateX(120%);}}
-  #coin .coin-ico{font-size:20px; line-height:1; color:var(--coin-accent,#ffd400); filter:drop-shadow(0 0 7px var(--coin-accent,#ffd400)); z-index:2;}
+  #coin .coin-ico{font-size:23px; line-height:1; color:var(--coin-accent,#ffd400); filter:drop-shadow(0 0 7px var(--coin-accent,#ffd400)); z-index:2;}
   #coin .coin-cta{display:flex; flex-direction:column; align-items:flex-start; line-height:1.08; z-index:2; flex:1;}
-  #coin .coin-cta b{font-size:16px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
-  #coin .coin-cta span{font-size:8px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
-  #coin .coin-val{z-index:2; font-size:14px; font-weight:900; color:var(--coin-accent,#ffd400); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
+  #coin .coin-cta b{font-size:18px; font-weight:900; color:#fff; letter-spacing:.4px; text-shadow:0 0 10px rgba(124,77,255,.6);}
+  #coin .coin-cta span{font-size:9px; font-weight:800; letter-spacing:1.6px; color:#c3b0ff;}
+  #coin .coin-val{z-index:2; font-size:15px; font-weight:900; color:var(--coin-accent,#ffd400); text-shadow:0 0 8px rgba(0,0,0,.6); white-space:nowrap;}
   #coin .tick{position:absolute; top:5px; left:12px; z-index:3; font-size:8px; font-weight:900; letter-spacing:.5px; color:#0e0826; background:var(--coin-accent,#ffd400); padding:1px 6px; border-radius:7px;}
   #coinRing{position:absolute; left:0; bottom:0; z-index:3; height:4px; width:var(--xp,0%); background:linear-gradient(90deg,var(--cyan),var(--coin-accent,#ffd400)); box-shadow:0 0 8px var(--coin-accent,#ffd400); transition:width .25s ease;}
-  #boostBadge{position:absolute; top:4px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,var(--neon),var(--gold));
-    color:#13002a; font-weight:900; font-size:12px; padding:4px 12px; border-radius:20px; display:none; animation:pulse .6s infinite alternate;}
+  #boostBadge{position:absolute; top:7px; left:auto; right:72px; transform:none; background:linear-gradient(90deg,var(--neon),var(--gold));
+    color:#13002a; font-weight:900; font-size:9.5px; padding:2px 7px; border-radius:20px; display:none; animation:boostpulse .6s infinite alternate; z-index:4; box-shadow:0 0 12px rgba(255,42,230,.35);}
+  @keyframes boostpulse{to{transform:scale(1.06);}}
   @keyframes pulse{to{transform:translateX(-50%) scale(1.08);}}
   .spark{position:absolute; width:11px; height:11px; border-radius:50%; pointer-events:none; z-index:39;
     background:radial-gradient(circle,#fff6c0,var(--gold)); box-shadow:0 0 8px var(--gold);
     transition:transform .55s cubic-bezier(.2,.7,.3,1), opacity .55s;}
-  .hint{position:absolute; bottom:2px; width:100%; text-align:center; font-size:10px; color:#9a82c9; padding:0 12px; animation:hintglow 2.5s ease-in-out infinite;}
+  .hint{display:none;}
   @keyframes hintglow{50%{opacity:.5;}}
-  .predict{margin:0 12px 6px; padding:6px 11px; border-radius:13px; background:rgba(124,77,255,.10); border:1px solid var(--line);}
-  .predict-h{font-size:11px; font-weight:800; color:#cbb6ff; letter-spacing:.04em; display:flex; justify-content:space-between; align-items:center;}
+  .predict{margin:0 14px 3px; padding:4px 10px 5px; border-radius:11px; background:rgba(124,77,255,.09); border:1px solid rgba(124,77,255,.28);}
+  .predict-h{font-size:9.5px; font-weight:800; color:#cbb6ff; letter-spacing:.03em; display:flex; justify-content:space-between; align-items:center;}
   .predict-h #predTimer{color:var(--gold); font-variant-numeric:tabular-nums;}
-  .predict-btns{display:flex; gap:8px; margin:6px 0 5px;}
-  .pbtn{flex:1; border:none; border-radius:10px; padding:9px; font-weight:800; font-size:13px; color:#fff; cursor:pointer; transition:transform .08s;}
+  .predict-btns{display:flex; gap:7px; margin:4px 0 3px;}
+  .pbtn{flex:1; border:none; border-radius:8px; padding:6px 8px; font-weight:800; font-size:11px; color:#fff; cursor:pointer; transition:transform .08s; min-height:28px;}
   .pbtn:active{transform:scale(.96);}
   .pbtn.long{background:linear-gradient(180deg,#1f9a55,#127040);}
   .pbtn.short{background:linear-gradient(180deg,#d0402f,#922a20);}
   .pbtn:disabled{opacity:.4; cursor:default;}
   .pbtn.picked{outline:2px solid var(--gold); outline-offset:1px;}
-  .predict-sub{font-size:10px; color:#9c92c4; text-align:center;}
+  .predict-sub{font-size:8.5px; color:#9c92c4; text-align:center; line-height:1.1;}
 
   /* energy + actions */
   .energy-wrap{padding:0 14px 1px;}
   .energy-row{display:flex; align-items:center; gap:8px; font-size:10px; color:#cbb6ff;}
   .energy-bar{flex:1; height:9px; background:#1c0e36; border-radius:6px; overflow:hidden; border:1px solid rgba(35,240,255,.3);}
   #energyFill{height:100%; width:100%; background:linear-gradient(90deg,var(--cyan),var(--neon)); transition:width .2s;}
-  .actions{display:flex; gap:8px; padding:0 14px 4px;}
-  .btn{flex:1; position:relative; overflow:hidden; border:none; border-radius:12px; padding:9px 8px; font-weight:900; font-size:13px; letter-spacing:.5px; cursor:pointer; color:#13002a; transition:transform .08s;}
+  .actions{display:flex; gap:9px; padding:0 14px 4px;}
+  .btn{flex:1; position:relative; overflow:hidden; border:none; border-radius:14px; padding:11px 9px; font-weight:900; font-size:13px; letter-spacing:.7px; cursor:pointer; color:#13002a; transition:transform .08s, filter .18s, box-shadow .18s;}
   .btn:active{transform:scale(.96);}
   .btn::after{content:""; position:absolute; top:0; left:-60%; width:45%; height:100%; pointer-events:none;
     background:linear-gradient(120deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:shine 3.6s ease-in-out infinite;}
   @keyframes shine{0%,55%{left:-60%;}100%{left:150%;}}
-  #cashout{background:linear-gradient(90deg,var(--green),#0bd47a);}
+  #cashout{background:linear-gradient(135deg,#f4ffe8,#79f0a4 34%,#1dff8f 65%,#0bd47a); color:#07150c; box-shadow:inset 0 1px 0 rgba(255,255,255,.65), 0 0 22px rgba(29,255,143,.22);}
   #cashout:not(:disabled){animation:cashpulse 1.8s ease-in-out infinite;}
   @keyframes cashpulse{50%{box-shadow:0 0 30px rgba(29,255,143,.8);}}
   #cashout:disabled{filter:grayscale(.8) brightness(.6); cursor:not-allowed; animation:none;}
@@ -357,7 +362,7 @@
   #toast .t{font-size:13px; font-weight:900;} #toast .s{font-size:10px; color:#cbb6ff;}
   /* market event badge */
   .evt{position:absolute; top:34px; left:11px; font-size:11px; font-weight:800; padding:3px 9px; border-radius:8px; display:none; z-index:3; animation:pulse .7s infinite alternate;}
-  .wintag{font-size:11px; font-weight:800; color:var(--gold); height:14px;}
+  .wintag{font-size:11px; font-weight:800; color:var(--gold); min-height:0; line-height:12px;}
   .mstats{font-size:9px; color:#9a82c9; text-align:center; margin-top:4px; letter-spacing:.3px;}
   .mstats b{color:#cbb6ff;}
   .shake{animation:shk .4s;}
@@ -376,10 +381,10 @@
   .bethud{display:flex; align-items:center; gap:10px; padding:2px 14px 4px;}
   .betadj{width:38px; height:38px; border-radius:12px; border:1px solid var(--line); background:var(--glass); color:#fff; font-size:21px; font-weight:900; cursor:pointer; transition:transform .1s, background .15s;}
   .betadj:active{transform:scale(.9); background:rgba(255,255,255,.14);}
-  .betmid{flex:1; text-align:center;}
-  .betval{font-size:16px; font-weight:900; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:6px;}
+  .betmid{flex:1; text-align:center; min-width:0;}
+  .betval{font-size:17px; font-weight:900; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:7px; line-height:1;}
   .curtog{border:none; background:rgba(35,240,255,.18); color:var(--cyan); border-radius:9px; padding:3px 9px; font-size:13px; cursor:pointer;}
-  .betsub{font-size:10px; color:#a78fd6; margin-top:1px;}
+  .betsub{font-size:11px; color:#a78fd6; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
   .betrow{display:flex; align-items:center; gap:14px; justify-content:center;}
   .betbig{font-size:24px; font-weight:900; color:var(--gold); min-width:170px; text-align:center;}
   .presets{display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; justify-content:center;}
@@ -392,7 +397,7 @@
   .upstats .arrowi{color:#a78fd6; font-weight:900;}
   .pill.next{background:rgba(29,255,143,.16); color:var(--green);}
   /* pot pops more */
-  .pot .amt{font-size:18px; text-shadow:0 0 16px rgba(35,240,255,.85), 0 0 4px rgba(35,240,255,.6);}
+  .pot .amt{font-size:22px; text-shadow:0 0 16px rgba(35,240,255,.85), 0 0 4px rgba(35,240,255,.6);}
   /* help page */
   .help-sec{margin-bottom:13px;}
   .help-sec .row{align-items:flex-start;}
@@ -428,7 +433,7 @@
   .crewhero>*{position:relative; z-index:2;}
   .crewhero .big{font-size:22px; font-weight:900; color:#fff;} .crewhero .v{font-size:20px; font-weight:900; color:var(--gold);}
   /* coin scene: futuristic crypto icons + hop */
-  .coin-stage{padding-bottom:4px;}
+  .coin-stage{padding-bottom:0;}
   #coin{z-index:2;}
   #coin.hop{animation:hop .26s ease;}
   @keyframes hop{0%{transform:translateY(0);}45%{transform:translateY(-16px) scale(1.05);}100%{transform:translateY(0);}}
@@ -465,16 +470,21 @@
   .sicon:hover{border-color:rgba(35,240,255,.5);}
   .sicon:active{transform:scale(.88); background:rgba(255,255,255,.16);}
   /* trade console (cleaner bet area) */
-  .console{margin:1px 10px 3px; padding:4px 10px 5px; border-radius:14px; border:1px solid var(--line);
-    background:radial-gradient(120% 140% at 50% 0%, rgba(124,77,255,.12), rgba(8,4,20,.5)); box-shadow:0 -6px 22px rgba(0,0,0,.4), inset 0 1px 0 rgba(124,77,255,.35);}
-  .console .energy-row{margin-bottom:3px;}
-  .betbar{display:flex; align-items:center; gap:8px;}
-  .betchips{display:flex; gap:5px; margin-top:3px;}
+  .console{margin:0 10px 3px; padding:5px 10px 6px; border-radius:16px; border:1px solid rgba(35,240,255,.26);
+    background:linear-gradient(180deg,rgba(35,240,255,.07),rgba(124,77,255,.12) 42%,rgba(8,4,20,.72));
+    box-shadow:0 -6px 24px rgba(0,0,0,.42), inset 0 1px 0 rgba(124,77,255,.38), 0 0 24px rgba(35,240,255,.08);}
+  .console .energy-row{margin-bottom:4px;}
+  .betbar{display:grid; grid-template-columns:36px 1fr 36px; align-items:center; gap:8px; padding:4px; border-radius:14px; border:1px solid rgba(255,255,255,.10);
+    background:radial-gradient(100% 160% at 50% 0%,rgba(255,212,0,.11),rgba(35,240,255,.06) 50%,rgba(0,0,0,.12));}
+  .betbar .betadj{width:32px; height:32px; justify-self:center; border-radius:11px; background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.04)); box-shadow:inset 0 1px 0 rgba(255,255,255,.14);}
+  .betchips{display:none;}
   .chip{flex:1; background:rgba(255,255,255,.06); border:1px solid var(--line); color:#cbb6ff; border-radius:9px; padding:4px 2px; font-size:11px; font-weight:800; cursor:pointer; transition:transform .1s, background .15s;}
   .chip:active{transform:scale(.92); background:rgba(255,255,255,.14);}
   .chip.max{color:var(--gold); border-color:rgba(255,212,0,.45);}
-  .actions{padding:0 !important; margin-top:3px;}
-  .btn.half{flex:.6; background:linear-gradient(90deg,var(--cyan),#0bd4c4); color:#06121f;}
+  .actions{padding:0 !important; margin-top:6px;}
+  .btn.half{flex:.72; background:linear-gradient(135deg,#dfffff,#38f5ff 42%,#00cfd7); color:#04151a; box-shadow:inset 0 1px 0 rgba(255,255,255,.65), 0 0 20px rgba(35,240,255,.22);}
+  .btn.sell{flex:1.28;}
+  .btn:disabled{filter:grayscale(.75) brightness(.58); cursor:not-allowed; animation:none;}
   /* clicker juice: tap ripple + confetti */
   .ripple{position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; border-radius:50%; border:2px solid rgba(255,255,255,.65); pointer-events:none; z-index:38; animation:rip .5s ease-out forwards;}
   @keyframes rip{from{transform:scale(.4); opacity:.7;} to{transform:scale(4.2); opacity:0;}}
@@ -511,27 +521,34 @@
     .rug-bar { height: 14px; border-radius: 8px; }
     #rugSkull { font-size: 14px; }
     #rugPct { font-size: 10px; }
-    .predict { margin: 0 12px 2px; padding: 3px 8px; border-radius: 10px; }
-    .predict-btns { gap: 6px; margin: 4px 0 3px; }
-    .pbtn { padding: 6px; font-size: 11px; border-radius: 8px; }
-    .pot .amt { font-size: 16px; }
+    .predict { margin: 0 14px 1px; padding: 3px 8px 4px; border-radius: 9px; }
+    .predict-h { font-size: 8.5px; }
+    .predict-btns { gap: 6px; margin: 3px 0 2px; }
+    .pbtn { padding: 4px 6px; font-size: 10px; border-radius: 7px; min-height:24px; }
+    .predict-sub { font-size: 7.8px; }
+    .pot .amt { font-size: 19px; }
     .pot .lab { font-size: 7.5px; }
-    .coin-stage { padding: 1px 0 0; }
-    #coin { height: 44px; min-height: 44px; border-radius: 14px; gap: 8px; padding: 0 15px; }
-    #coin .coin-ico { font-size: 16px; }
-    #coin .coin-cta b { font-size: 14px; }
-    #coin .coin-cta span { font-size: 7.5px; }
-    #coin .coin-val { font-size: 12px; }
-    .console { margin: 0 10px 1px; padding: 3px 8px 4px; border-radius: 11px; }
-    .console .energy-row { margin-bottom: 2px; }
-    .betbar { gap: 6px; }
+    .combo { height: 4px; line-height: 4px; font-size: 8px; }
+    .combo:empty { height:0; }
+    .wintag:empty { height:4px; }
+    .wintag:not(:empty) { height:10px; line-height:10px; font-size:9px; }
+    .coin-stage { padding: 0; margin-top:0; }
+    #coin { height: 56px; min-height: 56px; border-radius: 17px; gap: 10px; padding: 0 17px; width:min(96%,360px); }
+    #coin .coin-ico { font-size: 19px; }
+    #coin .coin-cta b { font-size: 16px; }
+    #coin .coin-cta span { font-size: 8px; }
+    #coin .coin-val { font-size: 13px; }
+    #boostBadge { top: 6px; right: 58px; font-size: 8.5px; padding: 2px 6px; }
+    .console { margin: 0 10px 1px; padding: 4px 8px 5px; border-radius: 13px; }
+    .console .energy-row { margin-bottom: 3px; }
+    .betbar { gap: 5px; grid-template-columns:32px 1fr 32px; padding:3px; }
     .betadj { width: 30px; height: 30px; border-radius: 8px; font-size: 16px; }
-    .betval { font-size: 14px; }
-    .betsub { font-size: 9px; }
-    .betchips { gap: 4px; margin-top: 2px; }
-    .chip { padding: 3px 2px; font-size: 10px; border-radius: 7px; }
-    .actions { margin-top: 2px; }
-    .btn { padding: 7px 6px; font-size: 11px; border-radius: 10px; }
+    .betbar .betadj { width: 28px; height: 28px; }
+    .betval { font-size: 15px; }
+    .betsub { font-size: 9.5px; gap:5px; margin-top:3px; }
+    .betchips { display:none; }
+    .actions { margin-top: 5px; }
+    .btn { padding: 8px 6px; font-size: 11.5px; border-radius: 11px; }
     nav { min-height: 52px; }
     nav button { padding: 6px 0 8px; font-size: 8.5px; }
     nav button .ic { font-size: 15px; }
@@ -603,8 +620,7 @@
       <div class="betmid"><div class="betval"><span id="betAmt">100</span> <span id="betCurTxt">$MOON</span><button class="curtog" id="curTog" aria-label="Switch currency">⇄</button></div><div class="betsub">max <b id="betMaxHud">1K</b> · bets <span id="betCount">0/20</span> · <span id="betPL">P/L +0</span></div></div>
       <button class="betadj" id="betUp" aria-label="Increase bet">+</button>
     </div>
-    <div class="betchips" id="betChips"></div>
-    <div class="actions"><button class="btn half" id="sellHalf">✂️ HALF</button><button class="btn sell" id="cashout">💰 SELL ALL</button></div>
+    <div class="actions"><button class="btn half" id="sellHalf">✂️ SELL 50%</button><button class="btn sell" id="cashout">💰 SELL ALL</button></div>
   </div>
   </div><!-- /gameScroll -->
 
@@ -1101,8 +1117,10 @@
   questCheck();
   const qprog=id=>S.quests.prog[id]||0;
   function bumpQuest(track,val,mode){QUESTS.filter(q=>q.track===track).forEach(q=>{const c=S.quests.prog[q.id]||0;S.quests.prog[q.id]=mode==="max"?Math.max(c,val):c+val;});updateQuestDot();}
-  function updateQuestDot(){const any=QUESTS.some(q=>S.vip>=(q.vip||0)&&qprog(q.id)>=q.goal&&S.quests.claimed.indexOf(q.id)<0);
-    const nb=document.querySelector('nav button[data-p="airdrop"]');if(nb)nb.classList.toggle("alert",any);}
+  function hasQuestClaim(){return QUESTS.some(q=>effVip()>=(q.vip||0)&&qprog(q.id)>=q.goal&&S.quests.claimed.indexOf(q.id)<0);}
+  function hasSocialClaim(){return SOCIAL.some(q=>(S.social[q.id]||0)===2);}
+  function updateQuestDot(){const any=hasQuestClaim()||hasSocialClaim();
+    const nb=document.querySelector('nav button[data-p="airdrop"]');if(nb)nb.classList.toggle("alert",any&&panelOpen!=="airdrop");}
 
   // ---------- ACHIEVEMENTS ----------
   const ACH=[{id:"first",emo:"💀",nm:"Rekt",ds:"Get rugged for the first time"},
@@ -1635,18 +1653,18 @@
       else btn='<button class="buy">Follow ↗</button>';
       d.innerHTML='<div class="emo">'+socialIcon(q.id)+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+sub+'</div></div>'+btn;
       const b=d.querySelector("button");
-      if(st===0)b.addEventListener("click",()=>{try{window.open(q.url,"_blank");}catch(e){}S.social[q.id]=1;save();renderSocial();});
+      if(st===0)b.addEventListener("click",()=>{try{window.open(q.url,"_blank");}catch(e){}S.social[q.id]=1;save();renderSocial();updateQuestDot();});
       else if(st===1)b.addEventListener("click",()=>verifySocial(q,b));
       else if(st===2)b.addEventListener("click",()=>{
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "claim_social", id: q.id }));
           return;
         }
-        S.social[q.id]=3;bank(q.reward);save();renderSocial();renderAirdrop();renderLive();renderStats();confetti();toast(q.emo,"Reward claimed!","+"+fmt(q.reward)+" $MOON & points");});
+        S.social[q.id]=3;bank(q.reward);save();renderSocial();renderAirdrop();renderLive();renderStats();updateQuestDot();confetti();toast(q.emo,"Reward claimed!","+"+fmt(q.reward)+" $MOON & points");});
       wrap.appendChild(d);});}
   function verifySocial(q,btn){if(btn){btn.disabled=true;btn.textContent="Checking…";}
-    const pass=()=>{S.social[q.id]=2;save();renderSocial();toast("✅","Verified!","Tap Claim to collect "+fmt(q.reward));};
-    const fail=()=>{S.social[q.id]=1;save();renderSocial();toast("❌","Not detected yet","Make sure you followed, then Verify again");};
+    const pass=()=>{S.social[q.id]=2;save();renderSocial();updateQuestDot();toast("✅","Verified!","Tap Claim to collect "+fmt(q.reward));};
+    const fail=()=>{S.social[q.id]=1;save();renderSocial();updateQuestDot();toast("❌","Not detected yet","Make sure you followed, then Verify again");};
     const tg=window.Telegram&&window.Telegram.WebApp;
     if(resolvedVerifyEndpoint){   // production: server confirms the real follow/membership (e.g. Telegram getChatMember)
       try{fetch(resolvedVerifyEndpoint,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task:q.id,initData:tg&&tg.initData})})
@@ -1888,11 +1906,11 @@
   const panels={shop:"panel-shop",vip:"panel-vip",store:"panel-store",dash:"panel-dash",help:"panel-help",airdrop:"panel-airdrop",ranks:"panel-ranks",invite:"panel-invite",profile:"panel-profile"};
   function closeAll(){Object.values(panels).forEach(id=>$(id).classList.remove("show"));}
   function openPanel(p){panelOpen=p;closeAll();
-    if(p==="game")return;
+    if(p==="game"){updateQuestDot();return;}
     if(p==="shop")renderShop();else if(p==="vip")renderVip();else if(p==="store")renderStore();else if(p==="dash"){renderPresets();renderDash();}
     else if(p==="airdrop"){renderAirdrop();renderQuests();renderAch();}
     else if(p==="ranks"){renderRanks();renderCrews();renderMyCrew();resetRankTab();}else if(p==="invite")renderInvite();else if(p==="profile")renderStats();
-    if(panels[p])$(panels[p]).classList.add("show");}
+    if(panels[p])$(panels[p]).classList.add("show");updateQuestDot();}
   document.querySelectorAll("nav button").forEach(b=>{b.addEventListener("click",()=>{
     document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));b.classList.add("on");openPanel(b.dataset.p);});});
   $("profileBtn").addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));openPanel("profile");});
