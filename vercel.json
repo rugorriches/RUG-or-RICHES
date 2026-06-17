@@ -19,6 +19,7 @@
     { "src": "/api/gift", "dest": "/api/gift.js" },
     { "src": "/api/cron", "dest": "/api/cron.js" },
     { "src": "/play", "dest": "/moontap.html" },
+    { "src": "/privacy", "dest": "/privacy.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ],
   "crons": [
