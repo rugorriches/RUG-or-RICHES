@@ -2,7 +2,8 @@
   "name": "rug-or-riches",
   "builds": [
     { "src": "api/**/*.js", "use": "@vercel/node" },
-    { "src": "*.html", "use": "@vercel/static" }
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "assets/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/leaderboard", "dest": "/api/leaderboard.js" },
