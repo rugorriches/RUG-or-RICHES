@@ -1,4 +1,5 @@
 const db = require("./db");
+const ECONOMY_CAP = 100000000;
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -19,10 +20,11 @@ module.exports = async (req, res) => {
       `SELECT
          COUNT(*)::bigint AS players,
          COALESCE(SUM(taps), 0)::bigint AS taps,
-         COALESCE(SUM(lifetime_banked), 0)::bigint AS moon_banked,
+         COALESCE(SUM(LEAST(lifetime_banked, $1)), 0)::bigint AS moon_banked,
          COALESCE(SUM(rugs), 0)::bigint AS rugs_survived,
-         COALESCE(SUM(airdrop_pts), 0)::bigint AS airdrop_pts
-       FROM players`
+         COALESCE(SUM(LEAST(airdrop_pts, $1)), 0)::bigint AS airdrop_pts
+       FROM players`,
+      [ECONOMY_CAP]
     );
     const row = rows[0] || {};
     const stats = Object.fromEntries(
