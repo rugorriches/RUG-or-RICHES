@@ -7,6 +7,7 @@
   "routes": [
     { "src": "/api/leaderboard", "dest": "/api/leaderboard.js" },
     { "src": "/api/stats", "dest": "/api/stats.js" },
+    { "src": "/api/crews", "dest": "/api/crews.js" },
     { "src": "/api/verify", "dest": "/api/verify.js" },
     { "src": "/api/sync", "dest": "/api/sync.js" },
     { "src": "/api/invoice", "dest": "/api/invoice.js" },

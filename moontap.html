@@ -831,6 +831,7 @@
   "use strict";
   const $=id=>document.getElementById(id);
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const fmt=n=>{n=Math.floor(n);
     if(n>=1e12)return (n/1e12).toFixed(2)+"T"; if(n>=1e9)return (n/1e9).toFixed(2)+"B";
     if(n>=1e6)return (n/1e6).toFixed(2)+"M"; if(n>=1e3)return (n/1e3).toFixed(2)+"K";
@@ -848,7 +849,7 @@
 
   // ---------- STATE ----------
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,pnlWon:0,pnlLost:0,
-    streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
+    streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
@@ -871,6 +872,8 @@
 
   let hasCloudAuth = false;
   let referralsLoaded = false;
+  let currentUserId = null;
+  let crewLoaded = false;
   let syncInProgress = false;
   let syncTimeout = null;
 
@@ -942,7 +945,10 @@
     }
     const refMiles = Array.isArray(db.ref_milestones) ? db.ref_milestones : (Array.isArray(db.refMiles) ? db.refMiles : []);
     if (Array.isArray(refMiles)) S.refMiles = [...new Set(refMiles.map(Number).filter(Number.isFinite))];
-    if (db.crew_name) S.crew = db.crew_name;
+    if (db.id !== undefined) currentUserId = String(db.id);
+    if (db.crew_name) S.crew = db.crew_name; else S.crew = null;
+    if (db.crew_id_text !== undefined) S.crewId = db.crew_id_text;
+    if (db.crew_leader_id !== undefined) S.crewLeaderId = db.crew_leader_id;
     if (db.sound !== undefined) S.sound = db.sound;
     if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
     if (db.bet_cur !== undefined) S.betCur = db.bet_cur;
@@ -1790,70 +1796,86 @@
       renderList(list);
     }
   }
-  // ---------- CREWS (teams) ----------
-  const CREWS=["Moon Mafia","Diamond Dogs","Rug Survivors","Degen Squad","Whale Watchers","Paperhand Patrol"];
-  const CMEM=["0xVibe","jeetslayer","moonfren","ngmi_no","ser_hodl","pumpqueen","degenDan","aper.eth","frostbyte","lunabull"];
-  function crewSeed(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return h;}
-  function crewPower(n){return 1.5e6+(crewSeed(n)%9)*1.4e6;}
-  function crewMembers(n){const s=crewSeed(n),m=[];for(let i=0;i<5;i++)m.push({n:CMEM[(s+i)%CMEM.length]+((s+i)%90+1),b:Math.floor(crewPower(n)/6*(0.55+(((s>>i)%50)/100)))});return m;}
+  // ---------- CREWS (real server-backed teams) ----------
+  function applyCrewPayload(data){if(!data)return;
+    S.crewBoard=Array.isArray(data.crews)?data.crews:[];
+    if(data.mine){S.crew=data.mine.name;S.crewId=data.mine.id;S.crewLeaderId=data.mine.leaderId;S.crewMembers=Array.isArray(data.mine.members)?data.mine.members:[];}
+    else{S.crew=null;S.crewId=null;S.crewLeaderId=null;S.crewMembers=[];}
+    crewLoaded=true;save();}
+  async function crewApi(action,payload){
+    const tg=window.Telegram&&window.Telegram.WebApp;if(!tg||!tg.initData){toast("🔒","Telegram required","Open inside Telegram to manage crews");return null;}
+    const body=Object.assign({initData:tg.initData,action:action||"list"},payload||{});
+    const r=await fetch("/api/crews",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    const data=await r.json().catch(()=>null);
+    if(!r.ok)throw new Error((data&&data.error)||"Crew action failed");
+    applyCrewPayload(data);return data;}
+  function refreshCrews(render){return crewApi("list").then(()=>{if(render){renderCrews();renderMyCrew();renderWars();}}).catch(e=>{crewLoaded=true;toast("⚠️","Crew sync failed",e.message);});}
+  function isCrewCaptain(){return S.crewLeaderId&&currentUserId&&String(S.crewLeaderId)===String(currentUserId);}
+  function crewTotal(){return S.crewMembers.reduce((a,m)=>a+(Number(m.banked)||0),0);}
   function renderCrews(){const wrap=$("crewBoard");if(!wrap)return;wrap.innerHTML="";
-    const list=CREWS.map(n=>({n:n,b:crewPower(n)+(S.crew===n?S.balance:0),me:S.crew===n}));list.sort((a,b)=>b.b-a.b);
-    list.forEach((c,i)=>{const d=document.createElement("div");d.className="crewrow"+(c.me?" me":"");
+    if(!crewLoaded){wrap.innerHTML='<p class="sub">Loading real crews...</p>';refreshCrews(true);return;}
+    const list=(S.crewBoard||[]).slice().sort((a,b)=>(b.totalBanked||0)-(a.totalBanked||0));
+    if(list.length===0){wrap.innerHTML='<p class="sub">No crews exist yet. Create the first one in <b>My Crew</b>.</p>';return;}
+    list.forEach((c,i)=>{const d=document.createElement("div");d.className="crewrow"+(S.crewId===c.id?" me":"");
       const rk=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-      d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+c.n+(c.me?' (you)':'')+'</div><div class="sc">'+fmt(c.b)+'</div>';wrap.appendChild(d);});}
+      d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+esc(c.name)+(S.crewId===c.id?' (you)':'')+'<div class="ds">captain '+esc(c.leaderName||"—")+' · '+fmt(c.members||0)+' members</div></div><div class="sc">'+fmt(c.totalBanked||0)+'</div>';
+      wrap.appendChild(d);});}
+  function crewForm(){return '<div class="card"><div class="sec-h" style="margin-top:0">Create your crew</div><div class="ds">Become captain, recruit players, manage members, and fight weekly wars.</div><input id="crewNameInput" maxlength="24" placeholder="Crew name" style="width:100%;margin-top:10px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:11px;padding:12px;color:#fff;font-weight:800;outline:none"><button class="big-btn" id="crewCreateBtn" style="margin-top:10px">Create Crew</button></div>';}
   function renderMyCrew(){const wrap=$("myCrewView");if(!wrap)return;wrap.innerHTML="";
-    if(!S.crew){wrap.innerHTML='<p class="sub">Join a crew to climb the team leaderboard together — your banked $MOON adds to your crew\'s total.</p><div class="sec-h">Pick a crew</div>';
-      CREWS.forEach(n=>{const d=document.createElement("div");d.className="crewrow";
-        d.innerHTML='<div class="nm">'+n+'</div><div class="sc" style="margin-right:8px">'+fmt(crewPower(n))+'</div><button class="buy">Join</button>';
-        d.querySelector("button").addEventListener("click",()=>{
-          if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
-            window._moonWS.send(JSON.stringify({ t: "join_crew", name: n }));
-            return;
-          }
-          S.crew=n;save();renderMyCrew();renderCrews();toast("🤝","Joined "+n+"!","Climb the crew board together");});
+    if(!crewLoaded){wrap.innerHTML='<p class="sub">Loading crew controls...</p>';refreshCrews(true);return;}
+    if(!S.crew){wrap.innerHTML='<p class="sub">Create your own crew or join a real player crew. Fake prefilled crews have been removed.</p>'+crewForm()+'<div class="sec-h">Join a crew</div>';
+      const btn=$("crewCreateBtn"),inp=$("crewNameInput");
+      if(btn)btn.addEventListener("click",async()=>{try{btn.disabled=true;await crewApi("create",{name:inp.value});renderMyCrew();renderCrews();toast("👑","Crew created","You are the captain of "+S.crew);}catch(e){toast("⚠️","Crew not created",e.message);}finally{btn.disabled=false;}});
+      (S.crewBoard||[]).forEach(c=>{const d=document.createElement("div");d.className="crewrow";
+        d.innerHTML='<div class="nm">'+esc(c.name)+'<div class="ds">captain '+esc(c.leaderName||"—")+' · '+fmt(c.members||0)+' members</div></div><div class="sc" style="margin-right:8px">'+fmt(c.totalBanked||0)+'</div><button class="buy">Join</button>';
+        d.querySelector("button").addEventListener("click",async()=>{try{await crewApi("join",{crewId:c.id});renderMyCrew();renderCrews();toast("🤝","Joined "+c.name,"Climb the board together");}catch(e){toast("⚠️","Join failed",e.message);}});
         wrap.appendChild(d);});return;}
-    const mems=crewMembers(S.crew),total=crewPower(S.crew)+S.balance;
+    const total=crewTotal(),cap=isCrewCaptain();
     const hero=document.createElement("div");hero.className="crewhero";
-    hero.innerHTML='<div class="ds">YOUR CREW</div><div class="big">'+S.crew+'</div><div class="v">'+fmt(total)+'</div><div class="ds">combined banked $MOON · '+(mems.length+1)+' members</div>';
+    hero.innerHTML='<div class="ds">'+(cap?'YOUR CREW · CAPTAIN':'YOUR CREW')+'</div><div class="big">'+esc(S.crew)+'</div><div class="v">'+fmt(total)+'</div><div class="ds">combined lifetime banked · '+fmt(S.crewMembers.length)+' members</div>';
     wrap.appendChild(hero);
-    const sec=document.createElement("div");sec.className="sec-h";sec.textContent="Member stats";wrap.appendChild(sec);
-    const all=[{n:S.name+" (you)",b:S.balance,me:true}].concat(mems.map(m=>({n:m.n,b:m.b,me:false})));all.sort((a,b)=>b.b-a.b);
-    all.forEach((m,i)=>{const d=document.createElement("div");d.className="crewrow"+(m.me?" me":"");
-      d.innerHTML='<div class="rk">'+(i+1)+'</div><div class="nm">'+m.n+'</div><div class="sc">'+fmt(m.b)+'</div>';wrap.appendChild(d);});
-    const leave=document.createElement("button");leave.className="big-btn";leave.style.cssText="background:#3a2456;color:#fff;margin-top:12px";leave.textContent="Leave crew";
-    leave.addEventListener("click",()=>{if(confirm("Leave "+S.crew+"?")){
-      if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
-        window._moonWS.send(JSON.stringify({ t: "leave_crew" }));
-        return;
-      }
-      S.crew=null;save();renderMyCrew();renderCrews();}});wrap.appendChild(leave);}
+    const sec=document.createElement("div");sec.className="sec-h";sec.textContent=cap?"Manage members":"Member stats";wrap.appendChild(sec);
+    (S.crewMembers||[]).forEach((m,i)=>{const me=currentUserId&&String(m.id)===String(currentUserId),leader=S.crewLeaderId&&String(m.id)===String(S.crewLeaderId);
+      const d=document.createElement("div");d.className="crewrow"+(me?" me":"");
+      d.innerHTML='<div class="rk">'+(i+1)+'</div><div class="nm">'+esc(m.name)+(me?' (you)':'')+(leader?' <span class="pill">CAPTAIN</span>':'')+'<div class="ds">war pts '+fmt(m.warScore||0)+' · VIP '+(m.vip||0)+'</div></div><div class="sc">'+fmt(m.banked||0)+'</div>'+(cap&&!me?'<button class="qclaim">Kick</button>':'');
+      const kick=d.querySelector("button");if(kick)kick.addEventListener("click",async()=>{if(!confirm("Remove "+m.name+" from "+S.crew+"?"))return;try{await crewApi("kick",{memberId:m.id});renderMyCrew();renderCrews();toast("🧹","Member removed",m.name+" was kicked");}catch(e){toast("⚠️","Kick failed",e.message);}});
+      wrap.appendChild(d);});
+    const leave=document.createElement("button");leave.className="big-btn";leave.style.cssText="background:#3a2456;color:#fff;margin-top:12px";leave.textContent=cap?"Leave crew / transfer captain":"Leave crew";
+    leave.addEventListener("click",async()=>{if(!confirm("Leave "+S.crew+"?"+(cap?" Captain transfers to the highest-ranked remaining member.":"")))return;
+      try{await crewApi("leave");renderMyCrew();renderCrews();renderWars();toast("🚪","Left crew","You can create or join another crew anytime");}catch(e){toast("⚠️","Leave failed",e.message);}});
+    wrap.appendChild(leave);}
   // ---------- CREW WARS ----------
   function weekId(){return Math.floor(Date.now()/(7*864e5));}
+  function crewHash(n){let h=0;for(let i=0;i<String(n).length;i++)h=(h*31+String(n).charCodeAt(i))>>>0;return h;}
   function renderWars(){const wrap=$("warView");if(!wrap)return;wrap.innerHTML="";
     if(!S.crew){wrap.innerHTML='<p class="sub">Join a crew in the <b>My Crew</b> tab to fight in Crew Wars.</p>';return;}
     const wk=weekId();if(S.warWeek!==wk){S.warWeek=wk;S.warScore=0;S.warClaim=false;save();}
+    if(!crewLoaded){wrap.innerHTML='<p class="sub">Loading real crew war...</p>';refreshCrews(true);return;}
     const frac=(Date.now()%(7*864e5))/(7*864e5);
-    const rivals=CREWS.filter(c=>c!==S.crew);const rival=rivals[crewSeed(S.crew)%rivals.length]||"BlackRug Capital";
-    const your=Math.floor((6000+(crewSeed(S.crew)%10)*900)*(0.5+frac))+S.warScore;
-    const rivalScore=Math.floor((9000+(crewSeed(rival)%10)*900)*(0.5+frac));
+    const mine=(S.crewBoard||[]).find(c=>c.id===S.crewId)||{name:S.crew,warScore:S.warScore,totalBanked:crewTotal()};
+    const rivals=(S.crewBoard||[]).filter(c=>c.id!==S.crewId);
+    const rival=rivals.length?rivals[crewHash(S.crewId+":"+wk)%rivals.length]:{name:"BlackRug Capital",warScore:12000,totalBanked:2500000};
+    const your=(Number(mine.warScore)||0)+S.warScore;
+    const rivalScore=Math.max(1,Math.floor((Number(rival.warScore)||0)+(9000+(crewHash(rival.name+wk)%12)*750)*(0.35+frac)));
     const winning=your>=rivalScore,maxs=Math.max(your,rivalScore,1);
     const left=7*864e5-(Date.now()%(7*864e5)),dd=Math.floor(left/864e5),hh=Math.floor((left%864e5)/36e5);
     const hero=document.createElement("div");hero.className="crewhero";
-    hero.innerHTML='<div class="ds">⚔️ CREW WAR · ends in '+dd+'d '+hh+'h</div><div class="big">'+S.crew+' vs '+rival+'</div><div class="v" style="color:'+(winning?"var(--green)":"var(--red)")+'">'+(winning?"WINNING 🏆":"LOSING 😤")+'</div>';
+    hero.innerHTML='<div class="ds">⚔️ REAL CREW WAR · ends in '+dd+'d '+hh+'h</div><div class="big">'+esc(S.crew)+' vs '+esc(rival.name)+'</div><div class="v" style="color:'+(winning?"var(--green)":"var(--red)")+'">'+(winning?"WINNING 🏆":"LOSING 😤")+'</div>';
     wrap.appendChild(hero);
     const bars=document.createElement("div");bars.className="card";
-    bars.innerHTML='<div class="sec-h" style="margin-top:0">War score</div><div class="ds" style="display:flex;justify-content:space-between"><span style="color:var(--cyan)">'+S.crew+'</span><b>'+fmt(your)+'</b></div><div class="pbar2"><i style="width:'+(your/maxs*100)+'%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></div><div class="ds" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--red)">'+rival+'</span><b>'+fmt(rivalScore)+'</b></div><div class="pbar2"><i style="width:'+(rivalScore/maxs*100)+'%;background:linear-gradient(90deg,var(--red),#ff7a3b)"></i></div><div class="ds" style="margin-top:10px">Your contribution: <b style="color:var(--gold)">'+fmt(S.warScore)+'</b> war pts</div>';
+    bars.innerHTML='<div class="sec-h" style="margin-top:0">War score</div><div class="ds" style="display:flex;justify-content:space-between"><span style="color:var(--cyan)">'+esc(S.crew)+'</span><b>'+fmt(your)+'</b></div><div class="pbar2"><i style="width:'+(your/maxs*100)+'%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></div><div class="ds" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--red)">'+esc(rival.name)+'</span><b>'+fmt(rivalScore)+'</b></div><div class="pbar2"><i style="width:'+(rivalScore/maxs*100)+'%;background:linear-gradient(90deg,var(--red),#ff7a3b)"></i></div><div class="ds" style="margin-top:10px">Your contribution: <b style="color:var(--gold)">'+fmt(S.warScore)+'</b> war pts · crew total updates after sync</div>';
     wrap.appendChild(bars);
-    const rcost=1000,rgain=1500,canR=S.balance>=rcost;
+    const rcost=Math.max(1000,Math.floor(S.bet*3)),rgain=Math.floor(rcost*1.6*(1+effVip()*0.08)),canR=S.balance>=rcost;
     const ra=document.createElement("div");ra.className="card row";
     ra.innerHTML='<div class="emo">⚔️</div><div class="grow"><div class="nm">Rally the crew</div><div class="ds">spend '+fmt(rcost)+' $MOON → +'+fmt(rgain)+' war pts</div></div><button class="buy"'+(canR?"":" disabled")+'>Rally</button>';
     wrap.appendChild(ra);
     ra.querySelector("button").addEventListener("click",()=>{if(S.balance<rcost)return;S.balance-=rcost;S.warScore+=rgain;save();renderWars();renderLive();renderStats();sfxBuy();toast("⚔️","Rallied!","+"+fmt(rgain)+" war pts");});
-    const cl=document.createElement("div");cl.className="card row";const canClaim=winning&&!S.warClaim;
-    cl.innerHTML='<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">'+(S.warClaim?"Claimed this week ✓":(winning?"Your crew is ahead — claim it!":"Pull ahead of "+rival+" to unlock"))+'</div></div><button class="qclaim '+(S.warClaim?"done":"")+'"'+(canClaim?"":" disabled")+'>'+(S.warClaim?"✓":"Claim 20K")+'</button>';
+    const lead=Math.max(0,your-rivalScore),reward=Math.min(250000,Math.max(25000,Math.floor(25000+lead*0.35+S.warScore*0.6)));
+    const cl=document.createElement("div");cl.className="card row";const canClaim=winning&&!S.warClaim&&S.warScore>=5000;
+    cl.innerHTML='<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">'+(S.warClaim?"Claimed this week ✓":(winning?(S.warScore>=5000?"Claim scales with lead + contribution":"Contribute 5K war pts to unlock"):"Pull ahead of "+esc(rival.name)+" to unlock"))+'</div></div><button class="qclaim '+(S.warClaim?"done":"")+'"'+(canClaim?"":" disabled")+'>'+(S.warClaim?"✓":"Claim "+fmt(reward))+'</button>';
     wrap.appendChild(cl);
-    if(canClaim)cl.querySelector("button").addEventListener("click",()=>{S.warClaim=true;bank(20000);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+20,000 $MOON — gg");});
-    const f=document.createElement("div");f.innerHTML='<div class="sec-h">❔ How crew wars work</div><details class="faq"><summary>What is a crew war?</summary><div class="a">Each week your crew battles a rival crew. Highest war score when the timer ends wins.</div></details><details class="faq"><summary>How do I help win?</summary><div class="a">Rally (spend $MOON for war pts) to push your crew ahead — every member stacks up.</div></details><details class="faq"><summary>Reward?</summary><div class="a">If your crew is ahead, claim the weekly Victory Chest (+20,000 $MOON). Wars reset each week.</div></details>';
+    if(canClaim)cl.querySelector("button").addEventListener("click",()=>{S.warClaim=true;bank(reward);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+"+fmt(reward)+" $MOON — gg");});
+    const f=document.createElement("div");f.innerHTML='<div class="sec-h">❔ How crew wars work</div><details class="faq"><summary>What changed?</summary><div class="a">Wars now use real player crews instead of fake prefilled crews. Your rally points persist and stack with other members.</div></details><details class="faq"><summary>How do I help win?</summary><div class="a">Rally by spending $MOON. Rally cost scales with your selected bet, and VIP slightly improves war point efficiency.</div></details><details class="faq"><summary>Reward?</summary><div class="a">Victory chests now scale from 25K to 250K based on your contribution and the crew lead. You must contribute at least 5K war pts this week.</div></details>';
     wrap.appendChild(f);}
   function resetRankTab(){document.querySelectorAll(".rtab").forEach((x,i)=>x.classList.toggle("on",i===0));["rank","players","crews","mycrew","wars"].forEach((k,i)=>{const el=$("rt-"+k);if(el)el.style.display=i===0?"block":"none";});}
   document.querySelectorAll(".rtab").forEach(b=>{b.addEventListener("click",()=>{
@@ -2018,7 +2040,7 @@
       tg.onEvent&&tg.onEvent("viewportChanged",fitViewport);fitViewport();
       const u=tg.initDataUnsafe&&tg.initDataUnsafe.user;
       if(u){
-        if(u.id)S.refCode=refFromId(u.id);                 // referral code tied to the Telegram account
+        if(u.id){currentUserId=String(u.id);S.refCode=refFromId(u.id);}                 // referral code tied to the Telegram account
         if(!HADSAVE)S.name=String(u.username||u.first_name||S.name).slice(0,18);
         const rc=$("refCode");if(rc)rc.textContent=S.refCode;
         const nm=$("invName");if(nm)nm.textContent=u.username?("@"+u.username):(u.first_name||S.name);

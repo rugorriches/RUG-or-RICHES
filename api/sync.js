@@ -33,6 +33,10 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL
       `);
       await db.query(`
+        ALTER TABLE crews
+          ADD COLUMN IF NOT EXISTS leader_id BIGINT REFERENCES players(id) ON DELETE SET NULL
+      `);
+      await db.query(`
         ALTER TABLE quests
           ADD COLUMN IF NOT EXISTS social_tg_group BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS social_x_state INT DEFAULT 0 NOT NULL,
@@ -183,7 +187,7 @@ async function loadPurchaseEntitlements(playerId) {
 // Load full player profile from DB
 async function loadPlayerProfile(playerId) {
   const { rows: players } = await db.query(
-    `SELECT p.*, c.name as crew_name
+    `SELECT p.*, c.id::text as crew_id_text, c.name as crew_name, c.leader_id::text as crew_leader_id
      FROM players p
      LEFT JOIN crews c ON p.crew_id = c.id
      WHERE p.id = $1`,
@@ -338,17 +342,8 @@ module.exports = async (req, res) => {
       try {
         await client.query("BEGIN");
 
-        // Crew lookup/creation
-        let crewId = null;
-        if (state.crew) {
-          const { rows: crews } = await client.query("SELECT id FROM crews WHERE name = $1", [state.crew]);
-          if (crews.length > 0) {
-            crewId = crews[0].id;
-          } else {
-            const { rows: newCrews } = await client.query("INSERT INTO crews (name) VALUES ($1) RETURNING id", [state.crew]);
-            crewId = newCrews[0].id;
-          }
-        }
+        const { rows: currentCrewRows } = await client.query("SELECT crew_id FROM players WHERE id = $1", [tgUser.id]);
+        const crewId = currentCrewRows[0] ? currentCrewRows[0].crew_id : null;
 
         const questIds = ["taps", "price", "cash", "invite", "vbig", "vmoon"];
         const achIds = ["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"];
