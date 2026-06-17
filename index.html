@@ -206,10 +206,10 @@
 
 <div class="wrap">
   <div class="stats reveal">
-    <div class="stat"><div class="n grad" data-count="500000">0</div><div class="l">Taps & counting</div></div>
-    <div class="stat"><div class="n grad" data-count="12000">0</div><div class="l">Degens playing</div></div>
-    <div class="stat"><div class="n grad" data-count="9800000">0</div><div class="l">$MOON banked</div></div>
-    <div class="stat"><div class="n grad" data-count="41200">0</div><div class="l">Rugs survived</div></div>
+    <div class="stat"><div class="n grad" id="statTaps" data-count="0">0</div><div class="l">Taps & counting</div></div>
+    <div class="stat"><div class="n grad" id="statPlayers" data-count="0">0</div><div class="l">Degens playing</div></div>
+    <div class="stat"><div class="n grad" id="statBanked" data-count="0">0</div><div class="l">$MOON banked</div></div>
+    <div class="stat"><div class="n grad" id="statRugs" data-count="0">0</div><div class="l">Rugs survived</div></div>
   </div>
 </div>
 
@@ -309,12 +309,16 @@
   // scroll reveal
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.15});
   document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
-  // animated counters
-  const fmt=n=>{n=Math.floor(n);if(n>=1e6)return (n/1e6).toFixed(1)+"M";if(n>=1e3)return (n/1e3).toFixed(0)+"K";return n.toLocaleString();};
-  const cio=new IntersectionObserver((es)=>{es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target,target=+el.dataset.count;let t0=null;
-    const step=(t)=>{if(!t0)t0=t;const p=Math.min((t-t0)/1400,1);el.textContent=fmt(target*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);};
-    requestAnimationFrame(step);cio.unobserve(el);});},{threshold:.5});
+  // live database-backed counters
+  const fmt=n=>{n=Math.floor(n);if(n>=1e9)return (n/1e9).toFixed(2)+"B";if(n>=1e6)return (n/1e6).toFixed(1)+"M";if(n>=1e3)return (n/1e3).toFixed(1)+"K";return n.toLocaleString();};
+  const counterSeen=new WeakSet();
+  function animateCounter(el,target){let t0=null;const step=(t)=>{if(!t0)t0=t;const p=Math.min((t-t0)/1400,1);el.textContent=fmt(target*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
+  const cio=new IntersectionObserver((es)=>{es.forEach(e=>{if(!e.isIntersecting||counterSeen.has(e.target))return;counterSeen.add(e.target);animateCounter(e.target,+e.target.dataset.count||0);});},{threshold:.5});
   document.querySelectorAll("[data-count]").forEach(el=>cio.observe(el));
+  fetch("/api/stats").then(r=>r.ok?r.json():null).then(s=>{if(!s)return;
+    const pairs=[["statTaps",s.taps],["statPlayers",s.players],["statBanked",s.moon_banked],["statRugs",s.rugs_survived]];
+    pairs.forEach(([id,val])=>{const el=document.getElementById(id);if(!el)return;el.dataset.count=String(val||0);if(counterSeen.has(el))animateCounter(el,val||0);});
+  }).catch(()=>{});
 </script>
 </body>
 </html>
