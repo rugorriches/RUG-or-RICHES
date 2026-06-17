@@ -163,7 +163,19 @@ CREATE TABLE public.stars_transactions (
 );
 
 -- ============================================================
--- 8. CREWS TABLE
+-- 8. WEBHOOK LOGS
+-- Stores raw Telegram webhook events/errors for payment auditability.
+-- ============================================================
+CREATE TABLE public.webhook_logs (
+    id         BIGSERIAL PRIMARY KEY,
+    type       VARCHAR(100) NOT NULL,
+    payload    JSONB        NOT NULL,
+    error      TEXT,
+    created_at TIMESTAMPTZ  DEFAULT now() NOT NULL
+);
+
+-- ============================================================
+-- 9. CREWS TABLE
 -- ============================================================
 CREATE TABLE public.crews (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

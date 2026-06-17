@@ -7,6 +7,30 @@ const AIRDROP_CAP = 100000000;
 
 let lastUpdate = null;
 let lastError = null;
+let schemaReady;
+
+async function ensureSchema() {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS webhook_logs (
+          id BIGSERIAL PRIMARY KEY,
+          type VARCHAR(100) NOT NULL,
+          payload JSONB NOT NULL,
+          error TEXT,
+          created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+        )
+      `);
+      await db.query(`
+        ALTER TABLE players
+          ADD COLUMN IF NOT EXISTS vip_sub_until BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS skin VARCHAR(40) DEFAULT 'gold',
+          ADD COLUMN IF NOT EXISTS skins JSONB DEFAULT '["gold"]'::jsonb
+      `);
+    })();
+  }
+  return schemaReady;
+}
 
 function refFromId(id) {
   let h = 2166136261 >>> 0;
@@ -53,6 +77,7 @@ async function tgApi(method, body) {
 }
 
 async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
+  await ensureSchema();
   const client = await db.pool.connect();
   try {
     await client.query("BEGIN");
@@ -130,6 +155,26 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
          WHERE id = $1`,
         [payerId, reward.airdrop, starsAmount, AIRDROP_CAP]
       );
+    } else if (purchase.type === "vipsub" && reward.days) {
+      await client.query(
+        `UPDATE players
+         SET vip_sub_until = GREATEST(vip_sub_until, $2) + $3,
+             stars_spent = stars_spent + $4
+         WHERE id = $1`,
+        [payerId, Date.now(), reward.days * 86400000, starsAmount]
+      );
+    } else if (purchase.type === "skin" && reward.id) {
+      await client.query(
+        `UPDATE players
+         SET skins = (
+               SELECT jsonb_agg(DISTINCT s)
+               FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $2::jsonb) AS t(s)
+             ),
+             skin = $3,
+             stars_spent = stars_spent + $4
+         WHERE id = $1`,
+        [payerId, JSON.stringify(["gold", reward.id]), reward.id, starsAmount]
+      );
     } else if (purchase.type === "piggy" && reward.moon) {
       await client.query(
         `UPDATE players
@@ -157,6 +202,8 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
 }
 
 module.exports = async (req, res) => {
+  await ensureSchema();
+
   // Simple status check
   if (req.method === "GET") {
     res.statusCode = 200;
