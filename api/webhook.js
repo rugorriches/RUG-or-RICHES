@@ -5,6 +5,13 @@ const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000;
 const AIRDROP_CAP = 100000000;
 
+// /start message config — override any of these with Vercel env vars
+const WEBAPP_URL = process.env.WEBAPP_URL || "https://rug-or-riches-seven.vercel.app/play";
+const WELCOME_IMAGE = process.env.WELCOME_IMAGE_URL || "https://rug-or-riches-seven.vercel.app/assets/brand/welcome.png";
+const CHANNEL_URL = process.env.CHANNEL_URL || "https://t.me/rugorricheslounge";
+const GROUP_URL = process.env.GROUP_URL || "https://t.me/rugorricheslounge";
+const X_URL = process.env.X_URL || "https://x.com/RUGorRICHESApp";
+
 let lastUpdate = null;
 let lastError = null;
 let schemaReady;
@@ -242,21 +249,30 @@ module.exports = async (req, res) => {
       const chatId = upd.message.chat.id;
       
       if (text.startsWith("/start")) {
-        const webappUrl = `https://rug-or-riches-seven.vercel.app/play`;
-        const tgRes = await tgApi("sendMessage", {
-          chat_id: chatId,
-          text: `Welcome to RUG OR RICHES ($MOON) — the press-your-luck crypto simulator! 📈💀\n\nTap to pump the chart, accumulate $MOON points, and cash out before the rug pull wipes your position.\n\nInvite friends to earn massive bonuses and compete on the global leaderboard!`,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: "▶ Play RUG OR RICHES",
-                  web_app: { url: webappUrl }
-                }
-              ]
-            ]
-          }
+        const caption =
+          `🦈 <b>Welcome to RUG OR RICHES</b> ($MOON)\n` +
+          `<i>Pump it. Bank it. Before it rugs.</i>\n\n` +
+          `📈 Tap to pump a live $MOON chart, ride the gains as high as you dare — then cash out before the rug wipes your bag.\n` +
+          `🪂 Stack <b>Airdrop Points</b> all Season 1.\n` +
+          `🤝 Invite friends — you <b>both</b> bank 5,000 $MOON.\n` +
+          `🏆 Climb the global leaderboard 🦐 → 🦖\n\n` +
+          `Tap <b>Play</b> and don't get rekt. 💀`;
+        const keyboard = {
+          inline_keyboard: [
+            [{ text: "🎮 Play RUG OR RICHES", web_app: { url: WEBAPP_URL } }],
+            [{ text: "📢 Channel", url: CHANNEL_URL }, { text: "💬 Group", url: GROUP_URL }],
+            [{ text: "🐦 Follow on X", url: X_URL }, { text: "🪂 Airdrop", web_app: { url: WEBAPP_URL } }]
+          ]
+        };
+        // try a rich photo message; if the image URL isn't reachable yet, fall back to text so /start never breaks
+        let tgRes = await tgApi("sendPhoto", {
+          chat_id: chatId, photo: WELCOME_IMAGE, caption, parse_mode: "HTML", reply_markup: keyboard
         });
+        if (!tgRes || !tgRes.ok) {
+          tgRes = await tgApi("sendMessage", {
+            chat_id: chatId, text: caption, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: keyboard
+          });
+        }
         if (tgRes && !tgRes.ok) {
           lastError = `Telegram API Error: ${JSON.stringify(tgRes)}`;
           await dbLogWebhook("start_command_error", upd, lastError);
