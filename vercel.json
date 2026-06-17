@@ -18,10 +18,13 @@
     { "src": "/api/claim", "dest": "/api/claim.js" },
     { "src": "/api/gift", "dest": "/api/gift.js" },
     { "src": "/api/cron", "dest": "/api/cron.js" },
-    { "src": "/play", "dest": "/moontap.html" },
+    { "src": "/play", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/moontap.html" },
+    { "src": "/", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/index.html" },
+    { "src": "/(.*\\.html)", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/$1" },
     { "src": "/privacy", "dest": "/privacy.html" },
     { "src": "/terms", "dest": "/terms.html" },
     { "src": "/cookies", "dest": "/cookies.html" },
+    { "src": "/litepaper", "dest": "/litepaper.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ],
   "crons": [
