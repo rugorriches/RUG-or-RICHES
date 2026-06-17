@@ -3,6 +3,10 @@ const db = require("./db");
 const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
+const ECONOMY_CAP = 100000000;
+const PRICE_CAP = 100;
+const REFERRAL_REWARD = 5000;
+const PREMIUM_REFERRAL_REWARD = 25000;
 let schemaReady;
 
 async function ensureSchema() {
@@ -285,28 +289,46 @@ module.exports = async (req, res) => {
       const startParam = params.get("start_param");
       let referredById = null;
       if (startParam) {
-        const { rows: referrers } = await db.query("SELECT id FROM players WHERE ref_code = $1", [startParam]);
+        const { rows: referrers } = await db.query("SELECT id FROM players WHERE ref_code = $1 AND id <> $2", [startParam, tgUser.id]);
         if (referrers.length > 0) {
           referredById = referrers[0].id;
         }
       }
 
       await db.query(
-        `INSERT INTO players (id, username, first_name, ref_code, name, referred_by)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO players (id, username, first_name, ref_code, name, referred_by, balance, airdrop_pts)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
          ON CONFLICT (id) DO NOTHING`,
-        [tgUser.id, tgUser.username || null, tgUser.first_name || null, refCode, name, referredById]
+        [tgUser.id, tgUser.username || null, tgUser.first_name || null, refCode, name, referredById, referredById ? 500 + REFERRAL_REWARD : 500]
       );
       await db.query("INSERT INTO upgrades (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [tgUser.id]);
       await db.query("INSERT INTO quests (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [tgUser.id]);
       
       if (referredById) {
-        await db.query(
+        const reward = tgUser.is_premium ? PREMIUM_REFERRAL_REWARD : REFERRAL_REWARD;
+        const { rows: credited } = await db.query(
           `INSERT INTO friends (player_id, friend_id, is_premium)
            VALUES ($1, $2, $3)
-           ON CONFLICT DO NOTHING`,
+           ON CONFLICT DO NOTHING
+           RETURNING friend_id`,
           [referredById, tgUser.id, !!tgUser.is_premium]
         );
+        if (credited.length > 0) {
+          await db.query(
+            `UPDATE players
+             SET balance = LEAST(balance + $2, $3),
+                 airdrop_pts = LEAST(airdrop_pts + $2, $3),
+                 lifetime_banked = LEAST(lifetime_banked + $2, $3)
+             WHERE id = $1`,
+            [referredById, reward, ECONOMY_CAP]
+          );
+          await db.query(
+            `UPDATE quests
+             SET daily_invites = daily_invites + 1
+             WHERE player_id = $1`,
+            [referredById]
+          );
+        }
       }
     }
 
@@ -382,16 +404,16 @@ module.exports = async (req, res) => {
           [
             tgUser.id,
             cleanName(state.name, tgUser.username || tgUser.first_name),
-            clampInt(state.balance, 0, 1000000000000000, 500),
-            clampInt(state.airdrop, 0, 1000000000000000, 500),
-            clampInt(state.lifetime, 0, 1000000000000000, 0),
-            clampInt(state.bestPot, 0, 1000000000000000, 0),
-            clampNumber(state.bestPrice, 0.01, 1000000, 1),
+            clampInt(state.balance, 0, ECONOMY_CAP, 500),
+            clampInt(state.airdrop, 0, ECONOMY_CAP, 500),
+            clampInt(state.lifetime, 0, ECONOMY_CAP, 0),
+            clampInt(state.bestPot, 0, ECONOMY_CAP, 0),
+            clampNumber(state.bestPrice, 0.01, PRICE_CAP, 1),
             clampInt(state.rugs, 0, 1000000000, 0),
             clampInt(state.cashouts, 0, 1000000000, 0),
             clampInt(state.taps, 0, 1000000000000, 0),
-            clampInt(state.pnlWon, 0, 1000000000000000, 0),
-            clampInt(state.pnlLost, 0, 1000000000000000, 0),
+            clampInt(state.pnlWon, 0, ECONOMY_CAP, 0),
+            clampInt(state.pnlLost, 0, ECONOMY_CAP, 0),
             clampInt(state.vip, 0, 4, 0),
             cleanDate(state.vipDay),
             cleanDate(state.comboDay),
@@ -410,13 +432,13 @@ module.exports = async (req, res) => {
             clampInt(state.vipSubUntil, 0, 4102444800000, 0),
             !!state.firstBuyUsed,
             cleanDate(state.dealDay),
-            clampInt(state.piggy, 0, 1000000000000000, 0),
+            clampInt(state.piggy, 0, ECONOMY_CAP, 0),
             clampInt(state.coinLevel, 1, 1000000, 1),
             clampInt(state.coinXp, 0, 1000000000, 0),
             skin,
             JSON.stringify(skins),
             cleanString(state.warWeek, 20),
-            clampInt(state.warScore, 0, 1000000000000000, 0),
+            clampInt(state.warScore, 0, ECONOMY_CAP, 0),
             !!state.warClaim
           ]
         );
@@ -450,7 +472,7 @@ module.exports = async (req, res) => {
              daily_taps = GREATEST(daily_taps, $2),
              daily_max_price = GREATEST(daily_max_price, $3),
              daily_big_sell = GREATEST(daily_big_sell, $4),
-             daily_invites = GREATEST(daily_invites, $5),
+             daily_invites = daily_invites,
              claimed_ids = $6,
              last_quest_reset = COALESCE($7::date, last_quest_reset),
              social_x_state = GREATEST(social_x_state, $8),
@@ -466,7 +488,7 @@ module.exports = async (req, res) => {
             tgUser.id,
             clampInt(questProg.taps, 0, 1000000000, 0),
             clampNumber(questProg.price, 0, 1000000, 1),
-            clampInt(questProg.cash, 0, 1000000000000000, 0),
+            clampInt(questProg.cash, 0, ECONOMY_CAP, 0),
             clampInt(questProg.invite, 0, 1000000, 0),
             cleanIdArray(quests.claimed, questIds),
             cleanDate(quests.date),
@@ -489,7 +511,12 @@ module.exports = async (req, res) => {
           }
         }
 
-        for (const milestone of cleanMilestones(state.refMiles)) {
+        const { rows: friendCountRows } = await client.query(
+          "SELECT COUNT(*)::int AS n FROM friends WHERE player_id = $1",
+          [tgUser.id]
+        );
+        const realFriendCount = friendCountRows[0] ? Number(friendCountRows[0].n) || 0 : 0;
+        for (const milestone of cleanMilestones(state.refMiles).filter(n => n <= realFriendCount)) {
           await client.query(
             `INSERT INTO ref_milestones (player_id, milestone_n)
              VALUES ($1, $2)

@@ -672,6 +672,9 @@
     <div class="sec-h">Trading P&L (saved)</div>
     <div class="twocol"><div class="card"><div class="v" id="d-won" style="color:var(--green)">0</div><div class="l">Won (cash-outs)</div></div><div class="card"><div class="v" id="d-lost" style="color:var(--red)">0</div><div class="l">Lost (rugs)</div></div></div>
     <div class="card"><div class="stat-line" style="border:none"><span>Net session P&L</span><b id="d-net">0</b></div></div>
+    <div class="sec-h">Referral tracking</div>
+    <div class="twocol"><div class="card"><div class="v" id="d-refs">0</div><div class="l">Friends invited</div></div><div class="card"><div class="v" id="d-refEarned" style="color:var(--gold)">0</div><div class="l">Referral earned</div></div></div>
+    <div class="card"><div class="stat-line" style="border:none"><span>Next milestone</span><b id="d-refNext">—</b></div></div>
   </div>
 
   <div class="panel" id="panel-airdrop">
@@ -838,6 +841,7 @@
   const PRODUCTION_BACKEND_URL = null; 
   const CONFIG={ heatHazard:0.06, tapHazard:0.05, tapHazardFloor:65, warnHeat:90,
     fakeoutChance:0.15, softChance:0.55, vipEarn:[1,1.12,1.3,1.6,2.2], serverUrl:PRODUCTION_BACKEND_URL, invoiceEndpoint:"/api/invoice", verifyEndpoint:"/api/verify" };
+  const ECONOMY_CAP=100000000, PRICE_CAP=100, PRICE_SOFTCAP=18;
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
@@ -849,6 +853,7 @@
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
   let S=load();
+  clampEconomyState();
   function load(){try{const r=JSON.parse(localStorage.getItem("moontap"));
     if(r) {
       const merged = Object.assign({},DEF,r,{up:Object.assign({},DEF.up,r.up||{}),quests:Object.assign({},DEF.quests,r.quests||{}),social:Object.assign({},DEF.social,r.social||{})});
@@ -859,8 +864,13 @@
     }
     }catch(e){}
     return JSON.parse(JSON.stringify(DEF));}
+  function clampEconomyState(){
+    ["balance","airdrop","lifetime","bestPot","pnlWon","pnlLost","piggy"].forEach(k=>{S[k]=Math.floor(clamp(Number(S[k])||0,0,ECONOMY_CAP));});
+    S.bestPrice=clamp(Number(S.bestPrice)||1,0.01,PRICE_CAP);
+  }
 
   let hasCloudAuth = false;
+  let referralsLoaded = false;
   let syncInProgress = false;
   let syncTimeout = null;
 
@@ -931,7 +941,7 @@
       db.ach.forEach(a => { if (S.ach.indexOf(a) < 0) S.ach.push(a); });
     }
     const refMiles = Array.isArray(db.ref_milestones) ? db.ref_milestones : (Array.isArray(db.refMiles) ? db.refMiles : []);
-    refMiles.forEach(m => { if (S.refMiles.indexOf(m) < 0) S.refMiles.push(m); });
+    if (Array.isArray(refMiles)) S.refMiles = [...new Set(refMiles.map(Number).filter(Number.isFinite))];
     if (db.crew_name) S.crew = db.crew_name;
     if (db.sound !== undefined) S.sound = db.sound;
     if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
@@ -976,19 +986,17 @@
       }
       if (db.questsObj.date) S.quests.date = dbDay(db.questsObj.date);
     }
-    if (Array.isArray(db.friends)) {
-      db.friends.forEach(df => {
-        if (!S.friends.some(sf => sf.n === df.n)) S.friends.push(df);
-      });
-    }
+    if (Array.isArray(db.friends)) { S.friends = db.friends; referralsLoaded = true; }
     // adopt the server's canonical referral code so invite links actually attribute
     if (db.ref_code) { S.refCode = db.ref_code; const rc = document.getElementById("refCode"); if (rc) rc.textContent = S.refCode; }
     if (typeof questCheck === "function") questCheck();
     if (typeof updateQuestDot === "function") updateQuestDot();
+    clampEconomyState();
     localStorage.setItem("moontap", JSON.stringify(S));
   }
 
   function save(){
+    clampEconomyState();
     try{localStorage.setItem("moontap",JSON.stringify(S));}catch(e){}
     if (hasCloudAuth) {
       clearTimeout(syncTimeout);
@@ -1011,10 +1019,10 @@
   try{const sp=new URLSearchParams(location.search);const _tg=window.Telegram&&window.Telegram.WebApp;
     const inRef=(_tg&&_tg.initDataUnsafe&&_tg.initDataUnsafe.start_param)||sp.get("startapp")||sp.get("tgWebAppStartParam")||sp.get("ref");
     if(inRef && !localStorage.getItem("moontap_referred")){localStorage.setItem("moontap_referred",inRef);
-      bank(5000); save(); setTimeout(()=>toast("🎁","Welcome bonus!","Invited by "+inRef+" — +5,000 $MOON"),700);}}catch(e){}
+      setTimeout(()=>toast("🎁","Invite detected","Secure Telegram sync applies valid referral bonuses"),700);}}catch(e){}
 
   // ---------- EARN HELPER (tracks lifetime for ranks) ----------
-  function bank(amt){amt=Math.floor(amt); S.balance+=amt; S.airdrop+=amt; S.lifetime+=amt;}
+  function bank(amt){amt=Math.floor(amt); S.balance=Math.min(ECONOMY_CAP,S.balance+amt); S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+amt); S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+amt);}
 
   // ---------- UPGRADES ----------
   const UP=[
@@ -1064,7 +1072,7 @@
   let bonusBets=0;   // temporary +bets from a boost (resets each round)
   const betsPerRound=()=>20+effVip()*10+bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
   const curBal=c=>c==="pts"?S.airdrop:S.balance;
-  function addCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop+=a;else S.balance+=a;}
+  function addCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+a);else S.balance=Math.min(ECONOMY_CAP,S.balance+a);}
   function subCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.max(0,S.airdrop-a);else S.balance=Math.max(0,S.balance-a);}
 
   // ---------- RANKS ----------
@@ -1094,6 +1102,9 @@
   let hist=[]; for(let i=0;i<64;i++)hist.push(1.0);
   const RUGSPAN=8;
   function risk(){return clamp(heat/100,0,1);}   // rug risk now driven by multi-factor heat
+  const priceDamp=()=>price<=PRICE_SOFTCAP?1:Math.max(0.08,Math.pow(PRICE_SOFTCAP/price,0.85));
+  function capPrice(){price=clamp(price,0.2,PRICE_CAP);ath=Math.min(ath,PRICE_CAP);S.bestPrice=Math.min(S.bestPrice||1,PRICE_CAP);}
+  const maxRoundRoi=()=>8+effVip()*3+Math.min(winStreak,10)*0.4;
   let panelOpen="game";
   let isOnline = false;
   let resolvedInvoiceEndpoint = CONFIG.invoiceEndpoint;
@@ -1254,7 +1265,10 @@
       const oldP=price;
       const mult=(boost>0?2:1)*(1+Math.min(combo,comboCap())*comboGain());
       const slip=clamp(stake/liq,0,0.25);
-      price += ((0.035+price*0.009)*tapPower()*0.4 + price*slip*0.7)*(boost>0?1.6:1)*(1+(mult-1)*0.5)*vipMult()*(1+(S.coinLevel-1)*0.03)*(mevent&&mevent.pumpMul?mevent.pumpMul:1);
+      const pumpBase=(0.018+price*0.0025)*tapPower()*0.25 + price*slip*0.18;
+      const pumpMult=(boost>0?1.25:1)*(1+(mult-1)*0.18)*Math.min(vipMult(),1.65)*(1+Math.min(S.coinLevel-1,80)*0.006)*(mevent&&mevent.pumpMul?mevent.pumpMul:1);
+      price += pumpBase*pumpMult*priceDamp();
+      capPrice();
       if(Math.random()<0.5)holders++;
       if(price>ath){ath=price;if(ath>S.bestPrice)S.bestPrice=ath;}
       if(pot>0)pot*=price/oldP;
@@ -1274,13 +1288,13 @@
   coin.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();const r=stage.getBoundingClientRect();doTap(r.width/2,r.height/2);}});
 
   function triggerRug(){if(busting)return;const r=Math.random();
-    if(r<CONFIG.fakeoutChance){price*=0.6;pumpVel=0;heat=Math.max(0,heat-45);if(panelOpen==="game"){toast("😱","FLASH CRASH","Fakeout dip — hold or fold?");if(navigator.vibrate)navigator.vibrate(30);}return;}
+    if(r<CONFIG.fakeoutChance){price*=0.6;capPrice();pumpVel=0;heat=Math.max(0,heat-45);if(panelOpen==="game"){toast("😱","FLASH CRASH","Fakeout dip — hold or fold?");if(navigator.vibrate)navigator.vibrate(30);}return;}
     startBust(r<CONFIG.softChance?"soft":"hard");}
   function startBust(type){if(busting)return;busting=true;bustFrames=14;S.rugs++;unlock("first");
     bustType=type||"hard";bustTarget=bustType==="soft"?price*0.45:price*0.12;
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
     const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
-    const lost=Math.max(0,invested-rescued);S.pnlLost=(S.pnlLost||0)+lost;
+    const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+lost);
     if(panelOpen==="game"){
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
@@ -1297,9 +1311,10 @@
     ac();
     const cur=roundCur||S.betCur;const r=risk();
     const streakMul=1+Math.min(winStreak,10)*0.05;
-    const payout=Math.floor(pot*(1+r*cashBonus())*streakMul);addCur(cur,payout);
+    const rawPayout=Math.floor(pot*(1+r*cashBonus())*streakMul);
+    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*maxRoundRoi())));addCur(cur,payout);
     const profit=payout-invested;
-    if(profit>0){S.pnlWon=(S.pnlWon||0)+profit;winStreak++;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{S.pnlLost=(S.pnlLost||0)+(-profit);winStreak=0;}
+    if(profit>0){S.pnlWon=Math.min(ECONOMY_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
     if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
     if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();}
@@ -1314,8 +1329,9 @@
     }
     ac();
     const cur=roundCur||S.betCur;const r=risk();const half=pot*0.5;
-    const payout=Math.floor(half*(1+r*cashBonus()));addCur(cur,payout);
-    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=(S.pnlWon||0)+profit;if(cur==="moon")S.lifetime+=Math.floor(profit);}else{S.pnlLost=(S.pnlLost||0)+(-profit);}
+    const rawPayout=Math.floor(half*(1+r*cashBonus()));
+    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*0.5*maxRoundRoi())));addCur(cur,payout);
+    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=Math.min(ECONOMY_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+(-profit));}
     pot-=half;invested*=0.5;heat=Math.max(0,heat-25);   // scaling out locks profit & cools the rug heat
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
     save();renderLive();renderStats();renderDash();}
@@ -1335,18 +1351,19 @@
     if(Math.random()<0.12)holders+=Math.round((mktBuy-0.45)*9);          // holders follow sentiment
     holders=Math.max(200,holders); liq=30000+holders*25;                 // deeper liquidity as it grows
     const vol=mevent&&mevent.vol?mevent.vol:1;
-    const flow=mktBuy-0.5;price += flow*0.11*price + (Math.random()-0.5)*0.015*price*vol;price*=(1-0.003);
-    if(price<0.2)price=0.2;if(price>ath){ath=price;if(ath>S.bestPrice)S.bestPrice=ath;}
+    const flow=mktBuy-0.5;price += (flow*0.018*price + (Math.random()-0.5)*0.006*price*vol)*priceDamp();price*=(1-0.002);
+    capPrice();if(price>ath){ath=price;if(ath>S.bestPrice)S.bestPrice=ath;}
     if(pot>0)pot*=price/oldP;
     // ---- refined rug pressure: heat builds from overvaluation, position size vs liquidity, sell pressure & pump speed ----
     if(price>roundPeak)roundPeak=price;
     const over=clamp((price-1)/6,0,1), posRisk=pot>0?clamp(invested/liq,0,1):0, sellers=clamp(0.5-mktBuy,0,0.5)*2, frenzy=clamp(combo/120,0,1);
     const blowoff=price>=roundPeak*0.985?0.12:0;   // riding the very top is extra fragile
-    const target=over*50 + posRisk*24 + sellers*18 + frenzy*8;
+    const overextended=clamp((price-8)/20,0,1);
+    const target=over*45 + overextended*35 + posRisk*28 + sellers*18 + frenzy*8;
     heat += (target-heat)*0.06 + pumpVel*10 + blowoff*4; pumpVel*=0.85; heat=clamp(heat,0,100);
     feedAcc++;if(feedAcc>=2){feedAcc=0;spawnTrade();}
     const whaleSafe=effVip()>=4?0.4:1;
-    if(Math.random() < (0.003+(heat/100)*0.012)*whaleSafe){pushFeed("🐋 "+pick(WHALES)+" DUMPED",false,true);heat=Math.min(100,heat+22);price*=0.9;}
+    if(Math.random() < (0.003+(heat/100)*0.012)*whaleSafe){pushFeed("🐋 "+pick(WHALES)+" DUMPED",false,true);heat=Math.min(100,heat+22);price*=0.9;capPrice();}
     if(pot>0 && heat>=CONFIG.warnHeat && dumpWarn<=0){dumpWarn=1.7;if(panelOpen==="game"){toast("🚨","DUMP INCOMING","Sell NOW or get rugged!");sfxRug();}}
     if(Math.random() < Math.pow(heat/100,3)*CONFIG.heatHazard*rugResist()) triggerRug();
     updatePressure();pushTick();}
@@ -1427,7 +1444,7 @@
   function resolvePredict(){
     const up=price>predLock*1.0005, down=price<predLock*0.9995, win=(predDir>0&&up)||(predDir<0&&down);
     predActive=false;
-    if(!up&&!down){S.balance+=predStake;if(panelOpen==="game")toast("➖","Flat — refunded","+"+fmt(predStake)+" $MOON back");}
+    if(!up&&!down){addCur("moon",predStake);if(panelOpen==="game")toast("➖","Flat — refunded","+"+fmt(predStake)+" $MOON back");}
     else if(win){const payout=Math.floor(predStake*1.8);bank(payout);if(panelOpen==="game"){toast("🔮","Called it! "+(predDir>0?"📈":"📉"),"+"+fmt(payout)+" $MOON · 1.8×");sfxCash();confetti();}}
     else if(panelOpen==="game"){toast("🔮","Wrong way "+(predDir>0?"📈":"📉"),"-"+fmt(predStake)+" $MOON");}
     predDir=0;predStake=0;save();renderLive();renderStats();updatePredict();}
@@ -1460,6 +1477,10 @@
     $("betMaxTxt").textContent="Max bet ("+VIP[S.vip].nm+"): "+fmt(betMax())+(S.vip<4?" — raise it by leveling VIP":"");
     $("d-won").textContent=fmt(S.pnlWon||0);$("d-lost").textContent=fmt(S.pnlLost||0);
     const net=(S.pnlWon||0)-(S.pnlLost||0);const dn=$("d-net");dn.textContent=(net>=0?"+":"")+fmt(net);dn.style.color=net>=0?"var(--green)":"var(--red)";
+    const refEarned=S.friends.reduce((a,f)=>a+(Number(f.b)||0),0),nm=nextMile();
+    const dr=$("d-refs"),dre=$("d-refEarned"),drn=$("d-refNext");
+    if(dr)dr.textContent=S.friends.length;if(dre)dre.textContent=fmt(refEarned);
+    if(drn)drn.textContent=nm?(nm.n-S.friends.length)+" more → "+fmt(nm.r)+" $MOON":"All claimed";
     const av=$("autoVal");if(av)av.textContent=S.autoSell>0?S.autoSell.toFixed(1)+"x":"Off";
     const sl=$("slVal");if(sl)sl.textContent=S.stopLoss>0?"-"+S.stopLoss+"%":"Off";
     const dbd=$("dBetDown"),dbu=$("dBetUp");if(dbd)dbd.classList.toggle("maxed",S.bet<=10);if(dbu)dbu.classList.toggle("maxed",S.bet>=betMax());
@@ -1586,19 +1607,19 @@
     if(confirm(desc+"\n(Simulated purchase in this prototype)"))grant();}
   function buyMoon(p){const dbl=!S.firstBuyUsed;const moon=p.moon*(dbl?2:1);
     starsPurchase("Buy "+fmt(moon)+" $MOON for "+p.stars+" ⭐ Telegram Stars?"+(dbl?" (first-buy 2×!)":""),{type:"moon",stars:p.stars,moon:moon},()=>{
-    S.firstBuyUsed=true;addCur("moon",moon);S.airdrop+=moon;S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
+    S.firstBuyUsed=true;addCur("moon",moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+moon);S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
     toast("⭐","Purchase complete!","+"+fmt(moon)+" $MOON"+(dbl?" (2× first buy!)":""));});}
-  function buyStarter(){if(S.starterBought)return;starsPurchase("Starter Pack — "+fmt(STARTER.moon)+" $MOON + Bronze VIP for "+STARTER.stars+" ⭐?",{type:"starter",stars:STARTER.stars},()=>{S.starterBought=true;addCur("moon",STARTER.moon);S.airdrop+=STARTER.moon;if(S.vip<STARTER.vip)S.vip=STARTER.vip;S.starsSpent+=STARTER.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🎁","Starter Pack!","+"+fmt(STARTER.moon)+" $MOON + Bronze VIP");});}
-  function buyWhale(){starsPurchase("Whale Pack — "+fmt(WHALE.moon)+" $MOON + Gold VIP for "+fmt(WHALE.stars)+" ⭐?",{type:"whale",stars:WHALE.stars},()=>{addCur("moon",WHALE.moon);S.airdrop+=WHALE.moon;if(S.vip<WHALE.vip)S.vip=WHALE.vip;S.starsSpent+=WHALE.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🐋","Whale Pack!","+"+fmt(WHALE.moon)+" $MOON + Gold VIP");});}
+  function buyStarter(){if(S.starterBought)return;starsPurchase("Starter Pack — "+fmt(STARTER.moon)+" $MOON + Bronze VIP for "+STARTER.stars+" ⭐?",{type:"starter",stars:STARTER.stars},()=>{S.starterBought=true;addCur("moon",STARTER.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+STARTER.moon);if(S.vip<STARTER.vip)S.vip=STARTER.vip;S.starsSpent+=STARTER.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🎁","Starter Pack!","+"+fmt(STARTER.moon)+" $MOON + Bronze VIP");});}
+  function buyWhale(){starsPurchase("Whale Pack — "+fmt(WHALE.moon)+" $MOON + Gold VIP for "+fmt(WHALE.stars)+" ⭐?",{type:"whale",stars:WHALE.stars},()=>{addCur("moon",WHALE.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+WHALE.moon);if(S.vip<WHALE.vip)S.vip=WHALE.vip;S.starsSpent+=WHALE.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🐋","Whale Pack!","+"+fmt(WHALE.moon)+" $MOON + Gold VIP");});}
   function buyVipSub(){starsPurchase("VIP Pass — 30 days of Diamond perks for "+VIPSUB.stars+" ⭐?",{type:"vipsub",stars:VIPSUB.stars},()=>{S.vipSubUntil=Math.max(Date.now(),S.vipSubUntil||0)+VIPSUB.days*864e5;S.starsSpent+=VIPSUB.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("👑","VIP Pass active!","30 days of Diamond-level perks");});}
-  function buyDeal(){const td=new Date().toDateString();if(S.dealDay===td)return;starsPurchase("Daily Deal — "+fmt(DEAL.moon)+" $MOON (2× value) for "+DEAL.stars+" ⭐?",{type:"deal",stars:DEAL.stars},()=>{S.dealDay=td;addCur("moon",DEAL.moon);S.airdrop+=DEAL.moon;S.starsSpent+=DEAL.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("⏰","Daily Deal!","+"+fmt(DEAL.moon)+" $MOON");});}
-  function buyComeback(){starsPurchase("Comeback Pack — "+fmt(COMEBACK.moon)+" $MOON for "+COMEBACK.stars+" ⭐?",{type:"comeback",stars:COMEBACK.stars},()=>{addCur("moon",COMEBACK.moon);S.airdrop+=COMEBACK.moon;S.starsSpent+=COMEBACK.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🆘","Comeback!","+"+fmt(COMEBACK.moon)+" $MOON");});}
+  function buyDeal(){const td=new Date().toDateString();if(S.dealDay===td)return;starsPurchase("Daily Deal — "+fmt(DEAL.moon)+" $MOON (2× value) for "+DEAL.stars+" ⭐?",{type:"deal",stars:DEAL.stars},()=>{S.dealDay=td;addCur("moon",DEAL.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+DEAL.moon);S.starsSpent+=DEAL.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("⏰","Daily Deal!","+"+fmt(DEAL.moon)+" $MOON");});}
+  function buyComeback(){starsPurchase("Comeback Pack — "+fmt(COMEBACK.moon)+" $MOON for "+COMEBACK.stars+" ⭐?",{type:"comeback",stars:COMEBACK.stars},()=>{addCur("moon",COMEBACK.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+COMEBACK.moon);S.starsSpent+=COMEBACK.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🆘","Comeback!","+"+fmt(COMEBACK.moon)+" $MOON");});}
   function buyBoost(b){starsPurchase(b.nm+" for "+b.stars+" ⭐?",{type:"boost",id:b.id,stars:b.stars},()=>{
     if(b.id==="energy")energy=maxEnergy();
     else if(b.id==="turbo"){boost=Math.max(boost,30);const bb=$("boostBadge");if(bb)bb.style.display="block";}
     else if(b.id==="bets")bonusBets+=20;
     S.starsSpent+=b.stars;save();renderStore();renderLive();renderStats();renderBetHUD();sfxCash();toast(b.emo,b.nm+"!","Activated");});}
-  function buySeason(){if(S.seasonPass)return;starsPurchase("Season 1 Pass for "+SEASON.stars+" ⭐?",{type:"season",stars:SEASON.stars},()=>{S.seasonPass=true;S.airdrop+=50000;S.starsSpent+=SEASON.stars;save();renderStore();renderLive();renderStats();confetti();toast("🎟️","Season Pass!","+50,000 airdrop pts + daily rewards");});}
+  function buySeason(){if(S.seasonPass)return;starsPurchase("Season 1 Pass for "+SEASON.stars+" ⭐?",{type:"season",stars:SEASON.stars},()=>{S.seasonPass=true;S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+50000);S.starsSpent+=SEASON.stars;save();renderStore();renderLive();renderStats();confetti();toast("🎟️","Season Pass!","+50,000 airdrop pts + daily rewards");});}
   function crackPiggy(){if(S.piggy<1)return;const pcost=Math.max(20,Math.round(S.piggy/3000));starsPurchase("Crack the piggy bank — claim "+fmt(S.piggy)+" $MOON for "+pcost+" ⭐?",{type:"piggy",stars:pcost,moon:S.piggy},()=>{const amt=S.piggy;S.piggy=0;bank(amt);S.starsSpent+=pcost;save();renderStore();renderLive();renderStats();confetti();toast("🐷","Piggy cracked!","+"+fmt(amt)+" $MOON");});}
   function buyVipStars(i){const v=VIP[i];if(S.vip>=i)return;
     starsPurchase("Unlock "+v.nm+" for "+v.vstars+" ⭐ Telegram Stars?",{type:"vip",tier:i,stars:v.vstars},()=>{
@@ -1853,10 +1874,11 @@
       $("invBar").style.width=clamp((n-lo)/(nm.n-lo)*100,0,100)+"%";$("invNextTxt").textContent=(nm.n-n)+" more → "+fmt(nm.r)+" $MOON";}
     else{$("invBar").style.width="100%";$("invNextTxt").textContent="All milestones claimed 👑";}
     const ml=$("mileList");ml.innerHTML="";
+    const needCloud=!!(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData),refVerified=!needCloud||referralsLoaded;
     REF_MILE.forEach(m=>{const reached=n>=m.n,claimed=S.refMiles.indexOf(m.n)>=0;
       const d=document.createElement("div");d.className="mile"+(reached?" done":"");
-      d.innerHTML='<div class="emo">🎁</div><div class="grow"><div class="nm">Invite '+m.n+' friends</div><div class="ds">reward '+fmt(m.r)+' $MOON</div></div><button class="qclaim '+(claimed?"done":"")+'"'+((!reached||claimed)?" disabled":"")+'>'+(claimed?"✓":"Claim")+'</button>';
-      d.querySelector(".qclaim").addEventListener("click",()=>{if(S.friends.length<m.n||S.refMiles.indexOf(m.n)>=0)return;
+      d.innerHTML='<div class="emo">🎁</div><div class="grow"><div class="nm">Invite '+m.n+' friends</div><div class="ds">'+(refVerified?'reward '+fmt(m.r)+' $MOON':'syncing verified referrals...')+'</div></div><button class="qclaim '+(claimed?"done":"")+'"'+((!refVerified||!reached||claimed)?" disabled":"")+'>'+(claimed?"✓":"Claim")+'</button>';
+      d.querySelector(".qclaim").addEventListener("click",()=>{if(!refVerified||S.friends.length<m.n||S.refMiles.indexOf(m.n)>=0)return;
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "claim_milestone", n: m.n }));
           return;
@@ -1867,10 +1889,6 @@
     if(n===0){fl.innerHTML='<div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div>';}
     else{fl.innerHTML="";S.friends.slice().reverse().forEach(f=>{const d=document.createElement("div");d.className="friend";
       d.innerHTML='<div class="av">'+(f.n?f.n[0].toUpperCase():"?")+'</div><div><div class="nm" style="font-size:12px">'+f.n+(f.prem?' <span class="pill">PREMIUM</span>':'')+'</div><div class="ds">'+(f.d||"")+'</div></div><div class="b">+'+fmt(f.b||0)+'</div>';fl.appendChild(d);});}}
-  function addFriend(){const prem=Math.random()<0.3;const r=prem?25000:5000;
-    S.friends.push({n:pick(TRADERS)+Math.floor(Math.random()*99),d:new Date().toLocaleDateString(),b:r,prem:prem});
-    bank(r);bumpQuest("invites",1,"add");save();}
-
   $("copyCode").addEventListener("click",doShare);
   function shareTo(p){const url=inviteLink();const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
     const t=encodeURIComponent(txt),u=encodeURIComponent(url);
