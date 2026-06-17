@@ -66,6 +66,11 @@
     border-radius:9px; font-size:13px; cursor:pointer; transition:transform .12s; backdrop-filter:blur(6px); padding:0;}
   .iconbtn:active{transform:scale(.9);}
   .season{font-size:8.5px; color:#b79bff; text-align:center; padding:0 14px;}
+  .event-banner{margin:2px 10px 0; padding:5px 10px; border-radius:10px; font-size:11px; font-weight:800; text-align:center; color:#fff;
+    background:linear-gradient(90deg,rgba(255,212,0,.18),rgba(255,43,214,.18)); border:1px solid rgba(255,212,0,.45); box-shadow:0 0 16px rgba(255,212,0,.25);
+    animation:evtpulse 2s ease-in-out infinite;}
+  .event-banner b{color:var(--gold);}
+  @keyframes evtpulse{50%{box-shadow:0 0 24px rgba(255,43,214,.4);}}
   .season b{color:var(--gold);}
 
   /* stats */
@@ -610,6 +615,7 @@
     <div class="hbtns"><button class="iconbtn" id="storeBtn" aria-label="Store">⭐</button><button class="iconbtn" id="helpBtn" aria-label="Help">❓</button><button class="iconbtn" id="dashBtn" aria-label="Dashboard">📊</button><button class="iconbtn" id="soundBtn" aria-label="Toggle sound">🔊</button><button class="iconbtn" id="profileBtn" aria-label="Profile">👤</button></div>
   </header>
   <div class="season">⏳ Airdrop Season 1 ends in <b id="seasonTimer">--</b></div>
+  <div class="event-banner" id="eventBanner" style="display:none"></div>
 
   <div id="gameScroll">
   <div class="stats">
@@ -1111,6 +1117,18 @@
 
   // ---------- EARN HELPER (tracks lifetime for ranks) ----------
   function addAirdrop(amt){amt=Math.floor(amt);S.airdrop=Math.min(AIRDROP_CAP,S.airdrop+Math.max(0,amt));}
+  // ---------- LIVE EVENTS (deterministic, time-based — every player sees the same one) ----------
+  const EVENTS=[
+    {id:"happy",emo:"🍾",nm:"Happy Hour",desc:"2× cash-out earnings",mult:2,when:d=>d.getUTCHours()===18},
+    {id:"frenzy",emo:"⚡",nm:"Frenzy Friday",desc:"2× earnings all day",mult:2,when:d=>d.getUTCDay()===5},
+    {id:"storm",emo:"⛈️",nm:"Weekend Rug Storm",desc:"1.5× earnings — ride it if you dare",mult:1.5,when:d=>d.getUTCDay()===0||d.getUTCDay()===6}];
+  function activeEvent(){const d=new Date();for(let i=0;i<EVENTS.length;i++){if(EVENTS[i].when(d))return EVENTS[i];}return null;}
+  function eventMult(){const e=activeEvent();return e?e.mult:1;}
+  function eventEndsAt(e){const d=new Date();if(e.id==="happy"){const n=new Date(d);n.setUTCHours(d.getUTCHours()+1,0,0,0);return n.getTime();}const n=new Date(d);n.setUTCHours(24,0,0,0);return n.getTime();}
+  function renderEventBanner(){const el=$("eventBanner");if(!el)return;const e=activeEvent();
+    if(!e){el.style.display="none";return;}
+    const secs=Math.max(0,Math.floor((eventEndsAt(e)-Date.now())/1000)),m=Math.floor(secs/60),s=secs%60;
+    el.style.display="block";el.innerHTML=e.emo+" <b>"+e.nm+"</b> — "+e.desc+" · ends in "+(m>0?m+"m ":"")+s+"s";}
   function bank(amt,airRate){amt=Math.floor(amt); S.balance=Math.min(MOON_CAP,S.balance+amt); S.lifetime=Math.min(MOON_CAP,S.lifetime+amt); addAirdrop(Math.floor(amt*(airRate==null?AIRDROP_BANK_RATE:airRate)));}
 
   // ---------- UPGRADES ----------
@@ -1423,7 +1441,7 @@
     const cur=roundCur||S.betCur;const r=risk();
     const streakMul=1+Math.min(winStreak,10)*0.05;
     const rawPayout=Math.floor(pot*(1+r*cashBonus())*streakMul);
-    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*maxRoundRoi())));addCur(cur,payout);
+    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*maxRoundRoi()))*eventMult());addCur(cur,payout);
     const profit=payout-invested;
     if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
@@ -1448,7 +1466,7 @@
     ac();
     const cur=roundCur||S.betCur;const r=risk();const half=pot*0.5;
     const rawPayout=Math.floor(half*(1+r*cashBonus()));
-    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*0.5*maxRoundRoi())));addCur(cur,payout);
+    const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*0.5*maxRoundRoi()))*eventMult());addCur(cur,payout);
     const profit=payout-invested*0.5;if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));}
     pot-=half;invested*=0.5;heat=Math.max(0,heat-25);   // scaling out locks profit & cools the rug heat
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
@@ -2020,6 +2038,8 @@
     if(bl&&!$("boardToggle")){const tg2=document.createElement("div");tg2.id="boardToggle";tg2.style.cssText="display:flex;gap:6px;margin-bottom:9px";
       tg2.innerHTML='<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button><button class="lb-tg" data-m="region">🌍 Region</button>';
       bl.parentNode.insertBefore(tg2,bl);
+      const note=document.createElement("div");note.className="qsum";note.style.cssText="text-align:center;margin:-2px 0 9px;color:var(--gold)";note.innerHTML="🏆 Top 10 each week win $MOON — paid out automatically";
+      bl.parentNode.insertBefore(note,bl);
       tg2.querySelectorAll(".lb-tg").forEach(b=>b.addEventListener("click",()=>{boardMode=b.dataset.m;loadBoard();}));}
     const tgw=window.Telegram&&window.Telegram.WebApp;
     const myRegion=(tgw&&tgw.initDataUnsafe&&tgw.initDataUnsafe.user&&tgw.initDataUnsafe.user.language_code)||null;
@@ -2309,7 +2329,8 @@
   function seasonTick(){let end=parseInt(lsGet("moontap_season")||"0");
     if(!end){end=Date.now()+30*864e5;lsSet("moontap_season",end);}
     let s=Math.max(0,Math.floor((end-Date.now())/1000));const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);const sec=s%60;
-    const txt=d+"d "+h+"h "+m+"m "+sec+"s";$("seasonTimer").textContent=txt;const ad=$("adSeason");if(ad)ad.textContent=txt;}
+    const txt=d+"d "+h+"h "+m+"m "+sec+"s";$("seasonTimer").textContent=txt;const ad=$("adSeason");if(ad)ad.textContent=txt;
+    renderEventBanner();}
 
   // ---------- TUTORIAL ----------
   const TUT=[{em:"🪙",h:"Every tap is a bet",p:"Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered."},

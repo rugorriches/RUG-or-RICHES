@@ -43,7 +43,40 @@ module.exports = async (req, res) => {
   const job = String(getParams(req).job || "nudge");
   let sent = 0;
   try {
-    if (job === "recap") {
+    if (job === "payouts") {
+      // weekly leaderboard prizes — top 10 banked + top 10 inviters get tiered $MOON, paid once per week
+      const week = "" + Math.floor(Date.now() / (7 * 864e5));
+      const PRIZES = [1000000, 600000, 400000, 250000, 150000, 100000, 75000, 50000, 30000, 20000];
+      const MOON_CAP = 1000000000;
+      await db.query(`CREATE TABLE IF NOT EXISTS payouts (
+        period TEXT, kind TEXT, player_id BIGINT, amount BIGINT, created_at TIMESTAMPTZ DEFAULT now(),
+        PRIMARY KEY (period, kind, player_id))`);
+      const { rows: banked } = await db.query("SELECT id FROM players ORDER BY lifetime_banked DESC LIMIT 10");
+      const { rows: invs } = await db.query(
+        `SELECT ref.id FROM players child JOIN players ref ON child.referred_by = ref.id
+          WHERE child.created_at >= now() - interval '7 days'
+          GROUP BY ref.id ORDER BY COUNT(child.id) DESC LIMIT 10`);
+      const award = async (kind, list) => {
+        for (let i = 0; i < list.length; i++) {
+          const pid = list[i].id, amt = PRIZES[i] || 0;
+          if (!amt) continue;
+          const ins = await db.query(
+            "INSERT INTO payouts (period, kind, player_id, amount) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING RETURNING player_id",
+            [week, kind, pid, amt]);
+          if (ins.rows.length) {
+            await db.query(
+              "UPDATE players SET balance = LEAST(balance + $2, $3), lifetime_banked = LEAST(lifetime_banked + $2, $3) WHERE id = $1",
+              [pid, amt, MOON_CAP]);
+            sent++;
+            await sendDM(pid, "🏆 You placed #" + (i + 1) + " on this week's " +
+              (kind === "banked" ? "banked" : "inviter") + " leaderboard!\n\n💰 +" +
+              amt.toLocaleString() + " $MOON added to your balance. Keep climbing 👉 " + APP_URL);
+          }
+        }
+      };
+      await award("banked", banked);
+      await award("referral", invs);
+    } else if (job === "recap") {
       // weekly recap to players active in the last 7 days
       const { rows } = await db.query(
         `SELECT id, COALESCE(name, username, 'degen') AS name, lifetime_banked, airdrop_pts, taps, cashouts

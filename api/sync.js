@@ -38,7 +38,8 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ,
           ADD COLUMN IF NOT EXISTS region VARCHAR(8),
           ADD COLUMN IF NOT EXISTS notify BOOLEAN DEFAULT TRUE NOT NULL,
-          ADD COLUMN IF NOT EXISTS last_notify_at TIMESTAMPTZ
+          ADD COLUMN IF NOT EXISTS last_notify_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS flagged INT DEFAULT 0 NOT NULL
       `);
       await db.query(`
         ALTER TABLE crews
@@ -382,11 +383,20 @@ module.exports = async (req, res) => {
         const perRoundMax = SVR_BETMAX[vipNow] * (20 + vipNow * 10) * PRICE_CAP * 1.6;
         const lastSyncMs = prev.last_sync_at ? new Date(prev.last_sync_at).getTime() : 0;
         const elapsedSec = lastSyncMs ? Math.max(0, (Date.now() - lastSyncMs) / 1000) : 86400;
-        const gainCap = Math.min(MOON_CAP, Math.ceil(perRoundMax * (1 + elapsedSec / 2)) + perRoundMax);
+        // event headroom — must mirror moontap.html EVENTS so legit 2× event earnings aren't clipped
+        const ed = new Date();
+        const svrEventMult = (ed.getUTCHours() === 18 || ed.getUTCDay() === 5) ? 2 : ((ed.getUTCDay() === 0 || ed.getUTCDay() === 6) ? 1.5 : 1);
+        // tighter than before: an immediate re-sync allows only ~2 rounds; accrual is bounded to 8h so
+        // tampering a quick sync can't jump the balance, while honest offline gains still land.
+        const cappedElapsed = Math.min(elapsedSec, 28800);
+        const gainCap = Math.min(MOON_CAP, Math.ceil(perRoundMax * (1 + cappedElapsed / 6) * svrEventMult) + perRoundMax);
         const prevBal = Number(prev.balance) || 0, prevAir = Number(prev.airdrop_pts) || 0, prevLife = Number(prev.lifetime_banked) || 0;
-        const boundedBalance = Math.min(clampInt(state.balance, 0, MOON_CAP, 500), prevBal + gainCap);
+        const claimedBal = clampInt(state.balance, 0, MOON_CAP, 500);
+        const boundedBalance = Math.min(claimedBal, prevBal + gainCap);
         const boundedAirdrop = Math.min(clampInt(state.airdrop, 0, AIRDROP_CAP, 500), prevAir + gainCap);
         const boundedLifetime = Math.min(Math.max(clampInt(state.lifetime, 0, MOON_CAP, 0), prevLife), prevLife + gainCap);
+        // flag clients that try to claim far more than physically possible since the last sync
+        const cheatFlag = (claimedBal - (prevBal + gainCap)) > perRoundMax;
 
         const questIds = ["taps", "price", "cash", "invite", "vbig", "vmoon"];
         const achIds = ["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"];
@@ -570,6 +580,11 @@ module.exports = async (req, res) => {
              ON CONFLICT (player_id, milestone_n) DO NOTHING`,
             [tgUser.id, milestone]
           );
+        }
+
+        if (cheatFlag) {
+          await client.query("UPDATE players SET flagged = flagged + 1 WHERE id = $1", [tgUser.id]);
+          console.warn("[sync] anti-cheat: clamped + flagged player", tgUser.id, "claimed", claimedBal, "cap", prevBal + gainCap);
         }
 
         await client.query("COMMIT");
