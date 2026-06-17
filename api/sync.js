@@ -3,7 +3,7 @@ const db = require("./db");
 const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const ECONOMY_CAP = 100000000;
+const ECONOMY_CAP = 1000000000;
 const PRICE_CAP = 100;
 const REFERRAL_REWARD = 5000;
 const PREMIUM_REFERRAL_REWARD = 25000;

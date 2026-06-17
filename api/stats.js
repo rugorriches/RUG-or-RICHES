@@ -1,5 +1,5 @@
 const db = require("./db");
-const ECONOMY_CAP = 100000000;
+const ECONOMY_CAP = 1000000000;
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

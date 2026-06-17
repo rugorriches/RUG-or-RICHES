@@ -841,7 +841,7 @@
   const PRODUCTION_BACKEND_URL = null; 
   const CONFIG={ heatHazard:0.075, tapHazard:0.065, tapHazardFloor:58, warnHeat:84,
     fakeoutChance:0.18, softChance:0.50, vipEarn:[1,1.08,1.18,1.35,1.65], serverUrl:PRODUCTION_BACKEND_URL, invoiceEndpoint:"/api/invoice", verifyEndpoint:"/api/verify" };
-  const ECONOMY_CAP=100000000, PRICE_CAP=100, PRICE_SOFTCAP=18;
+  const ECONOMY_CAP=1000000000, PRICE_CAP=100, PRICE_SOFTCAP=18;
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
