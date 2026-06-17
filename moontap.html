@@ -688,7 +688,7 @@
     <div id="stakeBox"></div>
     <div class="sec-h">🔥 Daily combo</div><div class="card row" id="comboCard"></div>
     <div class="sec-h">📣 Social quests — follow & earn</div><div id="socialList"></div>
-    <div class="sec-h">🎯 Daily quests</div><div id="questList"></div>
+    <div id="questList"></div>
     <div class="sec-h">🏅 Achievements</div><div id="achList"></div>
     <div class="sec-h">❔ Airdrop FAQ</div>
     <details class="faq"><summary>What are Airdrop Points?</summary><div class="a">Points are your Season 1 qualification score, separate from spendable $MOON and VIP progress. They cannot be wagered.</div></details>
@@ -1171,19 +1171,34 @@
 
   // ---------- QUESTS ----------
   const QUESTS=[{id:"taps",emo:"👆",label:"Tap 200 times",goal:200,reward:1500,track:"taps"},
-    {id:"price",emo:"🚀",label:"Pump price to 5x",goal:5,reward:2500,track:"maxPrice"},
+    {id:"price",emo:"🚀",label:"Pump to 5x",goal:5,reward:2500,track:"maxPrice"},
     {id:"cash",emo:"💰",label:"Bank 10K in one sell",goal:10000,reward:3000,track:"bigSell"},
-    {id:"invite",emo:"🤝",label:"Invite a friend",goal:1,reward:3000,track:"invites"},
-    {id:"vbig",emo:"💎",label:"VIP: Bank 100K in one sell",goal:100000,reward:25000,track:"bigSell",vip:1},
-    {id:"vmoon",emo:"🌕",label:"VIP: Pump price to 10x",goal:10,reward:40000,track:"maxPrice",vip:2}];
-  function normalizeQuestState(){if(!S.quests)S.quests={date:null,prog:{},claimed:[]};
-    if(!S.quests.prog)S.quests.prog={};
-    if(!Array.isArray(S.quests.claimed))S.quests.claimed=[];}
-  function questCheck(){normalizeQuestState();const t=new Date().toDateString();if(S.quests.date!==t){S.quests={date:t,prog:{},claimed:[]};save();}}
+    {id:"taps2",emo:"⚡",label:"Tap 600 times",goal:600,reward:4000,track:"taps"},
+    {id:"invite",emo:"🤝",label:"Invite a friend",goal:1,reward:5000,track:"invites"}];
+  const QUESTS_W=[{id:"w_taps",emo:"👆",label:"Tap 3,000 times this week",goal:3000,reward:15000,track:"taps"},
+    {id:"w_price",emo:"🚀",label:"Pump to 15x this week",goal:15,reward:20000,track:"maxPrice"},
+    {id:"w_cash",emo:"💰",label:"Bank 250K in one sell",goal:250000,reward:25000,track:"bigSell"},
+    {id:"w_invite",emo:"🤝",label:"Invite 3 friends this week",goal:3,reward:35000,track:"invites"}];
+  const QUESTS_M=[{id:"m_taps",emo:"🔥",label:"Tap 20,000 times this month",goal:20000,reward:75000,track:"taps"},
+    {id:"m_cash",emo:"🐋",label:"Bank 2M in one sell",goal:2000000,reward:120000,track:"bigSell"},
+    {id:"m_invite",emo:"📣",label:"Invite 10 friends this month",goal:10,reward:200000,track:"invites"}];
+  const QUESTS_VIP=[{id:"v_silver",emo:"🥈",label:"Silver: Pump to 20x",goal:20,reward:60000,track:"maxPrice",vip:2},
+    {id:"v_gold",emo:"🥇",label:"Gold: Bank 5M in one sell",goal:5000000,reward:175000,track:"bigSell",vip:3},
+    {id:"v_diamond",emo:"💎",label:"Diamond: Tap 50,000 times",goal:50000,reward:400000,track:"taps",vip:4}];
+  QUESTS.forEach(q=>q.period="daily");QUESTS_W.forEach(q=>q.period="weekly");QUESTS_M.forEach(q=>q.period="monthly");QUESTS_VIP.forEach(q=>q.period="vip");
+  const ALLQ=[].concat(QUESTS,QUESTS_W,QUESTS_M,QUESTS_VIP);const qById={};ALLQ.forEach(q=>qById[q.id]=q);
+  function normalizeQuestState(){if(!S.quests)S.quests={date:null,prog:{},claimed:[]};if(!S.quests.prog)S.quests.prog={};if(!Array.isArray(S.quests.claimed))S.quests.claimed=[];
+    if(!S.qw||typeof S.qw!=="object")S.qw={k:null,prog:{},claimed:[]};if(!S.qm||typeof S.qm!=="object")S.qm={k:null,prog:{},claimed:[]};if(!S.qv||typeof S.qv!=="object")S.qv={prog:{},claimed:[]};}
+  function qbucket(q){return q.period==="weekly"?S.qw:q.period==="monthly"?S.qm:q.period==="vip"?S.qv:S.quests;}
+  function questCheck(){normalizeQuestState();
+    const t=new Date().toDateString();if(S.quests.date!==t)S.quests={date:t,prog:{},claimed:[]};
+    const wk=Math.floor(Date.now()/(7*864e5));if(S.qw.k!==wk)S.qw={k:wk,prog:{},claimed:[]};
+    const mo=new Date().toISOString().slice(0,7);if(S.qm.k!==mo)S.qm={k:mo,prog:{},claimed:[]};
+    save();}
   questCheck();
-  const qprog=id=>S.quests.prog[id]||0;
-  function bumpQuest(track,val,mode){QUESTS.filter(q=>q.track===track).forEach(q=>{const c=S.quests.prog[q.id]||0;S.quests.prog[q.id]=mode==="max"?Math.max(c,val):c+val;});updateQuestDot();}
-  function hasQuestClaim(){questCheck();return QUESTS.some(q=>effVip()>=(q.vip||0)&&qprog(q.id)>=q.goal&&S.quests.claimed.indexOf(q.id)<0);}
+  function qprog(id){const q=qById[id];const b=q?qbucket(q):S.quests;return (b&&b.prog&&b.prog[id])||0;}
+  function bumpQuest(track,val,mode){ALLQ.filter(q=>q.track===track).forEach(q=>{const b=qbucket(q);if(!b.prog)b.prog={};const c=b.prog[q.id]||0;b.prog[q.id]=mode==="max"?Math.max(c,val):c+val;});updateQuestDot();}
+  function hasQuestClaim(){questCheck();return ALLQ.some(q=>!(q.period==="vip"&&effVip()<(q.vip||0))&&qprog(q.id)>=q.goal&&(qbucket(q).claimed||[]).indexOf(q.id)<0);}
   function hasSocialClaim(){return SOCIAL.some(q=>Number((S.social||{})[q.id]||0)===2);}
   function updateQuestDot(){const any=hasQuestClaim()||hasSocialClaim();
     const nb=document.querySelector('nav button[data-p="airdrop"]');if(nb)nb.classList.toggle("alert",!!any&&panelOpen!=="airdrop");}
@@ -1695,22 +1710,24 @@
       wrap.appendChild(d);});}
 
   // ---------- QUESTS / ACH ----------
-  function renderQuests(){questCheck();const wrap=$("questList");
-    const avail=QUESTS.filter(q=>S.vip>=(q.vip||0));const nclaim=avail.filter(q=>S.quests.claimed.indexOf(q.id)>=0).length;
-    const md=new Date();md.setHours(24,0,0,0);const hrs=Math.max(1,Math.ceil((md-Date.now())/3600000));
-    wrap.innerHTML='<div class="qsum">'+nclaim+'/'+avail.length+' claimed today · resets in '+hrs+'h</div>';
-    QUESTS.forEach(q=>{const locked=S.vip<(q.vip||0);const p=qprog(q.id),done=p>=q.goal,claimed=S.quests.claimed.indexOf(q.id)>=0;
+  function renderQuests(){questCheck();const wrap=$("questList");wrap.innerHTML="";
+    const sec=(title,sub)=>{const h=document.createElement("div");h.className="sec-h";h.style.marginTop="14px";h.textContent=title;wrap.appendChild(h);
+      if(sub){const s=document.createElement("div");s.className="qsum";s.textContent=sub;wrap.appendChild(s);}};
+    const rowFor=(q)=>{const b=qbucket(q);const locked=q.period==="vip"&&effVip()<(q.vip||0);
+      const p=qprog(q.id),done=p>=q.goal,claimed=(b.claimed||[]).indexOf(q.id)>=0;
       const d=document.createElement("div");d.className="card row";
       const pct=q.track==="maxPrice"?p.toFixed(1)+"/"+q.goal+"x":fmt(p)+"/"+fmt(q.goal);
       const btn=locked?'<button class="qclaim" disabled>🔒 VIP '+q.vip+'</button>':'<button class="qclaim '+(claimed?"done":"")+'"'+((!done||claimed)?" disabled":"")+'>'+(claimed?"✓":"Claim")+'</button>';
-      d.innerHTML='<div class="emo">'+q.emo+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+(locked?("Unlocks at VIP tier "+q.vip+" · "+fmt(q.reward)+" $MOON"):(pct+' · reward '+fmt(q.reward)+' $MOON'))+'</div><div class="pbar2"><i style="width:'+clamp(p/q.goal*100,0,100)+'%"></i></div></div>'+btn;
-      if(!locked)d.querySelector(".qclaim").addEventListener("click",()=>{if(qprog(q.id)<q.goal||S.quests.claimed.indexOf(q.id)>=0)return;
-        if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
-          window._moonWS.send(JSON.stringify({ t: "claim_quest", id: q.id }));
-          return;
-        }
-        S.quests.claimed.push(q.id);bank(q.reward);save();sfxCash();renderQuests();renderLive();renderStats();updateQuestDot();toast("🎯","Quest complete!","+"+fmt(q.reward)+" $MOON");});
-      wrap.appendChild(d);});}
+      d.innerHTML='<div class="emo">'+q.emo+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+(locked?("Unlocks at VIP tier "+q.vip+" · "+fmt(q.reward)+" $MOON"):(pct+' · '+fmt(q.reward)+' $MOON'))+'</div><div class="pbar2"><i style="width:'+clamp(p/q.goal*100,0,100)+'%"></i></div></div>'+btn;
+      if(!locked)d.querySelector(".qclaim").addEventListener("click",()=>{const bb=qbucket(q);if(qprog(q.id)<q.goal||(bb.claimed||[]).indexOf(q.id)>=0)return;
+        bb.claimed.push(q.id);bank(q.reward);save();sfxCash();renderQuests();renderLive();renderStats();updateQuestDot();confetti();toast("🎯","Quest complete!","+"+fmt(q.reward)+" $MOON");});
+      wrap.appendChild(d);};
+    const md=new Date();md.setHours(24,0,0,0);const hrs=Math.max(1,Math.ceil((md-Date.now())/3600000));
+    const eom=new Date();eom.setMonth(eom.getMonth()+1,1);eom.setHours(0,0,0,0);const dleft=Math.max(1,Math.ceil((eom-Date.now())/864e5));
+    sec("🎯 Daily quests","resets in "+hrs+"h"); QUESTS.forEach(rowFor);
+    sec("📆 Weekly quests","bigger rewards · resets weekly"); QUESTS_W.forEach(rowFor);
+    sec("🗓️ Monthly quests","huge rewards · "+dleft+"d left"); QUESTS_M.forEach(rowFor);
+    sec("👑 VIP quests","members only · season-long"); QUESTS_VIP.forEach(rowFor);}
   function renderAch(){const wrap=$("achList");
     wrap.innerHTML='<div class="qsum">'+S.ach.length+'/'+ACH.length+' unlocked</div>';
     ACH.forEach(a=>{const on=S.ach.indexOf(a.id)>=0;const d=document.createElement("div");d.className="card row ach"+(on?" on":"");
