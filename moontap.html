@@ -36,6 +36,7 @@
   #gameScroll>*{flex-shrink:1;}
   #gameScroll>.coin-stage{flex:0 0 auto; min-height:0;}
   #gameScroll>.chart-card{flex:1 1 auto; min-height:150px; display:flex; flex-direction:column;}   /* chart is the hero — absorbs the slack and grows */
+  @media(max-height:760px){ #gameScroll>.chart-card{min-height:104px;} #chart{min-height:60px;} }   /* short phones: don't let the chart floor push the nav off */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -2365,6 +2366,12 @@
       // times as the viewport settles so the bottom nav is on-screen without the user dragging the sheet up.
       [60,250,600,1200,2500].forEach(t=>setTimeout(()=>{try{tg.expand&&tg.expand();}catch(e){}fitViewport();},t));
       tg.onEvent&&tg.onEvent("fullscreenChanged",fitViewport);
+      // Many iOS Telegram clients only honor expand() after a user gesture — force it on the first touch/click.
+      const forceExpand=()=>{try{tg.expand&&tg.expand();}catch(e){}fitViewport();
+        document.removeEventListener("touchstart",forceExpand);document.removeEventListener("pointerdown",forceExpand);};
+      document.addEventListener("touchstart",forceExpand,{passive:true});
+      document.addEventListener("pointerdown",forceExpand,{passive:true});
+      try{tg.disableVerticalSwipes&&tg.disableVerticalSwipes();}catch(e){}   // stop the sheet from collapsing on in-app scroll
       const u=tg.initDataUnsafe&&tg.initDataUnsafe.user;
       if(u){
         if(u.id){currentUserId=String(u.id);S.refCode=refFromId(u.id);}                 // referral code tied to the Telegram account
