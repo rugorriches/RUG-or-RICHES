@@ -34,7 +34,8 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS skins JSONB DEFAULT '["gold"]'::jsonb,
           ADD COLUMN IF NOT EXISTS war_week VARCHAR(20),
           ADD COLUMN IF NOT EXISTS war_score BIGINT DEFAULT 0 NOT NULL,
-          ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL
+          ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL,
+          ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ
       `);
       await db.query(`
         ALTER TABLE crews
@@ -360,8 +361,24 @@ module.exports = async (req, res) => {
       try {
         await client.query("BEGIN");
 
-        const { rows: currentCrewRows } = await client.query("SELECT crew_id FROM players WHERE id = $1", [tgUser.id]);
+        const { rows: currentCrewRows } = await client.query("SELECT crew_id, balance, airdrop_pts, lifetime_banked, vip_tier, last_sync_at FROM players WHERE id = $1", [tgUser.id]);
         const crewId = currentCrewRows[0] ? currentCrewRows[0].crew_id : null;
+
+        // ----- anti-cheat: bound how much economy state can rise per sync -----
+        // Ceiling = the most a player of this tier could plausibly bank in one round,
+        // scaled mildly by elapsed time so honest big/offline cash-outs still land,
+        // but a tampered client can't jump balance to the cap. Decreases (spending) pass freely.
+        const prev = currentCrewRows[0] || {};
+        const SVR_BETMAX = [1000, 5000, 25000, 150000, 1000000];
+        const vipNow = clampInt(prev.vip_tier, 0, 4, 0);
+        const perRoundMax = SVR_BETMAX[vipNow] * (20 + vipNow * 10) * PRICE_CAP * 1.6;
+        const lastSyncMs = prev.last_sync_at ? new Date(prev.last_sync_at).getTime() : 0;
+        const elapsedSec = lastSyncMs ? Math.max(0, (Date.now() - lastSyncMs) / 1000) : 86400;
+        const gainCap = Math.min(MOON_CAP, Math.ceil(perRoundMax * (1 + elapsedSec / 2)) + perRoundMax);
+        const prevBal = Number(prev.balance) || 0, prevAir = Number(prev.airdrop_pts) || 0, prevLife = Number(prev.lifetime_banked) || 0;
+        const boundedBalance = Math.min(clampInt(state.balance, 0, MOON_CAP, 500), prevBal + gainCap);
+        const boundedAirdrop = Math.min(clampInt(state.airdrop, 0, AIRDROP_CAP, 500), prevAir + gainCap);
+        const boundedLifetime = Math.min(Math.max(clampInt(state.lifetime, 0, MOON_CAP, 0), prevLife), prevLife + gainCap);
 
         const questIds = ["taps", "price", "cash", "invite", "vbig", "vmoon"];
         const achIds = ["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"];
@@ -412,14 +429,15 @@ module.exports = async (req, res) => {
              skins = (SELECT jsonb_agg(DISTINCT s) FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $35::jsonb) AS t(s)),
              war_week = COALESCE($36, war_week),
              war_score = GREATEST(war_score, $37),
-             war_claim = war_claim OR $38
+             war_claim = war_claim OR $38,
+             last_sync_at = now()
            WHERE id = $1`,
           [
             tgUser.id,
             cleanName(state.name, tgUser.username || tgUser.first_name),
-            clampInt(state.balance, 0, MOON_CAP, 500),
-            clampInt(state.airdrop, 0, AIRDROP_CAP, 500),
-            clampInt(state.lifetime, 0, MOON_CAP, 0),
+            boundedBalance,
+            boundedAirdrop,
+            boundedLifetime,
             clampInt(state.bestPot, 0, MOON_CAP, 0),
             clampNumber(state.bestPrice, 0.01, PRICE_CAP, 1),
             clampInt(state.rugs, 0, 1000000000, 0),

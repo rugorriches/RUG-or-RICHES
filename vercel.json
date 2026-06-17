@@ -12,6 +12,9 @@
     { "src": "/api/sync", "dest": "/api/sync.js" },
     { "src": "/api/invoice", "dest": "/api/invoice.js" },
     { "src": "/api/webhook", "dest": "/api/webhook.js" },
+    { "src": "/api/cashout", "dest": "/api/cashout.js" },
+    { "src": "/api/upgrade", "dest": "/api/upgrade.js" },
+    { "src": "/api/claim", "dest": "/api/claim.js" },
     { "src": "/play", "dest": "/moontap.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
