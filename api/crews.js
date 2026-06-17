@@ -43,9 +43,11 @@ function cleanName(value, fallback) {
 
 async function ensureSchema() {
   await db.query("ALTER TABLE crews ADD COLUMN IF NOT EXISTS leader_id BIGINT REFERENCES players(id) ON DELETE SET NULL");
+  // NOTE: no FK to crews(id) — crews.id type differs from BIGINT on some deploys, which makes the
+  // FK "cannot be implemented" and blocks the whole table. We store crew_id loosely and clean orphans separately.
   await db.query(`CREATE TABLE IF NOT EXISTS crew_chat (
     id BIGSERIAL PRIMARY KEY,
-    crew_id BIGINT REFERENCES crews(id) ON DELETE CASCADE,
+    crew_id BIGINT,
     player_id BIGINT,
     name VARCHAR(24),
     msg VARCHAR(200),

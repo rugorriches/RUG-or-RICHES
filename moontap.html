@@ -2361,6 +2361,10 @@
   function initTelegram(){const tg=window.Telegram&&window.Telegram.WebApp;if(!tg){fitViewport();return;}
     try{tg.ready();tg.expand&&tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#05010f");tg.setBackgroundColor&&tg.setBackgroundColor("#05010f");
       tg.onEvent&&tg.onEvent("viewportChanged",fitViewport);fitViewport();
+      // Telegram (esp. iOS) often opens the mini-app sheet collapsed and ignores the first expand() — retry a few
+      // times as the viewport settles so the bottom nav is on-screen without the user dragging the sheet up.
+      [60,250,600,1200,2500].forEach(t=>setTimeout(()=>{try{tg.expand&&tg.expand();}catch(e){}fitViewport();},t));
+      tg.onEvent&&tg.onEvent("fullscreenChanged",fitViewport);
       const u=tg.initDataUnsafe&&tg.initDataUnsafe.user;
       if(u){
         if(u.id){currentUserId=String(u.id);S.refCode=refFromId(u.id);}                 // referral code tied to the Telegram account
