@@ -43,6 +43,27 @@ function cleanName(value, fallback) {
 
 async function ensureSchema() {
   await db.query("ALTER TABLE crews ADD COLUMN IF NOT EXISTS leader_id BIGINT REFERENCES players(id) ON DELETE SET NULL");
+  await db.query(`CREATE TABLE IF NOT EXISTS crew_chat (
+    id BIGSERIAL PRIMARY KEY,
+    crew_id BIGINT REFERENCES crews(id) ON DELETE CASCADE,
+    player_id BIGINT,
+    name VARCHAR(24),
+    msg VARCHAR(200),
+    created_at TIMESTAMPTZ DEFAULT now())`);
+  await db.query("CREATE INDEX IF NOT EXISTS crew_chat_idx ON crew_chat(crew_id, created_at DESC)");
+}
+
+async function postChat(playerId, text) {
+  const msg = String(text || "").replace(/\s+/g, " ").trim().slice(0, 200);
+  if (!msg) throw new Error("Empty message");
+  const { rows } = await db.query(
+    "SELECT crew_id, COALESCE(name, username, first_name, 'degen') AS name FROM players WHERE id = $1", [playerId]);
+  const crewId = rows[0] && rows[0].crew_id;
+  if (!crewId) throw new Error("Join a crew to chat");
+  const { rows: last } = await db.query(
+    "SELECT created_at FROM crew_chat WHERE player_id = $1 ORDER BY created_at DESC LIMIT 1", [playerId]);
+  if (last[0] && Date.now() - new Date(last[0].created_at).getTime() < 1500) throw new Error("Slow down");
+  await db.query("INSERT INTO crew_chat (crew_id, player_id, name, msg) VALUES ($1, $2, $3, $4)", [crewId, playerId, rows[0].name, msg]);
 }
 
 async function ensurePlayer(tgUser) {
@@ -91,6 +112,12 @@ async function crewList(playerId) {
   );
   const mine = playerRows[0] || {};
   let members = [];
+  let chat = [];
+  if (mine.crew_id) {
+    const { rows: cm } = await db.query(
+      "SELECT name, msg, EXTRACT(EPOCH FROM created_at)*1000 AS ts FROM crew_chat WHERE crew_id = $1 ORDER BY created_at DESC LIMIT 30", [mine.crew_id]);
+    chat = cm.reverse().map(r => ({ name: r.name, msg: r.msg, ts: Number(r.ts) }));
+  }
   if (mine.crew_id) {
     const { rows } = await db.query(
       `SELECT id::text, COALESCE(name, username, first_name, 'degen') AS name,
@@ -124,7 +151,8 @@ async function crewList(playerId) {
       id: mine.crew_id,
       name: mine.name,
       leaderId: mine.leader_id,
-      members
+      members,
+      chat
     } : null
   };
 }
@@ -192,7 +220,7 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "Method not allowed" }));
   }
 
-  const { initData, action, name, crewId, memberId } = req.body || {};
+  const { initData, action, name, crewId, memberId, text } = req.body || {};
   const data = verifyInitData(initData);
   if (!data || !data.user) {
     res.statusCode = 401;
@@ -204,7 +232,9 @@ module.exports = async (req, res) => {
     await ensureSchema();
     await ensurePlayer(data.user);
 
-    if (action && action !== "list") {
+    if (action === "chat") {
+      await postChat(data.user.id, text);
+    } else if (action && action !== "list") {
       const client = await db.pool.connect();
       try {
         await client.query("BEGIN");

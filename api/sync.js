@@ -35,7 +35,10 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS war_week VARCHAR(20),
           ADD COLUMN IF NOT EXISTS war_score BIGINT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL,
-          ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ
+          ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS region VARCHAR(8),
+          ADD COLUMN IF NOT EXISTS notify BOOLEAN DEFAULT TRUE NOT NULL,
+          ADD COLUMN IF NOT EXISTS last_notify_at TIMESTAMPTZ
       `);
       await db.query(`
         ALTER TABLE crews
@@ -353,6 +356,11 @@ module.exports = async (req, res) => {
           );
         }
       }
+    }
+
+    // capture region (Telegram language_code) for localized leaderboards — set once, then leave it
+    if (tgUser.language_code) {
+      try { await db.query("UPDATE players SET region = COALESCE(region, $2) WHERE id = $1", [tgUser.id, String(tgUser.language_code).slice(0, 8)]); } catch (e) {}
     }
 
     // ---------------- SAVE STATE IF PROVIDED ----------------

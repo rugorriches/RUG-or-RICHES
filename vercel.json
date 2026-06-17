@@ -15,7 +15,13 @@
     { "src": "/api/cashout", "dest": "/api/cashout.js" },
     { "src": "/api/upgrade", "dest": "/api/upgrade.js" },
     { "src": "/api/claim", "dest": "/api/claim.js" },
+    { "src": "/api/gift", "dest": "/api/gift.js" },
+    { "src": "/api/cron", "dest": "/api/cron.js" },
     { "src": "/play", "dest": "/moontap.html" },
     { "src": "/(.*)", "dest": "/$1" }
+  ],
+  "crons": [
+    { "path": "/api/cron?job=nudge", "schedule": "0 17 * * *" },
+    { "path": "/api/cron?job=recap", "schedule": "0 16 * * 1" }
   ]
 }

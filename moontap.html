@@ -172,9 +172,42 @@
 
   /* energy + actions */
   .energy-wrap{padding:0 14px 1px;}
-  .energy-row{display:flex; align-items:center; gap:8px; font-size:10px; color:#cbb6ff;}
-  .energy-bar{flex:1; height:9px; background:#1c0e36; border-radius:6px; overflow:hidden; border:1px solid rgba(35,240,255,.3);}
-  #energyFill{height:100%; width:100%; background:linear-gradient(90deg,var(--cyan),var(--neon)); transition:width .2s;}
+  .energy-row{display:flex; align-items:center; gap:9px; font-size:12px; font-weight:800; color:#dff6ff;}
+  .energy-row .en-ico{font-size:17px; filter:drop-shadow(0 0 6px var(--cyan)); animation:enpulse 1.8s ease-in-out infinite;}
+  @keyframes enpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+  .energy-bar{flex:1; height:16px; background:#160a2c; border-radius:9px; overflow:hidden; border:1px solid rgba(35,240,255,.45); position:relative; box-shadow:inset 0 1px 4px rgba(0,0,0,.5);}
+  #energyFill{height:100%; width:100%; background:linear-gradient(90deg,var(--cyan),var(--neon)); transition:width .2s; box-shadow:0 0 10px rgba(35,240,255,.6);}
+  #energyFill.low{background:linear-gradient(90deg,#ff5b6b,#ff2bd6);}
+  .energy-bar .en-count{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); letter-spacing:.3px;}
+  .en-buy{flex:0 0 auto; border:none; border-radius:9px; padding:6px 11px; font-size:11px; font-weight:900; cursor:pointer; color:#13002a; background:linear-gradient(90deg,var(--gold),#ffe169); box-shadow:0 2px 8px rgba(255,212,0,.35); transition:transform .08s, filter .15s;}
+  .en-buy:active{transform:scale(.94);}
+  .en-sub{padding:2px 14px 0; font-size:9.5px; color:#9c92c4; letter-spacing:.02em;}
+  .en-sub b{color:var(--cyan);}
+  /* rewards hub */
+  .reward-card{align-items:center;}
+  .reward-card .emo{font-size:24px;}
+  .reward-card .rbtn{flex:0 0 auto; border:none; border-radius:11px; padding:9px 14px; font-weight:900; font-size:12px; cursor:pointer; color:#13002a; background:linear-gradient(90deg,var(--cyan),var(--neon)); box-shadow:0 2px 9px rgba(35,240,255,.3); transition:transform .08s,filter .15s;}
+  .reward-card .rbtn:active{transform:scale(.95);}
+  .reward-card .rbtn.locked{background:#2a1a44; color:#8b7fb0; box-shadow:none; cursor:default;}
+  .reward-card .rbtn.gold{background:linear-gradient(90deg,var(--gold),#ffe169); box-shadow:0 2px 9px rgba(255,212,0,.35);}
+  /* spin wheel */
+  .wheel-wrap{position:relative; width:236px; height:236px; margin:6px auto 12px;}
+  .wheel-ptr{position:absolute; top:-4px; left:50%; transform:translateX(-50%); font-size:24px; color:var(--gold); z-index:3; filter:drop-shadow(0 2px 3px #000);}
+  #wheel{width:100%; height:100%; border-radius:50%; border:5px solid #2a1a44; box-shadow:0 0 0 3px rgba(35,240,255,.3),0 0 26px rgba(124,77,255,.5); transition:transform 4.4s cubic-bezier(.17,.67,.21,1); background:#160a2c;}
+  .wheel-hub{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:46px; height:46px; border-radius:50%; background:radial-gradient(circle,#2a1a44,#0b0419); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:20px; z-index:2;}
+  .seg-label{position:absolute; transform:translate(-50%,-50%); font-size:19px; text-shadow:0 1px 3px #000; pointer-events:none;}
+  /* mystery box */
+  .box-anim{font-size:74px; text-align:center; margin:14px 0 6px; transition:transform .25s;}
+  .box-anim.shake{animation:boxshake .4s ease-in-out 3;}
+  @keyframes boxshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-13deg)}75%{transform:rotate(13deg)}}
+  .box-anim.pop{animation:boxpop .5s ease-out;}
+  @keyframes boxpop{0%{transform:scale(.4)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+  /* leaderboard toggle */
+  .lb-tg{flex:1; border:1px solid var(--line); background:#160a2c; color:#b9a9e0; border-radius:9px; padding:7px 4px; font-size:11px; font-weight:800; cursor:pointer; transition:all .15s;}
+  .lb-tg.active{background:linear-gradient(90deg,var(--cyan),var(--neon)); color:#13002a; border-color:transparent;}
+  /* gifting */
+  .gift-row{display:flex; gap:7px; margin-top:9px;}
+  .gift-row input{background:rgba(255,255,255,.08); border:1px solid var(--line); border-radius:11px; padding:11px; color:#fff; font-weight:800; outline:none; min-width:0;}
   .actions{display:flex; gap:9px; padding:0 14px 4px;}
   .btn{flex:1; position:relative; overflow:hidden; border:none; border-radius:14px; padding:11px 9px; font-weight:900; font-size:13px; letter-spacing:.7px; cursor:pointer; color:#13002a; transition:transform .08s, filter .18s, box-shadow .18s;}
   .btn:active{transform:scale(.96);}
@@ -616,7 +649,8 @@
   </div>
 
   <div class="console">
-    <div class="energy-row">⚡<div class="energy-bar"><div id="energyFill"></div></div><span id="energyTxt">100/100</span></div>
+    <div class="energy-row"><span class="en-ico">⚡</span><div class="energy-bar"><div id="energyFill"></div><span class="en-count" id="energyTxt">100/100</span></div><button class="en-buy" id="enBuy">⚡ Refill</button></div>
+    <div class="en-sub" id="enSub">Recharging <b>+1.0/s</b> · full in 0s</div>
     <div class="betbar">
       <button class="betadj" id="betDown" aria-label="Decrease bet">−</button>
       <div class="betmid"><div class="betval"><span id="betAmt">100</span> <span id="betCurTxt">$MOON</span><button class="curtog" id="curTog" aria-label="Switch currency">⇄</button></div><div class="betsub">max <b id="betMaxHud">1K</b> · bets <span id="betCount">0/20</span> · <span id="betPL">P/L +0</span></div></div>
@@ -686,6 +720,10 @@
       <div class="ds" style="margin-top:6px">Season ends in <b id="adSeason" style="color:var(--gold)">--</b></div>
     </div>
     <div id="stakeBox"></div>
+    <div class="sec-h">🎁 Daily rewards</div>
+    <div class="card row reward-card" id="spinCard"></div>
+    <div class="card row reward-card" id="boxCard"></div>
+    <div class="card row reward-card" id="raffleCard"></div>
     <div class="sec-h">🔥 Daily combo</div><div class="card row" id="comboCard"></div>
     <div class="sec-h">📣 Social quests — follow & earn</div><div id="socialList"></div>
     <div id="questList"></div>
@@ -759,6 +797,10 @@
     </div>
     <button class="flexbtn" id="cardBtn"><b>🪂 Mint my flex card</b><small>Share your stats + invite link as an image</small></button>
     <div class="sec-h">🎁 Milestone rewards</div><div id="mileList"></div>
+    <div class="sec-h">💝 Gift $MOON to a friend</div>
+    <div class="card"><div class="ds">Send $MOON to any player by their invite code. Min 1,000 · max 100,000 per gift · 250,000/day.</div>
+      <div class="gift-row"><input id="giftCode" maxlength="6" placeholder="FRIEND CODE" style="flex:1;text-transform:uppercase"><input id="giftAmt" type="number" inputmode="numeric" placeholder="Amount" style="width:104px"></div>
+      <button class="big-btn" id="giftSend" style="margin-top:9px">💝 Send Gift</button></div>
     <div class="sec-h">👥 Friends you invited</div><div id="friendList"><div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div></div>
   </div>
 
@@ -828,6 +870,21 @@
     <div class="mbtns"><button class="ok" id="rankMClose" style="width:100%">Got it</button></div>
   </div></div>
 
+  <div class="modal" id="spinModal" role="dialog" aria-modal="true" aria-label="Daily spin"><div class="box">
+    <h3>🎰 Daily Spin</h3>
+    <div class="wheel-wrap"><div class="wheel-ptr">▼</div><div id="wheel"></div><div class="wheel-hub">🌙</div></div>
+    <div class="ds" id="spinResult" style="min-height:18px;font-weight:800">One free spin every day — land a prize!</div>
+    <div class="mbtns"><button class="ok" id="spinBtn" style="flex:1">SPIN</button><button id="spinClose">Close</button></div>
+  </div></div>
+
+  <div class="modal" id="boxModal" role="dialog" aria-modal="true" aria-label="Mystery box"><div class="box">
+    <h3>🎁 Mystery Box</h3>
+    <div id="boxAnim" class="box-anim">🎁</div>
+    <div class="ds" id="boxResult" style="min-height:18px;font-weight:800">Tap OPEN to reveal your loot.</div>
+    <div class="ds" id="boxOdds" style="font-size:10px;color:#9c92c4"></div>
+    <div class="mbtns"><button class="ok" id="boxOpenBtn" style="flex:1">OPEN</button><button id="boxCloseBtn">Close</button></div>
+  </div></div>
+
   <div id="tut"><div class="em" id="tutEm">📈</div><h3 id="tutH"></h3><p id="tutP"></p><div class="dots" id="tutDots"></div><button id="tutNext">Next</button></div>
 </div>
 
@@ -859,7 +916,9 @@
     streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     seasonStart:null,seasonDays:[],
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
-    ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
+    ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]},
+    qw:{k:null,prog:{},claimed:[]}, qm:{k:null,prog:{},claimed:[]}, qv:{prog:{},claimed:[]},
+    spinDay:null, boxes:0, tickets:0, raffleDay:null, raffleWon:0};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
   let S=load();
   clampEconomyState();
@@ -1160,8 +1219,9 @@
   // ---------- DAILY STREAK ----------
   (function(){const today=new Date().toDateString();
     if(S.lastDay!==today){const y=new Date(Date.now()-864e5).toDateString();
-      S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.min(S.streak,20)*250;bank(b);save();
-      setTimeout(()=>toast("🔥","Day "+S.streak+" streak!","Daily bonus +"+fmt(b)+" $MOON"),1200);}})();
+      S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.min(S.streak,20)*250;bank(b);
+      S.boxes=(S.boxes||0)+1;S.tickets=(S.tickets||0)+1;save();   // daily login also drops a mystery box + a lucky-draw ticket
+      setTimeout(()=>toast("🔥","Day "+S.streak+" streak!","+"+fmt(b)+" $MOON · 🎁 1 box · 🎟️ 1 ticket"),1200);}})();
 
   // ---------- OFFLINE ----------
   (function(){const last=parseInt(lsGet("moontap_last")||"0");
@@ -1364,6 +1424,13 @@
     pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;bonusBets=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
     save();achCheck();renderLive();renderStats();renderDash();}
   $("cashout").addEventListener("click",()=>cashOut(false));
+  function energyRefillCost(){return Math.floor(maxEnergy()*8);}   // $MOON sink: full refill price scales with tank size
+  function buyEnergy(){const me=maxEnergy();if(energy>=me){toast("⚡","Already full","Your energy tank is maxed");return;}
+    const cost=energyRefillCost();
+    if(S.balance<cost){flashEnergy();toast("💸","Need "+fmt(cost)+" $MOON","Bank more — or grab a ⭐ refill in the Store");return;}
+    S.balance-=cost;energy=me;save();sfxCash();renderLive();renderStats();if(navigator.vibrate)navigator.vibrate(25);
+    toast("⚡","Energy refilled!","−"+fmt(cost)+" $MOON · tank full");}
+  $("enBuy")&&$("enBuy").addEventListener("click",buyEnergy);
   function sellHalf(){if(pot<2||busting)return;
     if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
       window._moonWS.send(JSON.stringify({ t: "sell_half" }));
@@ -1439,7 +1506,8 @@
     $("pot").textContent=fmt(dPot);$("balance").textContent=fmt(dBal);$("airdrop").textContent=fmt(dAir);
     $("streak").textContent=S.streak+"🔥";
     const cr=$("coinRing");if(cr)cr.style.setProperty("--xp",clamp(S.coinXp/(S.coinLevel*50)*100,0,100)+"%");const cl=$("coinLvl");if(cl)cl.textContent="Lv "+S.coinLevel;
-    const me=maxEnergy();$("energyFill").style.width=(energy/me*100)+"%";$("energyTxt").textContent=Math.floor(energy)+"/"+Math.floor(me);
+    const me=maxEnergy();const ef=$("energyFill");ef.style.width=(energy/me*100)+"%";ef.classList.toggle("low",energy/me<0.25);$("energyTxt").textContent=Math.floor(energy)+"/"+Math.floor(me);
+    const es=$("enSub");if(es){const rr=regenRate();if(energy>=me){es.innerHTML="⚡ Energy <b>FULL</b> — tap away";}else{const secs=Math.ceil((me-energy)/rr);const mm=Math.floor(secs/60),ss=secs%60;es.innerHTML="Recharging <b>+"+rr.toFixed(1)+"/s</b> · full in "+(mm>0?mm+"m ":"")+ss+"s";}}
     const r=risk()*100;$("rugFill").style.width=r+"%";$("rugPct").textContent=Math.floor(r)+"%";
     $("rugSkull").style.left=clamp(r,2,98)+"%";
     const rb=$("rugBar");rb.classList.toggle("risky",r>=35);rb.classList.toggle("danger",r>=70);
@@ -1666,12 +1734,105 @@
   function buyVipStars(i){const v=VIP[i];if(S.vip>=i)return;
     starsPurchase("Unlock "+v.nm+" for "+v.vstars+" ⭐ Telegram Stars?",{type:"vip",tier:i,stars:v.vstars},()=>{
       S.vip=i;S.starsSpent+=v.vstars;save();sfxCash();renderVip();renderLive();renderStats();achCheck();energy=maxEnergy();confetti();toast(v.emo,v.nm+" unlocked!","Thanks for supporting the game ⭐");});}
-  const SKINS=[{id:"gold",nm:"Classic Gold",stars:0,c:"#ffd400"},{id:"neon",nm:"Neon Pink",stars:80,c:"#ff2bd6"},{id:"ice",nm:"Ice Cyan",stars:80,c:"#23f0ff"},{id:"emerald",nm:"Emerald",stars:120,c:"#1dff8f"},{id:"diamond",nm:"Diamond",stars:250,c:"#cfe8ff"}];
+  const SKINS=[{id:"gold",nm:"Classic Gold",stars:0,c:"#ffd400",rar:"common"},{id:"neon",nm:"Neon Pink",stars:80,c:"#ff2bd6",rar:"rare"},{id:"ice",nm:"Ice Cyan",stars:80,c:"#23f0ff",rar:"rare"},{id:"emerald",nm:"Emerald",stars:120,c:"#1dff8f",rar:"epic"},{id:"diamond",nm:"Diamond",stars:250,c:"#cfe8ff",rar:"epic"},
+    {id:"cosmic",nm:"Cosmic Nebula",stars:0,c:"#a06bff",rar:"legendary",win:true},{id:"molten",nm:"Molten Core",stars:0,c:"#ff7a18",rar:"legendary",win:true}];
+  const RARITY={common:{nm:"Common",c:"#9c92c4"},rare:{nm:"Rare",c:"#23f0ff"},epic:{nm:"Epic",c:"#ff2bd6"},legendary:{nm:"Legendary",c:"#ffd400"}};
   const SKIN_ACCENT={};SKINS.forEach(s=>SKIN_ACCENT[s.id]=s.c);
   function applySkin(){if(coin)coin.style.setProperty("--coin-accent",SKIN_ACCENT[S.skin]||"#ffd400");}
   function equipSkin(id){S.skin=id;save();applySkin();renderStore();toast("🎨","Skin equipped!",(SKINS.find(s=>s.id===id)||{}).nm||"");}
   function buySkin(s){starsPurchase("Unlock the "+s.nm+" coin skin for "+s.stars+" ⭐?",{type:"skin",id:s.id,stars:s.stars},()=>{
     if(S.skins.indexOf(s.id)<0)S.skins.push(s.id);S.skin=s.id;S.starsSpent+=s.stars;save();applySkin();renderStore();sfxCash();confetti();toast("🎨",s.nm+" unlocked!","Equipped on your BUY button");});}
+
+  // ---------- REWARDS: spin wheel, mystery boxes, lucky draw ----------
+  const SPIN_PRIZES=[
+    {t:"moon",v:5000,emo:"💰",c:"#1dff8f",w:20},
+    {t:"energy",emo:"⚡",c:"#23f0ff",w:15},
+    {t:"tickets",v:3,emo:"🎟️",c:"#a06bff",w:15},
+    {t:"moon",v:25000,emo:"💰",c:"#ffd400",w:13},
+    {t:"box",v:1,emo:"🎁",c:"#ff7a18",w:12},
+    {t:"tickets",v:10,emo:"🎟️",c:"#7c4dff",w:15},
+    {t:"moon",v:100000,emo:"💎",c:"#ff2bd6",w:7},
+    {t:"skin",emo:"🌟",c:"#fff7c0",w:3}];
+  const BOX_PRIZES=[
+    {t:"moon",v:15000,emo:"💰",lab:"15K $MOON",w:30},
+    {t:"moon",v:50000,emo:"💰",lab:"50K $MOON",w:22},
+    {t:"tickets",v:5,emo:"🎟️",lab:"5 lucky tickets",w:18},
+    {t:"energy",emo:"⚡",lab:"Full energy refill",w:12},
+    {t:"moon",v:250000,emo:"💎",lab:"250K $MOON",w:10},
+    {t:"box",v:1,emo:"🎁",lab:"a bonus box",w:5},
+    {t:"skin",emo:"🌟",lab:"a LEGENDARY skin",w:3}];
+  let spinRot=0, spinning=false;
+  function grantSkin(){const locked=SKINS.filter(s=>s.win&&S.skins.indexOf(s.id)<0);
+    if(locked.length){const s=locked[Math.floor(Math.random()*locked.length)];S.skins.push(s.id);S.skin=s.id;applySkin();return"🌟 Legendary skin: "+s.nm+"!";}
+    bank(75000);return"75K $MOON (you own every skin!)";}
+  function grantReward(p){
+    if(p.t==="moon"){bank(p.v);return"💰 "+fmt(p.v)+" $MOON";}
+    if(p.t==="energy"){energy=maxEnergy();return"⚡ Energy fully refilled";}
+    if(p.t==="tickets"){S.tickets=(S.tickets||0)+p.v;return"🎟️ "+p.v+" lucky-draw tickets";}
+    if(p.t==="box"){S.boxes=(S.boxes||0)+p.v;return"🎁 "+p.v+" mystery box";}
+    if(p.t==="skin"){return grantSkin();}
+    return"";}
+  function buildWheel(){const w=$("wheel");if(!w)return;const n=SPIN_PRIZES.length,seg=360/n;
+    const stops=SPIN_PRIZES.map((p,i)=>p.c+" "+(i*seg)+"deg "+((i+1)*seg)+"deg").join(",");
+    w.style.background="conic-gradient("+stops+")";
+    let html="";const cx=113,cy=113,r=80;
+    SPIN_PRIZES.forEach((p,i)=>{const a=(i*seg+seg/2)*Math.PI/180,x=cx+Math.sin(a)*r,y=cy-Math.cos(a)*r;html+='<div class="seg-label" style="left:'+x+'px;top:'+y+'px">'+p.emo+'</div>';});
+    w.innerHTML=html;}
+  function openSpin(){buildWheel();const today=new Date().toDateString();const done=S.spinDay===today;
+    $("spinResult").textContent=done?"You already spun today — back tomorrow!":"One free spin every day — land a prize!";
+    const b=$("spinBtn");b.disabled=done;b.textContent=done?"COME BACK TOMORROW":"SPIN";
+    $("spinModal").classList.add("show");}
+  function doSpin(){if(spinning)return;const today=new Date().toDateString();
+    if(S.spinDay===today){toast("⏳","Already spun today","Come back tomorrow");return;}
+    spinning=true;const b=$("spinBtn");b.disabled=true;b.textContent="SPINNING…";
+    const total=SPIN_PRIZES.reduce((a,p)=>a+p.w,0);let r=Math.random()*total,k=0;
+    for(let i=0;i<SPIN_PRIZES.length;i++){r-=SPIN_PRIZES[i].w;if(r<=0){k=i;break;}}
+    const seg=360/SPIN_PRIZES.length;spinRot+=360*6-(k*seg+seg/2)+(Math.random()*(seg*0.6)-seg*0.3);
+    $("wheel").style.transform="rotate("+spinRot+"deg)";
+    S.spinDay=today;save();
+    setTimeout(()=>{const p=SPIN_PRIZES[k];const txt=grantReward(p);save();
+      $("spinResult").textContent="🎉 You won "+txt+"!";b.textContent="COME BACK TOMORROW";
+      spinning=false;renderRewards();renderLive();renderStats();sfxCash();confetti();},4500);}
+  function openBox(){if((S.boxes||0)<1){toast("🎁","No boxes yet","Win them from spins, quests & playing");return;}
+    const a=$("boxAnim");a.className="box-anim";a.textContent="🎁";
+    $("boxResult").textContent="You have "+S.boxes+" box"+(S.boxes>1?"es":"")+". Tap OPEN!";
+    const tot=BOX_PRIZES.reduce((s,p)=>s+p.w,0);
+    $("boxOdds").textContent="Odds: "+BOX_PRIZES.map(p=>(p.lab.replace(/^a |^[0-9]+ /,"").slice(0,10))+" "+Math.round(p.w/tot*100)+"%").join(" · ");
+    const ob=$("boxOpenBtn");ob.disabled=false;ob.textContent="OPEN";
+    $("boxModal").classList.add("show");}
+  function doOpenBox(){if((S.boxes||0)<1)return;const ob=$("boxOpenBtn");ob.disabled=true;
+    const a=$("boxAnim");a.className="box-anim shake";
+    const total=BOX_PRIZES.reduce((s,p)=>s+p.w,0);let r=Math.random()*total,k=0;
+    for(let i=0;i<BOX_PRIZES.length;i++){r-=BOX_PRIZES[i].w;if(r<=0){k=i;break;}}
+    S.boxes--;const p=BOX_PRIZES[k];
+    setTimeout(()=>{const txt=grantReward(p);save();a.className="box-anim pop";a.textContent=p.emo;
+      $("boxResult").textContent="🎉 "+txt+"!";renderRewards();renderLive();renderStats();sfxCash();confetti();
+      ob.disabled=(S.boxes||0)<1;ob.textContent=(S.boxes||0)>0?"OPEN NEXT ("+S.boxes+")":"No boxes left";},1300);}
+  function drawRaffle(){const today=new Date().toDateString();
+    if(S.raffleDay===today){toast("⏳","Already drawn today","Earn more tickets for tomorrow");return;}
+    if((S.tickets||0)<1){toast("🎟️","No tickets","Win tickets from spins & boxes first");return;}
+    const t=S.tickets,chance=Math.min(0.65,t*0.03);S.raffleDay=today;
+    if(Math.random()<chance){const prize=50000+t*8000;bank(prize);S.raffleWon=(S.raffleWon||0)+prize;S.tickets=0;save();
+      confetti();sfxCash();toast("🎰","🎉 JACKPOT!","Won "+fmt(prize)+" $MOON from "+t+" tickets!");}
+    else{S.tickets=0;save();toast("🎰","So close!","Your "+t+" tickets missed — try again tomorrow");}
+    renderRewards();renderLive();renderStats();}
+  function renderRewards(){const today=new Date().toDateString();
+    const sc=$("spinCard");if(sc){const done=S.spinDay===today;
+      sc.innerHTML='<div class="emo">🎰</div><div class="grow"><div class="nm">Daily Spin</div><div class="ds">'+(done?"Spun today — back tomorrow":"One free spin · up to 100K $MOON + legendary skins")+'</div></div><button class="rbtn '+(done?"locked":"")+'" id="spinOpen">'+(done?"✓ Done":"SPIN")+'</button>';
+      const so=$("spinOpen");if(so&&!done)so.addEventListener("click",openSpin);}
+    const bc=$("boxCard");if(bc){const n=S.boxes||0;
+      bc.innerHTML='<div class="emo">🎁</div><div class="grow"><div class="nm">Mystery Boxes</div><div class="ds">'+(n>0?(n+" box"+(n>1?"es":"")+" ready — tap to open"):"Win boxes from spins, the wheel & play")+'</div></div><button class="rbtn gold '+(n<1?"locked":"")+'" id="boxOpenC">'+(n>0?"OPEN "+n:"0")+'</button>';
+      const bo=$("boxOpenC");if(bo&&n>0)bo.addEventListener("click",openBox);}
+    const rc=$("raffleCard");if(rc){const done=S.raffleDay===today,t=S.tickets||0;
+      rc.innerHTML='<div class="emo">🎟️</div><div class="grow"><div class="nm">Lucky Draw</div><div class="ds">'+t+' ticket'+(t===1?"":"s")+' · '+(done?"drawn today":"daily jackpot — odds rise with tickets")+'</div></div><button class="rbtn '+((done||t<1)?"locked":"")+'" id="raffleDrawC">'+(done?"✓ Done":"DRAW")+'</button>';
+      const rd=$("raffleDrawC");if(rd&&!done&&t>0)rd.addEventListener("click",drawRaffle);}}
+  $("spinBtn")&&$("spinBtn").addEventListener("click",doSpin);
+  $("spinClose")&&$("spinClose").addEventListener("click",()=>$("spinModal").classList.remove("show"));
+  $("spinModal")&&$("spinModal").addEventListener("click",e=>{if(e.target.id==="spinModal")$("spinModal").classList.remove("show");});
+  $("boxOpenBtn")&&$("boxOpenBtn").addEventListener("click",doOpenBox);
+  $("boxCloseBtn")&&$("boxCloseBtn").addEventListener("click",()=>$("boxModal").classList.remove("show"));
+  $("boxModal")&&$("boxModal").addEventListener("click",e=>{if(e.target.id==="boxModal")$("boxModal").classList.remove("show");});
+
   function pickOffer(){const today=new Date().toDateString();
     if(!S.starterBought&&S.lifetime<50000)return{emo:"🎁",nm:"Starter Pack",ds:"Best first boost: 500K $MOON + Bronze VIP",stars:STARTER.stars,fn:buyStarter};
     if(S.balance<5000)return{emo:"🆘",nm:"Comeback Pack",ds:"Low balance rescue: 200K $MOON",stars:COMEBACK.stars,fn:buyComeback};
@@ -1703,10 +1864,18 @@
     storeSection(wrap,"🪙 $MOON packs");
     if(!S.firstBuyUsed){const note=document.createElement("div");note.className="qsum";note.textContent="First $MOON pack pays 2× once.";wrap.appendChild(note);}
     STORE.forEach(p=>storeCard(wrap,{emo:"🪙",nm:fmt(p.moon*(S.firstBuyUsed?1:2))+" $MOON",ds:fmt(Math.round(p.moon/p.stars))+" $MOON per ⭐"+(S.firstBuyUsed?"":" · first-buy 2×"),stars:p.stars,fn:()=>buyMoon(p),tag:p.tag,best:/BEST/.test(p.tag)}));
-    storeSection(wrap,"🎨 Coin skins");
-    SKINS.forEach(s=>{const owned=S.skins.indexOf(s.id)>=0,eq=S.skin===s.id;const d=document.createElement("div");d.className="card row";
-      d.innerHTML='<div class="emo" style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,'+s.c+' 62%,#0e0826);box-shadow:0 0 10px '+s.c+'"></div><div class="grow"><div class="nm">'+s.nm+'</div><div class="ds">'+(owned?(eq?"equipped":"owned"):s.stars+" ⭐")+'</div></div><button class="buy'+(eq?" owned":"")+'">'+(eq?"✓ On":(owned?"Equip":"⭐ "+s.stars))+'</button>';
-      const b=d.querySelector("button");if(!eq){if(owned)b.addEventListener("click",()=>equipSkin(s.id));else b.addEventListener("click",()=>buySkin(s));}
+    const ownedN=SKINS.filter(s=>S.skins.indexOf(s.id)>=0).length;
+    storeSection(wrap,"🎨 Skin collection — "+ownedN+"/"+SKINS.length);
+    SKINS.forEach(s=>{const owned=S.skins.indexOf(s.id)>=0,eq=S.skin===s.id;const rr=RARITY[s.rar]||RARITY.common;
+      const d=document.createElement("div");d.className="card row";
+      const badge='<span style="font-size:9px;font-weight:900;color:'+rr.c+';border:1px solid '+rr.c+';border-radius:5px;padding:1px 5px;margin-left:6px;text-transform:uppercase;letter-spacing:.04em">'+rr.nm+'</span>';
+      const sub=owned?(eq?"equipped":"owned"):(s.win?"🔒 win-only — from spins & boxes":s.stars+" ⭐");
+      let btn;if(eq)btn='<button class="buy owned">✓ On</button>';
+      else if(owned)btn='<button class="buy">Equip</button>';
+      else if(s.win)btn='<button class="buy owned" disabled style="opacity:.5">🔒</button>';
+      else btn='<button class="buy">⭐ '+s.stars+'</button>';
+      d.innerHTML='<div class="emo" style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,'+s.c+' 62%,#0e0826);box-shadow:0 0 10px '+s.c+(owned?'':';filter:grayscale(.6);opacity:.7')+'"></div><div class="grow"><div class="nm">'+s.nm+badge+'</div><div class="ds">'+sub+'</div></div>'+btn;
+      const b=d.querySelector("button");if(!eq&&owned)b.addEventListener("click",()=>equipSkin(s.id));else if(!owned&&!s.win)b.addEventListener("click",()=>buySkin(s));
       wrap.appendChild(d);});}
 
   // ---------- QUESTS / ACH ----------
@@ -1781,7 +1950,7 @@
     ap.textContent=fmt(S.airdrop);$("adEst").textContent=pct>=100?"Qualified score reached":"Need "+fmt(Math.max(0,AIRDROP_QUALIFY-S.airdrop))+" more points";
     $("adSeason").textContent=$("seasonTimer").textContent;
     const ab=$("adBar");if(ab)ab.style.width=clamp(pct,2,100)+"%";
-    renderStakes();renderCombo();renderSocial();}
+    renderStakes();renderRewards();renderCombo();renderSocial();}
   function renderStakes(){const box=$("stakeBox");if(!box)return;
     const A=S.airdrop||0,days=seasonActiveDays(),cash=S.cashouts||0,taps=S.taps||0;
     const pointOk=A>=AIRDROP_QUALIFY,dayOk=days>=AIRDROP_MIN_DAYS,tapOk=taps>=AIRDROP_MIN_TAPS,cashOk=cash>=AIRDROP_MIN_CASHOUTS;
@@ -1815,6 +1984,7 @@
       S.comboDay=todayISO;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");},{once:true});}
 
   // ---------- RANKS + LEADERBOARD ----------
+  let boardMode="banked";
   function renderRanks(){const ri=rankIdx();const cur=RANKS[ri],next=RANKS[ri+1];
     $("myRankEmo").textContent=cur.e;$("myRankName").textContent=cur.nm;
     if(next){const span=next.min-cur.min,prog=clamp((S.lifetime-cur.min)/span*100,0,100);
@@ -1829,38 +1999,44 @@
     const list=BOTS.map(x=>({n:x[0],b:x[1]*(0.8+Math.random()*0.4),me:false}));
     list.push({n:S.name+" (you)",b:S.balance,me:true});list.sort((a,b)=>b.b-a.b);
     
-    const renderList = (data) => {
+    const renderList = (data,isCount) => {
       const wrap=$("boardList");wrap.innerHTML="";
+      if(!data.length){wrap.innerHTML='<p class="sub">No entries yet — be the first!</p>';return;}
       data.forEach((x,i)=>{const d=document.createElement("div");d.className="lb-row"+(x.me?" me":"");
         const rk=i===0?'<span class="medal">🥇</span>':i===1?'<span class="medal">🥈</span>':i===2?'<span class="medal">🥉</span>':(i+1);
-        d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+x.n+'</div><div class="sc">'+fmt(x.b)+'</div>';wrap.appendChild(d);});
+        d.innerHTML='<div class="rk">'+rk+'</div><div class="nm">'+esc(x.n)+'</div><div class="sc">'+(isCount?(fmt(x.b)+' 🤝'):fmt(x.b))+'</div>';wrap.appendChild(d);});
     };
-    
-    if (hasCloudAuth) {
-      fetch("/api/leaderboard")
-        .then(r => r.json())
-        .then(dbList => {
-          if (Array.isArray(dbList) && dbList.length > 0) {
-            const formatted = dbList.map(r => ({ n: r.name, b: r.banked, me: r.name === S.name }));
-            if (!formatted.some(x => x.me)) {
-              formatted.push({ n: S.name + " (you)", b: S.balance, me: true });
-            }
-            formatted.sort((a,b)=>b.b-a.b);
-            renderList(formatted);
-          } else {
-            renderList(list);
-          }
-        })
-        .catch(() => renderList(list));
-    } else {
-      renderList(list);
+    const bl=$("boardList");
+    if(bl&&!$("boardToggle")){const tg2=document.createElement("div");tg2.id="boardToggle";tg2.style.cssText="display:flex;gap:6px;margin-bottom:9px";
+      tg2.innerHTML='<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button><button class="lb-tg" data-m="region">🌍 Region</button>';
+      bl.parentNode.insertBefore(tg2,bl);
+      tg2.querySelectorAll(".lb-tg").forEach(b=>b.addEventListener("click",()=>{boardMode=b.dataset.m;loadBoard();}));}
+    const tgw=window.Telegram&&window.Telegram.WebApp;
+    const myRegion=(tgw&&tgw.initDataUnsafe&&tgw.initDataUnsafe.user&&tgw.initDataUnsafe.user.language_code)||null;
+    function loadBoard(){
+      const bt=$("boardToggle");if(bt)bt.querySelectorAll(".lb-tg").forEach(b=>b.classList.toggle("active",b.dataset.m===boardMode));
+      if(!hasCloudAuth){renderList(list);return;}
+      if(boardMode==="referral"){
+        fetch("/api/leaderboard?type=referral&period=week").then(r=>r.json())
+          .then(d=>renderList(Array.isArray(d)?d.map(x=>({n:x.name,b:x.refs,me:x.name===S.name})):[],true))
+          .catch(()=>renderList([],true));
+        return;}
+      const url=(boardMode==="region"&&myRegion)?("/api/leaderboard?region="+encodeURIComponent(myRegion)):"/api/leaderboard";
+      fetch(url).then(r=>r.json()).then(dbList=>{
+        if(Array.isArray(dbList)&&dbList.length>0){
+          const formatted=dbList.map(r=>({n:r.name,b:r.banked,me:r.name===S.name}));
+          if(!formatted.some(x=>x.me))formatted.push({n:S.name+" (you)",b:S.balance,me:true});
+          formatted.sort((a,b)=>b.b-a.b);renderList(formatted);
+        } else renderList(list);
+      }).catch(()=>renderList(list));
     }
+    loadBoard();
   }
   // ---------- CREWS (real server-backed teams) ----------
   function applyCrewPayload(data){if(!data)return;
     S.crewBoard=Array.isArray(data.crews)?data.crews:[];
-    if(data.mine){S.crew=data.mine.name;S.crewId=data.mine.id;S.crewLeaderId=data.mine.leaderId;S.crewMembers=Array.isArray(data.mine.members)?data.mine.members:[];}
-    else{S.crew=null;S.crewId=null;S.crewLeaderId=null;S.crewMembers=[];}
+    if(data.mine){S.crew=data.mine.name;S.crewId=data.mine.id;S.crewLeaderId=data.mine.leaderId;S.crewMembers=Array.isArray(data.mine.members)?data.mine.members:[];S.crewChat=Array.isArray(data.mine.chat)?data.mine.chat:[];}
+    else{S.crew=null;S.crewId=null;S.crewLeaderId=null;S.crewMembers=[];S.crewChat=[];}
     crewLoaded=true;save();}
   async function crewApi(action,payload){
     const tg=window.Telegram&&window.Telegram.WebApp;if(!tg||!tg.initData){toast("🔒","Telegram required","Open inside Telegram to manage crews");return null;}
@@ -1900,10 +2076,22 @@
       d.innerHTML='<div class="rk">'+(i+1)+'</div><div class="nm">'+esc(m.name)+(me?' (you)':'')+(leader?' <span class="pill">CAPTAIN</span>':'')+'<div class="ds">war pts '+fmt(m.warScore||0)+' · VIP '+(m.vip||0)+'</div></div><div class="sc">'+fmt(m.banked||0)+'</div>'+(cap&&!me?'<button class="qclaim">Kick</button>':'');
       const kick=d.querySelector("button");if(kick)kick.addEventListener("click",async()=>{if(!confirm("Remove "+m.name+" from "+S.crew+"?"))return;try{await crewApi("kick",{memberId:m.id});renderMyCrew();renderCrews();toast("🧹","Member removed",m.name+" was kicked");}catch(e){toast("⚠️","Kick failed",e.message);}});
       wrap.appendChild(d);});
+    const chatWrap=document.createElement("div");chatWrap.className="card";chatWrap.style.marginTop="12px";
+    chatWrap.innerHTML='<div class="sec-h" style="margin-top:0">💬 Crew chat</div><div id="crewChatLog" style="max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:8px"></div><div style="display:flex;gap:7px"><input id="crewChatInput" maxlength="200" placeholder="Message your crew…" style="flex:1;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:11px;padding:10px;color:#fff;font-weight:700;outline:none"><button class="buy" id="crewChatSend">Send</button></div>';
+    wrap.appendChild(chatWrap);renderCrewChat();
+    const ci=$("crewChatInput"),cs=$("crewChatSend");
+    const sendChat=async()=>{const t=(ci.value||"").trim();if(!t)return;ci.value="";try{await crewApi("chat",{text:t});renderCrewChat();}catch(e){toast("⚠️","Not sent",e.message);}};
+    if(cs)cs.addEventListener("click",sendChat);
+    if(ci)ci.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendChat();}});
     const leave=document.createElement("button");leave.className="big-btn";leave.style.cssText="background:#3a2456;color:#fff;margin-top:12px";leave.textContent=cap?"Leave crew / transfer captain":"Leave crew";
     leave.addEventListener("click",async()=>{if(!confirm("Leave "+S.crew+"?"+(cap?" Captain transfers to the highest-ranked remaining member.":"")))return;
       try{await crewApi("leave");renderMyCrew();renderCrews();renderWars();toast("🚪","Left crew","You can create or join another crew anytime");}catch(e){toast("⚠️","Leave failed",e.message);}});
     wrap.appendChild(leave);}
+  function renderCrewChat(){const log=$("crewChatLog");if(!log)return;const msgs=S.crewChat||[];
+    if(msgs.length===0){log.innerHTML='<div class="ds" style="opacity:.6">No messages yet — say gm 👋</div>';return;}
+    log.innerHTML=msgs.map(m=>'<div style="font-size:12px;line-height:1.35"><b style="color:var(--cyan)">'+esc(m.name)+':</b> '+esc(m.msg)+'</div>').join("");
+    log.scrollTop=log.scrollHeight;}
+  setInterval(()=>{if(panelOpen==="ranks"&&S.crew&&$("crewChatLog")&&hasCloudAuth){crewApi("list").then(()=>renderCrewChat()).catch(()=>{});}},6000);
   // ---------- CREW WARS ----------
   function weekId(){return Math.floor(Date.now()/(7*864e5));}
   function crewHash(n){let h=0;for(let i=0;i<String(n).length;i++)h=(h*31+String(n).charCodeAt(i))>>>0;return h;}
@@ -1999,6 +2187,21 @@
          if(tg&&tg.openLink){tg.openLink(url);return;} }catch(e){}
     try{window.open(url,"_blank");}catch(e){location.href=url;}}
   $("copyCode").addEventListener("click",doShare);
+  function sendGift(){const tg=window.Telegram&&window.Telegram.WebApp;
+    if(!tg||!tg.initData){toast("🔒","Telegram required","Open inside Telegram to send gifts");return;}
+    const code=($("giftCode").value||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
+    const amt=Math.floor(Number($("giftAmt").value)||0);
+    if(code.length<6){toast("⚠️","Invalid code","Enter your friend's 6-char invite code");return;}
+    if(amt<1000){toast("⚠️","Minimum 1,000","Gift at least 1,000 $MOON");return;}
+    if(S.balance<amt){toast("💸","Not enough $MOON","Bank more before gifting");return;}
+    const btn=$("giftSend");btn.disabled=true;btn.textContent="Sending…";
+    fetch("/api/gift",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({initData:tg.initData,toCode:code,amount:amt})})
+      .then(r=>r.json().then(d=>({ok:r.ok,d})))
+      .then(({ok,d})=>{if(ok&&d&&d.ok){S.balance=typeof d.balance==="number"?d.balance:S.balance-amt;save();renderLive();renderStats();sfxCash();$("giftCode").value="";$("giftAmt").value="";toast("💝","Gift sent!","−"+fmt(amt)+" $MOON to "+code);}
+        else toast("⚠️","Gift failed",(d&&d.error)||"Try again");})
+      .catch(()=>toast("⚠️","Gift failed","Network error"))
+      .finally(()=>{btn.disabled=false;btn.textContent="💝 Send Gift";});}
+  $("giftSend")&&$("giftSend").addEventListener("click",sendGift);
   function shareTo(p){const url=inviteLink();const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
     const t=encodeURIComponent(txt),u=encodeURIComponent(url);
     if(p==="x")openExt("https://twitter.com/intent/tweet?text="+t+"&url="+u);
