@@ -34,9 +34,9 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0;}
-  #gameScroll>.chart-card{flex:1 1 auto; min-height:150px; display:flex; flex-direction:column;}   /* chart is the hero — absorbs the slack and grows */
-  @media(max-height:760px){ #gameScroll>.chart-card{min-height:104px;} #chart{min-height:60px;} }   /* short phones: don't let the chart floor push the nav off */
+  #gameScroll>.coin-stage{flex:1 1 auto; min-height:110px;}   /* BUY area absorbs slack so the chart stays a sane fixed size */
+  #gameScroll>.chart-card{flex:0 0 auto;}
+  @media(max-height:760px){ #chart{height:120px;} }   /* short phones: trim the chart so the nav stays on-screen */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -66,7 +66,7 @@
   .iconbtn{background:var(--glass); border:1px solid var(--line); color:#fff; width:29px; height:29px;
     border-radius:9px; font-size:13px; cursor:pointer; transition:transform .12s; backdrop-filter:blur(6px); padding:0;}
   .iconbtn:active{transform:scale(.9);}
-  .season{font-size:8.5px; color:#b79bff; text-align:center; padding:0 14px;}
+  .season{font-size:10px; color:#b79bff; text-align:center; padding:2px 14px;}
   .event-banner{margin:2px 10px 0; padding:5px 10px; border-radius:10px; font-size:11px; font-weight:800; text-align:center; color:#fff;
     background:linear-gradient(90deg,rgba(255,212,0,.18),rgba(255,43,214,.18)); border:1px solid rgba(255,212,0,.45); box-shadow:0 0 16px rgba(255,212,0,.25);
     animation:evtpulse 2s ease-in-out infinite;}
@@ -75,13 +75,13 @@
   .season b{color:var(--gold);}
 
   /* stats */
-  .stats{display:flex; gap:5px; padding:1px 12px;}
+  .stats{display:flex; gap:6px; padding:4px 12px;}
   .stat{flex:1; position:relative; overflow:hidden; background:var(--card); border:1px solid var(--line);
-    backdrop-filter:blur(6px); border-radius:12px; padding:2px 4px; text-align:center;
+    backdrop-filter:blur(6px); border-radius:12px; padding:6px 4px; text-align:center;
     box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .15s;}
   .stat:active{transform:translateY(-2px) scale(1.02);}
-  .stat .v{font-size:13px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
-  .stat .l{font-size:7px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase;}
+  .stat .v{font-size:16px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
+  .stat .l{font-size:8px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase; margin-top:2px;}
   #balance{color:var(--gold);}
 
   /* chart */
@@ -99,7 +99,7 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; flex:1 1 auto; min-height:84px; height:auto; display:block;}
+  #chart{width:100%; height:168px; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
@@ -1174,8 +1174,8 @@
   const tapPower=()=>1+lvl("power")*0.45;
   const effVip=()=>Math.max(S.vip||0,(S.vipSubUntil&&Date.now()<S.vipSubUntil)?4:0);   // 30-day VIP Pass grants Diamond perks while active
   const maxEnergy=()=>100+lvl("energy")*40 + effVip()*25 + (rankPerk().eb||0);
-  const regenRate=()=>Math.min(1+lvl("regen")*0.6, 5);   // capped — energy regen can never out-pace a fast tapper
-  const tapCost=()=>1+Math.floor(rankIdx()/2);            // energy per tap rises with rank: 🦐1 🦀1 🐟2 🐬2 🦈3 🐋3 🦖4
+  const regenRate=()=>Math.min(0.8+lvl("regen")*0.25, 3);   // slower regen for ALL tiers — energy is a real resource again
+  const tapCost=()=>1;                                       // clicking is never rate-limited — every tap costs a flat 1 energy
   const autoRate=()=>lvl("auto")*2;
   const comboCap=()=>40+lvl("combo")*12;
   const comboGain=()=>0.025+lvl("combo")*0.004;
