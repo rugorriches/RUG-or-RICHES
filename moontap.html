@@ -34,7 +34,7 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0; padding:0;}   /* BUY button hugs the pot, no big gap */
+  #gameScroll>.coin-stage{flex:1 1 auto; min-height:120px;}   /* absorbs slack so the console sits at the bottom (no gap under SELL) */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -130,7 +130,7 @@
   .wintag:not(:empty){height:13px;}
   .coin-stage{flex:0 0 auto; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; padding:0; margin-top:0;}
   /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
-  #coin{width:min(96%,360px); min-height:64px; height:64px; border-radius:20px; cursor:pointer; position:relative; overflow:hidden;
+  #coin{width:min(96%,360px); min-height:96px; height:104px; border-radius:24px; cursor:pointer; position:relative; overflow:hidden;
     background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
     display:flex; align-items:center; gap:15px; padding:0 22px; transition:transform .07s, box-shadow .2s;
     box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--coin-accent,#ffd400);}
@@ -187,7 +187,7 @@
   #cashout:disabled{filter:grayscale(.8) brightness(.6); cursor:not-allowed; animation:none;}
 
   /* nav */
-  nav{flex:0 0 auto; display:flex; min-height:64px; border-top:1px solid var(--line); background:rgba(5,1,15,.92); backdrop-filter:blur(8px); padding-bottom:env(safe-area-inset-bottom);}
+  nav{flex:0 0 auto; position:relative; z-index:40; display:flex; min-height:64px; border-top:1px solid var(--line); background:rgba(5,1,15,.96); backdrop-filter:blur(8px); padding-bottom:env(safe-area-inset-bottom);}
   nav button{flex:1; position:relative; background:none; border:none; color:#9a82c9; padding:10px 0 12px; font-size:9.5px; font-weight:700; cursor:pointer; transition:color .2s, transform .1s;}
   nav button:active{transform:scale(.92);}
   nav button.on{color:var(--cyan); text-shadow:0 0 8px var(--cyan);}
@@ -717,7 +717,7 @@
         <div class="rh-next" id="myRankNext">—</div>
         <div class="pbar2" style="margin-top:7px"><i id="myRankBar" style="width:0%"></i></div>
       </div>
-      <div class="sec-h">All tiers</div><div id="rankList"></div>
+      <div class="sec-h">All tiers · tap for details</div><div id="rankList"></div>
     </div>
     <div class="rt" id="rt-players" style="display:none"><div class="sec-h">Season Leaderboard</div><div id="boardList"></div></div>
     <div class="rt" id="rt-crews" style="display:none"><div class="sec-h">Top Crews</div><div id="crewBoard"></div></div>
@@ -819,6 +819,13 @@
     <div class="ds" id="upDesc"></div>
     <div class="cmp"><div class="col"><div class="lab">Current</div><div class="val" id="upNow"></div></div><div class="arrow">→</div><div class="col next"><div class="lab">Next level</div><div class="val" id="upNext"></div></div></div>
     <div class="mbtns"><button class="cancel" id="upBack">Back</button><button class="ok" id="upBuy">Upgrade</button></div>
+  </div></div>
+
+  <div class="modal" id="rankModal" role="dialog" aria-modal="true" aria-label="Rank details"><div class="box updetail">
+    <div class="uhead"><div class="e" id="rankMEmo">🦐</div><div><div class="nm" id="rankMName"></div><div class="ds" id="rankMReq"></div></div></div>
+    <div class="ds" id="rankMPerk"></div>
+    <div class="ds" id="rankMStatus" style="margin-top:8px; font-weight:800"></div>
+    <div class="mbtns"><button class="ok" id="rankMClose" style="width:100%">Got it</button></div>
   </div></div>
 
   <div id="tut"><div class="em" id="tutEm">📈</div><h3 id="tutH"></h3><p id="tutP"></p><div class="dots" id="tutDots"></div><button id="tutNext">Next</button></div>
@@ -1091,8 +1098,13 @@
   function subCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.max(0,S.airdrop-a);else S.balance=Math.max(0,S.balance-a);}
 
   // ---------- RANKS ----------
-  const RANKS=[{min:0,nm:"Shrimp",e:"🦐"},{min:100000,nm:"Crab",e:"🦀"},{min:750000,nm:"Fish",e:"🐟"},
-    {min:3e6,nm:"Dolphin",e:"🐬"},{min:15e6,nm:"Shark",e:"🦈"},{min:50e6,nm:"Orca",e:"🐋"},{min:1e8,nm:"Megalodon",e:"🦖"}];
+  const RANKS=[{min:0,nm:"Shrimp",e:"🦐",p:"Where every degen starts. Tap, bet, and bank your first $MOON."},
+    {min:250000,nm:"Crab",e:"🦀",p:"You're climbing. Unlocks the Bronze VIP $MOON route."},
+    {min:2500000,nm:"Fish",e:"🐟",p:"A real trader now. Unlocks the Silver VIP $MOON route."},
+    {min:15000000,nm:"Dolphin",e:"🐬",p:"Smart money. Leaderboard flex + bigger airdrop standing."},
+    {min:75000000,nm:"Shark",e:"🦈",p:"Apex predator — unlocks the Shark achievement."},
+    {min:300000000,nm:"Orca",e:"🐋",p:"Elite whale tier. Few ever get here."},
+    {min:1000000000,nm:"Megalodon",e:"🦖",p:"Max rank — apex of the food chain. 👑"}];
   function rankIdx(){let i=0;for(let j=0;j<RANKS.length;j++)if(S.lifetime>=RANKS[j].min)i=j;return i;}
 
   // ---------- REFERRAL MILESTONES ----------
@@ -1722,7 +1734,7 @@
       else btn='<button class="buy">Follow ↗</button>';
       d.innerHTML='<div class="emo">'+socialIcon(q.id)+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+sub+'</div></div>'+btn;
       const b=d.querySelector("button");
-      if(st===0)b.addEventListener("click",()=>{try{window.open(q.url,"_blank");}catch(e){}S.social[q.id]=1;save();renderSocial();updateQuestDot();});
+      if(st===0)b.addEventListener("click",()=>{openExt(q.url);S.social[q.id]=1;save();renderSocial();updateQuestDot();});
       else if(st===1)b.addEventListener("click",()=>verifySocial(q,b));
       else if(st===2)b.addEventListener("click",()=>{
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
@@ -1762,15 +1774,21 @@
       '<div '+sr+'><span>Cash-outs</span><b style="color:'+(cashOk?'var(--green)':'var(--gold)')+'">'+fmt(cash)+' / '+fmt(AIRDROP_MIN_CASHOUTS)+'</b></div>'+
       '<div '+sr+'><span>Est. pool share</span><b style="color:var(--cyan)">'+share.toFixed(4)+'%</b></div>'+
       '<div class="pbar2" style="margin-top:9px"><i style="width:'+clamp(reqPct,3,100)+'%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';}
-  function renderCombo(){const wrap=$("comboCard");if(!wrap)return;const today=new Date().toDateString();const done=S.comboDay===today;
-    wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">A free bonus every day you check in</div></div><button class="qclaim '+(done?"done":"")+'"'+(done?" disabled":"")+'>'+(done?"✓":"Claim 10K")+'</button>';
-    if(!done)wrap.querySelector("button").addEventListener("click",()=>{
-      if(S.comboDay===today)return;
-      if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
-        window._moonWS.send(JSON.stringify({ t: "claim_combo" }));
-        return;
-      }
-      S.comboDay=today;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");},{once:true});}
+  const COMBO_TAPS_NEEDED=300;
+  function renderCombo(){const wrap=$("comboCard");if(!wrap)return;
+    // normalize to a stable YYYY-MM-DD so the once-a-day guard survives cloud-sync date formats (was claimable every refresh)
+    const todayISO=new Date().toLocaleDateString('en-CA');
+    const norm=v=>{if(!v)return"";const dt=new Date(v);return isNaN(dt)?String(v).slice(0,10):dt.toLocaleDateString('en-CA');};
+    const done=norm(S.comboDay)===todayISO;
+    const tapsToday=qprog("taps")||0, ready=tapsToday>=COMBO_TAPS_NEEDED;
+    let label, sub;
+    if(done){label="✓"; sub="Claimed — come back tomorrow";}
+    else if(!ready){label="🔒 "+tapsToday+"/"+COMBO_TAPS_NEEDED; sub="Tap "+COMBO_TAPS_NEEDED+" times today to unlock";}
+    else {label="Claim 10K"; sub="Unlocked! Claim your daily bonus";}
+    wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">'+sub+'</div></div><button class="qclaim '+(done?"done":"")+'"'+((done||!ready)?" disabled":"")+'>'+label+'</button>';
+    if(!done&&ready)wrap.querySelector("button").addEventListener("click",()=>{
+      if(norm(S.comboDay)===todayISO)return;
+      S.comboDay=todayISO;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");},{once:true});}
 
   // ---------- RANKS + LEADERBOARD ----------
   function renderRanks(){const ri=rankIdx();const cur=RANKS[ri],next=RANKS[ri+1];
@@ -1779,8 +1797,9 @@
       $("myRankNext").textContent=fmt(next.min-S.lifetime)+" more to "+next.nm+" "+next.e;$("myRankBar").style.width=prog+"%";}
     else{$("myRankNext").textContent="Max rank reached 👑";$("myRankBar").style.width="100%";}
     const rl=$("rankList");rl.innerHTML="";
-    RANKS.forEach((r,i)=>{const d=document.createElement("div");d.className="rankrow"+(i===ri?" cur":(i<ri?" done":""));
-      d.innerHTML='<div class="e">'+r.e+'</div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'');rl.appendChild(d);});
+    RANKS.forEach((r,i)=>{const d=document.createElement("div");d.className="rankrow"+(i===ri?" cur":(i<ri?" done":""));d.style.cursor="pointer";
+      d.innerHTML='<div class="e">'+r.e+'</div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'<span class="pill" style="opacity:.6">ⓘ</span>');
+      d.addEventListener("click",()=>openRank(i));rl.appendChild(d);});
     
     const BOTS=[["0xWhaleKing",8.4e6],["satoshi_jr",5.1e6],["rugproof.eth",3.9e6],["DiamondHandz",2.7e6],["paperhands99",1.4e6],["moonboy_420",920000],["anon_degen",610000],["ngmi_chad",340000],["frenly_fox",180000],["tap_tap_rev",96000]];
     const list=BOTS.map(x=>({n:x[0],b:x[1]*(0.8+Math.random()*0.4),me:false}));
@@ -1864,6 +1883,18 @@
   // ---------- CREW WARS ----------
   function weekId(){return Math.floor(Date.now()/(7*864e5));}
   function crewHash(n){let h=0;for(let i=0;i<String(n).length;i++)h=(h*31+String(n).charCodeAt(i))>>>0;return h;}
+  function openRank(i){const r=RANKS[i],ri=rankIdx();
+    $("rankMEmo").textContent=r.e;$("rankMName").textContent=r.nm;
+    $("rankMReq").textContent=fmt(r.min)+"+ lifetime $MOON banked";
+    $("rankMPerk").textContent=r.p||"";
+    let st,col;
+    if(i<ri){st="✅ Achieved — you've passed this rank.";col="var(--green)";}
+    else if(i===ri){st="⭐ This is your current rank.";col="var(--gold)";}
+    else{st="🔒 "+fmt(Math.max(0,r.min-S.lifetime))+" more lifetime $MOON to reach "+r.nm+".";col="var(--cyan)";}
+    $("rankMStatus").textContent=st;$("rankMStatus").style.color=col;
+    $("rankModal").classList.add("show");}
+  $("rankMClose")&&$("rankMClose").addEventListener("click",()=>$("rankModal").classList.remove("show"));
+  $("rankModal")&&$("rankModal").addEventListener("click",e=>{if(e.target.id==="rankModal")$("rankModal").classList.remove("show");});
   function renderWars(){const wrap=$("warView");if(!wrap)return;wrap.innerHTML="";
     if(!S.crew){wrap.innerHTML='<p class="sub">Join a crew in the <b>My Crew</b> tab to fight in Crew Wars.</p>';return;}
     const wk=weekId();if(S.warWeek!==wk){S.warWeek=wk;S.warScore=0;S.warClaim=false;save();}
@@ -1892,7 +1923,17 @@
     cl.innerHTML='<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">'+(S.warClaim?"Claimed this week ✓":(winning?(S.warScore>=5000?"Claim scales with lead + contribution":"Contribute 5K war pts to unlock"):"Pull ahead of "+esc(rival.name)+" to unlock"))+'</div></div><button class="qclaim '+(S.warClaim?"done":"")+'"'+(canClaim?"":" disabled")+'>'+(S.warClaim?"✓":"Claim "+fmt(reward))+'</button>';
     wrap.appendChild(cl);
     if(canClaim)cl.querySelector("button").addEventListener("click",()=>{S.warClaim=true;bank(reward);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+"+fmt(reward)+" $MOON — gg");});
-    const f=document.createElement("div");f.innerHTML='<div class="sec-h">❔ How crew wars work</div><details class="faq"><summary>What changed?</summary><div class="a">Wars now use real player crews instead of fake prefilled crews. Your rally points persist and stack with other members.</div></details><details class="faq"><summary>How do I help win?</summary><div class="a">Rally by spending $MOON. Rally cost scales with your selected bet, and VIP slightly improves war point efficiency.</div></details><details class="faq"><summary>Reward?</summary><div class="a">Victory chests now scale from 25K to 250K based on your contribution and the crew lead. You must contribute at least 5K war pts this week.</div></details>';
+    const f=document.createElement("div");f.innerHTML=
+      '<div class="sec-h">📜 War rules</div>'+
+      '<details class="faq"><summary>How a war works</summary><div class="a">Each week your crew is auto-matched against a rival crew. Both sides earn <b>war points</b>; whoever has more when the timer hits zero wins the week.</div></details>'+
+      '<details class="faq"><summary>Earning war points</summary><div class="a">Tap <b>Rally</b> to spend $MOON for instant war pts, and keep playing — your contribution is tracked. Every crew member\'s points stack into the crew total.</div></details>'+
+      '<details class="faq"><summary>Winning &amp; the Victory Chest</summary><div class="a">If your crew is ahead, claim the <b>Victory Chest</b> (25K–250K $MOON, scaling with the lead + your contribution). You must contribute at least <b>5,000 war pts</b> that week to be eligible.</div></details>'+
+      '<details class="faq"><summary>Weekly reset</summary><div class="a">Wars reset every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>'+
+      '<div class="sec-h">❔ Crew wars Q&amp;A</div>'+
+      '<details class="faq"><summary>Do I need a crew?</summary><div class="a">Yes — join or create one on the <b>My Crew</b> tab. Solo players can\'t enter wars.</div></details>'+
+      '<details class="faq"><summary>Does VIP help?</summary><div class="a">Slightly — higher VIP improves your war-point efficiency when you rally.</div></details>'+
+      '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you banked. The chest just doesn\'t unlock that week. Try again next week.</div></details>'+
+      '<details class="faq"><summary>Will rallying drain my balance?</summary><div class="a">Only what you confirm each time. Rallying is optional — playing normally also feeds war pts to your crew.</div></details>';
     wrap.appendChild(f);}
   function resetRankTab(){document.querySelectorAll(".rtab").forEach((x,i)=>x.classList.toggle("on",i===0));["rank","players","crews","mycrew","wars"].forEach((k,i)=>{const el=$("rt-"+k);if(el)el.style.display=i===0?"block":"none";});}
   document.querySelectorAll(".rtab").forEach(b=>{b.addEventListener("click",()=>{
@@ -1928,12 +1969,17 @@
     if(n===0){fl.innerHTML='<div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div>';}
     else{fl.innerHTML="";S.friends.slice().reverse().forEach(f=>{const d=document.createElement("div");d.className="friend";
       d.innerHTML='<div class="av">'+(f.n?f.n[0].toUpperCase():"?")+'</div><div><div class="nm" style="font-size:12px">'+f.n+(f.prem?' <span class="pill">PREMIUM</span>':'')+'</div><div class="ds">'+(f.d||"")+'</div></div><div class="b">+'+fmt(f.b||0)+'</div>';fl.appendChild(d);});}}
+  // open an external/Telegram link reliably inside the Telegram WebView (window.open is blocked there)
+  function openExt(url){const tg=window.Telegram&&window.Telegram.WebApp;
+    try{ if(tg&&/(^|\.)t\.me\//.test(url)&&tg.openTelegramLink){tg.openTelegramLink(url);return;}
+         if(tg&&tg.openLink){tg.openLink(url);return;} }catch(e){}
+    try{window.open(url,"_blank");}catch(e){location.href=url;}}
   $("copyCode").addEventListener("click",doShare);
   function shareTo(p){const url=inviteLink();const txt="I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
     const t=encodeURIComponent(txt),u=encodeURIComponent(url);
-    if(p==="x")window.open("https://twitter.com/intent/tweet?text="+t+"&url="+u,"_blank");
-    else if(p==="tg")window.open("https://t.me/share/url?url="+u+"&text="+t,"_blank");
-    else if(p==="wa")window.open("https://wa.me/?text="+t+"%20"+u,"_blank");
+    if(p==="x")openExt("https://twitter.com/intent/tweet?text="+t+"&url="+u);
+    else if(p==="tg")openExt("https://t.me/share/url?url="+u+"&text="+t);
+    else if(p==="wa")openExt("https://wa.me/?text="+t+"%20"+u);
     else if(p==="ig"){if(navigator.clipboard)navigator.clipboard.writeText(txt+" "+url);toast("📸","Copied for Instagram","Paste it in your story or bio");}
     else{if(navigator.clipboard)navigator.clipboard.writeText(txt+" "+url);toast("🔗","Link copied!","Paste it anywhere 👀");}}
   document.querySelectorAll(".sicon").forEach(b=>b.addEventListener("click",()=>shareTo(b.dataset.s)));
@@ -2025,8 +2071,8 @@
   // ---------- SEASON ----------
   function seasonTick(){let end=parseInt(lsGet("moontap_season")||"0");
     if(!end){end=Date.now()+30*864e5;lsSet("moontap_season",end);}
-    let s=Math.max(0,Math.floor((end-Date.now())/1000));const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);
-    $("seasonTimer").textContent=d+"d "+h+"h "+m+"m";}
+    let s=Math.max(0,Math.floor((end-Date.now())/1000));const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);const sec=s%60;
+    const txt=d+"d "+h+"h "+m+"m "+sec+"s";$("seasonTimer").textContent=txt;const ad=$("adSeason");if(ad)ad.textContent=txt;}
 
   // ---------- TUTORIAL ----------
   const TUT=[{em:"🪙",h:"Every tap is a bet",p:"Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered."},
@@ -2049,7 +2095,9 @@
     syncWithCloud().catch(() => {});
   }
   function fitViewport(){const tg=window.Telegram&&window.Telegram.WebApp;
-    const h=(tg&&(tg.viewportStableHeight||tg.viewportHeight))||window.innerHeight;
+    // cap to the SMALLEST sane height so the app never extends past the visible webview (keeps the bottom nav on-screen)
+    const cands=[tg&&tg.viewportStableHeight, tg&&tg.viewportHeight, window.innerHeight].filter(v=>typeof v==="number"&&v>120);
+    const h=cands.length?Math.min.apply(null,cands):window.innerHeight;
     if(h>120)document.documentElement.style.setProperty("--app-h",h+"px");
     if(typeof sizeChart==="function")sizeChart();}
   function initTelegram(){const tg=window.Telegram&&window.Telegram.WebApp;if(!tg){fitViewport();return;}
@@ -2080,7 +2128,7 @@
     requestAnimationFrame(loop);}
   window.addEventListener("resize",fitViewport);
   window.addEventListener("orientationchange",()=>setTimeout(fitViewport,250));
-  setInterval(achCheck,2000);seasonTick();setInterval(seasonTick,30000);
+  setInterval(achCheck,2000);seasonTick();setInterval(seasonTick,1000);
   init();
 })();
 </script>
