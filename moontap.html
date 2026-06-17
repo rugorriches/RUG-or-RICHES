@@ -603,14 +603,40 @@
     nav button { padding: 6px 0 8px; font-size: 8.5px; }
     nav button .ic { font-size: 15px; }
   }
+  /* ---------- BRAND / MASCOT ---------- */
+  #splash{position:fixed; inset:0; z-index:300; background:radial-gradient(130% 90% at 50% -10%,#1a0c33,#05010f 82%); display:flex; align-items:center; justify-content:center; transition:opacity .55s ease;}
+  #splash.hide{opacity:0; pointer-events:none;}
+  #splash img{width:min(76%,340px); height:auto; filter:drop-shadow(0 14px 44px rgba(124,77,255,.55)); animation:splashIn .6s ease;}
+  @keyframes splashIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .brand-av{width:30px; height:30px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(35,240,255,.55); box-shadow:0 0 10px rgba(35,240,255,.35); flex:0 0 auto; margin-right:7px;}
+  @media(max-width:380px){ .brand-av{width:26px;height:26px;margin-right:5px;} }
+  .react-modal{position:absolute; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:22px; background:rgba(4,0,12,.84); backdrop-filter:blur(3px);}
+  .react-modal.show{display:flex;}
+  .react-box{width:100%; max-width:320px; text-align:center; animation:splashIn .35s ease;}
+  .react-box img{width:min(78%,240px); height:auto; border-radius:18px; margin-bottom:10px; filter:drop-shadow(0 10px 30px rgba(0,0,0,.6));}
+  .react-amt{font-size:25px; font-weight:900; line-height:1.1; margin:2px 0;}
+  .react-sub{font-size:13px; color:var(--muted); margin-bottom:14px;}
+  .react-box .big-btn{width:100%;}
+  .ad-hero-img{width:100%; height:auto; border-radius:16px; display:block; margin:0 0 12px; border:1px solid var(--line);}
+  .brand-empty{text-align:center; padding:16px 10px;}
+  .brand-empty img{width:min(58%,190px); height:auto; opacity:.95; margin-bottom:10px;}
+  .rank-ic{width:30px; height:30px; object-fit:contain; vertical-align:middle; filter:drop-shadow(0 0 4px rgba(0,0,0,.5));}
 </style>
 </head>
 <body>
+<div id="splash"><img src="/assets/brand/loading-splash.webp" alt="RUG OR RICHES — Pump it. Bank it. Before it rugs." onerror="this.style.display='none'"></div>
+<script>/* failsafe: hide splash even if the main script fails to load */setTimeout(function(){var s=document.getElementById('splash');if(s)s.classList.add('hide');setTimeout(function(){if(s)s.style.display='none';},700);},3800);</script>
 <div id="bg"><span></span><span></span><span></span><div class="grid"></div></div>
 <div id="app">
   <div id="rugOverlay"></div>
+  <div class="react-modal" id="reactModal"><div class="react-box">
+    <img id="reactImg" src="" alt="" onerror="this.style.display='none'">
+    <div class="react-amt" id="reactAmt"></div><div class="react-sub" id="reactSub"></div>
+    <button class="big-btn" id="reactBtn">Continue</button>
+  </div></div>
 
   <header>
+    <img class="brand-av" src="/assets/brand/shark-pfp.webp" alt="$MOON shark" onerror="this.style.display='none'">
     <button class="rankpill" id="rankPill" aria-label="View ranks"><span class="e">🦐</span><span id="rankName">Shrimp</span></button>
     <div class="logo">RUG <small>OR</small> RICHES</div>
     <div class="hbtns"><button class="iconbtn" id="storeBtn" aria-label="Store">⭐</button><button class="iconbtn" id="helpBtn" aria-label="Help">❓</button><button class="iconbtn" id="dashBtn" aria-label="Dashboard">📊</button><button class="iconbtn" id="soundBtn" aria-label="Toggle sound">🔊</button><button class="iconbtn" id="profileBtn" aria-label="Profile">👤</button></div>
@@ -728,6 +754,7 @@
 
   <div class="panel" id="panel-airdrop">
     <h2>🪂 Airdrop</h2><p class="sub">Airdrop Points are a separate Season 1 score. Qualify through sustained play during your first 30 days.</p>
+    <img class="ad-hero-img" src="/assets/brand/airdrop-banner.webp" alt="Season 1 $MOON airdrop" loading="lazy" onerror="this.style.display='none'">
     <div class="invhero">
       <div class="lab">Your airdrop allocation</div><div class="big" id="adPoints">0</div>
       <div class="ds" id="adEst">≈ 0 $MOON tokens</div>
@@ -928,7 +955,7 @@
 
   // ---------- STATE ----------
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,pnlWon:0,pnlLost:0,
-    streak:0,lastDay:null,refCode:null,name:null,nameSet:false,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
+    streak:0,lastDay:null,refCode:null,name:null,nameSet:false,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,vipEnergyDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     seasonStart:null,seasonDays:[],
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]},
@@ -1146,7 +1173,7 @@
   const lvl=k=>S.up[k]||0;
   const tapPower=()=>1+lvl("power")*0.45;
   const effVip=()=>Math.max(S.vip||0,(S.vipSubUntil&&Date.now()<S.vipSubUntil)?4:0);   // 30-day VIP Pass grants Diamond perks while active
-  const maxEnergy=()=>100+lvl("energy")*40 + effVip()*25;
+  const maxEnergy=()=>100+lvl("energy")*40 + effVip()*25 + (rankPerk().eb||0);
   const regenRate=()=>1+lvl("regen")*0.6;
   const autoRate=()=>lvl("auto")*2;
   const comboCap=()=>40+lvl("combo")*12;
@@ -1184,13 +1211,15 @@
   function subCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.max(0,S.airdrop-a);else S.balance=Math.max(0,S.balance-a);}
 
   // ---------- RANKS ----------
-  const RANKS=[{min:0,nm:"Shrimp",e:"🦐",p:"Where every degen starts. Tap, bet, and bank your first $MOON."},
-    {min:250000,nm:"Crab",e:"🦀",p:"You're climbing. Unlocks the Bronze VIP $MOON route."},
-    {min:2500000,nm:"Fish",e:"🐟",p:"A real trader now. Unlocks the Silver VIP $MOON route."},
-    {min:15000000,nm:"Dolphin",e:"🐬",p:"Smart money. Leaderboard flex + bigger airdrop standing."},
-    {min:75000000,nm:"Shark",e:"🦈",p:"Apex predator — unlocks the Shark achievement."},
-    {min:300000000,nm:"Orca",e:"🐋",p:"Elite whale tier. Few ever get here."},
-    {min:1000000000,nm:"Megalodon",e:"🦖",p:"Max rank — apex of the food chain. 👑"}];
+  const RANKS=[
+    {min:0,nm:"Shrimp",e:"🦐",p:"Where every degen starts. Tap, bet, and bank your first $MOON.",eb:0,db:1,ben:["Tap, bet & bank — the journey begins"]},
+    {min:250000,nm:"Crab",e:"🦀",p:"You're climbing.",eb:20,db:1,ben:["⚡ +20 max energy","🥉 Unlocks Bronze VIP $MOON route"]},
+    {min:2500000,nm:"Fish",e:"🐟",p:"A real trader now.",eb:40,db:1.1,ben:["⚡ +40 max energy","🎁 +10% daily login bonus","🥈 Unlocks Silver VIP $MOON route"]},
+    {min:15000000,nm:"Dolphin",e:"🐬",p:"Smart money.",eb:65,db:1.25,ben:["⚡ +65 max energy","🎁 +25% daily login bonus","🥇 Unlocks Gold VIP $MOON route","🏆 Bigger leaderboard & airdrop standing"]},
+    {min:75000000,nm:"Shark",e:"🦈",p:"Apex predator.",eb:90,db:1.5,ben:["⚡ +90 max energy","🎁 +50% daily login bonus","💎 Unlocks Diamond VIP $MOON route","🦈 Shark achievement"]},
+    {min:300000000,nm:"Orca",e:"🐋",p:"Elite whale tier.",eb:120,db:1.75,ben:["⚡ +120 max energy","🎁 +75% daily login bonus","🐋 Elite whale status"]},
+    {min:1000000000,nm:"Megalodon",e:"🦖",p:"Max rank — apex of the food chain. 👑",eb:160,db:2,ben:["⚡ +160 max energy","🎁 2× daily login bonus","👑 Apex badge — top of the food chain"]}];
+  function rankPerk(){return RANKS[rankIdx()]||RANKS[0];}
   function rankIdx(){let i=0;for(let j=0;j<RANKS.length;j++)if(S.lifetime>=RANKS[j].min)i=j;return i;}
 
   // ---------- REFERRAL MILESTONES ----------
@@ -1246,7 +1275,7 @@
   // ---------- DAILY STREAK ----------
   (function(){const today=new Date().toDateString();
     if(S.lastDay!==today){const y=new Date(Date.now()-864e5).toDateString();
-      S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.min(S.streak,20)*250;bank(b);
+      S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.floor(Math.min(S.streak,20)*250*(rankPerk().db||1));bank(b);
       S.boxes=(S.boxes||0)+1;S.tickets=(S.tickets||0)+1;save();   // daily login also drops a mystery box + a lucky-draw ticket
       setTimeout(()=>toast("🔥","Day "+S.streak+" streak!","+"+fmt(b)+" $MOON · 🎁 1 box · 🎟️ 1 ticket"),1200);}})();
 
@@ -1429,7 +1458,8 @@
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
       toast(bustType==="soft"?"🩸":"💀",bustType==="soft"?"SOFT RUG":"RUGGED!",(bustType==="soft"?"Saved "+fmt(rescued)+" · lost ":"Lost ")+fmt(lost)+" "+(cur==="pts"?"pts":"$MOON"));
-      sfxRug();if(navigator.vibrate)navigator.vibrate(bustType==="soft"?[40,30,60]:[60,40,140]);}
+      sfxRug();if(navigator.vibrate)navigator.vibrate(bustType==="soft"?[40,30,60]:[60,40,140]);
+      if(bustType!=="soft"&&cur==="moon")showReaction(false,"−"+fmt(lost)+" $MOON","The chart dumped on you. Bank earlier next time.");}
     holders=Math.floor(holders*(bustType==="soft"?0.93:0.85));
     pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;winStreak=0;heat=0;pumpVel=0;dumpWarn=0;$("combo").textContent="";save();renderStats();renderDash();}
 
@@ -1447,7 +1477,8 @@
     if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
     if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
-    if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();}
+    if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();
+      if(!auto&&profit>0&&cur==="moon"&&r>=0.5)showReaction(true,"+"+fmt(payout)+" $MOON","You banked it before the rug — gains locked.");}
     mktBuy=clamp(mktBuy-0.12,0.05,0.9);   // your sell adds sell pressure
     pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;bonusBets=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
     save();achCheck();renderLive();renderStats();renderDash();}
@@ -1703,11 +1734,11 @@
     const hero=document.createElement("div");hero.className="viphero";
     hero.innerHTML='<div class="vh-tier">'+(cur>0?VIP[cur].emo+" "+VIP[cur].nm:"🆓 Free Tier")+'</div><div class="vh-ben">'+vipBenefits(cur).map(x=>'<span class="bchip">'+x+'</span>').join("")+'</div>';
     wrap.appendChild(hero);
-    if(cur>0){const today=new Date().toDateString();const claimed=S.vipDay===today;const reward=cur*50000;
+    if(cur>0){const today=new Date().toDateString();const claimed=S.vipDay===today;const eClaimed=S.vipEnergyDay===today;const reward=cur*50000;
       const lng=document.createElement("div");lng.className="lounge";
-      lng.innerHTML='<h3>🛋️ '+VIP[cur].nm+' Lounge</h3><div class="ds" style="margin-bottom:10px">Members-only perks — drop by daily.</div>'+
+      lng.innerHTML='<h3>🛋️ '+VIP[cur].nm+' Lounge</h3><div class="ds" style="margin-bottom:10px">Members-only perks — one of each per day.</div>'+
         '<button class="big-btn" id="vipClaim" style="margin:0 0 9px'+(claimed?';opacity:.5':'')+'"'+(claimed?' disabled':'')+'>'+(claimed?'✓ Daily bonus claimed':'🎁 Claim daily bonus · +'+fmt(reward)+' $MOON')+'</button>'+
-        '<button class="big-btn" id="vipEnergy" style="margin:0;background:linear-gradient(90deg,var(--cyan),#0bd4c4)">⚡ Instant energy refill</button>';
+        '<button class="big-btn" id="vipEnergy" style="margin:0;background:linear-gradient(90deg,var(--cyan),#0bd4c4)'+(eClaimed?';opacity:.5':'')+'"'+(eClaimed?' disabled':'')+'>'+(eClaimed?'✓ Energy refilled today':'⚡ Instant energy refill')+'</button>';
       wrap.appendChild(lng);
       const cbn=lng.querySelector("#vipClaim");if(cbn&&!claimed)cbn.addEventListener("click",()=>{
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
@@ -1715,12 +1746,12 @@
           return;
         }
         S.vipDay=today;bank(reward);save();renderVip();renderLive();renderStats();toast("🛋️","VIP daily bonus!","+"+fmt(reward)+" $MOON");});
-      lng.querySelector("#vipEnergy").addEventListener("click",()=>{
+      const ebn=lng.querySelector("#vipEnergy");if(ebn&&!eClaimed)ebn.addEventListener("click",()=>{
+        if(S.vipEnergyDay===new Date().toDateString())return;
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "refill_vip_energy" }));
-          return;
         }
-        energy=maxEnergy();renderLive();toast("⚡","Energy refilled!","VIP perk used");});
+        S.vipEnergyDay=new Date().toDateString();energy=maxEnergy();save();renderVip();renderLive();toast("⚡","Energy refilled!","VIP perk — back tomorrow");});
     }else{const t=document.createElement("div");t.className="card";t.innerHTML='<div class="ds">🔒 Unlock any VIP tier to enter the <b>VIP Lounge</b> — daily $MOON bonuses & instant energy refills.</div>';wrap.appendChild(t);}
     for(let i=1;i<VIP.length;i++){const v=VIP[i];const owned=cur>=i;const reqOk=rankIdx()>=v.req;const can=S.balance>=v.cost&&cur===i-1&&reqOk;
       const d=document.createElement("div");d.className="vipcard "+v.cls+(cur===i?" active":"");
@@ -2021,7 +2052,7 @@
     else{$("myRankNext").textContent="Max rank reached 👑";$("myRankBar").style.width="100%";}
     const rl=$("rankList");rl.innerHTML="";
     RANKS.forEach((r,i)=>{const d=document.createElement("div");d.className="rankrow"+(i===ri?" cur":(i<ri?" done":""));d.style.cursor="pointer";
-      d.innerHTML='<div class="e">'+r.e+'</div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'<span class="pill" style="opacity:.6">ⓘ</span>');
+      d.innerHTML='<div class="e"><img class="rank-ic" src="/assets/brand/rank-'+r.nm.toLowerCase()+'.webp" alt="" onerror="this.parentNode.textContent=\''+r.e+'\'"></div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'<span class="pill" style="opacity:.6">ⓘ</span>');
       d.addEventListener("click",()=>openRank(i));rl.appendChild(d);});
     
     const BOTS=[["0xWhaleKing",8.4e6],["satoshi_jr",5.1e6],["rugproof.eth",3.9e6],["DiamondHandz",2.7e6],["paperhands99",1.4e6],["moonboy_420",920000],["anon_degen",610000],["ngmi_chad",340000],["frenly_fox",180000],["tap_tap_rev",96000]];
@@ -2127,9 +2158,11 @@
   function weekId(){return Math.floor(Date.now()/(7*864e5));}
   function crewHash(n){let h=0;for(let i=0;i<String(n).length;i++)h=(h*31+String(n).charCodeAt(i))>>>0;return h;}
   function openRank(i){const r=RANKS[i],ri=rankIdx();
-    $("rankMEmo").textContent=r.e;$("rankMName").textContent=r.nm;
+    $("rankMEmo").innerHTML='<img class="rank-ic" style="width:42px;height:42px" src="/assets/brand/rank-'+r.nm.toLowerCase()+'.webp" alt="" onerror="this.parentNode.textContent=\''+r.e+'\'">';$("rankMName").textContent=r.nm;
     $("rankMReq").textContent=fmt(r.min)+"+ lifetime $MOON banked";
-    $("rankMPerk").textContent=r.p||"";
+    const ben=(r.ben&&r.ben.length)?r.ben:[r.p||""];
+    $("rankMPerk").innerHTML='<div style="font-weight:800;color:#e7deff;margin-bottom:6px">This tier gets you:</div>'+
+      ben.map(b=>'<div style="margin:3px 0">• '+esc(b)+'</div>').join("");
     let st,col;
     if(i<ri){st="✅ Achieved — you've passed this rank.";col="var(--green)";}
     else if(i===ri){st="⭐ This is your current rank.";col="var(--gold)";}
@@ -2209,7 +2242,7 @@
         S.refMiles.push(m.n);bank(m.r);save();sfxCash();renderInvite();renderLive();renderStats();toast("🎁","Milestone reward!","+"+fmt(m.r)+" $MOON");});
       ml.appendChild(d);});
     const fl=$("friendList");
-    if(n===0){fl.innerHTML='<div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div>';}
+    if(n===0){fl.innerHTML='<div class="brand-empty"><img src="/assets/brand/empty-state.webp" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="nm" style="font-weight:800">No crew yet</div><div class="ds">Share your code — you both bank 5,000 $MOON.</div></div>';}
     else{fl.innerHTML="";S.friends.slice().reverse().forEach(f=>{const d=document.createElement("div");d.className="friend";
       d.innerHTML='<div class="av">'+(f.n?f.n[0].toUpperCase():"?")+'</div><div><div class="nm" style="font-size:12px">'+f.n+(f.prem?' <span class="pill">PREMIUM</span>':'')+'</div><div class="ds">'+(f.d||"")+'</div></div><div class="b">+'+fmt(f.b||0)+'</div>';fl.appendChild(d);});}}
   // open an external/Telegram link reliably inside the Telegram WebView (window.open is blocked there)
@@ -2392,8 +2425,24 @@
     if(/[?&]test/.test(location.search)){const b=document.createElement("div");b.textContent=fail?("⚠ "+fail+" FAIL"):("✅ "+pass+" checks OK");
       b.style.cssText="position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:90;font:700 11px sans-serif;padding:3px 9px;border-radius:8px;color:#06121f;background:"+(fail?"#ff3b5c":"#1dff8f");$("app").appendChild(b);}
     return fail===0;}
+  // ---------- WIN / LOSS REACTION ----------
+  function showReaction(win,amount,sub){const m=$("reactModal");if(!m)return;
+    const img=$("reactImg");img.src=win?"/assets/brand/banked-win.webp":"/assets/brand/rugged-lost.webp";img.style.display="";
+    $("reactAmt").textContent=amount||"";$("reactAmt").style.color=win?"var(--green)":"var(--red)";
+    $("reactSub").textContent=sub||"";$("reactBtn").textContent=win?"Continue":"Try again";
+    m.classList.add("show");}
+  function closeReaction(){const m=$("reactModal");if(m)m.classList.remove("show");}
+  $("reactBtn")&&$("reactBtn").addEventListener("click",closeReaction);
+  $("reactModal")&&$("reactModal").addEventListener("click",e=>{if(e.target.id==="reactModal")closeReaction();});
+
   function init(){initTelegram();sizeChart();applySkin();renderLive();renderBetChips();renderBetHUD();updatePredict();renderStats();updateQuestDot();connectBackend();selfTest();
+    // deep-link: ?tab=airdrop (etc.) from the bot button / shared links opens that tab on load
+    try{const dt=new URLSearchParams(location.search).get("tab");
+      if(dt&&panels[dt]){document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+        const nb=document.querySelector('nav button[data-p="'+dt+'"]');if(nb)nb.classList.add("on");openPanel(dt);}}catch(e){}
     if(!lsGet("moontap_tut")){$("tut").classList.add("show");renderTut();}
+    // fade out the branded splash once the app is up
+    setTimeout(()=>{const s=$("splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none";},650);}},900);
     requestAnimationFrame(loop);}
   window.addEventListener("resize",fitViewport);
   window.addEventListener("orientationchange",()=>setTimeout(fitViewport,250));
