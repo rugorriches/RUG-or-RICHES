@@ -39,7 +39,7 @@ CREATE TABLE public.players (
     stars_spent     INT             DEFAULT 0      NOT NULL,
     -- bet settings (persisted across sessions)
     bet             INT             DEFAULT 100    NOT NULL,
-    bet_cur         VARCHAR(10)     DEFAULT 'moon' NOT NULL,     -- 'moon' or 'pts'
+    bet_cur         VARCHAR(10)     DEFAULT 'moon' NOT NULL,     -- locked to 'moon'; airdrop points are not spendable
     auto_sell       DOUBLE PRECISION DEFAULT 0     NOT NULL,     -- 0 = off, else target multiplier
     stop_loss       INT             DEFAULT 0      NOT NULL,     -- 0 = off, else % from peak
     -- referral
@@ -51,6 +51,8 @@ CREATE TABLE public.players (
     starter_bought  BOOLEAN         DEFAULT FALSE  NOT NULL,
     season_pass     BOOLEAN         DEFAULT FALSE  NOT NULL,
     season_claim_day DATE,
+    season_start    DATE,
+    season_days     TEXT[]          DEFAULT '{}'   NOT NULL,
     vip_sub_until   BIGINT          DEFAULT 0      NOT NULL,
     first_buy_used  BOOLEAN         DEFAULT FALSE  NOT NULL,
     deal_day        DATE,

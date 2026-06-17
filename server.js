@@ -56,6 +56,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const MOON_CAP = 1000000000;
+const AIRDROP_CAP = 100000000;
 
 // ---------- DATABASE ----------
 // Primary: direct PostgreSQL via pg Pool (works from cloud hosts with IPv6)
@@ -251,8 +253,8 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
     const reward = purchase.reward || {};
     if (purchase.type === "moon" && reward.moon) {
       await client.query(
-        "UPDATE players SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, reward.moon, starsAmount]
+        "UPDATE players SET balance = LEAST(balance + $2, $4), stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else if (purchase.type === "vip" && reward.tier) {
       await client.query(
@@ -262,25 +264,25 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
     } else if ((purchase.type === "starter" || purchase.type === "whale") && reward.moon) {
       await client.query(
         `UPDATE players
-         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2,
+         SET balance = LEAST(balance + $2, $5),
              vip_tier = GREATEST(vip_tier, $3), stars_spent = stars_spent + $4
          WHERE id = $1`,
-        [payerId, reward.moon, reward.vip || 0, starsAmount]
+        [payerId, reward.moon, reward.vip || 0, starsAmount, MOON_CAP]
       );
     } else if ((purchase.type === "deal" || purchase.type === "comeback") && reward.moon) {
       await client.query(
-        "UPDATE players SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, reward.moon, starsAmount]
+        "UPDATE players SET balance = LEAST(balance + $2, $4), stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else if (purchase.type === "season" && reward.airdrop) {
       await client.query(
-        "UPDATE players SET airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, reward.airdrop, starsAmount]
+        "UPDATE players SET airdrop_pts = LEAST(airdrop_pts + $2, $4), stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.airdrop, starsAmount, AIRDROP_CAP]
       );
     } else if (purchase.type === "piggy" && reward.moon) {
       await client.query(
-        "UPDATE players SET balance = balance + $2, lifetime_banked = lifetime_banked + $2, stars_spent = stars_spent + $3 WHERE id = $1",
-        [payerId, reward.moon, starsAmount]
+        "UPDATE players SET balance = LEAST(balance + $2, $4), lifetime_banked = LEAST(lifetime_banked + $2, $4), stars_spent = stars_spent + $3 WHERE id = $1",
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else {
       await client.query(
@@ -347,14 +349,14 @@ const VIP = [
   { nm: "Gold",    cost: 12000000, vstars: 2500,  req: 3, buyOnly: true },
   { nm: "Diamond", cost: 75000000, vstars: 10000, req: 4, buyOnly: true },
 ];
-const VIP_EARN = [1, 1.12, 1.3, 1.6, 2.2];
+const VIP_EARN = [1, 1.08, 1.18, 1.35, 1.65];
 const BETMAX = [1000, 5000, 25000, 150000, 1000000];
 const BETS_PER_ROUND = (vip) => 20 + vip * 10;
 
 // ---------- RANK DEFINITIONS ----------
 const RANKS = [
-  { min: 0, nm: "Shrimp" }, { min: 50000, nm: "Crab" }, { min: 250000, nm: "Fish" },
-  { min: 1e6, nm: "Dolphin" }, { min: 5e6, nm: "Shark" }, { min: 2e7, nm: "Orca" }, { min: 1e8, nm: "Megalodon" },
+  { min: 0, nm: "Shrimp" }, { min: 100000, nm: "Crab" }, { min: 750000, nm: "Fish" },
+  { min: 3e6, nm: "Dolphin" }, { min: 15e6, nm: "Shark" }, { min: 5e7, nm: "Orca" }, { min: 1e8, nm: "Megalodon" },
 ];
 function rankIdx(lifetime) {
   let i = 0;
@@ -742,7 +744,7 @@ wss.on("connection", (ws) => {
         return;
       }
 
-      const cur = session.invested > 0 ? session.roundCur : (m.cur === "pts" ? "pts" : "moon");
+      const cur = session.invested > 0 ? session.roundCur : "moon";
       const curBal = cur === "pts" ? session.airdrop_pts : session.balance;
       const stake = Math.max(1, Math.min(m.bet || 100, betMax, curBal));
       if (stake <= 0) {
@@ -879,7 +881,7 @@ wss.on("connection", (ws) => {
     if (m.t === "settings") {
       const updates = {};
       if (m.bet !== undefined) { session.bet = m.bet; updates.bet = m.bet; }
-      if (m.bet_cur !== undefined) { session.betCur = m.bet_cur; updates.bet_cur = m.bet_cur; }
+      if (m.bet_cur !== undefined) { session.betCur = "moon"; updates.bet_cur = "moon"; }
       if (m.auto_sell !== undefined) { updates.auto_sell = m.auto_sell; }
       if (m.stop_loss !== undefined) { updates.stop_loss = m.stop_loss; }
       if (m.sound !== undefined) { updates.sound = m.sound; }

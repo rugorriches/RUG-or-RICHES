@@ -3,10 +3,12 @@ const db = require("./db");
 const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const ECONOMY_CAP = 1000000000;
+const MOON_CAP = 1000000000;
+const AIRDROP_CAP = 100000000;
 const PRICE_CAP = 100;
 const REFERRAL_REWARD = 5000;
 const PREMIUM_REFERRAL_REWARD = 25000;
+const AIRDROP_REFERRAL_RATE = 0.2;
 let schemaReady;
 
 async function ensureSchema() {
@@ -20,6 +22,8 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS starter_bought BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS season_pass BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS season_claim_day DATE,
+          ADD COLUMN IF NOT EXISTS season_start DATE,
+          ADD COLUMN IF NOT EXISTS season_days TEXT[] DEFAULT '{}' NOT NULL,
           ADD COLUMN IF NOT EXISTS vip_sub_until BIGINT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS first_buy_used BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS deal_day DATE,
@@ -129,6 +133,11 @@ function cleanIdArray(value, allowed) {
   if (!Array.isArray(value)) return [];
   const allow = new Set(allowed);
   return [...new Set(value.map(v => String(v || "").trim()).filter(v => allow.has(v)))];
+}
+
+function cleanDateArray(value) {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.map(cleanDate).filter(Boolean))].slice(-30);
 }
 
 function cleanMilestones(value) {
@@ -301,9 +310,18 @@ module.exports = async (req, res) => {
 
       await db.query(
         `INSERT INTO players (id, username, first_name, ref_code, name, referred_by, balance, airdrop_pts)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT (id) DO NOTHING`,
-        [tgUser.id, tgUser.username || null, tgUser.first_name || null, refCode, name, referredById, referredById ? 500 + REFERRAL_REWARD : 500]
+        [
+          tgUser.id,
+          tgUser.username || null,
+          tgUser.first_name || null,
+          refCode,
+          name,
+          referredById,
+          referredById ? 500 + REFERRAL_REWARD : 500,
+          referredById ? 500 + Math.floor(REFERRAL_REWARD * AIRDROP_REFERRAL_RATE) : 500
+        ]
       );
       await db.query("INSERT INTO upgrades (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [tgUser.id]);
       await db.query("INSERT INTO quests (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [tgUser.id]);
@@ -321,10 +339,10 @@ module.exports = async (req, res) => {
           await db.query(
             `UPDATE players
              SET balance = LEAST(balance + $2, $3),
-                 airdrop_pts = LEAST(airdrop_pts + $2, $3),
+                 airdrop_pts = LEAST(airdrop_pts + $4, $5),
                  lifetime_banked = LEAST(lifetime_banked + $2, $3)
              WHERE id = $1`,
-            [referredById, reward, ECONOMY_CAP]
+            [referredById, reward, MOON_CAP, Math.floor(reward * AIRDROP_REFERRAL_RATE), AIRDROP_CAP]
           );
           await db.query(
             `UPDATE quests
@@ -399,16 +417,16 @@ module.exports = async (req, res) => {
           [
             tgUser.id,
             cleanName(state.name, tgUser.username || tgUser.first_name),
-            clampInt(state.balance, 0, ECONOMY_CAP, 500),
-            clampInt(state.airdrop, 0, ECONOMY_CAP, 500),
-            clampInt(state.lifetime, 0, ECONOMY_CAP, 0),
-            clampInt(state.bestPot, 0, ECONOMY_CAP, 0),
+            clampInt(state.balance, 0, MOON_CAP, 500),
+            clampInt(state.airdrop, 0, AIRDROP_CAP, 500),
+            clampInt(state.lifetime, 0, MOON_CAP, 0),
+            clampInt(state.bestPot, 0, MOON_CAP, 0),
             clampNumber(state.bestPrice, 0.01, PRICE_CAP, 1),
             clampInt(state.rugs, 0, 1000000000, 0),
             clampInt(state.cashouts, 0, 1000000000, 0),
             clampInt(state.taps, 0, 1000000000000, 0),
-            clampInt(state.pnlWon, 0, ECONOMY_CAP, 0),
-            clampInt(state.pnlLost, 0, ECONOMY_CAP, 0),
+            clampInt(state.pnlWon, 0, MOON_CAP, 0),
+            clampInt(state.pnlLost, 0, MOON_CAP, 0),
             clampInt(state.vip, 0, 4, 0),
             cleanDate(state.vipDay),
             cleanDate(state.comboDay),
@@ -416,7 +434,7 @@ module.exports = async (req, res) => {
             clampInt(state.streak, 0, 1000000, 0),
             clampInt(state.starsSpent, 0, 1000000000, 0),
             Math.round(clampNumber(state.bet, 10, 1000000, 100)),
-            state.betCur === "pts" ? "pts" : "moon",
+            "moon",
             clampNumber(state.autoSell, 0, 1000, 0),
             Math.round(clampNumber(state.stopLoss, 0, 95, 0)),
             state.sound !== false,
@@ -427,13 +445,13 @@ module.exports = async (req, res) => {
             clampInt(state.vipSubUntil, 0, 4102444800000, 0),
             !!state.firstBuyUsed,
             cleanDate(state.dealDay),
-            clampInt(state.piggy, 0, ECONOMY_CAP, 0),
+            clampInt(state.piggy, 0, MOON_CAP, 0),
             clampInt(state.coinLevel, 1, 1000000, 1),
             clampInt(state.coinXp, 0, 1000000000, 0),
             skin,
             JSON.stringify(skins),
             cleanString(state.warWeek, 20),
-            clampInt(state.warScore, 0, ECONOMY_CAP, 0),
+            clampInt(state.warScore, 0, MOON_CAP, 0),
             !!state.warClaim
           ]
         );
@@ -463,6 +481,14 @@ module.exports = async (req, res) => {
         );
 
         await client.query(
+          `UPDATE players
+             SET season_start = COALESCE($2::date, season_start),
+                 season_days = $3
+           WHERE id = $1`,
+          [tgUser.id, cleanDate(state.seasonStart), cleanDateArray(state.seasonDays)]
+        );
+
+        await client.query(
           `UPDATE quests SET
              daily_taps = GREATEST(daily_taps, $2),
              daily_max_price = GREATEST(daily_max_price, $3),
@@ -483,7 +509,7 @@ module.exports = async (req, res) => {
             tgUser.id,
             clampInt(questProg.taps, 0, 1000000000, 0),
             clampNumber(questProg.price, 0, 1000000, 1),
-            clampInt(questProg.cash, 0, ECONOMY_CAP, 0),
+            clampInt(questProg.cash, 0, MOON_CAP, 0),
             clampInt(questProg.invite, 0, 1000000, 0),
             cleanIdArray(quests.claimed, questIds),
             cleanDate(quests.date),

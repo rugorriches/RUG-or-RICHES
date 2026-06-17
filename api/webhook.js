@@ -2,6 +2,8 @@ const db = require("./db");
 const { buildPurchase } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
+const MOON_CAP = 1000000000;
+const AIRDROP_CAP = 100000000;
 
 let lastUpdate = null;
 let lastError = null;
@@ -95,9 +97,9 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
     if (purchase.type === "moon" && reward.moon) {
       await client.query(
         `UPDATE players 
-         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3 
+         SET balance = LEAST(balance + $2, $4), stars_spent = stars_spent + $3
          WHERE id = $1`,
-        [payerId, reward.moon, starsAmount]
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else if (purchase.type === "vip" && reward.tier) {
       await client.query(
@@ -109,31 +111,31 @@ async function dbCreditPurchase(payerId, chargeId, starsAmount, payload) {
     } else if ((purchase.type === "starter" || purchase.type === "whale") && reward.moon) {
       await client.query(
         `UPDATE players
-         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2,
+         SET balance = LEAST(balance + $2, $5),
              vip_tier = GREATEST(vip_tier, $3), stars_spent = stars_spent + $4
          WHERE id = $1`,
-        [payerId, reward.moon, reward.vip || 0, starsAmount]
+        [payerId, reward.moon, reward.vip || 0, starsAmount, MOON_CAP]
       );
     } else if ((purchase.type === "deal" || purchase.type === "comeback") && reward.moon) {
       await client.query(
         `UPDATE players
-         SET balance = balance + $2, airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3
+         SET balance = LEAST(balance + $2, $4), stars_spent = stars_spent + $3
          WHERE id = $1`,
-        [payerId, reward.moon, starsAmount]
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else if (purchase.type === "season" && reward.airdrop) {
       await client.query(
         `UPDATE players
-         SET airdrop_pts = airdrop_pts + $2, stars_spent = stars_spent + $3
+         SET airdrop_pts = LEAST(airdrop_pts + $2, $4), stars_spent = stars_spent + $3
          WHERE id = $1`,
-        [payerId, reward.airdrop, starsAmount]
+        [payerId, reward.airdrop, starsAmount, AIRDROP_CAP]
       );
     } else if (purchase.type === "piggy" && reward.moon) {
       await client.query(
         `UPDATE players
-         SET balance = balance + $2, lifetime_banked = lifetime_banked + $2, stars_spent = stars_spent + $3
+         SET balance = LEAST(balance + $2, $4), lifetime_banked = LEAST(lifetime_banked + $2, $4), stars_spent = stars_spent + $3
          WHERE id = $1`,
-        [payerId, reward.moon, starsAmount]
+        [payerId, reward.moon, starsAmount, MOON_CAP]
       );
     } else {
       await client.query(

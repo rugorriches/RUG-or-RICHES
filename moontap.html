@@ -656,7 +656,7 @@
     <div class="card">
       <div class="betrow"><button class="betadj" id="dBetDown">−</button><div class="betbig"><span id="dBetAmt">100</span> <span id="dBetCur">$MOON</span></div><button class="betadj" id="dBetUp">+</button></div>
       <div class="presets" id="presets"></div>
-      <div class="row" style="margin-top:11px;gap:8px"><button class="buy" id="dCurMoon" style="flex:1">Bet $MOON</button><button class="buy" id="dCurPts" style="flex:1;background:linear-gradient(90deg,var(--cyan),#0bd4c4)">Bet Airdrop Pts</button></div>
+      <div class="row" style="margin-top:11px;gap:8px"><button class="buy" id="dCurMoon" style="flex:1">Bet $MOON</button><button class="buy" id="dCurPts" style="flex:1;background:linear-gradient(90deg,#3a2456,#21304f);color:#cdbff0">Airdrop locked</button></div>
       <div class="ds" id="betMaxTxt" style="margin-top:8px"></div>
     </div>
     <div class="sec-h">🎯 Auto-sell target</div>
@@ -678,7 +678,7 @@
   </div>
 
   <div class="panel" id="panel-airdrop">
-    <h2>🪂 Airdrop</h2><p class="sub">Airdrop Points = your share of the $MOON token at season end. Earn them by playing & completing tasks.</p>
+    <h2>🪂 Airdrop</h2><p class="sub">Airdrop Points are a separate Season 1 score. Qualify through sustained play during your first 30 days.</p>
     <div class="invhero">
       <div class="lab">Your airdrop allocation</div><div class="big" id="adPoints">0</div>
       <div class="ds" id="adEst">≈ 0 $MOON tokens</div>
@@ -691,11 +691,11 @@
     <div class="sec-h">🎯 Daily quests</div><div id="questList"></div>
     <div class="sec-h">🏅 Achievements</div><div id="achList"></div>
     <div class="sec-h">❔ Airdrop FAQ</div>
-    <details class="faq"><summary>What are Airdrop Points?</summary><div class="a">Points are your share of the $MOON token pool when the airdrop happens at season end. The more points you hold, the bigger your allocation. They never expire.</div></details>
-    <details class="faq"><summary>How do I earn points?</summary><div class="a">Every $MOON you bank (cash-outs), plus daily streaks, daily & social quests, milestones and invites — all add Airdrop Points automatically.</div></details>
+    <details class="faq"><summary>What are Airdrop Points?</summary><div class="a">Points are your Season 1 qualification score, separate from spendable $MOON and VIP progress. They cannot be wagered.</div></details>
+    <details class="faq"><summary>How do I qualify?</summary><div class="a">Reach 10M points, 20 active days, 5K taps, and 100 cash-outs during your first 30-day season. Elite status starts at 30M points.</div></details>
     <details class="faq"><summary>How do points become $MOON tokens?</summary><div class="a">At season end the token pool is split proportionally across all players by points. Your estimate is shown above and updates as you earn.</div></details>
     <details class="faq"><summary>When is the airdrop?</summary><div class="a">At the end of Season 1 — see the live countdown above. New seasons start fresh while your points carry your allocation.</div></details>
-    <details class="faq"><summary>Can I lose my points?</summary><div class="a">No — banked points are permanent. Only your unbanked position is ever at risk of a rug; once you cash out, the points are yours.</div></details>
+    <details class="faq"><summary>Can I lose my points?</summary><div class="a">No — Airdrop Points are locked season score. Rugs only affect your unbanked $MOON position.</div></details>
     <details class="faq"><summary>Is $MOON a real token?</summary><div class="a">Not yet — it's off-chain points in this prototype. A tradable token would only launch after legal review, so treat allocations as in-game until then.</div></details>
   </div>
 
@@ -785,7 +785,7 @@
 
   <div class="panel" id="panel-help">
     <h2>❓ How to Play</h2><p class="sub">RUG OR RICHES — pump it, then sell before it rugs.</p>
-    <div class="card help-sec"><div class="row"><div class="emo">🪙</div><div class="grow"><div class="nm">Every tap is a bet</div><div class="ds">Each click on the coin stakes your <b>bet / click</b> into the current round and pushes the live price up. You can bet in <b>$MOON</b> or <b>Airdrop Points</b> — pick which on the Trade screen (⇄) or in 📊 Dashboard.</div></div></div></div>
+    <div class="card help-sec"><div class="row"><div class="emo">🪙</div><div class="grow"><div class="nm">Every tap is a bet</div><div class="ds">Each click on the coin stakes your <b>$MOON bet / click</b> into the current round and pushes the live price up. Airdrop Points are locked Season 1 score, not betting fuel.</div></div></div></div>
     <div class="card help-sec"><div class="row"><div class="emo">📈</div><div class="grow"><div class="nm">Live market</div><div class="ds">Real-time order flow from other traders moves the chart on its own — green candles when buyers win, red when sellers do. Your taps add buy pressure. 🐋 Whale dumps can crash it without warning.</div></div></div></div>
     <div class="card help-sec"><div class="row"><div class="emo">💰</div><div class="grow"><div class="nm">Position & cashing out</div><div class="ds">Your unbanked <b>position</b> rides the price in real time. Hit <b>SELL / CASH OUT</b> to bank it as stake + profit. Selling at higher risk pays a bigger bonus (Profit Taker upgrade boosts this).</div></div></div></div>
     <div class="card help-sec"><div class="row"><div class="emo">🪤</div><div class="grow"><div class="nm">Rug risk (heat model)</div><div class="ds">The 🪤 meter is <b>heat</b> — it builds from how overvalued the price is, how big your position is vs liquidity, sellers taking over, and <b>how fast you pump</b> (greed spikes it). At max heat you get a <b>🚨 DUMP INCOMING</b> warning — sell in time or eat a hard rug. Outcomes: 😱 <b>Flash crash</b> (fakeout dip, recovers), 🩸 <b>Soft rug</b> (you keep 40%), 💀 <b>Hard rug</b> (lose it all). Rug Insurance, Diamond Vault & VIP all soften it.</div></div></div></div>
@@ -842,7 +842,7 @@
   const PRODUCTION_BACKEND_URL = null; 
   const CONFIG={ heatHazard:0.075, tapHazard:0.065, tapHazardFloor:58, warnHeat:84,
     fakeoutChance:0.18, softChance:0.50, vipEarn:[1,1.08,1.18,1.35,1.65], serverUrl:PRODUCTION_BACKEND_URL, invoiceEndpoint:"/api/invoice", verifyEndpoint:"/api/verify" };
-  const ECONOMY_CAP=1000000000, PRICE_CAP=100, PRICE_SOFTCAP=18;
+  const MOON_CAP=1000000000, AIRDROP_CAP=100000000, AIRDROP_QUALIFY=10000000, AIRDROP_ELITE=30000000, AIRDROP_MIN_DAYS=20, AIRDROP_MIN_TAPS=5000, AIRDROP_MIN_CASHOUTS=100, AIRDROP_BANK_RATE=0.08, PRICE_CAP=100, PRICE_SOFTCAP=18;
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
@@ -850,6 +850,7 @@
   // ---------- STATE ----------
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,pnlWon:0,pnlLost:0,
     streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
+    seasonStart:null,seasonDays:[],
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]}};
   const HADSAVE=(function(){try{return !!localStorage.getItem("moontap");}catch(e){return false;}})();
@@ -866,9 +867,13 @@
     }catch(e){}
     return JSON.parse(JSON.stringify(DEF));}
   function clampEconomyState(){
-    ["balance","airdrop","lifetime","bestPot","pnlWon","pnlLost","piggy"].forEach(k=>{S[k]=Math.floor(clamp(Number(S[k])||0,0,ECONOMY_CAP));});
+    ["balance","lifetime","bestPot","pnlWon","pnlLost","piggy"].forEach(k=>{S[k]=Math.floor(clamp(Number(S[k])||0,0,MOON_CAP));});
+    S.airdrop=Math.floor(clamp(Number(S.airdrop)||0,0,AIRDROP_CAP));
     S.bestPrice=clamp(Number(S.bestPrice)||1,0.01,PRICE_CAP);
   }
+  const dateKey=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+  function markSeasonActive(){const t=dateKey();if(!S.seasonStart)S.seasonStart=t;if(!Array.isArray(S.seasonDays))S.seasonDays=[];if(S.seasonDays.indexOf(t)<0)S.seasonDays.push(t);S.seasonDays=S.seasonDays.slice(-30);}
+  const seasonActiveDays=()=>Array.isArray(S.seasonDays)?S.seasonDays.length:0;
 
   let hasCloudAuth = false;
   let referralsLoaded = false;
@@ -951,7 +956,7 @@
     if (db.crew_leader_id !== undefined) S.crewLeaderId = db.crew_leader_id;
     if (db.sound !== undefined) S.sound = db.sound;
     if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
-    if (db.bet_cur !== undefined) S.betCur = db.bet_cur;
+    if (db.bet_cur !== undefined) S.betCur = db.bet_cur === "moon" ? "moon" : "moon";
     if (db.auto_sell !== undefined) S.autoSell = db.auto_sell;
     if (db.stop_loss !== undefined) S.stopLoss = db.stop_loss;
     if (db.first_buy_used !== undefined) S.firstBuyUsed = !!db.first_buy_used;
@@ -969,6 +974,8 @@
     if (db.war_week) S.warWeek = db.war_week;
     if (db.war_score !== undefined) S.warScore = Math.max(S.warScore || 0, Number(db.war_score) || 0);
     if (db.war_claim !== undefined) S.warClaim = !!db.war_claim;
+    if (db.season_start) S.seasonStart = String(db.season_start).slice(0,10);
+    if (Array.isArray(db.season_days)) S.seasonDays = db.season_days.map(x=>String(x).slice(0,10)).filter(Boolean).slice(-30);
     if (Array.isArray(db.skins)) db.skins.forEach(s => { if (S.skins.indexOf(s) < 0) S.skins.push(s); });
     if (db.skin && S.skins.indexOf(db.skin) >= 0) S.skin = db.skin;
     
@@ -1002,6 +1009,7 @@
   }
 
   function save(){
+    markSeasonActive();
     clampEconomyState();
     try{localStorage.setItem("moontap",JSON.stringify(S));}catch(e){}
     if (hasCloudAuth) {
@@ -1020,7 +1028,7 @@
   if(!S.friends)S.friends=[]; if(!S.refMiles)S.refMiles=[]; if(!S.social)S.social={x:0,tg:0,ig:0};
   if(HADSAVE){ if(!S.lifetime||S.lifetime<S.balance)S.lifetime=S.balance; }
   else { S.balance=500; S.airdrop=500; S.lifetime=0; }   // start small — players build up from here
-  if(!S.bet)S.bet=100; if(S.betCur!=="pts")S.betCur="moon";
+  if(!S.bet)S.bet=100; if(S.betCur!=="moon")S.betCur="moon";
 
   try{const sp=new URLSearchParams(location.search);const _tg=window.Telegram&&window.Telegram.WebApp;
     const inRef=(_tg&&_tg.initDataUnsafe&&_tg.initDataUnsafe.start_param)||sp.get("startapp")||sp.get("tgWebAppStartParam")||sp.get("ref");
@@ -1028,7 +1036,8 @@
       setTimeout(()=>toast("🎁","Invite detected","Secure Telegram sync applies valid referral bonuses"),700);}}catch(e){}
 
   // ---------- EARN HELPER (tracks lifetime for ranks) ----------
-  function bank(amt){amt=Math.floor(amt); S.balance=Math.min(ECONOMY_CAP,S.balance+amt); S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+amt); S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+amt);}
+  function addAirdrop(amt){amt=Math.floor(amt);S.airdrop=Math.min(AIRDROP_CAP,S.airdrop+Math.max(0,amt));}
+  function bank(amt,airRate){amt=Math.floor(amt); S.balance=Math.min(MOON_CAP,S.balance+amt); S.lifetime=Math.min(MOON_CAP,S.lifetime+amt); addAirdrop(Math.floor(amt*(airRate==null?AIRDROP_BANK_RATE:airRate)));}
 
   // ---------- UPGRADES ----------
   const UP=[
@@ -1078,7 +1087,7 @@
   let bonusBets=0;   // temporary +bets from a boost (resets each round)
   const betsPerRound=()=>20+effVip()*10+bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
   const curBal=c=>c==="pts"?S.airdrop:S.balance;
-  function addCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+a);else S.balance=Math.min(ECONOMY_CAP,S.balance+a);}
+  function addCur(c,a){a=Math.floor(a);if(c==="pts")addAirdrop(a);else S.balance=Math.min(MOON_CAP,S.balance+a);}
   function subCur(c,a){a=Math.floor(a);if(c==="pts")S.airdrop=Math.max(0,S.airdrop-a);else S.balance=Math.max(0,S.balance-a);}
 
   // ---------- RANKS ----------
@@ -1300,7 +1309,7 @@
     bustType=type||"hard";bustTarget=bustType==="soft"?price*0.45:price*0.12;
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
     const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
-    const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+lost);
+    const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+lost);
     if(panelOpen==="game"){
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
@@ -1320,7 +1329,7 @@
     const rawPayout=Math.floor(pot*(1+r*cashBonus())*streakMul);
     const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*maxRoundRoi())));addCur(cur,payout);
     const profit=payout-invested;
-    if(profit>0){S.pnlWon=Math.min(ECONOMY_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
+    if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
     if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
     if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();}
@@ -1337,7 +1346,7 @@
     const cur=roundCur||S.betCur;const r=risk();const half=pot*0.5;
     const rawPayout=Math.floor(half*(1+r*cashBonus()));
     const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*0.5*maxRoundRoi())));addCur(cur,payout);
-    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=Math.min(ECONOMY_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(ECONOMY_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(ECONOMY_CAP,(S.pnlLost||0)+(-profit));}
+    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));}
     pot-=half;invested*=0.5;heat=Math.max(0,heat-25);   // scaling out locks profit & cools the rug heat
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
     save();renderLive();renderStats();renderDash();}
@@ -1438,7 +1447,7 @@
   const BET_STEPS=[10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
   function clampBet(){const mx=betMax();if(S.bet>mx)S.bet=mx;if(S.bet<10)S.bet=10;}
   function stepBet(dir){clampBet();let i=BET_STEPS.findIndex(v=>v>=S.bet);if(i<0)i=BET_STEPS.length-1;i=clamp(i+dir,0,BET_STEPS.length-1);S.bet=Math.min(BET_STEPS[i],betMax());save();renderBetHUD();renderDash();renderPresets();sendSettings({bet:S.bet});}
-  function setCur(c){S.betCur=c;if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();renderPresets();sendSettings({bet_cur:S.betCur});}
+  function setCur(c){if(c==="pts"){toast("🪂","Airdrop points are locked","They are your Season 1 score, not betting fuel");return;}S.betCur="moon";if(invested===0)roundCur=null;save();renderBetHUD();renderBetChips();renderDash();renderPresets();sendSettings({bet_cur:S.betCur});}
   // ---------- PREDICTION (long/short) ----------
   function startPredict(dir){
     if(predActive)return;
@@ -1479,7 +1488,7 @@
     $("d-moon").textContent=fmt(S.balance);$("d-pts").textContent=fmt(S.airdrop);
     $("d-clicks").textContent=roundClicks+" / "+betsPerRound();$("d-invested").textContent=fmt(invested)+" "+((roundCur||S.betCur)==="pts"?"pts":"$MOON");
     $("d-pos").textContent=fmt(pot);const exp=pot-invested;const de=$("d-exp");de.textContent=(exp>=0?"+":"")+fmt(exp);de.style.color=exp>=0?"var(--green)":"var(--red)";
-    $("dBetAmt").textContent=fmt(S.bet);$("dBetCur").textContent=S.betCur==="pts"?"Airdrop Pts":"$MOON";
+    $("dBetAmt").textContent=fmt(S.bet);$("dBetCur").textContent="$MOON";
     $("betMaxTxt").textContent="Max bet ("+VIP[S.vip].nm+"): "+fmt(betMax())+(S.vip<4?" — raise it by leveling VIP":"");
     $("d-won").textContent=fmt(S.pnlWon||0);$("d-lost").textContent=fmt(S.pnlLost||0);
     const net=(S.pnlWon||0)-(S.pnlLost||0);const dn=$("d-net");dn.textContent=(net>=0?"+":"")+fmt(net);dn.style.color=net>=0?"var(--green)":"var(--red)";
@@ -1490,7 +1499,7 @@
     const av=$("autoVal");if(av)av.textContent=S.autoSell>0?S.autoSell.toFixed(1)+"x":"Off";
     const sl=$("slVal");if(sl)sl.textContent=S.stopLoss>0?"-"+S.stopLoss+"%":"Off";
     const dbd=$("dBetDown"),dbu=$("dBetUp");if(dbd)dbd.classList.toggle("maxed",S.bet<=10);if(dbu)dbu.classList.toggle("maxed",S.bet>=betMax());
-    const curMoonBtn=$("dCurMoon"),curPtsBtn=$("dCurPts");if(curMoonBtn)curMoonBtn.classList.toggle("sel",S.betCur==="moon");if(curPtsBtn)curPtsBtn.classList.toggle("sel",S.betCur==="pts");
+    const curMoonBtn=$("dCurMoon"),curPtsBtn=$("dCurPts");if(curMoonBtn)curMoonBtn.classList.add("sel");if(curPtsBtn)curPtsBtn.classList.remove("sel");
     const ai=AUTO_STEPS.indexOf(S.autoSell),si=SL_STEPS.indexOf(S.stopLoss);
     const ad=$("autoDown"),au=$("autoUp"),sd=$("slDown"),su=$("slUp");if(ad)ad.classList.toggle("maxed",ai<=0);if(au)au.classList.toggle("maxed",ai>=AUTO_STEPS.length-1);if(sd)sd.classList.toggle("maxed",si<=0);if(su)su.classList.toggle("maxed",si>=SL_STEPS.length-1);
     const sc=$("dashSpark");if(sc){const g=sc.getContext("2d");const w=sc.width=Math.max(300,(sc.clientWidth||300)*2),h=sc.height=128;
@@ -1506,12 +1515,12 @@
   function stepSL(dir){let i=SL_STEPS.indexOf(S.stopLoss);if(i<0)i=0;i=clamp(i+dir,0,SL_STEPS.length-1);S.stopLoss=SL_STEPS[i];save();renderDash();renderLive();sendSettings({stop_loss:S.stopLoss});}
   let lastFaucet=0,lastLimitT=0;
   function faucetOrWarn(cur){
-    if(S.balance<50&&S.airdrop<50){const now=Date.now();if(now-lastFaucet>15000){lastFaucet=now;bank(500);save();renderLive();renderDash();
-      toast("🪂","Airdrop faucet!","You went broke — here's 500 $MOON to get back in");}return;}
-    flashEnergy();toast("💸","Not enough "+(cur==="pts"?"Airdrop pts":"$MOON"),"Lower your bet or switch currency (📊)");}
+    if(S.balance<50){const now=Date.now();if(now-lastFaucet>15000){lastFaucet=now;bank(500);save();renderLive();renderDash();
+      toast("🪙","Comeback faucet!","You went broke — here's 500 $MOON to get back in");}return;}
+    flashEnergy();toast("💸","Not enough $MOON","Lower your bet or earn more before tapping");}
   $("betDown").addEventListener("click",()=>stepBet(-1));
   $("betUp").addEventListener("click",()=>stepBet(1));
-  $("curTog").addEventListener("click",()=>setCur(S.betCur==="pts"?"moon":"pts"));
+  $("curTog").addEventListener("click",()=>setCur("pts"));
   $("dBetDown").addEventListener("click",()=>stepBet(-1));
   $("dBetUp").addEventListener("click",()=>stepBet(1));
   $("dCurMoon").addEventListener("click",()=>setCur("moon"));
@@ -1613,19 +1622,19 @@
     if(confirm(desc+"\n(Simulated purchase in this prototype)"))grant();}
   function buyMoon(p){const dbl=!S.firstBuyUsed;const moon=p.moon*(dbl?2:1);
     starsPurchase("Buy "+fmt(moon)+" $MOON for "+p.stars+" ⭐ Telegram Stars?"+(dbl?" (first-buy 2×!)":""),{type:"moon",stars:p.stars,moon:moon},()=>{
-    S.firstBuyUsed=true;addCur("moon",moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+moon);S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
+    S.firstBuyUsed=true;addCur("moon",moon);S.starsSpent+=p.stars;save();renderStore();renderLive();renderStats();renderDash();sfxCash();confetti();
     toast("⭐","Purchase complete!","+"+fmt(moon)+" $MOON"+(dbl?" (2× first buy!)":""));});}
-  function buyStarter(){if(S.starterBought)return;starsPurchase("Starter Pack — "+fmt(STARTER.moon)+" $MOON + Bronze VIP for "+STARTER.stars+" ⭐?",{type:"starter",stars:STARTER.stars},()=>{S.starterBought=true;addCur("moon",STARTER.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+STARTER.moon);if(S.vip<STARTER.vip)S.vip=STARTER.vip;S.starsSpent+=STARTER.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🎁","Starter Pack!","+"+fmt(STARTER.moon)+" $MOON + Bronze VIP");});}
-  function buyWhale(){starsPurchase("Whale Pack — "+fmt(WHALE.moon)+" $MOON + Gold VIP for "+fmt(WHALE.stars)+" ⭐?",{type:"whale",stars:WHALE.stars},()=>{addCur("moon",WHALE.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+WHALE.moon);if(S.vip<WHALE.vip)S.vip=WHALE.vip;S.starsSpent+=WHALE.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🐋","Whale Pack!","+"+fmt(WHALE.moon)+" $MOON + Gold VIP");});}
+  function buyStarter(){if(S.starterBought)return;starsPurchase("Starter Pack — "+fmt(STARTER.moon)+" $MOON + Bronze VIP for "+STARTER.stars+" ⭐?",{type:"starter",stars:STARTER.stars},()=>{S.starterBought=true;addCur("moon",STARTER.moon);if(S.vip<STARTER.vip)S.vip=STARTER.vip;S.starsSpent+=STARTER.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🎁","Starter Pack!","+"+fmt(STARTER.moon)+" $MOON + Bronze VIP");});}
+  function buyWhale(){starsPurchase("Whale Pack — "+fmt(WHALE.moon)+" $MOON + Gold VIP for "+fmt(WHALE.stars)+" ⭐?",{type:"whale",stars:WHALE.stars},()=>{addCur("moon",WHALE.moon);if(S.vip<WHALE.vip)S.vip=WHALE.vip;S.starsSpent+=WHALE.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🐋","Whale Pack!","+"+fmt(WHALE.moon)+" $MOON + Gold VIP");});}
   function buyVipSub(){starsPurchase("VIP Pass — 30 days of Diamond perks for "+VIPSUB.stars+" ⭐?",{type:"vipsub",stars:VIPSUB.stars},()=>{S.vipSubUntil=Math.max(Date.now(),S.vipSubUntil||0)+VIPSUB.days*864e5;S.starsSpent+=VIPSUB.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("👑","VIP Pass active!","30 days of Diamond-level perks");});}
-  function buyDeal(){const td=new Date().toDateString();if(S.dealDay===td)return;starsPurchase("Daily Deal — "+fmt(DEAL.moon)+" $MOON (2× value) for "+DEAL.stars+" ⭐?",{type:"deal",stars:DEAL.stars},()=>{S.dealDay=td;addCur("moon",DEAL.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+DEAL.moon);S.starsSpent+=DEAL.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("⏰","Daily Deal!","+"+fmt(DEAL.moon)+" $MOON");});}
-  function buyComeback(){starsPurchase("Comeback Pack — "+fmt(COMEBACK.moon)+" $MOON for "+COMEBACK.stars+" ⭐?",{type:"comeback",stars:COMEBACK.stars},()=>{addCur("moon",COMEBACK.moon);S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+COMEBACK.moon);S.starsSpent+=COMEBACK.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🆘","Comeback!","+"+fmt(COMEBACK.moon)+" $MOON");});}
+  function buyDeal(){const td=new Date().toDateString();if(S.dealDay===td)return;starsPurchase("Daily Deal — "+fmt(DEAL.moon)+" $MOON (2× value) for "+DEAL.stars+" ⭐?",{type:"deal",stars:DEAL.stars},()=>{S.dealDay=td;addCur("moon",DEAL.moon);S.starsSpent+=DEAL.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("⏰","Daily Deal!","+"+fmt(DEAL.moon)+" $MOON");});}
+  function buyComeback(){starsPurchase("Comeback Pack — "+fmt(COMEBACK.moon)+" $MOON for "+COMEBACK.stars+" ⭐?",{type:"comeback",stars:COMEBACK.stars},()=>{addCur("moon",COMEBACK.moon);S.starsSpent+=COMEBACK.stars;save();renderStore();renderLive();renderStats();sfxCash();confetti();toast("🆘","Comeback!","+"+fmt(COMEBACK.moon)+" $MOON");});}
   function buyBoost(b){starsPurchase(b.nm+" for "+b.stars+" ⭐?",{type:"boost",id:b.id,stars:b.stars},()=>{
     if(b.id==="energy")energy=maxEnergy();
     else if(b.id==="turbo"){boost=Math.max(boost,30);const bb=$("boostBadge");if(bb)bb.style.display="block";}
     else if(b.id==="bets")bonusBets+=20;
     S.starsSpent+=b.stars;save();renderStore();renderLive();renderStats();renderBetHUD();sfxCash();toast(b.emo,b.nm+"!","Activated");});}
-  function buySeason(){if(S.seasonPass)return;starsPurchase("Season 1 Pass for "+SEASON.stars+" ⭐?",{type:"season",stars:SEASON.stars},()=>{S.seasonPass=true;S.airdrop=Math.min(ECONOMY_CAP,S.airdrop+50000);S.starsSpent+=SEASON.stars;save();renderStore();renderLive();renderStats();confetti();toast("🎟️","Season Pass!","+50,000 airdrop pts + daily rewards");});}
+  function buySeason(){if(S.seasonPass)return;starsPurchase("Season 1 Pass for "+SEASON.stars+" ⭐?",{type:"season",stars:SEASON.stars},()=>{S.seasonPass=true;addAirdrop(50000);S.starsSpent+=SEASON.stars;save();renderStore();renderLive();renderStats();confetti();toast("🎟️","Season Pass!","+50,000 airdrop pts + daily rewards");});}
   function crackPiggy(){if(S.piggy<1)return;const pcost=Math.max(20,Math.round(S.piggy/3000));starsPurchase("Crack the piggy bank — claim "+fmt(S.piggy)+" $MOON for "+pcost+" ⭐?",{type:"piggy",stars:pcost,moon:S.piggy},()=>{const amt=S.piggy;S.piggy=0;bank(amt);S.starsSpent+=pcost;save();renderStore();renderLive();renderStats();confetti();toast("🐷","Piggy cracked!","+"+fmt(amt)+" $MOON");});}
   function buyVipStars(i){const v=VIP[i];if(S.vip>=i)return;
     starsPurchase("Unlock "+v.nm+" for "+v.vstars+" ⭐ Telegram Stars?",{type:"vip",tier:i,stars:v.vstars},()=>{
@@ -1732,19 +1741,27 @@
       return;}
     setTimeout(pass,1300);}   // prototype: simulated verification check (no real follow data available client-side)
   function renderAirdrop(){const ap=$("adPoints");if(!ap)return;
-    ap.textContent=fmt(S.airdrop);$("adEst").textContent="≈ "+fmt(Math.floor(S.airdrop/100))+" $MOON tokens at listing";
+    const pct=clamp(S.airdrop/AIRDROP_QUALIFY*100,0,100);
+    ap.textContent=fmt(S.airdrop);$("adEst").textContent=pct>=100?"Qualified score reached":"Need "+fmt(Math.max(0,AIRDROP_QUALIFY-S.airdrop))+" more points";
     $("adSeason").textContent=$("seasonTimer").textContent;
-    const ab=$("adBar");if(ab)ab.style.width=clamp(S.airdrop/1e6*100,2,100)+"%";
+    const ab=$("adBar");if(ab)ab.style.width=clamp(pct,2,100)+"%";
     renderStakes();renderCombo();renderSocial();}
   function renderStakes(){const box=$("stakeBox");if(!box)return;
-    const A=S.airdrop||0,rank=Math.max(1,Math.round(120000/(1+A/4000))),inZone=rank<=10000,share=(A/4.2e9*100);
+    const A=S.airdrop||0,days=seasonActiveDays(),cash=S.cashouts||0,taps=S.taps||0;
+    const pointOk=A>=AIRDROP_QUALIFY,dayOk=days>=AIRDROP_MIN_DAYS,tapOk=taps>=AIRDROP_MIN_TAPS,cashOk=cash>=AIRDROP_MIN_CASHOUTS;
+    const qualified=pointOk&&dayOk&&tapOk&&cashOk,elite=A>=AIRDROP_ELITE&&qualified;
+    const reqPct=Math.min(A/AIRDROP_QUALIFY,days/AIRDROP_MIN_DAYS,taps/AIRDROP_MIN_TAPS,cash/AIRDROP_MIN_CASHOUTS)*100;
+    const share=(Math.min(A,AIRDROP_CAP)/12000000000*100);
     const sr='style="display:flex;justify-content:space-between;font-size:12px;margin-top:7px;color:#cdbff0"';
     box.innerHTML='<div class="card"><div class="sec-h" style="margin-top:0">🏆 Season 1 stakes</div>'+
-      '<div class="ds">The <b style="color:var(--gold)">top 10,000</b> point-holders split the on-chain $MOON launch pool when the season ends. Keep banking to climb.</div>'+
-      '<div '+sr+'><span>Your estimated standing</span><b style="color:'+(inZone?'var(--green)':'var(--gold)')+'">#'+fmt(rank)+'</b></div>'+
-      '<div '+sr+'><span>Status</span><b style="color:'+(inZone?'var(--green)':'var(--red)')+'">'+(inZone?'✅ In the airdrop zone':'⛏ Climb to the top 10,000')+'</b></div>'+
+      '<div class="ds">Airdrop qualification is separate from VIP and rank. You need sustained play during your first 30-day season, not just one huge lucky run.</div>'+
+      '<div '+sr+'><span>Status</span><b style="color:'+(qualified?'var(--green)':'var(--red)')+'">'+(elite?'👑 Elite qualified':qualified?'✅ Qualified':'⛏ Not qualified yet')+'</b></div>'+
+      '<div '+sr+'><span>Points</span><b style="color:'+(pointOk?'var(--green)':'var(--gold)')+'">'+fmt(A)+' / '+fmt(AIRDROP_QUALIFY)+'</b></div>'+
+      '<div '+sr+'><span>Active days</span><b style="color:'+(dayOk?'var(--green)':'var(--gold)')+'">'+days+' / '+AIRDROP_MIN_DAYS+'</b></div>'+
+      '<div '+sr+'><span>Taps</span><b style="color:'+(tapOk?'var(--green)':'var(--gold)')+'">'+fmt(taps)+' / '+fmt(AIRDROP_MIN_TAPS)+'</b></div>'+
+      '<div '+sr+'><span>Cash-outs</span><b style="color:'+(cashOk?'var(--green)':'var(--gold)')+'">'+fmt(cash)+' / '+fmt(AIRDROP_MIN_CASHOUTS)+'</b></div>'+
       '<div '+sr+'><span>Est. pool share</span><b style="color:var(--cyan)">'+share.toFixed(4)+'%</b></div>'+
-      '<div class="pbar2" style="margin-top:9px"><i style="width:'+clamp((1-rank/120000)*100,3,100)+'%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';}
+      '<div class="pbar2" style="margin-top:9px"><i style="width:'+clamp(reqPct,3,100)+'%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';}
   function renderCombo(){const wrap=$("comboCard");if(!wrap)return;const today=new Date().toDateString();const done=S.comboDay===today;
     wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">A free bonus every day you check in</div></div><button class="qclaim '+(done?"done":"")+'"'+(done?" disabled":"")+'>'+(done?"✓":"Claim 10K")+'</button>';
     if(!done)wrap.querySelector("button").addEventListener("click",()=>{
@@ -2012,7 +2029,7 @@
     $("seasonTimer").textContent=d+"d "+h+"h "+m+"m";}
 
   // ---------- TUTORIAL ----------
-  const TUT=[{em:"🪙",h:"Every tap is a bet",p:"Each click stakes your bet/click (in $MOON or Airdrop Points) into the round and pumps the live price. Set your bet in 📊."},
+  const TUT=[{em:"🪙",h:"Every tap is a bet",p:"Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered."},
     {em:"👥",h:"It's a live market",p:"Other traders buy & sell in real time, moving the price on their own. Whales can dump and crash it."},
     {em:"💰",h:"Sell before it rugs",p:"CASH OUT banks your position (stake + profit). If it rugs first, you lose what you invested — so time it."},
     {em:"👑",h:"Rank up & invite",p:"Upgrades & VIP raise your bet limits and edge. Climb the ranks and invite friends — you both get 5,000 $MOON."}];
