@@ -1734,7 +1734,7 @@
       else btn='<button class="buy">Follow ↗</button>';
       d.innerHTML='<div class="emo">'+socialIcon(q.id)+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+sub+'</div></div>'+btn;
       const b=d.querySelector("button");
-      if(st===0)b.addEventListener("click",()=>{openExt(q.url);S.social[q.id]=1;save();renderSocial();updateQuestDot();});
+      if(st===0)b.addEventListener("click",()=>{socialFollowT[q.id]=Date.now();openExt(q.url);S.social[q.id]=1;save();renderSocial();updateQuestDot();});
       else if(st===1)b.addEventListener("click",()=>verifySocial(q,b));
       else if(st===2)b.addEventListener("click",()=>{
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
@@ -1743,15 +1743,22 @@
         }
         S.social[q.id]=3;bank(q.reward);save();renderSocial();renderAirdrop();renderLive();renderStats();updateQuestDot();confetti();toast(q.emo,"Reward claimed!","+"+fmt(q.reward)+" $MOON & points");});
       wrap.appendChild(d);});}
-  function verifySocial(q,btn){if(btn){btn.disabled=true;btn.textContent="Checking…";}
+  const socialFollowT={};   // when the user tapped "Follow" (for the X/IG dwell gate)
+  function verifySocial(q,btn){const tg=window.Telegram&&window.Telegram.WebApp;
     const pass=()=>{S.social[q.id]=2;save();renderSocial();updateQuestDot();toast("✅","Verified!","Tap Claim to collect "+fmt(q.reward));};
-    const fail=()=>{S.social[q.id]=1;save();renderSocial();updateQuestDot();toast("❌","Not detected yet","Make sure you followed, then Verify again");};
-    const tg=window.Telegram&&window.Telegram.WebApp;
-    if(resolvedVerifyEndpoint){   // production: server confirms the real follow/membership (e.g. Telegram getChatMember)
-      try{fetch(resolvedVerifyEndpoint,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task:q.id,initData:tg&&tg.initData})})
-        .then(r=>r.json()).then(d=>{(d&&d.ok)?pass():fail();}).catch(fail);}catch(e){fail();}
+    const fail=(m)=>{S.social[q.id]=1;save();renderSocial();updateQuestDot();toast("❌","Not verified",m||"Make sure you followed, then Verify again");};
+    // Telegram channel/group → REAL server-side membership check via getChatMember (/api/verify)
+    if(q.id==="tg_channel"||q.id==="tg_group"){
+      if(btn){btn.disabled=true;btn.textContent="Checking…";}
+      if(resolvedVerifyEndpoint&&tg&&tg.initData){
+        try{fetch(resolvedVerifyEndpoint,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task:q.id,initData:tg.initData})})
+          .then(r=>r.json()).then(d=>{(d&&d.ok)?pass():fail("Join the "+(q.id==="tg_group"?"group":"channel")+" first, then tap Verify.");}).catch(()=>fail());}catch(e){fail();}
+      } else { fail("Open inside Telegram to verify membership."); }
       return;}
-    setTimeout(pass,1300);}   // prototype: simulated verification check (no real follow data available client-side)
+    // X / Instagram → no public API can confirm a follow; require an actual visit (dwell gate) before honoring it
+    const t=socialFollowT[q.id]||0;
+    if(Date.now()-t < 6000){toast("⏳","Go follow first","Open the link, follow, then come back and tap Verify.");return;}
+    pass();}
   function renderAirdrop(){const ap=$("adPoints");if(!ap)return;
     const pct=clamp(S.airdrop/AIRDROP_QUALIFY*100,0,100);
     ap.textContent=fmt(S.airdrop);$("adEst").textContent=pct>=100?"Qualified score reached":"Need "+fmt(Math.max(0,AIRDROP_QUALIFY-S.airdrop))+" more points";
