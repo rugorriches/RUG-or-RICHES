@@ -1174,7 +1174,8 @@
   const tapPower=()=>1+lvl("power")*0.45;
   const effVip=()=>Math.max(S.vip||0,(S.vipSubUntil&&Date.now()<S.vipSubUntil)?4:0);   // 30-day VIP Pass grants Diamond perks while active
   const maxEnergy=()=>100+lvl("energy")*40 + effVip()*25 + (rankPerk().eb||0);
-  const regenRate=()=>1+lvl("regen")*0.6;
+  const regenRate=()=>Math.min(1+lvl("regen")*0.6, 5);   // capped — energy regen can never out-pace a fast tapper
+  const tapCost=()=>1+Math.floor(rankIdx()/2);            // energy per tap rises with rank: 🦐1 🦀1 🐟2 🐬2 🦈3 🐋3 🦖4
   const autoRate=()=>lvl("auto")*2;
   const comboCap=()=>40+lvl("combo")*12;
   const comboGain=()=>0.025+lvl("combo")*0.004;
@@ -1276,8 +1277,8 @@
   (function(){const today=new Date().toDateString();
     if(S.lastDay!==today){const y=new Date(Date.now()-864e5).toDateString();
       S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.floor(Math.min(S.streak,20)*250*(rankPerk().db||1));bank(b);
-      S.boxes=(S.boxes||0)+1;S.tickets=(S.tickets||0)+1;save();   // daily login also drops a mystery box + a lucky-draw ticket
-      setTimeout(()=>toast("🔥","Day "+S.streak+" streak!","+"+fmt(b)+" $MOON · 🎁 1 box · 🎟️ 1 ticket"),1200);}})();
+      S.tickets=(S.tickets||0)+1;const gotBox=(S.streak%3===0);if(gotBox)S.boxes=(S.boxes||0)+1;save();   // ticket daily; mystery box only every 3rd streak day
+      setTimeout(()=>toast("🔥","Day "+S.streak+" streak!","+"+fmt(b)+" $MOON · 🎟️ 1 ticket"+(gotBox?" · 🎁 1 box":"")),1200);}})();
 
   // ---------- OFFLINE ----------
   (function(){const last=parseInt(lsGet("moontap_last")||"0");
@@ -1393,7 +1394,7 @@
 
   // ---------- TAP ----------
   const coin=$("coin"), stage=document.querySelector(".coin-stage");
-  function doTap(x,y){if(busting)return;if(energy<1){flashEnergy();return;}
+  function doTap(x,y){if(busting)return;if(energy<tapCost()){flashEnergy();return;}
     const cur=invested>0?roundCur:S.betCur;
     const stake=Math.max(1,Math.min(S.bet,betMax()));
     if(curBal(cur)<stake){faucetOrWarn(cur);return;}
@@ -1411,7 +1412,7 @@
     if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
       window._moonWS.send(JSON.stringify({ t: "tap", cur: cur, bet: stake }));
       // Snappy local prediction:
-      energy = Math.max(0, energy - 1);
+      energy = Math.max(0, energy - tapCost());
       if (cur === "pts") S.airdrop = Math.max(0, S.airdrop - stake);
       else S.balance = Math.max(0, S.balance - stake);
       invested += stake;
@@ -1419,7 +1420,7 @@
       pot += stake;
       renderLive();
     } else {
-      ac();energy-=1;S.taps++;combo++;comboTimer=1.2;roundClicks++;
+      ac();energy-=tapCost();S.taps++;combo++;comboTimer=1.2;roundClicks++;
       subCur(cur,stake);invested+=stake;roundCur=cur;
       const oldP=price;
       const mult=(boost>0?2:1)*(1+Math.min(combo,comboCap())*comboGain());
