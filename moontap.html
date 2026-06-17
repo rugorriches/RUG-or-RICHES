@@ -927,7 +927,7 @@
 
   // ---------- STATE ----------
   const DEF={balance:0,airdrop:0,lifetime:0,bestPot:0,bestPrice:1,rugs:0,cashouts:0,taps:0,pnlWon:0,pnlLost:0,
-    streak:0,lastDay:null,refCode:null,name:null,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
+    streak:0,lastDay:null,refCode:null,name:null,nameSet:false,sound:true,vip:0,bet:100,betCur:"moon",autoSell:0,stopLoss:0,starsSpent:0,vipDay:null,crew:null,crewId:null,crewLeaderId:null,crewMembers:[],crewBoard:[],comboDay:null,warWeek:null,warScore:0,warClaim:false,coinLevel:1,coinXp:0,skin:"gold",skins:["gold"],starterBought:false,seasonPass:false,seasonClaimDay:null,vipSubUntil:0,firstBuyUsed:false,dealDay:null,piggy:0,
     seasonStart:null,seasonDays:[],
     up:{power:0,energy:0,regen:0,insure:0,auto:0,combo:0,vault:0,cashbonus:0},
     ach:[], friends:[], refMiles:[], social:{x:0,tg_channel:0,tg_group:0,ig:0}, quests:{date:null,prog:{},claimed:[]},
@@ -1003,7 +1003,7 @@
       const d = new Date(v);
       return Number.isFinite(d.getTime()) ? d.toDateString() : String(v);
     };
-    if (db.name) S.name = db.name;
+    if (db.name && !S.nameSet) S.name = db.name;   // never clobber a name the player chose themselves
     S.vip = Math.max(S.vip, db.vip_tier || 0);
     S.streak = Math.max(S.streak, db.streak || 0);
     S.starsSpent = Math.max(S.starsSpent, db.stars_spent || 0);
@@ -2290,7 +2290,7 @@
   function openNameModal(){$("nameInput").value=S.name;$("nameModal").classList.add("show");setTimeout(()=>{try{$("nameInput").focus();}catch(e){}},60);}
   $("renameBtn").addEventListener("click",openNameModal);
   $("nameCancel").addEventListener("click",()=>$("nameModal").classList.remove("show"));
-  $("nameSave").addEventListener("click",()=>{const v=$("nameInput").value.trim();if(v){S.name=v.slice(0,18);save();renderStats();renderLive();sendSettings({name:S.name});}$("nameModal").classList.remove("show");});
+  $("nameSave").addEventListener("click",()=>{const v=$("nameInput").value.trim();if(v){S.name=v.slice(0,18);S.nameSet=true;save();renderStats();renderLive();sendSettings({name:S.name});if(hasCloudAuth)syncWithCloud(S).catch(()=>{});}$("nameModal").classList.remove("show");});
   $("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("nameSave").click();});
   $("resetBtn").addEventListener("click",()=>{if(confirm("Reset ALL progress? Cannot be undone.")){
     ["moontap","moontap_last","moontap_referred","moontap_season","moontap_tut"].forEach(k=>lsDel(k));location.href=location.origin+location.pathname;}});
