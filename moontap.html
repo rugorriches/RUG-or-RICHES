@@ -34,7 +34,8 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:1 1 auto; min-height:120px;}   /* absorbs slack so the console sits at the bottom (no gap under SELL) */
+  #gameScroll>.coin-stage{flex:0 0 auto; min-height:0;}
+  #gameScroll>.chart-card{flex:1 1 auto; min-height:150px; display:flex; flex-direction:column;}   /* chart is the hero — absorbs the slack and grows */
 
   /* animated background */
   #bg{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none;}
@@ -64,13 +65,13 @@
   .iconbtn{background:var(--glass); border:1px solid var(--line); color:#fff; width:29px; height:29px;
     border-radius:9px; font-size:13px; cursor:pointer; transition:transform .12s; backdrop-filter:blur(6px); padding:0;}
   .iconbtn:active{transform:scale(.9);}
-  .season{font-size:9px; color:#b79bff; text-align:center; padding:0 14px 1px;}
+  .season{font-size:8.5px; color:#b79bff; text-align:center; padding:0 14px;}
   .season b{color:var(--gold);}
 
   /* stats */
-  .stats{display:flex; gap:5px; padding:2px 12px;}
+  .stats{display:flex; gap:5px; padding:1px 12px;}
   .stat{flex:1; position:relative; overflow:hidden; background:var(--card); border:1px solid var(--line);
-    backdrop-filter:blur(6px); border-radius:12px; padding:3px 4px; text-align:center;
+    backdrop-filter:blur(6px); border-radius:12px; padding:2px 4px; text-align:center;
     box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .15s;}
   .stat:active{transform:translateY(-2px) scale(1.02);}
   .stat .v{font-size:13px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
@@ -92,7 +93,7 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; height:60px; display:block;}
+  #chart{width:100%; flex:1 1 auto; min-height:84px; height:auto; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
@@ -159,6 +160,14 @@
   .hint{display:none;}
   @keyframes hintglow{50%{opacity:.5;}}
   .predict{margin:0 14px 3px; padding:4px 10px 5px; border-radius:11px; background:rgba(124,77,255,.09); border:1px solid rgba(124,77,255,.28);}
+  .predict.collapsed{display:none;}
+  .predict-toggle{display:block; width:calc(100% - 28px); margin:1px 14px 3px; padding:6px; border:1px dashed rgba(124,77,255,.4); background:rgba(124,77,255,.07); color:#cbb6ff; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer;}
+  .predict-toggle .caret{display:inline-block; transition:transform .2s;}
+  .predict-toggle.open .caret{transform:rotate(180deg);}
+  .pot.compact{display:flex; align-items:baseline; justify-content:center; gap:8px; flex-wrap:wrap; padding:1px 0 2px;}
+  .pot.compact .lab{font-size:9px; letter-spacing:1px;}
+  .pot.compact .amt{font-size:20px; line-height:1;}
+  .pot.compact .combo,.pot.compact .wintag{display:inline; height:auto; line-height:1;}
   .predict-h{font-size:9.5px; font-weight:800; color:#cbb6ff; letter-spacing:.03em; display:flex; justify-content:space-between; align-items:center;}
   .predict-h #predTimer{color:var(--gold); font-variant-numeric:tabular-nums;}
   .predict-btns{display:flex; gap:7px; margin:4px 0 3px;}
@@ -627,7 +636,8 @@
     <div class="rug-bar" id="rugBar"><div id="rugFill"></div><div id="rugSkull">💀</div><div id="rugPct">0%</div></div>
   </div>
 
-  <div class="predict" id="predictBar">
+  <button class="predict-toggle" id="predictToggle">🔮 Predict next move <span class="caret">▾</span></button>
+  <div class="predict collapsed" id="predictBar">
     <div class="predict-h">🔮 PREDICT next move <span id="predTimer"></span></div>
     <div class="predict-btns">
       <button class="pbtn long" id="predLong">📈 LONG</button>
@@ -636,11 +646,9 @@
     <div class="predict-sub" id="predSub">Call the next 5s — win 1.8× · stake = your bet</div>
   </div>
 
-  <div class="pot">
-    <div class="lab">UNBANKED POSITION (AT RISK)</div>
-    <div class="amt" id="pot">0</div>
-    <div class="combo" id="combo"></div>
-    <div class="wintag" id="winTag"></div>
+  <div class="pot compact">
+    <span class="lab">AT RISK</span><span class="amt" id="pot">0</span>
+    <span class="combo" id="combo"></span><span class="wintag" id="winTag"></span>
   </div>
 
   <div class="coin-stage">
@@ -1295,7 +1303,8 @@
   // ---------- CHART ----------
   const cv=$("chart"), cx=cv.getContext("2d");
   function sizeChart(){const r=cv.getBoundingClientRect();cv.width=Math.max(200,r.width*2);cv.height=Math.max(80,r.height*2);}
-  function drawChart(){const w=cv.width,h=cv.height;cx.clearRect(0,0,w,h);
+  function drawChart(){const rh=cv.clientHeight*2;if(rh&&Math.abs(rh-cv.height)>6)sizeChart();   // chart now flex-grows; keep canvas resolution matched to its box
+    const w=cv.width,h=cv.height;cx.clearRect(0,0,w,h);
     // candlesticks grouped from price history
     const G=4,cand=[];for(let i=0;i+G<=hist.length;i+=G){const s=hist.slice(i,i+G);
       cand.push({o:s[0],c:s[s.length-1],hi:Math.max.apply(null,s),lo:Math.min.apply(null,s)});}
@@ -1447,6 +1456,7 @@
   $("sellHalf").addEventListener("click",sellHalf);
   $("predLong")&&$("predLong").addEventListener("click",()=>startPredict(1));
   $("predShort")&&$("predShort").addEventListener("click",()=>startPredict(-1));
+  $("predictToggle")&&$("predictToggle").addEventListener("click",()=>{const p=$("predictBar");const open=!p.classList.toggle("collapsed");$("predictToggle").classList.toggle("open",open);});
 
   // ---------- TICKS ----------
   function pushTick(){hist.push(price);if(hist.length>64)hist.shift();}
