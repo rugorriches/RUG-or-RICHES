@@ -1119,11 +1119,11 @@
   // ---------- EARN HELPER (tracks lifetime for ranks) ----------
   function addAirdrop(amt){amt=Math.floor(amt);S.airdrop=Math.min(AIRDROP_CAP,S.airdrop+Math.max(0,amt));}
   // ---------- LIVE EVENTS (deterministic, time-based — every player sees the same one) ----------
-  const EVENTS=[
+  const LIVE_EVENTS=[
     {id:"happy",emo:"🍾",nm:"Happy Hour",desc:"2× cash-out earnings",mult:2,when:d=>d.getUTCHours()===18},
     {id:"frenzy",emo:"⚡",nm:"Frenzy Friday",desc:"2× earnings all day",mult:2,when:d=>d.getUTCDay()===5},
     {id:"storm",emo:"⛈️",nm:"Weekend Rug Storm",desc:"1.5× earnings — ride it if you dare",mult:1.5,when:d=>d.getUTCDay()===0||d.getUTCDay()===6}];
-  function activeEvent(){const d=new Date();for(let i=0;i<EVENTS.length;i++){if(EVENTS[i].when(d))return EVENTS[i];}return null;}
+  function activeEvent(){const d=new Date();for(let i=0;i<LIVE_EVENTS.length;i++){if(LIVE_EVENTS[i].when(d))return LIVE_EVENTS[i];}return null;}
   function eventMult(){const e=activeEvent();return e?e.mult:1;}
   function eventEndsAt(e){const d=new Date();if(e.id==="happy"){const n=new Date(d);n.setUTCHours(d.getUTCHours()+1,0,0,0);return n.getTime();}const n=new Date(d);n.setUTCHours(24,0,0,0);return n.getTime();}
   function renderEventBanner(){const el=$("eventBanner");if(!el)return;const e=activeEvent();
