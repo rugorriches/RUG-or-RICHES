@@ -1704,10 +1704,10 @@
     ACH.forEach(a=>{const on=S.ach.indexOf(a.id)>=0;const d=document.createElement("div");d.className="card row ach"+(on?" on":"");
       d.innerHTML='<div class="emo">'+a.emo+'</div><div class="grow"><div class="nm">'+a.nm+' '+(on?"✓":"")+'</div><div class="ds">'+a.ds+'</div></div>';wrap.appendChild(d);});}
   // ---------- AIRDROP HUB + SOCIAL QUESTS ----------
-  const SOCIAL=[{id:"x",emo:"𝕏",label:"Follow on X",url:"https://x.com/rugorriches",reward:5000},
+  const SOCIAL=[{id:"x",emo:"𝕏",label:"Follow @RUGorRICHESApp on X",url:"https://x.com/RUGorRICHESApp",reward:5000},
     {id:"tg_channel",emo:"📢",label:"Join Telegram Channel",url:"https://t.me/rugorricheslounge",reward:5000},
     {id:"tg_group",emo:"💬",label:"Join Telegram Group",url:"https://t.me/rugorriches_HQ",reward:5000},
-    {id:"ig",emo:"📸",label:"Follow on Instagram",url:"https://instagram.com/rugorriches",reward:5000}];
+    {id:"ig",emo:"📸",label:"Follow @RUGorRICHESApp on Instagram",url:"https://instagram.com/RUGorRICHESApp",reward:5000}];
   const SOC_SVG={
     x:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23zm-1.16 17.52h1.83L7.08 4.13H5.12L17.08 19.77z"/></svg>',
     tg:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.94 4.6 18.9 19.2c-.22 1.02-.83 1.27-1.68.79l-4.64-3.42-2.24 2.16c-.25.25-.46.46-.94.46l.33-4.74 8.62-7.79c.37-.33-.08-.51-.58-.18L7.42 13.1l-4.58-1.43c-1-.31-1.02-1 .22-1.49l17.9-6.9c.83-.31 1.56.2 1.29 1.32z"/></svg>',
