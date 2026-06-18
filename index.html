@@ -60,26 +60,33 @@
 
   /* nav */
   nav{position:sticky; top:0; z-index:40; backdrop-filter:blur(12px); background:rgba(7,1,17,.6); border-bottom:1px solid var(--line);}
-  nav .row{display:flex; align-items:center; justify-content:space-between; height:62px;}
+  nav .row{display:flex; align-items:center; justify-content:space-between; height:62px; position:relative;}
   .logo{font-weight:900; font-size:18px; letter-spacing:1px;}
   .logo small{color:var(--gold);}
-  .navlinks{display:flex; gap:26px; font-size:14px; color:var(--muted); font-weight:600;}
+  .navlinks{display:flex; gap:24px; font-size:14px; color:var(--muted); font-weight:600;}
   .navlinks a:hover{color:#fff;}
   .navcta{display:flex; gap:10px; align-items:center;}
-  .burger{display:none; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;}
-  @media(max-width:820px){ .navlinks{display:none;} }
+  .burger{display:none; background:none; border:1px solid var(--line); border-radius:10px; color:#fff; font-size:20px; line-height:1; padding:6px 11px; cursor:pointer;}
+  @media(max-width:820px){
+    .burger{display:block;}
+    .navlinks{position:absolute; top:62px; left:-22px; right:-22px; flex-direction:column; gap:0; background:rgba(7,1,17,.98); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); padding:6px 22px 14px; display:none;}
+    .navlinks.open{display:flex;}
+    .navlinks a{padding:13px 2px; border-bottom:1px solid var(--line); font-size:16px; color:var(--ink);}
+    .navlinks a:last-child{border-bottom:none;}
+  }
 
-  /* hero */
-  .hero{position:relative; padding:72px 0 30px; display:grid; grid-template-columns:1fr; gap:24px; align-items:center; min-height:min(78vh,620px);}
-  .hero>div{position:relative; z-index:2; max-width:640px;}
-  /* shark lives in the background, anchored right, fading into the page */
-  .hero::after{content:""; position:absolute; z-index:1; top:50%; right:-3%; transform:translateY(-50%);
-    width:min(46%,440px); aspect-ratio:.801; pointer-events:none;
-    background:url(/assets/brand/home-hero-shark.webp) no-repeat center/contain;
-    -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 100%); mask-image:linear-gradient(90deg,transparent,#000 22%,#000 100%);
-    filter:drop-shadow(0 24px 70px rgba(124,77,255,.45)); opacity:.96;}
-  @media(max-width:900px){ .hero{text-align:center; padding:44px 0 16px; min-height:0;} .hero>div{max-width:none; margin:0 auto;}
-    .hero::after{position:static; transform:none; width:min(72%,320px); margin:6px auto 0; -webkit-mask-image:none; mask-image:none; opacity:1;} }
+  /* hero — shark as full-section background, fading into the page before the first cards */
+  .hero{position:relative;
+    background:linear-gradient(180deg, rgba(5,1,15,.40) 0%, rgba(5,1,15,.58) 55%, rgba(5,1,15,.92) 88%, var(--bg) 100%),
+      url(/assets/brand/home-hero-shark.webp) no-repeat;
+    background-size:auto, cover; background-position:center, center 16%;}
+  .hero-inner{position:relative; z-index:2; display:grid; grid-template-columns:1fr; align-items:center; min-height:min(88vh,760px); padding:60px 0 52px;}
+  .hero-inner>div{max-width:600px;}
+  @media(max-width:900px){
+    .hero{background-position:center, center top;}
+    .hero-inner{text-align:center; min-height:min(84vh,660px); padding:42px 0 36px;}
+    .hero-inner>div{max-width:none; margin:0 auto;}
+  }
   .badge{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.06); border:1px solid var(--line); border-radius:30px; padding:6px 14px; font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:18px;}
   .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.4s infinite;}
   @keyframes blink{50%{opacity:.4;}}
@@ -128,6 +135,11 @@
   .features{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
   @media(max-width:860px){ .features{grid-template-columns:1fr 1fr;} }
   @media(max-width:560px){ .features{grid-template-columns:1fr;} }
+  /* explore hub — 4 page cards */
+  .hub{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media(max-width:820px){ .hub{grid-template-columns:1fr 1fr;} }
+  @media(max-width:460px){ .hub{grid-template-columns:1fr;} }
+  .hub .feat .more{display:inline-block; margin-top:10px; color:var(--cyan); font-weight:700; font-size:14px;}
   .feat{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; transition:transform .2s, border-color .2s, box-shadow .2s; position:relative; overflow:hidden;}
   .feat::before{content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--neon),var(--cyan),var(--gold)); opacity:.65;}
   .feat:hover{transform:translateY(-6px); border-color:rgba(35,240,255,.4); box-shadow:0 16px 44px -14px rgba(35,240,255,.45);}
@@ -211,14 +223,18 @@
 <nav>
   <div class="wrap row">
     <div class="logo"><img src="/assets/brand/shark-pfp.webp" alt="" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:9px;border:1.5px solid rgba(35,240,255,.5)" onerror="this.style.display='none'">RUG <small>OR</small> RICHES</div>
-    <div class="navlinks">
-      <a href="#features">Features</a><a href="#how">How it works</a><a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/litepaper">Litepaper</a><a href="#faq">FAQ</a>
+    <div class="navlinks" id="navlinks" onclick="if(event.target.tagName==='A'){this.classList.remove('open');var b=document.querySelector('.burger');if(b){b.textContent='☰';b.setAttribute('aria-expanded',false);}}">
+      <a href="#how">How it works</a><a href="#features">Features</a><a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper">Litepaper</a><a href="#faq">FAQ</a>
     </div>
-    <div class="navcta"><a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a></div>
+    <div class="navcta">
+      <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a>
+      <button class="burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.getElementById('navlinks');var o=n.classList.toggle('open');this.setAttribute('aria-expanded',o);this.textContent=o?'✕':'☰';">☰</button>
+    </div>
   </div>
 </nav>
 
-<header class="hero wrap">
+<header class="hero">
+  <div class="wrap hero-inner">
   <div>
     <div class="badge"><span class="dot"></span>LIVE · Season 1 airdrop open</div>
     <h1>Pump it. Bank it.<br><span class="grad">Before it rugs.</span></h1>
@@ -228,6 +244,7 @@
       <a class="btn ghost" href="#how">How it works</a>
     </div>
     <div class="trust"><span>🪙 <b>Free</b> to play</span><span>⚡ No wallet needed</span><span>🪂 Earn <b>airdrop points</b></span></div>
+  </div>
   </div>
 </header>
 
@@ -369,6 +386,18 @@
     <div class="rd reveal"><div class="ph">PHASE 6</div><h4>Ecosystem</h4><p>Ongoing play-to-earn seasons, crew treasuries &amp; wagered wars, cross-mini-app collaborations, and community governance.</p></div>
   </div>
   <p class="sub reveal" style="margin-top:18px">Full detail in the <a href="/litepaper" style="color:var(--cyan)">litepaper</a> — tokenomics, utilities, and the post-launch plan.</p>
+</section>
+
+<section id="explore" class="wrap">
+  <div class="eyebrow reveal">Dive deeper</div>
+  <h2 class="reveal">Everything about <span class="grad">$MOON</span></h2>
+  <p class="sub reveal">The full picture — one tap away.</p>
+  <div class="hub reveal">
+    <a class="feat" href="/guide"><div class="ic">📖</div><h3>Game Guide</h3><p>About, how it works, every feature defined, and a full A–Z walkthrough.</p><span class="more">Open the guide →</span></a>
+    <a class="feat" href="/airdrop"><div class="ic">🪂</div><h3>Airdrop</h3><p>The six pre-launch cycles, rewards, and exactly how to qualify.</p><span class="more">See the cycles →</span></a>
+    <a class="feat" href="/tokenomics"><div class="ic">🪙</div><h3>Tokenomics</h3><p>Fixed supply, vesting, declining emissions, and the sustainability engine.</p><span class="more">View the model →</span></a>
+    <a class="feat" href="/litepaper"><div class="ic">📄</div><h3>Litepaper</h3><p>The full master document — concept, economy, fair play, and roadmap.</p><span class="more">Read it →</span></a>
+  </div>
 </section>
 
 <section id="faq" class="wrap">
