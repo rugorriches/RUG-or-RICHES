@@ -34,7 +34,7 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:1 1 auto; min-height:110px;}   /* BUY area absorbs slack so the chart stays a sane fixed size */
+  #gameScroll>.coin-stage{flex:1 1 auto; min-height:64px;}   /* BUY area absorbs slack (incl. the AT-RISK row after a bet) so the screen never needs to scroll */
   #gameScroll>.chart-card{flex:0 0 auto;}
   @media(max-height:760px){ #chart{height:100px;} }   /* short phones: trim the chart so the nav stays on-screen */
 

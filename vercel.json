@@ -25,6 +25,9 @@
     { "src": "/terms", "dest": "/terms.html" },
     { "src": "/cookies", "dest": "/cookies.html" },
     { "src": "/litepaper", "dest": "/litepaper.html" },
+    { "src": "/guide", "dest": "/guide.html" },
+    { "src": "/airdrop", "dest": "/airdrop.html" },
+    { "src": "/tokenomics", "dest": "/tokenomics.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ],
   "crons": [

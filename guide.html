@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05010f">
+<meta name="robots" content="index,follow">
+<meta name="description" content="The complete RUG OR RICHES ($MOON) guide — about, how it works, every game feature explained, a full A-Z walkthrough, and Crews & Crew Wars.">
+<title>Game Guide — RUG OR RICHES ($MOON)</title>
+<style>
+  :root{
+    --bg:#05010f; --bg2:#140826; --neon:#ff2bd6; --cyan:#23f0ff; --gold:#ffd400;
+    --green:#1dff8f; --red:#ff3b5c; --ink:#f3eeff; --muted:#b6a3e0; --line:rgba(255,255,255,.1);
+    --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  img{max-width:100%; height:auto;}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink);
+    background:radial-gradient(130% 90% at 50% -10%,#34125e 0%,var(--bg2) 45%,var(--bg) 85%) fixed;
+    line-height:1.7; padding:0 0 80px;}
+  .wrap{max-width:880px; margin:0 auto; padding:0 22px;}
+  header.top{padding:54px 0 22px; text-align:center; border-bottom:1px solid var(--line); margin-bottom:14px;}
+  .logo{font-weight:900; font-size:24px; letter-spacing:1px;}
+  .logo small{color:var(--gold);}
+  .grad{background:linear-gradient(90deg,var(--neon),var(--cyan),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  h1{font-size:clamp(30px,6vw,46px); font-weight:900; margin-top:14px; letter-spacing:-1px;}
+  .tagline{color:var(--muted); margin-top:10px; font-size:15px;}
+  h2{font-size:23px; font-weight:800; margin:40px 0 12px; color:var(--cyan); letter-spacing:-.3px; scroll-margin-top:70px;}
+  h3{font-size:16px; font-weight:700; margin:20px 0 6px; color:#e7deff;}
+  p, li{color:#dcd2f3; font-size:15px;}
+  ul,ol{margin:8px 0 8px 22px;} li{margin:6px 0;}
+  a{color:var(--cyan); text-decoration:none;} a:hover{text-decoration:underline;}
+  strong{color:#fff;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0;}
+  .muted{color:var(--muted); font-size:13px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  @media(max-width:640px){ .grid{grid-template-columns:1fr;} }
+  nav.toc{position:sticky; top:0; z-index:10; background:rgba(5,1,15,.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:10px 0; margin-bottom:8px;}
+  nav.toc .wrap{display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  nav.toc .wrap::-webkit-scrollbar{display:none;}
+  nav.toc a{flex:0 0 auto; font-size:12.5px; font-weight:700; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:6px 12px;}
+  nav.toc a:hover{color:#fff; border-color:var(--cyan); text-decoration:none;}
+  .feat{display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--line);}
+  .feat .e{font-size:22px; flex:0 0 30px; text-align:center;}
+  .feat .nm{font-weight:700; color:#fff;}
+  .feat .ds{color:var(--muted); font-size:13.5px;}
+  ol.steps{counter-reset:s; list-style:none; margin-left:0;}
+  ol.steps>li{position:relative; padding:11px 0 11px 46px; border-bottom:1px solid var(--line);}
+  ol.steps>li::before{counter-increment:s; content:counter(s); position:absolute; left:0; top:11px; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-weight:900; font-size:13px; color:#05010f; background:linear-gradient(135deg,var(--cyan),var(--neon));}
+  ol.steps>li b{color:#fff;}
+  .cta{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0;}
+  .btn{display:inline-block; font-weight:800; font-size:14px; padding:12px 20px; border-radius:30px; border:1px solid var(--line);}
+  .btn.primary{background:linear-gradient(120deg,var(--neon),#9b5cff); color:#fff; border:none;}
+  .btn.ghost{color:var(--cyan); border-color:rgba(35,240,255,.4);}
+  footer{margin-top:48px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; text-align:center;}
+  .note{font-size:12.5px; color:#8d7db5;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
+    <h1><span class="grad">Game Guide</span></h1>
+    <div class="tagline">Everything — not just the tap screen.</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#about">About</a>
+    <a href="#how">How it works</a>
+    <a href="#walkthrough">Full walkthrough</a>
+    <a href="#features">Game features</a>
+    <a href="#ranks">Ranks &amp; VIP</a>
+    <a href="#crews">Crews &amp; Wars</a>
+    <a href="#airdrop">Airdrop</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <h2 id="about">About</h2>
+  <p>RUG OR RICHES is a <strong>press-your-luck crypto tapper</strong> built as a Telegram Mini App. It turns the exact emotion of degen trading — the rush of a pump and the gut-punch of a rug — into a free, 10-second loop anyone can play with no wallet and no signup.</p>
+  <p>Your guide is the <strong>$MOON shark</strong> — pixel shades, gold chain, zero fear — the apex predator who's survived a thousand rugs and banked through every one. You start as a Shrimp and grind your way up the food chain to Megalodon, banking $MOON, building a crew, and stacking Airdrop Points along the way.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a>
+    <a class="btn ghost" href="/litepaper">Read the litepaper</a>
+  </div>
+
+  <h2 id="how">How it works</h2>
+  <p>The core loop is simple to learn and brutal to master:</p>
+  <div class="grid">
+    <div class="card"><h3>1 · Pump</h3><p class="muted">Tap to stake your bet and push the live $MOON price up. The higher it climbs, the bigger your unbanked pot — and the hotter the rug risk.</p></div>
+    <div class="card"><h3>2 · Read the heat</h3><p class="muted">A rug-risk meter rises as you ride. Market events swing the odds live, and a "DUMP INCOMING" warning fires before a likely rug.</p></div>
+    <div class="card"><h3>3 · Bank it</h3><p class="muted">Cash out before the rug to bank your gains. Clutch high-risk exits pay a bonus; one tap too greedy and a hard rug wipes the pot.</p></div>
+    <div class="card"><h3>4 · Climb</h3><p class="muted">Banked $MOON levels your rank, funds upgrades and VIP, and a slice of every cash-out feeds your Airdrop Points.</p></div>
+  </div>
+
+  <h2 id="walkthrough">Full walkthrough — A to Z</h2>
+  <ol class="steps">
+    <li><b>Open the app.</b> Launch from <a href="https://t.me/RugorRichesBot/play">@RugorRichesBot</a> or the website Play button. No wallet, no signup — your Telegram identity is your account, verified server-side.</li>
+    <li><b>Get your starting stack.</b> New players begin with a small $MOON balance and starting Airdrop Points so you can play right away.</li>
+    <li><b>Set your bet.</b> Pick a stake per round — bigger bets mean bigger pumps and bigger swings.</li>
+    <li><b>Tap to pump.</b> Each tap stakes your bet and pushes the live price up, building your in-round pot.</li>
+    <li><b>Read the heat.</b> The rug-risk meter climbs as you ride; market events (FOMO, bear raid, whale, volatility) shift the odds in real time.</li>
+    <li><b>Manage the position.</b> Sell half to lock partial profit, set an auto-sell target or a stop-loss, and watch for the dump warning.</li>
+    <li><b>Cash out.</b> Bank before it rugs. High-risk exits pay a bonus; ignore the warning and the unbanked pot is gone.</li>
+    <li><b>Rank up.</b> Lifetime banked $MOON levels you Shrimp → Megalodon, unlocking energy, daily-bonus and VIP perks.</li>
+    <li><b>Manage energy.</b> Tapping is free, but an energy tank gates long rushes; it regenerates over time, grows with rank, and can be refilled.</li>
+    <li><b>Buy upgrades.</b> Spend $MOON on eight permanent upgrades across Offense, Defense and Economy.</li>
+    <li><b>Climb VIP.</b> Earn or unlock four VIP tiers for earnings multipliers and rug protection.</li>
+    <li><b>Clear quests.</b> Daily, weekly, monthly and VIP quests pay $MOON and feed Airdrop Points.</li>
+    <li><b>Claim daily rewards.</b> Login streaks, a spin wheel, mystery boxes and a lucky draw keep the rewards flowing.</li>
+    <li><b>Go social.</b> Join or create a crew, chat, fight weekly Crew Wars, and invite friends for referral rewards (you both get 5,000 $MOON).</li>
+    <li><b>Qualify for the airdrop.</b> Sustained, legitimate play builds your points toward qualification, Elite status, and the cycle snapshot.</li>
+    <li><b>Stack across six cycles.</b> Each pre-launch cycle is a fresh season with a rising allocation — start early to stack the most.</li>
+  </ol>
+
+  <h2 id="features">Game features &amp; definitions</h2>
+
+  <h3>Core trading</h3>
+  <div class="feat"><div class="e">👆</div><div><div class="nm">Tap to pump</div><div class="ds">Each tap stakes your bet and pushes the live price higher, growing your unbanked pot.</div></div></div>
+  <div class="feat"><div class="e">🌡️</div><div><div class="nm">Rug-risk meter (heat)</div><div class="ds">A live gauge that climbs the longer/higher you ride. High heat triggers a "DUMP INCOMING" warning.</div></div></div>
+  <div class="feat"><div class="e">🎭</div><div><div class="nm">Fakeouts, soft &amp; hard rugs</div><div class="ds">Fakeouts shake out weak hands; soft rugs partly cut your pot; hard rugs wipe the unbanked position entirely.</div></div></div>
+  <div class="feat"><div class="e">✂️</div><div><div class="nm">Sell half</div><div class="ds">Bank half your pot to lock partial profit while keeping a position riding.</div></div></div>
+  <div class="feat"><div class="e">🤖</div><div><div class="nm">Auto-sell &amp; stop-loss</div><div class="ds">Pre-set a multiplier to bank at, or a floor to bail at — disciplined exits without the nerves.</div></div></div>
+  <div class="feat"><div class="e">📈</div><div><div class="nm">High-risk cash-out bonus</div><div class="ds">Banking at very high heat pays a bonus, scaled by the Profit Taker upgrade.</div></div></div>
+  <div class="feat"><div class="e">🔥</div><div><div class="nm">Combos &amp; win streaks</div><div class="ds">Consecutive profitable rounds build bonus earnings, raised by the Combo Master upgrade.</div></div></div>
+  <div class="feat"><div class="e">🎲</div><div><div class="nm">Market events</div><div class="ds">In-round swings: FOMO Surge &amp; Bullish News (up), Bear Raid (sell pressure), Whale Accumulation, High Volatility.</div></div></div>
+
+  <h3>Upgrades (8 permanent)</h3>
+  <div class="feat"><div class="e">💪</div><div><div class="nm">Tap Power · Offense</div><div class="ds">Bigger pumps and earnings per tap.</div></div></div>
+  <div class="feat"><div class="e">🔥</div><div><div class="nm">Combo Master · Offense</div><div class="ds">Higher combo cap and bonus.</div></div></div>
+  <div class="feat"><div class="e">🛡️</div><div><div class="nm">Rug Insurance · Defense</div><div class="ds">Lowers your rug chance.</div></div></div>
+  <div class="feat"><div class="e">💎</div><div><div class="nm">Diamond Vault · Defense</div><div class="ds">Rescues a percentage of the pot when you get rugged.</div></div></div>
+  <div class="feat"><div class="e">🔋</div><div><div class="nm">Max Energy · Economy</div><div class="ds">Bigger energy tank.</div></div></div>
+  <div class="feat"><div class="e">⚡</div><div><div class="nm">Energy Regen · Economy</div><div class="ds">Energy refills faster.</div></div></div>
+  <div class="feat"><div class="e">🤖</div><div><div class="nm">Auto-Trader · Economy</div><div class="ds">Earns banked $MOON while you're away.</div></div></div>
+  <div class="feat"><div class="e">📈</div><div><div class="nm">Profit Taker · Economy</div><div class="ds">Bigger high-risk cash-out bonus.</div></div></div>
+
+  <h3>Daily &amp; rewards</h3>
+  <div class="feat"><div class="e">📅</div><div><div class="nm">Login streaks &amp; daily combo</div><div class="ds">Consecutive logins grow a streak multiplier; a daily combo claim pays bonus $MOON.</div></div></div>
+  <div class="feat"><div class="e">🎡</div><div><div class="nm">Spin wheel &amp; lucky draw</div><div class="ds">Free daily spins and ticket draws paying $MOON, energy, bonus boxes, or rare skins.</div></div></div>
+  <div class="feat"><div class="e">🎁</div><div><div class="nm">Mystery boxes</div><div class="ds">Random chests from $MOON and energy up to a legendary skin.</div></div></div>
+  <div class="feat"><div class="e">🎯</div><div><div class="nm">Quests</div><div class="ds">Daily (5), weekly (4), monthly (3) and VIP-only quests — $MOON rewards that also feed Airdrop Points.</div></div></div>
+  <div class="feat"><div class="e">🏅</div><div><div class="nm">Achievements</div><div class="ds">Milestones like Diamond Hands (cash out at 70%+ risk), Whale, To The Moon, Apex Predator.</div></div></div>
+
+  <h3>Cosmetics &amp; store</h3>
+  <div class="feat"><div class="e">🎨</div><div><div class="nm">Coin skins</div><div class="ds">Collectible skins, Common → Legendary. Some bought with Telegram Stars; the rarest are win-only.</div></div></div>
+  <div class="feat"><div class="e">⭐</div><div><div class="nm">Telegram Stars store</div><div class="ds">Optional VIP, refills, boosts, $MOON packs and Season Pass — in-game items only, never real-world value.</div></div></div>
+  <div class="feat"><div class="e">🐷</div><div><div class="nm">Piggy bank</div><div class="ds">Auto-saves a small % of profitable cash-outs; crack it for a lump of $MOON.</div></div></div>
+
+  <h2 id="ranks">Ranks &amp; VIP</h2>
+  <p>Your <strong>rank</strong> is set by lifetime banked $MOON and unlocks energy, daily-bonus and VIP routes:</p>
+  <p style="line-height:2.4">
+    <img src="/assets/brand/ric-shrimp.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦐')"><strong>Shrimp</strong> 0+ ·
+    <img src="/assets/brand/ric-crab.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦀')"><strong>Crab</strong> 250K+ ·
+    <img src="/assets/brand/ric-fish.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐟')"><strong>Fish</strong> 2.5M+ ·
+    <img src="/assets/brand/ric-dolphin.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐬')"><strong>Dolphin</strong> 15M+ ·
+    <img src="/assets/brand/ric-shark.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦈')"><strong>Shark</strong> 75M+ ·
+    <img src="/assets/brand/ric-orca.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐳')"><strong>Orca</strong> 300M+ ·
+    <img src="/assets/brand/ric-megalodon.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦖')"><strong>Megalodon</strong> 1B+
+  </p>
+  <p><strong>VIP tiers</strong> stack on top, earnable with $MOON or unlockable with Stars:</p>
+  <ul>
+    <li><strong>🥉 Bronze</strong> — +12% earnings, +25 energy, faster pumps</li>
+    <li><strong>🥈 Silver</strong> — +30% earnings, lower rug risk</li>
+    <li><strong>🥇 Gold</strong> — +60% earnings, 25% rug auto-rescue</li>
+    <li><strong>💎 Diamond</strong> — +120% earnings, whale shield</li>
+  </ul>
+
+  <h2 id="crews">Crews &amp; Crew Wars</h2>
+  <p><strong>Crews</strong> are player teams. Join one or create your own, chat in-crew, and pool your banked $MOON onto a shared crew leaderboard. Each crew has a captain who manages the roster.</p>
+  <p><strong>Crew Wars</strong> run weekly. Members earn <em>war points</em> for the crew through play and by rallying. Each week your crew is matched against a rival; pull ahead and unlock a <strong>Victory Chest</strong> whose reward scales with your lead and your personal contribution (claim from 5,000 war points). War points and the matchup reset every week.</p>
+  <div class="card muted"><strong>Straight talk:</strong> crew leaderboards and member contributions are real and server-tracked. In the current build the weekly rival is simulated for pacing; live crew-vs-crew matchmaking is on the roadmap.</div>
+
+  <h2 id="airdrop">The airdrop</h2>
+  <p>Sustained play earns <strong>Airdrop Points</strong> — a separate season score you can't wager — across <strong>six pre-launch cycles</strong> with rising allocations. Full cycle breakdown, rewards and qualification rules are on the dedicated page.</p>
+  <div class="cta">
+    <a class="btn primary" href="/airdrop">🪂 Airdrop details</a>
+    <a class="btn ghost" href="/litepaper">Litepaper</a>
+  </div>
+
+  <footer>
+    © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br>
+    <a href="/">← Home</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+  </footer>
+</main>
+</body>
+</html>

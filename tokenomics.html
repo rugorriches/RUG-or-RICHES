@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05010f">
+<meta name="robots" content="index,follow">
+<meta name="description" content="RUG OR RICHES ($MOON) tokenomics — a sustainable, community-first model: fixed supply, dual-layer design, full vesting & unlock schedule, declining emissions, token sinks vs sources, buyback-and-burn, staking, and long-term value accrual.">
+<title>Tokenomics — RUG OR RICHES ($MOON)</title>
+<style>
+  :root{
+    --bg:#05010f; --bg2:#140826; --neon:#ff2bd6; --cyan:#23f0ff; --gold:#ffd400;
+    --green:#1dff8f; --red:#ff3b5c; --purple:#7c4dff; --ink:#f3eeff; --muted:#b6a3e0; --line:rgba(255,255,255,.1);
+    --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  img{max-width:100%; height:auto;}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink);
+    background:radial-gradient(130% 90% at 50% -10%,#34125e 0%,var(--bg2) 45%,var(--bg) 85%) fixed;
+    line-height:1.7; padding:0 0 80px;}
+  .wrap{max-width:900px; margin:0 auto; padding:0 22px;}
+  header.top{padding:54px 0 22px; text-align:center; border-bottom:1px solid var(--line); margin-bottom:14px;}
+  .logo{font-weight:900; font-size:24px; letter-spacing:1px;}
+  .logo small{color:var(--gold);}
+  .grad{background:linear-gradient(90deg,var(--neon),var(--cyan),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  h1{font-size:clamp(30px,6vw,46px); font-weight:900; margin-top:14px; letter-spacing:-1px;}
+  .tagline{color:var(--muted); margin-top:10px; font-size:15px;}
+  .updated{color:#7a6ba3; font-size:12px; margin-top:8px;}
+  h2{font-size:23px; font-weight:800; margin:42px 0 12px; color:var(--cyan); letter-spacing:-.3px; scroll-margin-top:70px;}
+  h3{font-size:16px; font-weight:700; margin:20px 0 6px; color:#e7deff;}
+  p, li{color:#dcd2f3; font-size:15px;}
+  ul,ol{margin:8px 0 8px 22px;} li{margin:6px 0;}
+  a{color:var(--cyan); text-decoration:none;} a:hover{text-decoration:underline;}
+  strong{color:#fff;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0;}
+  .muted{color:var(--muted); font-size:13px;}
+  .note{font-size:12.5px; color:#8d7db5;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin:16px 0;}
+  @media(max-width:680px){ .grid,.grid3{grid-template-columns:1fr;} }
+  nav.toc{position:sticky; top:0; z-index:10; background:rgba(5,1,15,.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:10px 0; margin-bottom:8px;}
+  nav.toc .wrap{display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  nav.toc .wrap::-webkit-scrollbar{display:none;}
+  nav.toc a{flex:0 0 auto; font-size:12.5px; font-weight:700; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:6px 12px;}
+  nav.toc a:hover{color:#fff; border-color:var(--cyan); text-decoration:none;}
+  /* allocation */
+  .alloc .bar{display:flex; align-items:center; gap:12px; margin:11px 0; font-size:14px;}
+  .alloc .bar .t{flex:1.5;} .alloc .bar .track{flex:2; height:11px; border-radius:6px; background:rgba(0,0,0,.3); overflow:hidden;}
+  .alloc .bar .track i{display:block; height:100%; border-radius:6px;}
+  .alloc .bar b{width:42px; text-align:right; color:var(--gold);}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{color:var(--cyan); font-size:11.5px; text-transform:uppercase; letter-spacing:1px;}
+  td b{color:var(--gold);}
+  .pill{display:inline-block; font-size:11px; font-weight:800; color:var(--gold); border:1px solid rgba(255,212,0,.5); border-radius:20px; padding:3px 10px; margin-bottom:6px;}
+  .twoeng{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  @media(max-width:680px){ .twoeng{grid-template-columns:1fr;} }
+  .eng{border-radius:14px; padding:16px; border:1px solid var(--line);}
+  .eng.src{background:linear-gradient(180deg,rgba(255,59,92,.12),rgba(255,59,92,.03)); border-color:rgba(255,59,92,.35);}
+  .eng.sink{background:linear-gradient(180deg,rgba(29,255,143,.12),rgba(29,255,143,.03)); border-color:rgba(29,255,143,.35);}
+  .eng h3{margin-top:0;}
+  .eng ul{margin-left:18px;} .eng li{font-size:13.5px;}
+  /* emission curve */
+  .emit{display:flex; align-items:flex-end; gap:10px; height:140px; margin:18px 0 6px; padding:0 4px;}
+  .emit .col{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px;}
+  .emit .col i{display:block; width:100%; border-radius:7px 7px 0 0; background:linear-gradient(180deg,var(--cyan),var(--purple));}
+  .emit .col span{font-size:11px; color:var(--muted);} .emit .col b{font-size:12px; color:#fff;}
+  .cta{display:flex; gap:12px; flex-wrap:wrap; margin:20px 0;}
+  .btn{display:inline-block; font-weight:800; font-size:14px; padding:12px 20px; border-radius:30px; border:1px solid var(--line);}
+  .btn.primary{background:linear-gradient(120deg,var(--neon),#9b5cff); color:#fff; border:none;}
+  .btn.ghost{color:var(--cyan); border-color:rgba(35,240,255,.4);}
+  footer{margin-top:48px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; text-align:center;}
+  .kpi{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0;}
+  @media(max-width:560px){ .kpi{grid-template-columns:1fr;} }
+  .kpi .k{border:1px solid var(--line); border-radius:14px; padding:14px; text-align:center; background:var(--card);}
+  .kpi .k .v{font-size:24px; font-weight:900;} .kpi .k .l{font-size:12px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
+    <h1><span class="grad">Tokenomics</span></h1>
+    <div class="tagline">A sustainable, community-first model — built for cycles, not just the next pump.</div>
+    <div class="updated">Proposed &amp; illustrative · v1.0 · June 18, 2026</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#model">The model</a>
+    <a href="#supply">Supply</a>
+    <a href="#allocation">Allocation</a>
+    <a href="#vesting">Vesting</a>
+    <a href="#emissions">Emissions</a>
+    <a href="#engine">Sinks vs sources</a>
+    <a href="#value">Value accrual</a>
+    <a href="#liquidity">Liquidity</a>
+    <a href="#governance">Governance</a>
+    <a href="#sustain">Sustainability</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="card muted"><strong>Important:</strong> This page describes a <em>proposed, illustrative</em> token model. <strong>$MOON</strong> and "Airdrop Points" are in-game points with <strong>no guaranteed monetary value</strong>. No token is offered or promised. Every figure, percentage, schedule and mechanism here is subject to legal review and may change, be replaced, or never occur. Nothing on this page is financial, investment, legal or tax advice, or an offer to sell any asset.</div>
+
+  <p>Most play-to-earn economies failed for one reason: they printed rewards faster than the game could absorb them, and assumed growth would never stop. Modern, sustainable GameFi design does the opposite — it <strong>caps supply, releases it slowly, and builds real demand sinks into the game so the economy survives the quiet months, not just the hype.</strong> The $MOON model below is built on those principles.</p>
+
+  <div class="kpi">
+    <div class="k"><div class="v grad">1B</div><div class="l">Fixed max supply</div></div>
+    <div class="k"><div class="v grad">~65%</div><div class="l">Community-directed</div></div>
+    <div class="k"><div class="v grad">0%</div><div class="l">Private/VC pre-sale</div></div>
+  </div>
+
+  <h2 id="model">1. A two-layer model</h2>
+  <p>RUG OR RICHES separates the <em>fun money</em> from the <em>real asset</em> — the structure that keeps sustainable economies stable:</p>
+  <div class="grid">
+    <div class="card"><h3>🎮 Game layer (off-chain, uncapped)</h3><p class="muted">In-game <strong>$MOON balance</strong> and <strong>Airdrop Points</strong> are earned and spent inside the game. They power upgrades, VIP and rank, reset and flow with seasons, and are <strong>never</strong> a tradeable asset. This is where unlimited grinding lives — so it can't inflate the real token.</p></div>
+    <div class="card"><h3>🪙 Token layer (on-chain, capped)</h3><p class="muted">The proposed <strong>$MOON token</strong> is a fixed-supply, on-chain asset. The game layer only ever <em>qualifies</em> you for a bounded share of it via airdrop snapshots — it cannot mint new tokens. Scarcity is protected by design.</p></div>
+  </div>
+  <p class="note">This is the dual-layer pattern modern GameFi uses to avoid the hyperinflation that collapsed first-generation play-to-earn tokens.</p>
+
+  <h2 id="supply">2. Supply</h2>
+  <p>Total supply is <strong>fixed at 1,000,000,000 $MOON</strong> — hard-capped, with <strong>no inflation mechanism and no ability to mint beyond the cap.</strong> The only path supply ever moves is <em>down</em>, through burns (see §7). There is no private sale and no venture allocation; the economy is built for players first.</p>
+
+  <h2 id="allocation">3. Allocation</h2>
+  <div class="card alloc">
+    <div class="bar"><span class="t">🪂 Pre-launch airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
+    <div class="bar"><span class="t">🎮 Post-launch play-to-earn</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
+    <div class="bar"><span class="t">🤝 Referrals &amp; crews</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
+    <div class="bar"><span class="t">💧 Liquidity &amp; exchange</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
+    <div class="bar"><span class="t">🛠️ Team &amp; ops (vested)</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.45)"></i></span><b>10%</b></div>
+    <div class="bar"><span class="t">🏛️ Treasury &amp; ecosystem</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--purple),var(--cyan))"></i></span><b>10%</b></div>
+  </div>
+  <p>Roughly <strong>two-thirds of supply is community-directed</strong> — airdrops, ongoing play-to-earn, and referral/crew rewards — versus 10% to the team and 10% to a transparent treasury. There is no allocation to private investors.</p>
+
+  <h2 id="vesting">4. Vesting &amp; unlock schedule</h2>
+  <p>Vesting exists to stop anyone — team, treasury, or even airdrop farmers — from dumping into thin early liquidity. Every allocation unlocks gradually, with cliffs and locks aligned to long-term commitment:</p>
+  <table>
+    <tr><th>Allocation</th><th>Share</th><th>Unlock schedule</th></tr>
+    <tr><td>🪂 Airdrops (per cycle)</td><td><b>40%</b></td><td>Each cycle's portion: <strong>30% at claim</strong>, remaining <strong>70% linear over 4 months</strong> — rewards the community immediately while spreading sell pressure.</td></tr>
+    <tr><td>🎮 Post-launch P2E</td><td><b>15%</b></td><td>Released on a <strong>declining 4-year emission curve</strong> (see §5). Never a flat, perpetual faucet.</td></tr>
+    <tr><td>🤝 Referrals &amp; crews</td><td><b>10%</b></td><td>Streamed with the seasons, <strong>linear over ~3 years</strong>, earned only by real referrals and crew activity.</td></tr>
+    <tr><td>💧 Liquidity &amp; exchange</td><td><b>15%</b></td><td><strong>100% at launch</strong> to seed deep liquidity; provided <strong>LP locked 12+ months.</strong></td></tr>
+    <tr><td>🛠️ Team &amp; ops</td><td><b>10%</b></td><td><strong>12-month cliff</strong> (zero unlocked in year one), then <strong>linear over 24 months.</strong></td></tr>
+    <tr><td>🏛️ Treasury &amp; ecosystem</td><td><b>10%</b></td><td><strong>6-month cliff</strong>, then <strong>linear over 48 months</strong> for grants, listings and partnerships — multisig-controlled.</td></tr>
+  </table>
+  <p class="note">Cliffs and linear vesting follow standard anti-dump practice: a 12-month team cliff acts as a loyalty lock, and gradual release keeps circulating supply predictable.</p>
+
+  <h2 id="emissions">5. Emission curve</h2>
+  <p>The post-launch play-to-earn pool (15%, 150M $MOON) is the only ongoing source of new circulating tokens — and it <strong>declines every year</strong> so rewards can never outrun demand. Roughly:</p>
+  <div class="emit">
+    <div class="col"><i style="height:100%"></i><b>40%</b><span>Year 1</span></div>
+    <div class="col"><i style="height:75%"></i><b>30%</b><span>Year 2</span></div>
+    <div class="col"><i style="height:50%"></i><b>20%</b><span>Year 3</span></div>
+    <div class="col"><i style="height:25%"></i><b>10%</b><span>Year 4</span></div>
+  </div>
+  <p>Front-loaded to bootstrap the post-launch economy, then tapering toward a low, predictable baseline. After Year 4 the pool is effectively exhausted, leaving the game to run on a circulating, recycled economy rather than fresh emissions.</p>
+
+  <h2 id="engine">6. The sustainability engine — sinks vs sources</h2>
+  <p>A healthy token economy keeps <strong>demand (sinks) at or above new supply (sources)</strong>. The game is designed so nearly every system that pays out tokens is matched by a system that consumes them:</p>
+  <div class="twoeng">
+    <div class="eng src"><h3>⬆️ Sources (supply in)</h3><ul>
+      <li>Airdrop claims (one-time, vested, capped)</li>
+      <li>Post-launch P2E rewards (declining)</li>
+      <li>Referral &amp; crew milestone rewards</li>
+    </ul><p class="muted" style="margin:8px 0 0">All bounded, all server-validated, none perpetual.</p></div>
+    <div class="eng sink"><h3>⬇️ Sinks (demand out)</h3><ul>
+      <li>Cosmetics &amp; skins marketplace</li>
+      <li>VIP tiers, boosts &amp; energy</li>
+      <li>Tournament entry fees &amp; prize pools</li>
+      <li>Permanent upgrades</li>
+      <li>Staking locks (removes circulating supply)</li>
+      <li>Crew treasury deposits &amp; wagered wars</li>
+      <li>A portion of every spend is <strong>burned</strong></li>
+    </ul></div>
+  </div>
+  <p>Sinks are embedded where players already want to spend — customization, status, competition and progression — so demand grows naturally with engagement instead of relying on new buyers.</p>
+
+  <h2 id="value">7. Value accrual &amp; deflation</h2>
+  <div class="grid3">
+    <div class="card"><h3>🔥 Buyback &amp; burn</h3><p class="muted">A share of marketplace fees and Telegram Stars revenue is used to buy back $MOON and permanently burn it — turning real product revenue into deflationary pressure.</p></div>
+    <div class="card"><h3>🔒 Staking</h3><p class="muted">Lock $MOON for in-game boosts, energy and seasonal multipliers. Staked tokens leave circulation, rewarding holders who play the long game.</p></div>
+    <div class="card"><h3>🏆 Utility demand</h3><p class="muted">Tournaments, marketplace, VIP, fee discounts and cross-app access all require $MOON, tying token demand directly to active play.</p></div>
+  </div>
+  <p>Because supply is capped and burns are permanent, sustained sinks make the circulating supply <strong>deflationary over time</strong> — the opposite of the infinite-mint models that collapsed.</p>
+
+  <h2 id="liquidity">8. Liquidity &amp; launch</h2>
+  <ul>
+    <li><strong>Deep initial liquidity</strong> seeded from the 15% allocation at launch, with <strong>LP locked 12+ months</strong> to protect the market.</li>
+    <li><strong>Claim portal</strong> opens after Cycle 6 against a snapshot of server-validated points — no off-chain trust required at distribution.</li>
+    <li><strong>Phased listings</strong>, starting with a DEX and expanding as the ecosystem matures.</li>
+    <li><strong>Transparent unlock calendar</strong> published so the community can see exactly what enters circulation and when.</li>
+  </ul>
+
+  <h2 id="governance">9. Treasury &amp; governance</h2>
+  <p>The 10% treasury is <strong>multisig-controlled</strong> and reserved for liquidity support, listings, audits, partnerships and grants — with a long 48-month vest so it can never be drained quickly. Over time, <strong>governance-lite</strong> lets token holders vote on seasons, events, prize pools and feature priorities, gradually shifting direction to the community that built the game.</p>
+
+  <h2 id="sustain">10. Why this is built to last</h2>
+  <div class="grid">
+    <div class="card"><h3>✅ Capped &amp; deflationary</h3><p class="muted">Hard 1B cap, no inflation, permanent burns from real revenue.</p></div>
+    <div class="card"><h3>✅ Declining emissions</h3><p class="muted">P2E tapers over 4 years — designed for cycles, not perpetual growth.</p></div>
+    <div class="card"><h3>✅ Sinks ≥ sources</h3><p class="muted">Demand is engineered into cosmetics, status, competition and staking.</p></div>
+    <div class="card"><h3>✅ Anti-dump vesting</h3><p class="muted">Team cliff, locked liquidity, vested airdrop claims, multisig treasury.</p></div>
+    <div class="card"><h3>✅ Community-first</h3><p class="muted">~65% to players; 0% to private investors.</p></div>
+    <div class="card"><h3>✅ Server-authoritative</h3><p class="muted">Every reward and snapshot is validated server-side — see the litepaper's Fair Play section.</p></div>
+  </div>
+
+  <div class="cta">
+    <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Start earning $MOON</a>
+    <a class="btn ghost" href="/airdrop">🪂 The 6 airdrop cycles</a>
+    <a class="btn ghost" href="/litepaper">Full litepaper</a>
+  </div>
+
+  <div class="card muted"><strong>Disclaimers:</strong> $MOON and Airdrop Points have no guaranteed value and may never have any. No token is offered or promised; any future token, allocation, schedule, percentage or mechanism is subject to legal/compliance review and may change materially or never happen. Vesting, emission and burn mechanics are design intentions, not commitments. This is a beta-stage product. Nothing here is financial, investment, legal or tax advice or a solicitation to buy any asset.</div>
+
+  <footer>
+    © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br>
+    <a href="/">← Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+  </footer>
+</main>
+</body>
+</html>

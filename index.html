@@ -32,11 +32,6 @@
   html{scroll-behavior:smooth;}
   body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--bg);
     overflow-x:hidden; line-height:1.5;}
-  /* persistent neon frame around the page content at any screen size */
-  .page-frame{position:fixed; top:10px; bottom:10px; left:max(10px,calc(50% - 600px)); right:max(10px,calc(50% - 600px));
-    border:1.5px solid rgba(124,77,255,.45); border-radius:18px; pointer-events:none; z-index:120;
-    box-shadow:inset 0 0 40px rgba(124,77,255,.10), 0 0 26px rgba(35,240,255,.06);}
-  @media(max-width:600px){ .page-frame{top:6px; bottom:6px; left:6px; right:6px; border-radius:13px;} }
   a{color:inherit; text-decoration:none;}
   /* ambient background */
   .bg{position:fixed; inset:0; z-index:-2; overflow:hidden; background:radial-gradient(130% 90% at 50% -10%,#34125e 0%,var(--bg2) 45%,var(--bg) 85%);}
@@ -213,13 +208,11 @@
 <body>
 <div class="bg"><span></span><span></span><span></span></div>
 <div class="grid"></div>
-<div class="page-frame" aria-hidden="true"></div>
-
 <nav>
   <div class="wrap row">
     <div class="logo"><img src="/assets/brand/shark-pfp.webp" alt="" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:9px;border:1.5px solid rgba(35,240,255,.5)" onerror="this.style.display='none'">RUG <small>OR</small> RICHES</div>
     <div class="navlinks">
-      <a href="#features">Features</a><a href="#rewards">Rewards</a><a href="#how">How it works</a><a href="#ranks">Ranks</a><a href="#airdrop">Airdrop</a><a href="#faq">FAQ</a>
+      <a href="#features">Features</a><a href="#how">How it works</a><a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/litepaper">Litepaper</a><a href="#faq">FAQ</a>
     </div>
     <div class="navcta"><a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a></div>
   </div>
@@ -331,16 +324,22 @@
 <section id="airdrop" class="wrap">
   <div class="airdrop reveal">
     <div>
-      <div class="eyebrow" style="text-align:left">Season 1 · live now</div>
+      <div class="eyebrow" style="text-align:left">6 cycles · live now</div>
       <h2>The $MOON airdrop</h2>
-      <p style="color:var(--muted); margin-bottom:18px">Every coin you bank and every quest you clear earns Airdrop Points — your proportional share of the $MOON token pool at season end. Start now to stack the biggest allocation.</p>
-      <a class="btn gold" href="https://t.me/RugorRichesBot/play">🪂 Start earning</a>
+      <p style="color:var(--muted); margin-bottom:14px">Every coin you bank and every quest you clear earns Airdrop Points. The airdrop runs across <strong style="color:#fff">six pre-launch cycles</strong> — and the share of supply <strong style="color:#fff">rises every cycle</strong> as more players join. Start early to stack the biggest slice <em>per person</em>.</p>
+      <p style="color:var(--muted); margin-bottom:18px;font-size:14px">Cycle 1 <b style="color:var(--gold)">3%</b> → 2 <b style="color:var(--gold)">4%</b> → 3 <b style="color:var(--gold)">5%</b> → 4 <b style="color:var(--gold)">7%</b> → 5 <b style="color:var(--gold)">9%</b> → 6 <b style="color:var(--gold)">12%</b> &nbsp;·&nbsp; <strong style="color:#fff">40% of supply to players</strong></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn gold" href="https://t.me/RugorRichesBot/play">🪂 Start earning</a>
+        <a class="btn ghost" href="/airdrop">See all cycles &amp; how to qualify</a>
+      </div>
     </div>
     <div class="alloc">
-      <div class="bar"><span class="t">🎮 Players & airdrop</span><span class="track"><i style="width:60%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>60%</b></div>
-      <div class="bar"><span class="t">🤝 Referrals & crews</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>15%</b></div>
-      <div class="bar"><span class="t">💧 Liquidity</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
-      <div class="bar"><span class="t">🛠️ Team & ops</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.4)"></i></span><b>10%</b></div>
+      <div class="bar"><span class="t">🪂 Pre-launch airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
+      <div class="bar"><span class="t">🎮 Post-launch play-to-earn</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
+      <div class="bar"><span class="t">🤝 Referrals & crews</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
+      <div class="bar"><span class="t">💧 Liquidity & exchange</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
+      <div class="bar"><span class="t">🛠️ Team & ops (vested)</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.4)"></i></span><b>10%</b></div>
+      <div class="bar"><span class="t">🏛️ Treasury & ecosystem</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,#7c4dff,var(--cyan))"></i></span><b>10%</b></div>
     </div>
   </div>
 </section>
@@ -362,11 +361,14 @@
   <h2 class="reveal">Roadmap</h2>
   <p class="sub reveal">From viral tapper to full ecosystem.</p>
   <div class="road">
-    <div class="rd done reveal"><div class="ph">PHASE 1 · LIVE</div><h4>Launch &amp; go viral</h4><p>Telegram Mini App, live market &amp; rug mechanics, ranks, VIP, crews + crew wars + chat, referrals, daily rewards (spins, mystery boxes, lucky draw, streaks), live events, leaderboard payouts, Telegram Stars, and Season 1 Airdrop Points.</p></div>
-    <div class="rd done reveal"><div class="ph">PHASE 2 · NOW</div><h4>Trust &amp; economy hardening</h4><p>Server-authoritative economy (live), anti-cheat bounds, custom domain at rugorriches.app, provably-fair rounds, verified social quests, and a polished first-run onboarding.</p></div>
-    <div class="rd reveal"><div class="ph">PHASE 3 · NEXT</div><h4>Growth &amp; retention</h4><p>Competitive referral &amp; regional leaderboards with seasonal $MOON payouts, daily/weekly tournaments, public shareable profiles, push re-engagement, and localization for Telegram's biggest markets.</p></div>
-    <div class="rd reveal"><div class="ph">PHASE 4</div><h4>Token review &amp; ecosystem</h4><p>Points snapshot and a legal/compliance review of any potential $MOON token event (subject to outcome; not guaranteed), new seasons, crew treasuries, and collaborations with other mini-apps.</p></div>
+    <div class="rd done reveal"><div class="ph">PHASE 1 · LIVE</div><h4>Launch &amp; go viral</h4><p>Telegram Mini App, live market &amp; rug mechanics, 8 upgrades, 4 VIP tiers, crews + crew wars + chat, referrals, daily rewards (spins, mystery boxes, lucky draw, streaks), live events, leaderboard payouts, Telegram Stars, and Season 1 Airdrop Points.</p></div>
+    <div class="rd done reveal"><div class="ph">PHASE 2 · NOW</div><h4>Economy hardening</h4><p>Server-authoritative economy (live), anti-cheat bounds, custom domain at rugorriches.app, provably-fair commit-reveal rounds, verified social quests, and regional &amp; seasonal expansion.</p></div>
+    <div class="rd reveal"><div class="ph">PHASE 3 · NEXT</div><h4>Airdrop cycles 1–6</h4><p>Six sequential pre-launch seasons with rising allocations (3% → 12%) and a points snapshot per cycle. Competitive leaderboards, tournaments, and qualification + Elite tiers.</p></div>
+    <div class="rd reveal"><div class="ph">PHASE 4</div><h4>Token review</h4><p>Points snapshot consolidation and a legal/compliance review of any potential $MOON token event. Subject to outcome; not guaranteed.</p></div>
+    <div class="rd reveal"><div class="ph">PHASE 5</div><h4>Launch &amp; utility</h4><p>Claim portal, liquidity &amp; listing, and token utilities switched on in phases — tournaments, cosmetics marketplace, staking, token-based VIP, and governance-lite.</p></div>
+    <div class="rd reveal"><div class="ph">PHASE 6</div><h4>Ecosystem</h4><p>Ongoing play-to-earn seasons, crew treasuries &amp; wagered wars, cross-mini-app collaborations, and community governance.</p></div>
   </div>
+  <p class="sub reveal" style="margin-top:18px">Full detail in the <a href="/litepaper" style="color:var(--cyan)">litepaper</a> — tokenomics, utilities, and the post-launch plan.</p>
 </section>
 
 <section id="faq" class="wrap">
