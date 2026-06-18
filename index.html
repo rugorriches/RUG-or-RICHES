@@ -83,13 +83,15 @@
 
   /* hero — shark as full-section background, fading into the page before the first cards */
   .hero{position:relative;
-    background:linear-gradient(180deg, rgba(5,1,15,.40) 0%, rgba(5,1,15,.58) 55%, rgba(5,1,15,.92) 88%, var(--bg) 100%),
+    background:
+      linear-gradient(180deg, rgba(5,1,15,.40) 0%, rgba(5,1,15,.58) 55%, rgba(5,1,15,.92) 88%, var(--bg) 100%),
+      linear-gradient(90deg, var(--bg) 0%, rgba(5,1,15,0) 16%, rgba(5,1,15,0) 84%, var(--bg) 100%),
       url(/assets/brand/home-hero-shark.webp) no-repeat;
-    background-size:auto, cover; background-position:center, center 16%;}
+    background-size:auto, auto, cover; background-position:center, center, center 16%;}
   .hero-inner{position:relative; z-index:2; display:grid; grid-template-columns:1fr; align-items:center; min-height:min(88vh,760px); padding:60px 0 52px;}
   .hero-inner>div{max-width:600px;}
   @media(max-width:900px){
-    .hero{background-position:center, center top;}
+    .hero{background-position:center, center, center top;}
     .hero-inner{text-align:center; min-height:min(84vh,660px); padding:42px 0 36px;}
     .hero-inner>div{max-width:none; margin:0 auto;}
   }
