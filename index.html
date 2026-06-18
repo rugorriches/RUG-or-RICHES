@@ -75,8 +75,16 @@
   @media(max-width:820px){ .navlinks{display:none;} }
 
   /* hero */
-  .hero{padding:64px 0 24px; display:grid; grid-template-columns:1.1fr .9fr; gap:30px; align-items:center;}
-  @media(max-width:900px){ .hero{grid-template-columns:1fr; text-align:center; padding:48px 0 20px;} }
+  .hero{position:relative; padding:72px 0 30px; display:grid; grid-template-columns:1fr; gap:24px; align-items:center; min-height:min(78vh,620px);}
+  .hero>div{position:relative; z-index:2; max-width:640px;}
+  /* shark lives in the background, anchored right, fading into the page */
+  .hero::after{content:""; position:absolute; z-index:1; top:50%; right:-3%; transform:translateY(-50%);
+    width:min(46%,440px); aspect-ratio:.801; pointer-events:none;
+    background:url(/assets/brand/home-hero-shark.webp) no-repeat center/contain;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 100%); mask-image:linear-gradient(90deg,transparent,#000 22%,#000 100%);
+    filter:drop-shadow(0 24px 70px rgba(124,77,255,.45)); opacity:.96;}
+  @media(max-width:900px){ .hero{text-align:center; padding:44px 0 16px; min-height:0;} .hero>div{max-width:none; margin:0 auto;}
+    .hero::after{position:static; transform:none; width:min(72%,320px); margin:6px auto 0; -webkit-mask-image:none; mask-image:none; opacity:1;} }
   .badge{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.06); border:1px solid var(--line); border-radius:30px; padding:6px 14px; font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:18px;}
   .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.4s infinite;}
   @keyframes blink{50%{opacity:.4;}}
@@ -228,9 +236,6 @@
     </div>
     <div class="trust"><span>🪙 <b>Free</b> to play</span><span>⚡ No wallet needed</span><span>🪂 Earn <b>airdrop points</b></span></div>
   </div>
-  <img src="/assets/brand/home-hero-shark.webp" alt="RUG OR RICHES — $MOON shark" fetchpriority="high"
-    style="justify-self:center;width:min(100%,440px);height:auto;border-radius:20px;box-shadow:0 24px 70px -12px rgba(124,77,255,.5)"
-    onerror="this.style.display='none'">
 </header>
 
 <div class="wrap stats-sec">
@@ -264,7 +269,7 @@
     <div class="step reveal"><div class="num">1</div><h4>Tap to pump</h4><p>Each tap bets your stake and sends the $MOON chart higher.</p></div>
     <div class="step reveal"><div class="num">2</div><h4>Watch the heat</h4><p>The rug-risk meter climbs as you ride. Greed is good… until it isn't.</p></div>
     <div class="step reveal"><div class="num">3</div><h4>Cash out</h4><p>Sell before it rugs to bank your gains — clutch sells pay a bonus.</p></div>
-    <div class="step reveal"><div class="num">4</div><h4>Rank up</h4><p>Bank $MOON to climb 🦐→🦖, unlock VIP, and grow your airdrop.</p></div>
+    <div class="step reveal"><div class="num">4</div><h4>Rank up</h4><p>Bank $MOON to climb <img src="/assets/brand/ric-shrimp.webp" alt="Shrimp" style="height:1.25em;vertical-align:-.28em;display:inline" onerror="this.replaceWith('🦐')">→<img src="/assets/brand/ric-megalodon.webp" alt="Megalodon" style="height:1.25em;vertical-align:-.28em;display:inline" onerror="this.replaceWith('🦖')">, unlock VIP, and grow your airdrop.</p></div>
   </div>
 </section>
 
@@ -347,7 +352,7 @@
   <div class="reveal" style="max-width:760px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.8">
     <p style="margin-bottom:16px">Every degen knows the dream: ape in early, ride it to the moon, and bail before it rugs. Almost nobody actually does. <strong style="color:#fff">RUG OR RICHES</strong> turns that exact adrenaline — the greed, the timing, the gut-punch — into a game you can finally win.</p>
     <p style="margin-bottom:16px">Every tap pumps a live <span class="grad">$MOON</span> chart higher. The longer you ride, the fatter your bag… and the hotter the rug meter glows. Bank too early and you leave gains on the table. Hold one tap too long and the chart dumps — everything gone. It's not luck. It's nerve.</p>
-    <p style="margin-bottom:16px">Your guide is the <strong style="color:#fff">$MOON shark</strong> — pixel shades, gold chain, zero fear — the apex predator who's survived a thousand rugs and banked through every one. Grind from <strong style="color:#fff">Shrimp 🦐 to Megalodon 🦖</strong> and earn your spot at the top of the food chain.</p>
+    <p style="margin-bottom:16px">Your guide is the <strong style="color:#fff">$MOON shark</strong> — pixel shades, gold chain, zero fear — the apex predator who's survived a thousand rugs and banked through every one. Grind from <strong style="color:#fff">Shrimp <img src="/assets/brand/ric-shrimp.webp" alt="" style="height:1.15em;vertical-align:-.22em;display:inline" onerror="this.replaceWith('🦐')"> to Megalodon <img src="/assets/brand/ric-megalodon.webp" alt="" style="height:1.15em;vertical-align:-.22em;display:inline" onerror="this.replaceWith('🦖')"></strong> and earn your spot at the top of the food chain.</p>
     <p>Free, no wallet, all the thrill of degen trading with none of the real-world rekt. <strong style="color:#fff">Pump it. Bank it. Before it rugs.</strong></p>
   </div>
 </section>
@@ -379,10 +384,10 @@
 
 <section class="wrap">
   <div class="final reveal">
-    <img src="/assets/brand/home-hero-shark.webp" alt="$MOON shark" loading="lazy" style="width:min(100%,460px);height:auto;border-radius:18px;margin:0 auto 22px;display:block" onerror="this.style.display='none'">
+    <img src="/assets/brand/social-share.jpg" alt="RUG OR RICHES — $MOON" loading="lazy" style="width:min(100%,420px);height:auto;border-radius:18px;margin:0 auto 22px;display:block;box-shadow:0 24px 70px -16px rgba(124,77,255,.5)" onerror="this.style.display='none'">
     <div class="eyebrow">Last call</div>
     <h2>Think you can <span class="grad">time the top?</span></h2>
-    <p class="sub" style="margin-bottom:26px">Most people don't. Find out where you land — Shrimp 🦐 or Megalodon 🦖.</p>
+    <p class="sub" style="margin-bottom:26px">Most people don't. Find out where you land — Shrimp <img src="/assets/brand/ric-shrimp.webp" alt="" style="height:1.15em;vertical-align:-.22em;display:inline" onerror="this.replaceWith('🦐')"> or Megalodon <img src="/assets/brand/ric-megalodon.webp" alt="" style="height:1.15em;vertical-align:-.22em;display:inline" onerror="this.replaceWith('🦖')">.</p>
     <a class="btn primary" href="https://t.me/RugorRichesBot/play" style="font-size:17px;padding:16px 34px">▶ Play RUG OR RICHES</a>
   </div>
 </section>
