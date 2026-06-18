@@ -298,6 +298,14 @@
   .rankrow.done{opacity:1;}
   .rankrow.cur{opacity:1; border:1px solid transparent; background:linear-gradient(rgba(14,8,38,.92),rgba(14,8,38,.92)) padding-box, linear-gradient(120deg,var(--gold),var(--neon),var(--cyan)) border-box; box-shadow:0 0 22px -6px var(--gold);}
   .rankrow .e{font-size:22px;}
+  .rankrow{align-items:center;}
+  .rankrow .rk-ic{width:46px; height:46px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:30px;}
+  .rankrow .rk-ic img{width:46px; height:46px; object-fit:contain; filter:drop-shadow(0 0 6px rgba(0,0,0,.5));}
+  .rankrow .rk-nm{font-size:17px; font-weight:900; letter-spacing:.3px; line-height:1;}
+  .rankrow .rk-th{font-size:11px; font-weight:800; margin-top:3px;}
+  .rankrow .rk-ds{font-size:11px; color:var(--muted); margin-top:2px; line-height:1.25;}
+  .rankrow .rk-spark{flex:0 0 auto; display:flex; align-items:flex-end; gap:2px; height:34px; width:52px;}
+  .rankrow .rk-spark i{flex:1; border-radius:1px; display:block; opacity:.8;}
   /* crypto airdrop-pass hero (rank + crew) */
   .rank-hero{position:relative; overflow:hidden; border-radius:20px; padding:16px; margin-bottom:12px;
     background:linear-gradient(180deg,rgba(124,77,255,.12),rgba(0,0,0,.28)), repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 14px),
@@ -813,7 +821,7 @@
 
   <div class="panel" id="panel-invite">
     <h2>🤝 Invite & Earn</h2><p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join with your link — premium friends are worth <b style="color:var(--gold)">25,000</b>.</p>
-    <img src="/assets/brand/invite-card.webp" alt="Invite friends, earn $MOON" loading="lazy" style="width:min(62%,230px);height:auto;border-radius:14px;display:block;margin:4px auto 12px;border:1px solid var(--line)" onerror="this.style.display='none'">
+    <img src="/assets/brand/inv-hero.webp" alt="Bring friends. Climb faster." loading="lazy" style="width:min(90%,360px);height:auto;border-radius:16px;display:block;margin:4px auto 14px;border:1px solid var(--line)" onerror="this.style.display='none'">
 
     <div class="inv-hero2">
       <div class="inv-pass">⛓️ $MOON AIRDROP · REFERRAL PASS</div>
@@ -1284,6 +1292,9 @@
     {min:1000000000,nm:"Megalodon",e:"🦖",p:"Max rank — apex of the food chain. 👑",eb:160,db:2,ben:["⚡ +160 max energy","🎁 2× daily login bonus","👑 Apex badge — top of the food chain"]}];
   function rankPerk(){return RANKS[rankIdx()]||RANKS[0];}
   function rankIdx(){let i=0;for(let j=0;j<RANKS.length;j++)if(S.lifetime>=RANKS[j].min)i=j;return i;}
+  const RANK_COLORS=["#ff4d8d","#ff4d4d","#3b9cff","#a06bff","#c9d4e0","#23e3d0","#5dff7a"];   // per-rank accent (matches the icon art)
+  function rankIconURL(r){return "/assets/brand/ric-"+r.nm.toLowerCase()+".webp";}
+  function rankSpark(col){const hs=[26,40,32,52,44,64,80];let s="";for(let i=0;i<hs.length;i++)s+='<i style="height:'+hs[i]+'%;background:'+col+'"></i>';return s;}
 
   // ---------- REFERRAL MILESTONES ----------
   const REF_MILE=[{n:1,r:10000},{n:3,r:35000},{n:5,r:90000},{n:10,r:250000},{n:25,r:900000}];
@@ -1674,7 +1685,8 @@
     let wt="";if(winStreak>1)wt="🏆 win streak x"+winStreak+" (+"+(Math.min(winStreak,10)*5)+"% payout)";
     if(S.autoSell>0)wt+=(wt?"   ":"")+"🎯 auto-sell @ "+S.autoSell.toFixed(1)+"x";
     $("winTag").textContent=wt;
-    const ri=rankIdx();$("rankName").textContent=RANKS[ri].nm;$("rankPill").querySelector(".e").textContent=RANKS[ri].e;
+    const ri=rankIdx();$("rankName").textContent=RANKS[ri].nm;
+    $("rankPill").querySelector(".e").innerHTML='<img src="'+rankIconURL(RANKS[ri])+'" alt="" style="width:18px;height:18px;object-fit:contain;vertical-align:middle" onerror="this.parentNode.textContent=\''+RANKS[ri].e+'\'">';
     renderBetHUD(); if(panelOpen==="dash")renderDash(); else if(panelOpen==="profile")renderStats();}
 
   function renderStats(){const ri=rankIdx();
@@ -2155,13 +2167,16 @@
   // ---------- RANKS + LEADERBOARD ----------
   let boardMode="banked";
   function renderRanks(){const ri=rankIdx();const cur=RANKS[ri],next=RANKS[ri+1];
-    $("myRankEmo").textContent=cur.e;$("myRankName").textContent=cur.nm;
+    $("myRankEmo").innerHTML='<img src="'+rankIconURL(cur)+'" alt="" style="width:46px;height:46px;object-fit:contain" onerror="this.parentNode.textContent=\''+cur.e+'\'">';$("myRankName").textContent=cur.nm;
     if(next){const span=next.min-cur.min,prog=clamp((S.lifetime-cur.min)/span*100,0,100);
       $("myRankNext").textContent=fmt(next.min-S.lifetime)+" more to "+next.nm+" "+next.e;$("myRankBar").style.width=prog+"%";}
     else{$("myRankNext").textContent="Max rank reached 👑";$("myRankBar").style.width="100%";}
     const rl=$("rankList");rl.innerHTML="";
     RANKS.forEach((r,i)=>{const d=document.createElement("div");d.className="rankrow"+(i===ri?" cur":(i<ri?" done":""));d.style.cursor="pointer";
-      d.innerHTML='<div class="e">'+r.e+'</div><div class="grow"><div class="nm">'+r.nm+'</div><div class="ds">'+fmt(r.min)+'+ banked</div></div>'+(i<=ri?'<span class="pill">✓</span>':'<span class="pill" style="opacity:.6">ⓘ</span>');
+      const col=RANK_COLORS[i]||"#23f0ff";
+      d.innerHTML='<div class="rk-ic"><img src="'+rankIconURL(r)+'" alt="" onerror="this.parentNode.textContent=\''+r.e+'\'"></div>'+
+        '<div class="grow"><div class="rk-nm" style="color:'+col+'">'+r.nm.toUpperCase()+'</div><div class="rk-th" style="color:'+col+'">'+fmt(r.min)+'+ banked</div><div class="rk-ds">'+(r.p||"")+'</div></div>'+
+        '<div class="rk-spark">'+rankSpark(col)+'</div>';
       d.addEventListener("click",()=>openRank(i));rl.appendChild(d);});
     
     const BOTS=[["0xWhaleKing",8.4e6],["satoshi_jr",5.1e6],["rugproof.eth",3.9e6],["DiamondHandz",2.7e6],["paperhands99",1.4e6],["moonboy_420",920000],["anon_degen",610000],["ngmi_chad",340000],["frenly_fox",180000],["tap_tap_rev",96000]];
