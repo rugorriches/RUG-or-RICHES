@@ -119,7 +119,9 @@
   </ul>
 
   <h2>8. Fair play</h2>
-  <p>Identity is verified through Telegram's signed Mini App mechanism, so every account is tied to a real Telegram user. Game state syncs to our server, where anti-cheat bounds <strong>cap implausible increases</strong> in balances or points and <strong>flag</strong> suspicious accounts for review. Today the client computes gameplay and the server enforces these limits on top of it; a planned migration to <strong>full server authority</strong> (see roadmap) will make the server the sole source of truth, so scores and any future allocation are fully defensible. Flagged accounts may be reset or made ineligible for rewards or the airdrop at our discretion.</p>
+  <p>The economy is <strong>server-authoritative</strong>. Your client never reports its own balance — it only requests actions (cash out, buy an upgrade, claim a reward), and the server validates and applies every balance and point change. The sync endpoint saves cosmetic settings only, so a tampered client cannot inject fake totals.</p>
+  <p>Each request carries Telegram's <strong>cryptographically signed identity</strong>, verified server-side, so every action is tied to a real account. Cash-out payouts are <strong>capped</strong> to the most a player's tier could plausibly win in a round, rewards are <strong>idempotent</strong> (each credits at most once), and implausible jumps are <strong>flagged</strong> — flagged accounts can be reset or made ineligible for rewards and the airdrop. <strong>Leaderboards read directly from the server database</strong>, so they only ever contain server-validated scores, and any future token allocation would come from a snapshot of that same authoritative data.</p>
+  <p><strong>Provably-fair rounds</strong> are next on the roadmap: a commit-reveal scheme where the server publishes a hash of each round's secret seed before you play and reveals the seed after, so the rug outcome is locked in advance and independently verifiable — the house can't rug you for winning.</p>
 
   <h2>9. Roadmap</h2>
   <div class="grid">
