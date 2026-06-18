@@ -51,6 +51,8 @@
   @keyframes gridmove{to{background-position:0 46px;}}
   body::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:50; opacity:.15; background:repeating-linear-gradient(0deg,rgba(0,0,0,.3) 0 1px,transparent 1px 3px);}
 
+  img{max-width:100%; height:auto;}   /* every image scales down to its container — no overflow on mobile */
+  *{min-width:0;}                       /* let flex/grid children shrink instead of forcing overflow */
   .wrap{max-width:1120px; margin:0 auto; padding:0 22px;}
   .grad{background:linear-gradient(90deg,var(--neon),var(--cyan),var(--gold)); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:flow 6s linear infinite;}
   @keyframes flow{to{background-position:200% center;}}
