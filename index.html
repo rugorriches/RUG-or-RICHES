@@ -29,7 +29,11 @@
     --line:rgba(255,255,255,.1); --card:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; overflow-x:hidden; background:var(--bg); scrollbar-width:thin; scrollbar-color:rgba(124,77,255,.55) var(--bg);}   /* clip horizontal overflow + dark root bg + themed scrollbar so no light edge shows */
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:rgba(124,77,255,.45); border-radius:6px;}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(124,77,255,.7);}
   body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--bg);
     overflow-x:hidden; line-height:1.5;}
   a{color:inherit; text-decoration:none;}
@@ -88,11 +92,11 @@
       linear-gradient(90deg, var(--bg) 0%, rgba(5,1,15,0) 16%, rgba(5,1,15,0) 84%, var(--bg) 100%),
       url(/assets/brand/home-hero-shark.webp) no-repeat;
     background-size:auto, auto, cover; background-position:center, center, center 16%;}
-  .hero-inner{position:relative; z-index:2; display:grid; grid-template-columns:1fr; align-items:center; min-height:min(88vh,760px); padding:60px 0 52px;}
+  .hero-inner{position:relative; z-index:2; display:grid; grid-template-columns:1fr; align-items:center; min-height:min(88vh,760px); padding:60px 22px 52px;}
   .hero-inner>div{max-width:600px;}
   @media(max-width:900px){
     .hero{background-position:center, center, center top;}
-    .hero-inner{text-align:center; min-height:min(84vh,660px); padding:42px 0 36px;}
+    .hero-inner{text-align:center; min-height:min(84vh,660px); padding:42px 22px 36px;}
     .hero-inner>div{max-width:none; margin:0 auto;}
   }
   .badge{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.06); border:1px solid var(--line); border-radius:30px; padding:6px 14px; font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:18px;}
@@ -132,7 +136,7 @@
   .sub{text-align:center; color:var(--muted); max-width:560px; margin:0 auto 48px;}
 
   /* stats strip */
-  .stats-sec{padding:40px 0 8px;}
+  .stats-sec{padding:40px 22px 8px;}   /* keep .wrap's side margin — don't zero it out */
   .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
   @media(max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
   .stat{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; text-align:center; backdrop-filter:blur(6px);}
