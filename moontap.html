@@ -1693,7 +1693,7 @@
     $("m-life").textContent=fmt(S.lifetime);$("m-balance").textContent=fmt(S.balance);$("m-airdrop").textContent=fmt(S.airdrop);
     $("m-ath").textContent=S.bestPrice.toFixed(2)+"x";$("m-best").textContent=fmt(S.bestPot);$("m-rugs").textContent=S.rugs;
     $("m-cash").textContent=S.cashouts;$("m-taps").textContent=fmt(S.taps);$("m-streak").textContent=S.streak;$("m-refs").textContent=S.friends.length;
-    $("nameTxt").textContent=S.name;$("pRankEmo").textContent=RANKS[ri].e;$("pRankName").textContent=RANKS[ri].nm;$("pVip").textContent=VIP[S.vip].nm;
+    $("nameTxt").textContent=S.name;$("pRankEmo").innerHTML='<img src="'+rankIconURL(RANKS[ri])+'" alt="" style="width:36px;height:36px;object-fit:contain" onerror="this.parentNode.textContent=\''+RANKS[ri].e+'\'">';$("pRankName").textContent=RANKS[ri].nm;$("pVip").textContent=VIP[S.vip].nm;
     const nx=RANKS[ri+1];if(nx){const span=nx.min-RANKS[ri].min;$("pRankBar").style.width=clamp((S.lifetime-RANKS[ri].min)/span*100,0,100)+"%";$("pRankNext").textContent=fmt(nx.min-S.lifetime)+" $MOON to "+nx.nm+" "+nx.e;}else{$("pRankBar").style.width="100%";$("pRankNext").textContent="Max rank reached 👑";}}
 
   // ---------- BETTING / DASHBOARD ----------
@@ -2282,7 +2282,7 @@
   function weekId(){return Math.floor(Date.now()/(7*864e5));}
   function crewHash(n){let h=0;for(let i=0;i<String(n).length;i++)h=(h*31+String(n).charCodeAt(i))>>>0;return h;}
   function openRank(i){const r=RANKS[i],ri=rankIdx();
-    $("rankMEmo").textContent=r.e;$("rankMName").textContent=r.nm;
+    $("rankMEmo").innerHTML='<img src="'+rankIconURL(r)+'" alt="" style="width:44px;height:44px;object-fit:contain" onerror="this.parentNode.textContent=\''+r.e+'\'">';$("rankMName").textContent=r.nm;
     $("rankMReq").textContent=fmt(r.min)+"+ lifetime $MOON banked";
     const ben=(r.ben&&r.ben.length)?r.ben:[r.p||""];
     $("rankMPerk").innerHTML='<div style="font-weight:800;color:#e7deff;margin-bottom:6px">This tier gets you:</div>'+
@@ -2418,12 +2418,16 @@
   // ---------- FLEX CARD ----------
   $("cardBtn").addEventListener("click",makeCard);
   function makeCard(){const c=$("card"),g=c.getContext("2d");const W=1080,H=1350;const ri=rankIdx();
+    const icon=new Image();icon.onload=()=>render(icon);icon.onerror=()=>render(null);icon.src=rankIconURL(RANKS[ri]);
+    function render(ic){
     const grad=g.createLinearGradient(0,0,W,H);grad.addColorStop(0,"#34125e");grad.addColorStop(.55,"#140826");grad.addColorStop(1,"#05010f");
     g.fillStyle=grad;g.fillRect(0,0,W,H);
     // glow blobs
     g.globalAlpha=.5;g.fillStyle="#ff2bd6";g.beginPath();g.arc(120,120,180,0,7);g.fill();g.fillStyle="#23f0ff";g.beginPath();g.arc(960,260,160,0,7);g.fill();g.globalAlpha=1;
     g.textAlign="center";
-    g.font="900 64px Segoe UI,sans-serif";g.fillStyle="#fff";g.fillText(RANKS[ri].e+"  "+RANKS[ri].nm.toUpperCase(),W/2,150);
+    const rnm=RANKS[ri].nm.toUpperCase();g.font="900 64px Segoe UI,sans-serif";g.fillStyle="#fff";
+    if(ic){const isz=74,gap=18,tw=g.measureText(rnm).width,total=isz+gap+tw,sx=W/2-total/2;g.drawImage(ic,sx,150-isz+8,isz,isz);g.textAlign="left";g.fillText(rnm,sx+isz+gap,150);g.textAlign="center";}
+    else g.fillText(RANKS[ri].e+"  "+rnm,W/2,150);
     g.fillStyle="#ffd400";g.font="900 76px Segoe UI";g.fillText("RUG OR RICHES",W/2,250);
     g.fillStyle="#23f0ff";g.font="700 34px Segoe UI";g.fillText("$MOON · Airdrop Season 1",W/2,300);
     // chart sparkline
@@ -2451,7 +2455,7 @@
       }catch(e){}
       const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download="moon-flex.png";a.click();
       setTimeout(()=>URL.revokeObjectURL(url),2000);toast("🖼️","Flex card saved!","Post it & drop your link 👀");
-    });}
+    });}}
   function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
 
   // ---------- SOUND / RENAME / RESET ----------
@@ -2565,7 +2569,7 @@
     return fail===0;}
   // ---------- WIN / LOSS REACTION ----------
   function showReaction(win,amount,sub){const m=$("reactModal");if(!m)return;
-    const img=$("reactImg");img.src=win?"/assets/brand/banked-win.webp":"/assets/brand/rugged-lost.webp";img.style.display="";
+    const img=$("reactImg");img.src=win?"/assets/brand/win-card.webp":"/assets/brand/loss-card.webp";img.style.display="";
     $("reactAmt").textContent=amount||"";$("reactAmt").style.color=win?"var(--green)":"var(--red)";
     $("reactSub").textContent=sub||"";$("reactBtn").textContent=win?"Continue":"Try again";
     m.classList.add("show");}
