@@ -69,11 +69,17 @@
   .burger{display:none; background:none; border:1px solid var(--line); border-radius:10px; color:#fff; font-size:20px; line-height:1; padding:6px 11px; cursor:pointer;}
   @media(max-width:820px){
     .burger{display:block;}
-    .navlinks{position:absolute; top:62px; left:-22px; right:-22px; flex-direction:column; gap:0; background:rgba(7,1,17,.98); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); padding:6px 22px 14px; display:none;}
+    .navlinks{position:absolute; top:calc(100% + 10px); right:0; left:auto; width:210px;
+      flex-direction:column; gap:2px; align-items:stretch; text-align:right;
+      background:linear-gradient(180deg,rgba(20,8,38,.98),rgba(9,3,20,.98)); backdrop-filter:blur(18px);
+      border:1px solid rgba(124,77,255,.35); border-radius:16px; padding:8px; display:none;
+      box-shadow:0 26px 60px -16px rgba(0,0,0,.75), inset 0 0 24px rgba(124,77,255,.08);
+      transform-origin:top right; animation:menuPop .16s ease-out;}
     .navlinks.open{display:flex;}
-    .navlinks a{padding:13px 2px; border-bottom:1px solid var(--line); font-size:16px; color:var(--ink);}
-    .navlinks a:last-child{border-bottom:none;}
+    .navlinks a{padding:11px 14px; border-radius:10px; font-size:15px; font-weight:700; color:var(--ink); text-align:right; transition:background .15s,color .15s;}
+    .navlinks a:hover,.navlinks a:active{background:rgba(124,77,255,.18); color:#fff;}
   }
+  @keyframes menuPop{from{opacity:0; transform:scale(.96) translateY(-4px);} to{opacity:1; transform:none;}}
 
   /* hero — shark as full-section background, fading into the page before the first cards */
   .hero{position:relative;
