@@ -4,7 +4,8 @@
   "description": "Authoritative real-time backend for RUG OR RICHES ($MOON) — Supabase + Telegram Stars",
   "scripts": {
     "start-local": "node server.js",
-    "dev-local": "node --watch server.js"
+    "dev-local": "node --watch server.js",
+    "verify-authority": "node scripts/verify-authority.js"
   },
   "dependencies": {
     "ws": "^8.18.0",
@@ -14,4 +15,3 @@
     "node": ">=18.0.0"
   }
 }
-

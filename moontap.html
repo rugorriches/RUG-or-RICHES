@@ -606,7 +606,11 @@
   /* ---------- BRAND / MASCOT ---------- */
   #splash{position:fixed; inset:0; z-index:300; background:radial-gradient(130% 90% at 50% -10%,#1a0c33,#05010f 82%); display:flex; align-items:center; justify-content:center; transition:opacity .55s ease;}
   #splash.hide{opacity:0; pointer-events:none;}
-  #splash img{width:min(76%,340px); height:auto; filter:drop-shadow(0 14px 44px rgba(124,77,255,.55)); animation:splashIn .6s ease;}
+  .splash-inner{display:flex; flex-direction:column; align-items:center; gap:14px; width:min(78%,330px);}
+  #splash img{width:100%; height:auto; filter:drop-shadow(0 14px 44px rgba(124,77,255,.55)); animation:splashIn .6s ease;}
+  .splash-bar{width:88%; height:9px; border-radius:6px; background:#1c0e36; overflow:hidden; border:1px solid rgba(35,240,255,.3); box-shadow:0 0 12px rgba(124,77,255,.25);}
+  .splash-bar i{display:block; height:100%; width:0; border-radius:6px; background:linear-gradient(90deg,var(--neon),var(--cyan)); box-shadow:0 0 10px rgba(35,240,255,.6); transition:width .25s ease;}
+  .splash-load{font-size:11px; font-weight:800; letter-spacing:4px; color:#8fdcff;}
   @keyframes splashIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
   .brand-av{width:30px; height:30px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(35,240,255,.55); box-shadow:0 0 10px rgba(35,240,255,.35); flex:0 0 auto; margin-right:7px;}
   @media(max-width:380px){ .brand-av{width:26px;height:26px;margin-right:5px;} }
@@ -624,8 +628,10 @@
 </style>
 </head>
 <body>
-<div id="splash"><img src="/assets/brand/loading-splash.webp" alt="RUG OR RICHES — Pump it. Bank it. Before it rugs." onerror="this.style.display='none'"></div>
-<script>/* failsafe: hide splash even if the main script fails to load */setTimeout(function(){var s=document.getElementById('splash');if(s)s.classList.add('hide');setTimeout(function(){if(s)s.style.display='none';},700);},3800);</script>
+<div id="splash"><div class="splash-inner"><img src="/assets/brand/loading-splash.webp" alt="RUG OR RICHES — Pump it. Bank it. Before it rugs." onerror="this.style.display='none'"><div class="splash-bar"><i id="splashFill"></i></div><div class="splash-load">LOADING…</div></div></div>
+<script>/* drive the loading bar + failsafe hide even if the main script fails */(function(){var f=document.getElementById('splashFill');
+  if(f){requestAnimationFrame(function(){f.style.width='22%';});setTimeout(function(){if(f)f.style.width='55%';},350);setTimeout(function(){if(f)f.style.width='82%';},800);}
+  setTimeout(function(){var s=document.getElementById('splash');if(s)s.classList.add('hide');setTimeout(function(){if(s)s.style.display='none';},700);},3800);})();</script>
 <div id="bg"><span></span><span></span><span></span><div class="grid"></div></div>
 <div id="app">
   <div id="rugOverlay"></div>
@@ -990,6 +996,68 @@
   let crewLoaded = false;
   let syncInProgress = false;
   let syncTimeout = null;
+  let startupClaimsChecked = false;
+  const cloudSettings=state=>({
+    name:state&&state.name,
+    sound:state&&state.sound,
+    bet:state&&state.bet,
+    betCur:"moon",
+    autoSell:state&&state.autoSell,
+    stopLoss:state&&state.stopLoss,
+    skin:state&&state.skin
+  });
+  const cloudAuth=()=>{const tg=window.Telegram&&window.Telegram.WebApp;return tg&&tg.initData?tg:null;};
+  const actionToken=()=>{try{return crypto.randomUUID().replace(/-/g,"");}catch(e){return Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);}};
+
+  async function cloudAction(path,payload){
+    const tg=cloudAuth();if(!tg)return null;
+    const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(Object.assign({initData:tg.initData},payload||{}))});
+    let data={};try{data=await r.json();}catch(e){}
+    if(!r.ok)throw new Error(data.error||("Request failed ("+r.status+")"));
+    return data;
+  }
+
+  function applyAuthoritativePlayer(db,force){
+    if(!db)return;
+    const setNum=(key,field)=>{if(db[field]!==undefined&&db[field]!==null)S[key]=Number(db[field])||0;};
+    if(force||invested===0){
+      setNum("balance","balance");setNum("airdrop","airdrop_pts");setNum("lifetime","lifetime_banked");
+    }
+    setNum("vip","vip_tier");setNum("starsSpent","stars_spent");setNum("piggy","piggy");
+    setNum("bestPot","best_pot");setNum("bestPrice","best_price");setNum("cashouts","cashouts");
+    setNum("rugs","rugs");setNum("pnlWon","pnl_won");setNum("pnlLost","pnl_lost");
+    if(db.taps!==undefined&&db.taps!==null)S.taps=force?Number(db.taps)||0:Math.max(S.taps||0,Number(db.taps)||0);
+    if(db.combo_day)S.comboDay=new Date(db.combo_day).toDateString();
+    if(db.vip_day)S.vipDay=new Date(db.vip_day).toDateString();
+    if(db.last_day)S.lastDay=new Date(db.last_day).toDateString();
+    if(db.streak!==undefined)S.streak=Number(db.streak)||0;
+    if(db.war_week!==undefined)S.warWeek=db.war_week;
+    if(db.war_score!==undefined)S.warScore=Number(db.war_score)||0;
+    if(db.war_claim!==undefined)S.warClaim=!!db.war_claim;
+    clampEconomyState();
+  }
+  function reconcileAction(data){
+    if(!data)return;
+    if(data.player)applyAuthoritativePlayer(data.player,true);
+    if(data.upgrades)for(const k in data.upgrades)if(k!=="player_id")S.up[k]=Number(data.upgrades[k])||0;
+    try{localStorage.setItem("moontap",JSON.stringify(S));}catch(e){}
+    renderLive();renderStats();renderDash();
+    if(panelOpen==="shop")renderShop();
+    if(panelOpen==="airdrop")renderAirdrop();
+    if(panelOpen==="vip")renderVip();
+    if(panelOpen==="invite")renderInvite();
+  }
+  async function claimCloud(kind,id){
+    const data=await cloudAction("/api/claim",{kind:kind,id:id});
+    if(data&&data.player)reconcileAction(data);
+    else if(data&&data.already)await syncWithCloud();
+    return data;
+  }
+  function runStartupClaims(){
+    if(startupClaimsChecked||!cloudAuth())return;startupClaimsChecked=true;
+    claimCloud("daily_login","daily").then(data=>{if(data&&data.ok&&data.reward>0)toast("🔥","Daily streak secured","+"+fmt(data.reward)+" $MOON");}).catch(()=>{});
+    setTimeout(()=>claimCloud("offline_auto","auto").then(data=>{if(data&&data.ok&&data.reward>0)toast("🤖","Auto-Trader worked!","+"+fmt(data.reward)+" $MOON while away");}).catch(()=>{}),350);
+  }
 
   async function syncWithCloud(stateToSave = null) {
     const tg = window.Telegram && window.Telegram.WebApp;
@@ -998,7 +1066,7 @@
     syncInProgress = true;
     try {
       const body = { initData: tg.initData };
-      if (stateToSave) body.state = stateToSave;
+      if (stateToSave) body.state = cloudSettings(stateToSave);
       const r = await fetch("/api/sync", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -1011,6 +1079,7 @@
           mergeState(data.player);
           renderLive();
           renderStats();
+          runStartupClaims();
         }
       }
     } catch (e) {
@@ -1033,30 +1102,11 @@
       return Number.isFinite(d.getTime()) ? d.toDateString() : String(v);
     };
     if (db.name && !S.nameSet) S.name = db.name;   // never clobber a name the player chose themselves
-    S.vip = Math.max(S.vip, db.vip_tier || 0);
-    S.streak = Math.max(S.streak, db.streak || 0);
-    S.starsSpent = Math.max(S.starsSpent, db.stars_spent || 0);
+    applyAuthoritativePlayer(db,invested===0);
+    if(db.streak!==undefined)S.streak=Number(db.streak)||0;
     
-    S.balance = Math.max(S.balance, db.balance || 0);
-    S.airdrop = Math.max(S.airdrop, db.airdrop_pts || 0);
-    S.lifetime = Math.max(S.lifetime, db.lifetime_banked || 0);
-    
-    S.bestPot = Math.max(S.bestPot, db.best_pot || 0);
-    S.bestPrice = Math.max(S.bestPrice, db.best_price || 1);
-    S.rugs = Math.max(S.rugs, db.rugs || 0);
-    S.cashouts = Math.max(S.cashouts, db.cashouts || 0);
-    S.taps = Math.max(S.taps, db.taps || 0);
-    if (db.pnl_won !== undefined) S.pnlWon = Math.max(S.pnlWon || 0, Number(db.pnl_won) || 0);
-    if (db.pnl_lost !== undefined) S.pnlLost = Math.max(S.pnlLost || 0, Number(db.pnl_lost) || 0);
-    
-    if (db.up) {
-      for (const k in db.up) {
-        S.up[k] = Math.max(S.up[k] || 0, db.up[k] || 0);
-      }
-    }
-    if (Array.isArray(db.ach)) {
-      db.ach.forEach(a => { if (S.ach.indexOf(a) < 0) S.ach.push(a); });
-    }
+    if(db.up)for(const k in db.up)if(k!=="player_id")S.up[k]=Number(db.up[k])||0;
+    if(Array.isArray(db.ach))S.ach=db.ach.slice();
     const refMiles = Array.isArray(db.ref_milestones) ? db.ref_milestones : (Array.isArray(db.refMiles) ? db.refMiles : []);
     if (Array.isArray(refMiles)) S.refMiles = [...new Set(refMiles.map(Number).filter(Number.isFinite))];
     if (db.id !== undefined) currentUserId = String(db.id);
@@ -1064,7 +1114,7 @@
     if (db.crew_id_text !== undefined) S.crewId = db.crew_id_text;
     if (db.crew_leader_id !== undefined) S.crewLeaderId = db.crew_leader_id;
     if (db.sound !== undefined) S.sound = db.sound;
-    if (db.bet !== undefined) S.bet = Math.max(S.bet, db.bet);
+    if (db.bet !== undefined) S.bet = Number(db.bet)||100;
     if (db.bet_cur !== undefined) S.betCur = db.bet_cur === "moon" ? "moon" : "moon";
     if (db.auto_sell !== undefined) S.autoSell = db.auto_sell;
     if (db.stop_loss !== undefined) S.stopLoss = db.stop_loss;
@@ -1072,27 +1122,23 @@
     if (db.starter_bought !== undefined) S.starterBought = !!db.starter_bought;
     if (db.season_pass !== undefined) S.seasonPass = !!db.season_pass;
     if (db.season_claim_day) S.seasonClaimDay = dbDay(db.season_claim_day);
-    if (db.vip_sub_until !== undefined) S.vipSubUntil = Math.max(S.vipSubUntil || 0, Number(db.vip_sub_until) || 0);
+    if (db.vip_sub_until !== undefined) S.vipSubUntil = Number(db.vip_sub_until)||0;
     if (db.vip_day) S.vipDay = dbDay(db.vip_day);
     if (db.combo_day) S.comboDay = dbDay(db.combo_day);
     if (db.last_day) S.lastDay = dbDay(db.last_day);
     if (db.deal_day) S.dealDay = dbDay(db.deal_day);
-    if (db.piggy !== undefined) S.piggy = Math.max(S.piggy || 0, Number(db.piggy) || 0);
-    if (db.coin_level !== undefined) S.coinLevel = Math.max(S.coinLevel || 1, Number(db.coin_level) || 1);
-    if (db.coin_xp !== undefined) S.coinXp = Math.max(S.coinXp || 0, Number(db.coin_xp) || 0);
-    if (db.war_week) S.warWeek = db.war_week;
-    if (db.war_score !== undefined) S.warScore = Math.max(S.warScore || 0, Number(db.war_score) || 0);
-    if (db.war_claim !== undefined) S.warClaim = !!db.war_claim;
+    if (db.coin_level !== undefined) S.coinLevel = Number(db.coin_level)||1;
+    if (db.coin_xp !== undefined) S.coinXp = Number(db.coin_xp)||0;
     if (db.season_start) S.seasonStart = String(db.season_start).slice(0,10);
     if (Array.isArray(db.season_days)) S.seasonDays = db.season_days.map(x=>String(x).slice(0,10)).filter(Boolean).slice(-30);
-    if (Array.isArray(db.skins)) db.skins.forEach(s => { if (S.skins.indexOf(s) < 0) S.skins.push(s); });
+    if(Array.isArray(db.skins))S.skins=[...new Set(db.skins)];
     if (db.skin && S.skins.indexOf(db.skin) >= 0) S.skin = db.skin;
     
     if (db.social) {
-      S.social.x = Math.max(S.social.x || 0, db.social.x || 0);
-      S.social.tg_channel = Math.max(S.social.tg_channel || 0, db.social.tg_channel || 0);
-      S.social.tg_group = Math.max(S.social.tg_group || 0, db.social.tg_group || 0);
-      S.social.ig = Math.max(S.social.ig || 0, db.social.ig || 0);
+      S.social.x=Number(db.social.x)||0;
+      S.social.tg_channel=Number(db.social.tg_channel)||0;
+      S.social.tg_group=Number(db.social.tg_group)||0;
+      S.social.ig=Number(db.social.ig)||0;
     }
     
     if (db.questsObj) {
@@ -1107,6 +1153,21 @@
         }
       }
       if (db.questsObj.date) S.quests.date = dbDay(db.questsObj.date);
+    }
+    if(db.questState){
+      const qs=db.questState;
+      if(qs.day)S.quests.date=new Date(qs.day+"T00:00:00").toDateString();
+      if(qs.week!==undefined&&qs.week!==null)S.qw.k=Number(qs.week);
+      if(qs.month)S.qm.k=qs.month;
+      if(qs.daily){S.quests.prog={taps:Number(qs.daily.taps)||0,taps2:Number(qs.daily.taps)||0,price:Number(qs.daily.price)||1,cash:Number(qs.daily.cash)||0,invite:Number(qs.daily.invite)||0};}
+      if(qs.weekly){S.qw.prog={w_taps:Number(qs.weekly.taps)||0,w_price:Number(qs.weekly.price)||1,w_cash:Number(qs.weekly.cash)||0,w_invite:Number(qs.weekly.invite)||0};}
+      if(qs.monthly){S.qm.prog={m_taps:Number(qs.monthly.taps)||0,m_cash:Number(qs.monthly.cash)||0,m_invite:Number(qs.monthly.invite)||0};}
+      const tokens=Array.isArray(qs.claimed)?qs.claimed:[];
+      const ids=tokens.map(x=>String(x).split(":")[1]).filter(Boolean);
+      S.quests.claimed=ids.filter(id=>qById[id]&&qById[id].period==="daily");
+      S.qw.claimed=ids.filter(id=>qById[id]&&qById[id].period==="weekly");
+      S.qm.claimed=ids.filter(id=>qById[id]&&qById[id].period==="monthly");
+      S.qv.claimed=ids.filter(id=>qById[id]&&qById[id].period==="vip");
     }
     if (Array.isArray(db.friends)) { S.friends = db.friends; referralsLoaded = true; }
     // adopt the server's canonical referral code so invite links actually attribute
@@ -1230,9 +1291,9 @@
   // ---------- RUNTIME ----------
   let energy=maxEnergy();
   let pot=0, price=1.0, ath=1.0, combo=0, comboTimer=0;
-  let predActive=false, predDir=0, predLock=0, predT=0, predStake=0;   // long/short prediction round
+  let predActive=false, predDir=0, predLock=0, predT=0, predStake=0, predRoundId=null;   // long/short prediction round
   let dPot=0, dBal=S.balance, dAir=S.airdrop;
-  let invested=0, roundCur=null, roundClicks=0, winStreak=0;
+  let invested=0, roundCur=null, roundClicks=0, winStreak=0, roundId=null, roundInvestedTotal=0;
   let heat=0, pumpVel=0, dumpWarn=0, bustType="hard", bustTarget=0.12, roundPeak=1;   // refined rug-pressure model
   let mevent=null, eventTime=0, eventAcc=0;
   let liq=45000, holders=1500+Math.floor(Math.random()*3500), trend=0;   // market depth, holders, momentum
@@ -1276,6 +1337,7 @@
 
   // ---------- DAILY STREAK ----------
   (function(){const today=new Date().toDateString();
+    if(cloudAuth())return;
     if(S.lastDay!==today){const y=new Date(Date.now()-864e5).toDateString();
       S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=today;const b=Math.floor(Math.min(S.streak,20)*250*(rankPerk().db||1));bank(b);
       S.tickets=(S.tickets||0)+1;const gotBox=(S.streak%3===0);if(gotBox)S.boxes=(S.boxes||0)+1;save();   // ticket daily; mystery box only every 3rd streak day
@@ -1283,6 +1345,7 @@
 
   // ---------- OFFLINE ----------
   (function(){const last=parseInt(lsGet("moontap_last")||"0");
+    if(cloudAuth())return;
     if(last&&autoRate()>0){const secs=Math.min((Date.now()-last)/1000,6*3600);const earn=Math.floor(secs*autoRate());
       if(earn>0){bank(earn);save();setTimeout(()=>toast("🤖","Auto-Trader worked!","+"+fmt(earn)+" $MOON while away"),1700);}}})();
   setInterval(()=>{try{localStorage.setItem("moontap_last",Date.now());}catch(e){}},5000);
@@ -1400,6 +1463,7 @@
     const stake=Math.max(1,Math.min(S.bet,betMax()));
     if(curBal(cur)<stake){faucetOrWarn(cur);return;}
     if(roundClicks>=betsPerRound()){if(panelOpen==="game"&&Date.now()-lastLimitT>2000){lastLimitT=Date.now();toast("🛑","Round bet limit","Cash out to start a fresh round — VIP raises the cap");}return;}
+    if(invested===0&&!roundId){roundId=actionToken();roundInvestedTotal=0;}
     
     // snappier feedback: trigger audio & visuals immediately
     floater("+"+fmt(stake),x,y);burst(x,y);sfxTap();
@@ -1417,12 +1481,16 @@
       if (cur === "pts") S.airdrop = Math.max(0, S.airdrop - stake);
       else S.balance = Math.max(0, S.balance - stake);
       invested += stake;
+      roundInvestedTotal += stake;
+      roundClicks++;
+      S.taps++;
       roundCur = cur;
       pot += stake;
       renderLive();
     } else {
       ac();energy-=tapCost();S.taps++;combo++;comboTimer=1.2;roundClicks++;
       subCur(cur,stake);invested+=stake;roundCur=cur;
+      roundInvestedTotal+=stake;
       const oldP=price;
       const mult=(boost>0?2:1)*(1+Math.min(combo,comboCap())*comboGain());
       const slip=clamp(stake/liq,0,0.25);
@@ -1448,6 +1516,16 @@
   coin.addEventListener("pointerdown",e=>{e.preventDefault();const r=stage.getBoundingClientRect();doTap(e.clientX-r.left,e.clientY-r.top);},{passive:false});
   coin.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();const r=stage.getBoundingClientRect();doTap(r.width/2,r.height/2);}});
 
+  function settleRoundCloud(payload){
+    if(!cloudAuth())return;
+    cloudAction("/api/cashout",Object.assign({nonce:actionToken()},payload)).then(data=>{
+      reconcileAction(data);
+    }).catch(err=>{
+      toast("⚠️","Settlement rejected",err.message||"Cloud balance restored");
+      syncWithCloud().catch(()=>{});
+    });
+  }
+
   function triggerRug(){if(busting)return;const r=Math.random();
     if(r<CONFIG.fakeoutChance){price*=0.6;capPrice();pumpVel=0;heat=Math.max(0,heat-45);if(panelOpen==="game"){toast("😱","FLASH CRASH","Fakeout dip — hold or fold?");if(navigator.vibrate)navigator.vibrate(30);}return;}
     startBust(r<CONFIG.softChance?"soft":"hard");}
@@ -1456,6 +1534,7 @@
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
     const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
     const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+lost);
+    const settlement={cur:"moon",payout:rescued,invested:Math.max(1,Math.floor(invested)),roundInvested:Math.max(1,Math.floor(roundInvestedTotal||invested)),peak:roundPeak,clicks:roundClicks,outcome:"rug",roundId:roundId||actionToken()};
     if(panelOpen==="game"){
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
@@ -1463,10 +1542,10 @@
       sfxRug();if(navigator.vibrate)navigator.vibrate(bustType==="soft"?[40,30,60]:[60,40,140]);
       if(bustType!=="soft"&&cur==="moon")showReaction(false,"−"+fmt(lost)+" $MOON","The chart dumped on you. Bank earlier next time.");}
     holders=Math.floor(holders*(bustType==="soft"?0.93:0.85));
-    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;winStreak=0;heat=0;pumpVel=0;dumpWarn=0;$("combo").textContent="";save();renderStats();renderDash();}
+    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;winStreak=0;heat=0;pumpVel=0;dumpWarn=0;roundId=null;roundInvestedTotal=0;$("combo").textContent="";save();renderStats();renderDash();settleRoundCloud(settlement);}
 
   function cashOut(auto){if(pot<1||busting)return;
-    if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
+    if (!cloudAuth()&&isOnline && window._moonWS && window._moonWS.readyState === 1) {
       window._moonWS.send(JSON.stringify({ t: "cashout" }));
       return;
     }
@@ -1476,24 +1555,27 @@
     const rawPayout=Math.floor(pot*(1+r*cashBonus())*streakMul);
     const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*maxRoundRoi()))*eventMult());addCur(cur,payout);
     const profit=payout-invested;
+    const settlement={cur:"moon",payout:payout,invested:Math.max(1,Math.floor(invested)),roundInvested:Math.max(1,Math.floor(roundInvestedTotal||invested)),peak:roundPeak,clicks:roundClicks,outcome:"cashout",roundId:roundId||actionToken()};
     if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);winStreak++;if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));winStreak=0;}
     S.cashouts++;if(payout>S.bestPot)S.bestPot=payout;if(r>=0.7)unlock("diamond");bumpQuest("bigSell",payout,"max");
     if(profit>0)S.piggy=Math.min(PIGGYCAP,S.piggy+Math.floor(payout*0.04));   // piggy bank fills as you cash out
     if(panelOpen==="game"){toast(auto?"🎯":"💰",auto?"AUTO-SOLD":"SOLD","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · profit "+(profit>=0?"+":"")+fmt(profit)+(winStreak>1?" · 🏆x"+winStreak:""));sfxCash();if(navigator.vibrate)navigator.vibrate(40);if(profit>0&&r>=0.5)confetti();
       if(!auto&&profit>0&&cur==="moon"&&r>=0.5)showReaction(true,"+"+fmt(payout)+" $MOON","You banked it before the rug — gains locked.");}
     mktBuy=clamp(mktBuy-0.12,0.05,0.9);   // your sell adds sell pressure
-    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;bonusBets=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
-    save();achCheck();renderLive();renderStats();renderDash();}
+    pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;heat=0;pumpVel=0;dumpWarn=0;bonusBets=0;roundId=null;roundInvestedTotal=0;$("combo").textContent="";price=Math.max(1.0,1+(price-1)*0.25);ath=price;roundPeak=price;
+    save();achCheck();renderLive();renderStats();renderDash();settleRoundCloud(settlement);}
   $("cashout").addEventListener("click",()=>cashOut(false));
   function energyRefillCost(){return Math.floor(maxEnergy()*8);}   // $MOON sink: full refill price scales with tank size
   function buyEnergy(){const me=maxEnergy();if(energy>=me){toast("⚡","Already full","Your energy tank is maxed");return;}
     const cost=energyRefillCost();
     if(S.balance<cost){flashEnergy();toast("💸","Need "+fmt(cost)+" $MOON","Bank more — or grab a ⭐ refill in the Store");return;}
+    if(cloudAuth()){const b=$("enBuy");if(b)b.disabled=true;claimCloud("energy_refill","full").then(data=>{if(data&&data.ok){energy=Number(data.energy)||me;save();sfxCash();renderLive();renderStats();toast("⚡","Energy refilled!","−"+fmt(data.spent||cost)+" $MOON · tank full");}})
+      .catch(err=>{toast("⚠️","Refill rejected",err.message);renderLive();});return;}
     S.balance-=cost;energy=me;save();sfxCash();renderLive();renderStats();if(navigator.vibrate)navigator.vibrate(25);
     toast("⚡","Energy refilled!","−"+fmt(cost)+" $MOON · tank full");}
   $("enBuy")&&$("enBuy").addEventListener("click",buyEnergy);
   function sellHalf(){if(pot<2||busting)return;
-    if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
+    if (!cloudAuth()&&isOnline && window._moonWS && window._moonWS.readyState === 1) {
       window._moonWS.send(JSON.stringify({ t: "sell_half" }));
       return;
     }
@@ -1501,10 +1583,11 @@
     const cur=roundCur||S.betCur;const r=risk();const half=pot*0.5;
     const rawPayout=Math.floor(half*(1+r*cashBonus()));
     const payout=Math.floor(Math.min(rawPayout,Math.max(1,invested*0.5*maxRoundRoi()))*eventMult());addCur(cur,payout);
-    const profit=payout-invested*0.5;if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));}
+    const soldInvested=Math.max(1,Math.floor(invested*0.5));const profit=payout-soldInvested;if(profit>0){S.pnlWon=Math.min(MOON_CAP,(S.pnlWon||0)+profit);if(cur==="moon")S.lifetime=Math.min(MOON_CAP,S.lifetime+Math.floor(profit));}else{S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+(-profit));}
+    const settlement={cur:"moon",payout:payout,invested:soldInvested,roundInvested:Math.max(1,Math.floor(roundInvestedTotal||invested)),peak:roundPeak,clicks:roundClicks,outcome:"half",roundId:roundId||actionToken()};
     pot-=half;invested*=0.5;heat=Math.max(0,heat-25);   // scaling out locks profit & cools the rug heat
     if(panelOpen==="game"){toast("✂️","Sold half","+"+fmt(payout)+" "+(cur==="pts"?"pts":"$MOON")+" · riding the rest");sfxCash();if(navigator.vibrate)navigator.vibrate(25);}
-    save();renderLive();renderStats();renderDash();}
+    save();renderLive();renderStats();renderDash();settleRoundCloud(settlement);}
   $("sellHalf").addEventListener("click",sellHalf);
   $("predLong")&&$("predLong").addEventListener("click",()=>startPredict(1));
   $("predShort")&&$("predShort").addEventListener("click",()=>startPredict(-1));
@@ -1611,16 +1694,17 @@
     if(predActive)return;
     const stake=Math.max(100,Math.min(S.bet||1000,Math.floor(S.balance)));
     if(S.balance<100){toast("💸","Not enough $MOON","Earn a bit before predicting");return;}
-    S.balance-=stake;predStake=stake;predActive=true;predDir=dir;predLock=price;predT=5;save();
+    S.balance-=stake;predStake=stake;predRoundId=actionToken();predActive=true;predDir=dir;predLock=price;predT=5;save();
     sfxBuy();renderLive();renderStats();updatePredict();
     if(panelOpen==="game")toast("🔮",(dir>0?"📈 LONG":"📉 SHORT")+" placed","Locked at "+predLock.toFixed(2)+"x · "+fmt(stake)+" $MOON");}
   function resolvePredict(){
     const up=price>predLock*1.0005, down=price<predLock*0.9995, win=(predDir>0&&up)||(predDir<0&&down);
-    predActive=false;
-    if(!up&&!down){addCur("moon",predStake);if(panelOpen==="game")toast("➖","Flat — refunded","+"+fmt(predStake)+" $MOON back");}
-    else if(win){const payout=Math.floor(predStake*1.8);bank(payout);if(panelOpen==="game"){toast("🔮","Called it! "+(predDir>0?"📈":"📉"),"+"+fmt(payout)+" $MOON · 1.8×");sfxCash();confetti();}}
+    predActive=false;const settledStake=predStake,settledRound=predRoundId||actionToken();let settledPayout=0;
+    if(!up&&!down){settledPayout=predStake;addCur("moon",predStake);if(panelOpen==="game")toast("➖","Flat — refunded","+"+fmt(predStake)+" $MOON back");}
+    else if(win){const payout=Math.floor(predStake*1.8);settledPayout=payout;bank(payout);if(panelOpen==="game"){toast("🔮","Called it! "+(predDir>0?"📈":"📉"),"+"+fmt(payout)+" $MOON · 1.8×");sfxCash();confetti();}}
     else if(panelOpen==="game"){toast("🔮","Wrong way "+(predDir>0?"📈":"📉"),"-"+fmt(predStake)+" $MOON");}
-    predDir=0;predStake=0;save();renderLive();renderStats();updatePredict();}
+    predDir=0;predStake=0;predRoundId=null;save();renderLive();renderStats();updatePredict();
+    settleRoundCloud({cur:"moon",payout:settledPayout,invested:settledStake,roundInvested:settledStake,peak:Math.max(0.01,Math.min(PRICE_CAP,price)),clicks:0,outcome:"prediction",roundId:settledRound});}
   function updatePredict(){
     const lo=$("predLong"),sh=$("predShort"),tm=$("predTimer"),sub=$("predSub");if(!lo)return;
     lo.disabled=predActive;sh.disabled=predActive;
@@ -1673,7 +1757,10 @@
   function stepSL(dir){let i=SL_STEPS.indexOf(S.stopLoss);if(i<0)i=0;i=clamp(i+dir,0,SL_STEPS.length-1);S.stopLoss=SL_STEPS[i];save();renderDash();renderLive();sendSettings({stop_loss:S.stopLoss});}
   let lastFaucet=0,lastLimitT=0;
   function faucetOrWarn(cur){
-    if(S.balance<50){const now=Date.now();if(now-lastFaucet>15000){lastFaucet=now;bank(500);save();renderLive();renderDash();
+    if(S.balance<50){const now=Date.now();if(now-lastFaucet>15000){lastFaucet=now;
+      if(cloudAuth()){claimCloud("faucet","hourly").then(data=>{if(data&&data.ok){save();renderLive();renderDash();toast("🪙","Comeback faucet!","You went broke — here's "+fmt(data.reward||500)+" $MOON");}})
+        .catch(err=>toast("⏳","Faucet unavailable",err.message));return;}
+      bank(500);save();renderLive();renderDash();
       toast("🪙","Comeback faucet!","You went broke — here's 500 $MOON to get back in");}return;}
     flashEnergy();toast("💸","Not enough $MOON","Lower your bet or earn more before tapping");}
   $("betDown").addEventListener("click",()=>stepBet(-1));
@@ -1720,6 +1807,13 @@
   $("upBack").addEventListener("click",()=>$("upModal").classList.remove("show"));
   $("upBuy").addEventListener("click",()=>{if(!upKey)return;const u=UP.find(x=>x.k===upKey),c=upCost(u);
     if(S.balance<c)return;
+    if(cloudAuth()){
+      $("upBuy").disabled=true;$("upBuy").textContent="Upgrading…";
+      cloudAction("/api/upgrade",{key:upKey}).then(data=>{reconcileAction(data);sfxBuy();
+        if(upKey==="energy")energy=Math.min(maxEnergy(),energy+40);
+        renderShop();openUpgrade(upKey);toast(u.emo,u.nm+" → Lv."+lvl(upKey),"Upgraded securely");})
+        .catch(err=>{toast("⚠️","Upgrade rejected",err.message);syncWithCloud().catch(()=>{});openUpgrade(upKey);});
+      return;}
     if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
       window._moonWS.send(JSON.stringify({ t: "upgrade", key: upKey }));
       return;
@@ -1744,6 +1838,8 @@
         '<button class="big-btn" id="vipEnergy" style="margin:0;background:linear-gradient(90deg,var(--cyan),#0bd4c4)'+(eClaimed?';opacity:.5':'')+'"'+(eClaimed?' disabled':'')+'>'+(eClaimed?'✓ Energy refilled today':'⚡ Instant energy refill')+'</button>';
       wrap.appendChild(lng);
       const cbn=lng.querySelector("#vipClaim");if(cbn&&!claimed)cbn.addEventListener("click",()=>{
+        if(cloudAuth()){cbn.disabled=true;cbn.textContent="Checking…";claimCloud("vip_daily","daily").then(data=>{if(data&&data.ok){S.vipDay=today;save();renderVip();renderLive();renderStats();toast("🛋️","VIP daily bonus!","+"+fmt(data.reward||reward)+" $MOON");}})
+          .catch(err=>{toast("⚠️","Claim rejected",err.message);renderVip();});return;}
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "claim_vip_daily" }));
           return;
@@ -1765,7 +1861,10 @@
       const note=v.buyOnly?'<div class="ds">⭐ Stars-only premium tier</div>':'<div class="ds">$MOON route needs '+RANKS[v.req].nm+' rank</div>';
       d.innerHTML='<div class="vtag">'+(owned?"OWNED":"TIER "+i)+'</div><div class="row"><div class="emo">'+v.emo+'</div><div class="grow"><div class="nm">'+v.nm+'</div>'+note+'</div></div><div class="vh-ben" style="margin-top:9px">'+vipBenefits(i).map(x=>'<span class="bchip">'+x+'</span>').join("")+'</div>'+buys;
       if(!owned){const mb=d.querySelector(".vbuy-moon"),sb=d.querySelector(".vbuy-stars");
-        if(mb)mb.addEventListener("click",()=>{if(S.balance<v.cost||S.vip!==i-1||rankIdx()<v.req)return;S.balance-=v.cost;S.vip=i;save();sfxCash();renderVip();renderLive();renderStats();achCheck();energy=maxEnergy();toast(v.emo,v.nm+" unlocked!",v.perks);});
+        if(mb)mb.addEventListener("click",()=>{if(S.balance<v.cost||S.vip!==i-1||rankIdx()<v.req)return;
+          if(cloudAuth()){mb.disabled=true;mb.textContent="Checking…";claimCloud("vip_upgrade",String(i)).then(data=>{if(data&&data.ok){save();sfxCash();renderVip();renderLive();renderStats();achCheck();energy=maxEnergy();toast(v.emo,v.nm+" unlocked!",v.perks);}})
+            .catch(err=>{toast("⚠️","VIP upgrade rejected",err.message);renderVip();});return;}
+          S.balance-=v.cost;S.vip=i;save();sfxCash();renderVip();renderLive();renderStats();achCheck();energy=maxEnergy();toast(v.emo,v.nm+" unlocked!",v.perks);});
         if(sb)sb.addEventListener("click",()=>buyVipStars(i));}
       wrap.appendChild(d);}}
 
@@ -1952,6 +2051,9 @@
       const btn=locked?'<button class="qclaim" disabled>🔒 VIP '+q.vip+'</button>':'<button class="qclaim '+(claimed?"done":"")+'"'+((!done||claimed)?" disabled":"")+'>'+(claimed?"✓":"Claim")+'</button>';
       d.innerHTML='<div class="emo">'+q.emo+'</div><div class="grow"><div class="nm">'+q.label+'</div><div class="ds">'+(locked?("Unlocks at VIP tier "+q.vip+" · "+fmt(q.reward)+" $MOON"):(pct+' · '+fmt(q.reward)+' $MOON'))+'</div><div class="pbar2"><i style="width:'+clamp(p/q.goal*100,0,100)+'%"></i></div></div>'+btn;
       if(!locked)d.querySelector(".qclaim").addEventListener("click",()=>{const bb=qbucket(q);if(qprog(q.id)<q.goal||(bb.claimed||[]).indexOf(q.id)>=0)return;
+        if(cloudAuth()){const qb=d.querySelector(".qclaim");qb.disabled=true;qb.textContent="Checking…";
+          claimCloud("quest",q.id).then(data=>{if(data&&data.ok){if(bb.claimed.indexOf(q.id)<0)bb.claimed.push(q.id);save();sfxCash();renderQuests();renderLive();renderStats();updateQuestDot();confetti();toast("🎯","Quest complete!","+"+fmt(data.reward||q.reward)+" $MOON");}})
+            .catch(err=>{toast("⚠️","Claim rejected",err.message);renderQuests();});return;}
         bb.claimed.push(q.id);bank(q.reward);save();sfxCash();renderQuests();renderLive();renderStats();updateQuestDot();confetti();toast("🎯","Quest complete!","+"+fmt(q.reward)+" $MOON");});
       wrap.appendChild(d);};
     const md=new Date();md.setHours(24,0,0,0);const hrs=Math.max(1,Math.ceil((md-Date.now())/3600000));
@@ -1986,6 +2088,8 @@
       if(st===0)b.addEventListener("click",()=>{socialFollowT[q.id]=Date.now();openExt(q.url);S.social[q.id]=1;save();renderSocial();updateQuestDot();});
       else if(st===1)b.addEventListener("click",()=>verifySocial(q,b));
       else if(st===2)b.addEventListener("click",()=>{
+        if(cloudAuth()){b.disabled=true;b.textContent="Claiming…";claimCloud("social",q.id).then(data=>{if(data&&data.ok){S.social[q.id]=3;save();renderSocial();renderAirdrop();renderLive();renderStats();updateQuestDot();confetti();toast(q.emo,"Reward claimed!","+"+fmt(data.reward||q.reward)+" $MOON & points");}})
+          .catch(err=>{toast("⚠️","Claim rejected",err.message);renderSocial();});return;}
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "claim_social", id: q.id }));
           return;
@@ -2044,6 +2148,8 @@
     wrap.innerHTML='<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">'+sub+'</div></div><button class="qclaim '+(done?"done":"")+'"'+((done||!ready)?" disabled":"")+'>'+label+'</button>';
     if(!done&&ready)wrap.querySelector("button").addEventListener("click",()=>{
       if(norm(S.comboDay)===todayISO)return;
+      if(cloudAuth()){const b=wrap.querySelector("button");b.disabled=true;b.textContent="Checking…";claimCloud("combo","daily").then(data=>{if(data&&data.ok){S.comboDay=todayISO;save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+"+fmt(data.reward||10000)+" $MOON");}})
+        .catch(err=>{toast("⚠️","Combo rejected",err.message);renderCombo();});return;}
       S.comboDay=todayISO;bank(10000);save();renderAirdrop();renderLive();renderStats();confetti();toast("🔥","Daily Combo!","+10,000 $MOON");},{once:true});}
 
   // ---------- RANKS + LEADERBOARD ----------
@@ -2071,7 +2177,7 @@
     };
     const bl=$("boardList");
     if(bl&&!$("boardToggle")){const tg2=document.createElement("div");tg2.id="boardToggle";tg2.style.cssText="display:flex;gap:6px;margin-bottom:9px";
-      tg2.innerHTML='<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button><button class="lb-tg" data-m="region">🌍 Region</button>';
+      tg2.innerHTML='<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button>';
       bl.parentNode.insertBefore(tg2,bl);
       const note=document.createElement("div");note.className="qsum";note.style.cssText="text-align:center;margin:-2px 0 9px;color:var(--gold)";note.innerHTML="🏆 Top 10 each week win $MOON — paid out automatically";
       bl.parentNode.insertBefore(note,bl);
@@ -2182,7 +2288,7 @@
     const mine=(S.crewBoard||[]).find(c=>c.id===S.crewId)||{name:S.crew,warScore:S.warScore,totalBanked:crewTotal()};
     const rivals=(S.crewBoard||[]).filter(c=>c.id!==S.crewId);
     const rival=rivals.length?rivals[crewHash(S.crewId+":"+wk)%rivals.length]:{name:"BlackRug Capital",warScore:12000,totalBanked:2500000};
-    const your=(Number(mine.warScore)||0)+S.warScore;
+    const your=Number(mine.warScore)||0;
     const rivalScore=Math.max(1,Math.floor((Number(rival.warScore)||0)+(9000+(crewHash(rival.name+wk)%12)*750)*(0.35+frac)));
     const winning=your>=rivalScore,maxs=Math.max(your,rivalScore,1);
     const left=7*864e5-(Date.now()%(7*864e5)),dd=Math.floor(left/864e5),hh=Math.floor((left%864e5)/36e5);
@@ -2196,23 +2302,35 @@
     const ra=document.createElement("div");ra.className="card row";
     ra.innerHTML='<div class="emo">⚔️</div><div class="grow"><div class="nm">Rally the crew</div><div class="ds">spend '+fmt(rcost)+' $MOON → +'+fmt(rgain)+' war pts</div></div><button class="buy"'+(canR?"":" disabled")+'>Rally</button>';
     wrap.appendChild(ra);
-    ra.querySelector("button").addEventListener("click",()=>{if(S.balance<rcost)return;S.balance-=rcost;S.warScore+=rgain;save();renderWars();renderLive();renderStats();sfxBuy();toast("⚔️","Rallied!","+"+fmt(rgain)+" war pts");});
+    ra.querySelector("button").addEventListener("click",()=>{if(S.balance<rcost)return;const b=ra.querySelector("button");
+      if(cloudAuth()){b.disabled=true;b.textContent="Rallying…";claimCloud("crew_rally","weekly").then(data=>{if(data&&data.ok){save();refreshCrews(true);renderLive();renderStats();sfxBuy();toast("⚔️","Rallied!","+"+fmt(data.gained||rgain)+" war pts");}})
+        .catch(err=>{toast("⚠️","Rally rejected",err.message);renderWars();});return;}
+      S.balance-=rcost;S.warScore+=rgain;save();renderWars();renderLive();renderStats();sfxBuy();toast("⚔️","Rallied!","+"+fmt(rgain)+" war pts");});
     const lead=Math.max(0,your-rivalScore),reward=Math.min(250000,Math.max(25000,Math.floor(25000+lead*0.35+S.warScore*0.6)));
     const cl=document.createElement("div");cl.className="card row";const canClaim=winning&&!S.warClaim&&S.warScore>=5000;
     cl.innerHTML='<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">'+(S.warClaim?"Claimed this week ✓":(winning?(S.warScore>=5000?"Claim scales with lead + contribution":"Contribute 5K war pts to unlock"):"Pull ahead of "+esc(rival.name)+" to unlock"))+'</div></div><button class="qclaim '+(S.warClaim?"done":"")+'"'+(canClaim?"":" disabled")+'>'+(S.warClaim?"✓":"Claim "+fmt(reward))+'</button>';
     wrap.appendChild(cl);
-    if(canClaim)cl.querySelector("button").addEventListener("click",()=>{S.warClaim=true;bank(reward);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+"+fmt(reward)+" $MOON — gg");});
+    if(canClaim)cl.querySelector("button").addEventListener("click",()=>{const b=cl.querySelector("button");
+      if(cloudAuth()){b.disabled=true;b.textContent="Checking…";claimCloud("war_chest","weekly").then(data=>{if(data&&data.ok){S.warClaim=true;save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+"+fmt(data.reward||reward)+" $MOON — gg");}})
+        .catch(err=>{toast("⚠️","Chest rejected",err.message);renderWars();});return;}
+      S.warClaim=true;bank(reward);save();renderWars();renderLive();renderStats();confetti();toast("🏆","Victory chest!","+"+fmt(reward)+" $MOON — gg");});
     const f=document.createElement("div");f.innerHTML=
-      '<div class="sec-h">📜 War rules</div>'+
-      '<details class="faq"><summary>How a war works</summary><div class="a">Each week your crew is auto-matched against a rival crew. Both sides earn <b>war points</b>; whoever has more when the timer hits zero wins the week.</div></details>'+
-      '<details class="faq"><summary>Earning war points</summary><div class="a">Tap <b>Rally</b> to spend $MOON for instant war pts, and keep playing — your contribution is tracked. Every crew member\'s points stack into the crew total.</div></details>'+
-      '<details class="faq"><summary>Winning &amp; the Victory Chest</summary><div class="a">If your crew is ahead, claim the <b>Victory Chest</b> (25K–250K $MOON, scaling with the lead + your contribution). You must contribute at least <b>5,000 war pts</b> that week to be eligible.</div></details>'+
-      '<details class="faq"><summary>Weekly reset</summary><div class="a">Wars reset every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>'+
-      '<div class="sec-h">❔ Crew wars Q&amp;A</div>'+
+      '<div class="sec-h">🎯 How Crew Wars works</div>'+
+      '<div class="card"><div class="ds" style="line-height:2">'+
+        '<b style="color:var(--cyan)">1.</b> Join or create a crew in the <b>My Crew</b> tab.<br>'+
+        '<b style="color:var(--cyan)">2.</b> Each week your crew is matched against a rival crew.<br>'+
+        '<b style="color:var(--cyan)">3.</b> Tap <b>⚔️ Rally</b> to convert $MOON into <b>war points</b> — every member\'s rallies stack into the crew total.<br>'+
+        '<b style="color:var(--cyan)">4.</b> Out-score the rival before the weekly timer hits zero.<br>'+
+        '<b style="color:var(--cyan)">5.</b> If you\'re winning <i>and</i> contributed 5,000+ war pts, claim the <b>🏆 Victory Chest</b> (25K–250K $MOON).'+
+      '</div></div>'+
+      '<div class="sec-h">❔ Crew Wars FAQ</div>'+
+      '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Whichever crew has more <b>war points</b> when the weekly timer ends wins. Your crew\'s score is the sum of every member\'s war points.</div></details>'+
+      '<details class="faq"><summary>How do I earn war points?</summary><div class="a">Tap <b>⚔️ Rally</b> to spend $MOON for instant war points. It\'s the main way to contribute — spend only what you\'re comfortable with.</div></details>'+
       '<details class="faq"><summary>Do I need a crew?</summary><div class="a">Yes — join or create one on the <b>My Crew</b> tab. Solo players can\'t enter wars.</div></details>'+
-      '<details class="faq"><summary>Does VIP help?</summary><div class="a">Slightly — higher VIP improves your war-point efficiency when you rally.</div></details>'+
-      '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you banked. The chest just doesn\'t unlock that week. Try again next week.</div></details>'+
-      '<details class="faq"><summary>Will rallying drain my balance?</summary><div class="a">Only what you confirm each time. Rallying is optional — playing normally also feeds war pts to your crew.</div></details>';
+      '<details class="faq"><summary>Does VIP help?</summary><div class="a">Yes — higher VIP tiers give more war points per rally.</div></details>'+
+      '<details class="faq"><summary>What\'s the Victory Chest worth?</summary><div class="a">25K–250K $MOON, scaling with how far ahead your crew is plus your personal contribution. You must contribute at least <b>5,000 war pts</b> to be eligible.</div></details>'+
+      '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you\'ve banked. The chest just doesn\'t unlock that week. A fresh rival is matched next week.</div></details>'+
+      '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
     wrap.appendChild(f);}
   function resetRankTab(){document.querySelectorAll(".rtab").forEach((x,i)=>x.classList.toggle("on",i===0));["rank","players","crews","mycrew","wars"].forEach((k,i)=>{const el=$("rt-"+k);if(el)el.style.display=i===0?"block":"none";});}
   document.querySelectorAll(".rtab").forEach(b=>{b.addEventListener("click",()=>{
@@ -2238,6 +2356,8 @@
       const d=document.createElement("div");d.className="mile"+(reached?" done":"");
       d.innerHTML='<div class="emo">🎁</div><div class="grow"><div class="nm">Invite '+m.n+' friends</div><div class="ds">'+(refVerified?'reward '+fmt(m.r)+' $MOON':'syncing verified referrals...')+'</div></div><button class="qclaim '+(claimed?"done":"")+'"'+((!refVerified||!reached||claimed)?" disabled":"")+'>'+(claimed?"✓":"Claim")+'</button>';
       d.querySelector(".qclaim").addEventListener("click",()=>{if(!refVerified||S.friends.length<m.n||S.refMiles.indexOf(m.n)>=0)return;
+        if(cloudAuth()){const b=d.querySelector(".qclaim");b.disabled=true;b.textContent="Checking…";claimCloud("milestone",String(m.n)).then(data=>{if(data&&data.ok){if(S.refMiles.indexOf(m.n)<0)S.refMiles.push(m.n);save();sfxCash();renderInvite();renderLive();renderStats();toast("🎁","Milestone reward!","+"+fmt(data.reward||m.r)+" $MOON");}})
+          .catch(err=>{toast("⚠️","Milestone rejected",err.message);renderInvite();});return;}
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "claim_milestone", n: m.n }));
           return;
@@ -2444,7 +2564,8 @@
       if(dt&&panels[dt]){document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
         const nb=document.querySelector('nav button[data-p="'+dt+'"]');if(nb)nb.classList.add("on");openPanel(dt);}}catch(e){}
     if(!lsGet("moontap_tut")){$("tut").classList.add("show");renderTut();}
-    // fade out the branded splash once the app is up
+    // finish the loading bar, then fade out the branded splash once the app is up
+    {const f=$("splashFill");if(f)f.style.width="100%";}
     setTimeout(()=>{const s=$("splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none";},650);}},900);
     requestAnimationFrame(loop);}
   window.addEventListener("resize",fitViewport);

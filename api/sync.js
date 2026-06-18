@@ -39,7 +39,10 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS region VARCHAR(8),
           ADD COLUMN IF NOT EXISTS notify BOOLEAN DEFAULT TRUE NOT NULL,
           ADD COLUMN IF NOT EXISTS last_notify_at TIMESTAMPTZ,
-          ADD COLUMN IF NOT EXISTS flagged INT DEFAULT 0 NOT NULL
+          ADD COLUMN IF NOT EXISTS flagged INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS last_cashout_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS earn_window_start TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS earn_window_amount BIGINT DEFAULT 0 NOT NULL
       `);
       await db.query(`
         ALTER TABLE crews
@@ -51,7 +54,25 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS social_x_state INT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS social_tg_state INT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS social_tg_group_state INT DEFAULT 0 NOT NULL,
-          ADD COLUMN IF NOT EXISTS social_ig_state INT DEFAULT 0 NOT NULL
+          ADD COLUMN IF NOT EXISTS social_ig_state INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS period_day DATE DEFAULT CURRENT_DATE NOT NULL,
+          ADD COLUMN IF NOT EXISTS period_week VARCHAR(20),
+          ADD COLUMN IF NOT EXISTS period_month VARCHAR(7),
+          ADD COLUMN IF NOT EXISTS weekly_taps BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS weekly_max_price DOUBLE PRECISION DEFAULT 1.0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS weekly_big_sell BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS weekly_invites INT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS monthly_taps BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS monthly_big_sell BIGINT DEFAULT 0 NOT NULL,
+          ADD COLUMN IF NOT EXISTS monthly_invites INT DEFAULT 0 NOT NULL
+      `);
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS cashout_nonces (
+          player_id BIGINT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+          nonce VARCHAR(80) NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+          PRIMARY KEY (player_id, nonce)
+        )
       `);
     })();
   }
@@ -241,6 +262,29 @@ async function loadPlayerProfile(playerId) {
     },
     claimed: q.claimed_ids || []
   };
+  player.questState = {
+    day: q.period_day ? new Date(q.period_day).toISOString().slice(0, 10) : null,
+    week: q.period_week || null,
+    month: q.period_month || null,
+    daily: {
+      taps: Number(q.daily_taps) || 0,
+      price: Number(q.daily_max_price) || 1,
+      cash: Number(q.daily_big_sell) || 0,
+      invite: Number(q.daily_invites) || 0
+    },
+    weekly: {
+      taps: Number(q.weekly_taps) || 0,
+      price: Number(q.weekly_max_price) || 1,
+      cash: Number(q.weekly_big_sell) || 0,
+      invite: Number(q.weekly_invites) || 0
+    },
+    monthly: {
+      taps: Number(q.monthly_taps) || 0,
+      cash: Number(q.monthly_big_sell) || 0,
+      invite: Number(q.monthly_invites) || 0
+    },
+    claimed: q.claimed_ids || []
+  };
   player.social = {
     x: q.social_x ? 3 : cleanSocialState(q.social_x_state),
     tg_channel: q.social_tg ? 3 : cleanSocialState(q.social_tg_state),
@@ -349,11 +393,20 @@ module.exports = async (req, res) => {
              WHERE id = $1`,
             [referredById, reward, MOON_CAP, Math.floor(reward * AIRDROP_REFERRAL_RATE), AIRDROP_CAP]
           );
+          const referralNow = new Date();
+          const referralDay = referralNow.toISOString().slice(0, 10);
+          const referralWeek = String(Math.floor(referralNow.getTime() / 604800000));
+          const referralMonth = referralNow.toISOString().slice(0, 7);
           await db.query(
-            `UPDATE quests
-             SET daily_invites = daily_invites + 1
+            `UPDATE quests SET
+               daily_invites = CASE WHEN period_day = $2::date THEN daily_invites + 1 ELSE 1 END,
+               period_day = $2::date,
+               weekly_invites = CASE WHEN period_week = $3 THEN weekly_invites + 1 ELSE 1 END,
+               period_week = $3,
+               monthly_invites = CASE WHEN period_month = $4 THEN monthly_invites + 1 ELSE 1 END,
+               period_month = $4
              WHERE player_id = $1`,
-            [referredById]
+            [referredById, referralDay, referralWeek, referralMonth]
           );
         }
       }
@@ -364,229 +417,46 @@ module.exports = async (req, res) => {
       try { await db.query("UPDATE players SET region = COALESCE(region, $2) WHERE id = $1", [tgUser.id, String(tgUser.language_code).slice(0, 8)]); } catch (e) {}
     }
 
-    // ---------------- SAVE STATE IF PROVIDED ----------------
+    // ---------------- SAVE SETTINGS IF PROVIDED ----------------
+    // Economy, progression, rewards, referrals, upgrades and claims are server-authoritative.
     if (state) {
       const client = await db.pool.connect();
       try {
         await client.query("BEGIN");
-
-        const { rows: currentCrewRows } = await client.query("SELECT crew_id, balance, airdrop_pts, lifetime_banked, vip_tier, last_sync_at FROM players WHERE id = $1", [tgUser.id]);
-        const crewId = currentCrewRows[0] ? currentCrewRows[0].crew_id : null;
-
-        // ----- anti-cheat: bound how much economy state can rise per sync -----
-        // Ceiling = the most a player of this tier could plausibly bank in one round,
-        // scaled mildly by elapsed time so honest big/offline cash-outs still land,
-        // but a tampered client can't jump balance to the cap. Decreases (spending) pass freely.
-        const prev = currentCrewRows[0] || {};
-        const SVR_BETMAX = [1000, 5000, 25000, 150000, 1000000];
-        const vipNow = clampInt(prev.vip_tier, 0, 4, 0);
-        const perRoundMax = SVR_BETMAX[vipNow] * (20 + vipNow * 10) * PRICE_CAP * 1.6;
-        const lastSyncMs = prev.last_sync_at ? new Date(prev.last_sync_at).getTime() : 0;
-        const elapsedSec = lastSyncMs ? Math.max(0, (Date.now() - lastSyncMs) / 1000) : 86400;
-        // event headroom — must mirror moontap.html EVENTS so legit 2× event earnings aren't clipped
-        const ed = new Date();
-        const svrEventMult = (ed.getUTCHours() === 18 || ed.getUTCDay() === 5) ? 2 : ((ed.getUTCDay() === 0 || ed.getUTCDay() === 6) ? 1.5 : 1);
-        // tighter than before: an immediate re-sync allows only ~2 rounds; accrual is bounded to 8h so
-        // tampering a quick sync can't jump the balance, while honest offline gains still land.
-        const cappedElapsed = Math.min(elapsedSec, 28800);
-        const gainCap = Math.min(MOON_CAP, Math.ceil(perRoundMax * (1 + cappedElapsed / 6) * svrEventMult) + perRoundMax);
-        const prevBal = Number(prev.balance) || 0, prevAir = Number(prev.airdrop_pts) || 0, prevLife = Number(prev.lifetime_banked) || 0;
-        const claimedBal = clampInt(state.balance, 0, MOON_CAP, 500);
-        const boundedBalance = Math.min(claimedBal, prevBal + gainCap);
-        const boundedAirdrop = Math.min(clampInt(state.airdrop, 0, AIRDROP_CAP, 500), prevAir + gainCap);
-        const boundedLifetime = Math.min(Math.max(clampInt(state.lifetime, 0, MOON_CAP, 0), prevLife), prevLife + gainCap);
-        // flag clients that try to claim far more than physically possible since the last sync
-        const cheatFlag = (claimedBal - (prevBal + gainCap)) > perRoundMax;
-
-        const questIds = ["taps", "price", "cash", "invite", "vbig", "vmoon"];
-        const achIds = ["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"];
-        const social = state.social || {};
-        const up = state.up || {};
-        const quests = state.quests || {};
-        const questProg = quests.prog || {};
-        const skins = cleanSkins(state.skins);
         const skin = cleanString(state.skin, 40) || "gold";
-
-        // Persist gameplay progress for cross-device Telegram Mini App continuity.
-        // Values are clamped and keyed to verified Telegram initData identity.
         await client.query(
           `UPDATE players SET 
              name = $2,
-             balance = $3,
-             airdrop_pts = $4,
-             lifetime_banked = $5,
-             best_pot = $6,
-             best_price = $7,
-             rugs = $8,
-             cashouts = $9,
-             taps = $10,
-             pnl_won = GREATEST(pnl_won, $11),
-             pnl_lost = GREATEST(pnl_lost, $12),
-             vip_tier = GREATEST(vip_tier, $13),
-             vip_day = COALESCE($14::date, vip_day),
-             combo_day = COALESCE($15::date, combo_day),
-             last_day = COALESCE($16::date, last_day),
-             streak = GREATEST(streak, $17),
-             stars_spent = GREATEST(stars_spent, $18),
-             bet = $19,
-             bet_cur = $20,
-             auto_sell = $21,
-             stop_loss = $22,
-             sound = $23,
-             crew_id = $24,
-             starter_bought = starter_bought OR $25,
-             season_pass = season_pass OR $26,
-             season_claim_day = COALESCE($27::date, season_claim_day),
-             vip_sub_until = GREATEST(vip_sub_until, $28),
-             first_buy_used = first_buy_used OR $29,
-             deal_day = COALESCE($30::date, deal_day),
-             piggy = GREATEST(piggy, $31),
-             coin_level = GREATEST(coin_level, $32),
-             coin_xp = GREATEST(coin_xp, $33),
-             skin = CASE WHEN $34 IN (SELECT jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $35::jsonb)) THEN $34 ELSE skin END,
-             skins = (SELECT jsonb_agg(DISTINCT s) FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb) || $35::jsonb) AS t(s)),
-             war_week = COALESCE($36, war_week),
-             war_score = GREATEST(war_score, $37),
-             war_claim = war_claim OR $38,
+             bet = $3,
+             bet_cur = 'moon',
+             auto_sell = $4,
+             stop_loss = $5,
+             sound = $6,
+             skin = CASE
+               WHEN EXISTS (
+                 SELECT 1
+                 FROM jsonb_array_elements_text(COALESCE(skins, '["gold"]'::jsonb)) AS owned(value)
+                 WHERE owned.value = $7
+               ) THEN $7
+               ELSE skin
+             END,
+             season_start = COALESCE(season_start, CURRENT_DATE),
+             season_days = CASE
+               WHEN CURRENT_DATE::text = ANY(COALESCE(season_days, '{}')) THEN season_days
+               ELSE array_append(COALESCE(season_days, '{}'), CURRENT_DATE::text)
+             END,
              last_sync_at = now()
            WHERE id = $1`,
           [
             tgUser.id,
             cleanName(state.name, tgUser.username || tgUser.first_name),
-            boundedBalance,
-            boundedAirdrop,
-            boundedLifetime,
-            clampInt(state.bestPot, 0, MOON_CAP, 0),
-            clampNumber(state.bestPrice, 0.01, PRICE_CAP, 1),
-            clampInt(state.rugs, 0, 1000000000, 0),
-            clampInt(state.cashouts, 0, 1000000000, 0),
-            clampInt(state.taps, 0, 1000000000000, 0),
-            clampInt(state.pnlWon, 0, MOON_CAP, 0),
-            clampInt(state.pnlLost, 0, MOON_CAP, 0),
-            clampInt(state.vip, 0, 4, 0),
-            cleanDate(state.vipDay),
-            cleanDate(state.comboDay),
-            cleanDate(state.lastDay),
-            clampInt(state.streak, 0, 1000000, 0),
-            clampInt(state.starsSpent, 0, 1000000000, 0),
             Math.round(clampNumber(state.bet, 10, 1000000, 100)),
-            "moon",
             clampNumber(state.autoSell, 0, 1000, 0),
             Math.round(clampNumber(state.stopLoss, 0, 95, 0)),
             state.sound !== false,
-            crewId,
-            !!state.starterBought,
-            !!state.seasonPass,
-            cleanDate(state.seasonClaimDay),
-            clampInt(state.vipSubUntil, 0, 4102444800000, 0),
-            !!state.firstBuyUsed,
-            cleanDate(state.dealDay),
-            clampInt(state.piggy, 0, MOON_CAP, 0),
-            clampInt(state.coinLevel, 1, 1000000, 1),
-            clampInt(state.coinXp, 0, 1000000000, 0),
-            skin,
-            JSON.stringify(skins),
-            cleanString(state.warWeek, 20),
-            clampInt(state.warScore, 0, MOON_CAP, 0),
-            !!state.warClaim
+            skin
           ]
         );
-
-        await client.query(
-          `UPDATE upgrades SET
-             power = GREATEST(power, $2),
-             energy = GREATEST(energy, $3),
-             regen = GREATEST(regen, $4),
-             insure = GREATEST(insure, $5),
-             auto = GREATEST(auto, $6),
-             combo = GREATEST(combo, $7),
-             vault = GREATEST(vault, $8),
-             cashbonus = GREATEST(cashbonus, $9)
-           WHERE player_id = $1`,
-          [
-            tgUser.id,
-            clampInt(up.power, 0, 100000, 0),
-            clampInt(up.energy, 0, 100000, 0),
-            clampInt(up.regen, 0, 100000, 0),
-            clampInt(up.insure, 0, 100000, 0),
-            clampInt(up.auto, 0, 100000, 0),
-            clampInt(up.combo, 0, 100000, 0),
-            clampInt(up.vault, 0, 100000, 0),
-            clampInt(up.cashbonus, 0, 100000, 0)
-          ]
-        );
-
-        await client.query(
-          `UPDATE players
-             SET season_start = COALESCE($2::date, season_start),
-                 season_days = $3
-           WHERE id = $1`,
-          [tgUser.id, cleanDate(state.seasonStart), cleanDateArray(state.seasonDays)]
-        );
-
-        await client.query(
-          `UPDATE quests SET
-             daily_taps = GREATEST(daily_taps, $2),
-             daily_max_price = GREATEST(daily_max_price, $3),
-             daily_big_sell = GREATEST(daily_big_sell, $4),
-             daily_invites = daily_invites,
-             claimed_ids = $6,
-             last_quest_reset = COALESCE($7::date, last_quest_reset),
-             social_x_state = GREATEST(social_x_state, $8),
-             social_tg_state = GREATEST(social_tg_state, $9),
-             social_tg_group_state = GREATEST(social_tg_group_state, $10),
-             social_ig_state = GREATEST(social_ig_state, $11),
-             social_x = social_x OR $8 >= 3,
-             social_tg = social_tg OR $9 >= 3,
-             social_tg_group = social_tg_group OR $10 >= 3,
-             social_ig = social_ig OR $11 >= 3
-           WHERE player_id = $1`,
-          [
-            tgUser.id,
-            clampInt(questProg.taps, 0, 1000000000, 0),
-            clampNumber(questProg.price, 0, 1000000, 1),
-            clampInt(questProg.cash, 0, MOON_CAP, 0),
-            clampInt(questProg.invite, 0, 1000000, 0),
-            cleanIdArray(quests.claimed, questIds),
-            cleanDate(quests.date),
-            cleanSocialState(social.x),
-            Math.max(cleanSocialState(social.tg_channel), cleanSocialState(social.tg)),
-            cleanSocialState(social.tg_group),
-            cleanSocialState(social.ig)
-          ]
-        );
-
-        // Insert achievements
-        if (Array.isArray(state.ach)) {
-          for (const achId of cleanIdArray(state.ach, achIds)) {
-            await client.query(
-              `INSERT INTO achievements (player_id, achievement_id)
-               VALUES ($1, $2)
-               ON CONFLICT (player_id, achievement_id) DO NOTHING`,
-              [tgUser.id, achId]
-            );
-          }
-        }
-
-        const { rows: friendCountRows } = await client.query(
-          "SELECT COUNT(*)::int AS n FROM friends WHERE player_id = $1",
-          [tgUser.id]
-        );
-        const realFriendCount = friendCountRows[0] ? Number(friendCountRows[0].n) || 0 : 0;
-        for (const milestone of cleanMilestones(state.refMiles).filter(n => n <= realFriendCount)) {
-          await client.query(
-            `INSERT INTO ref_milestones (player_id, milestone_n)
-             VALUES ($1, $2)
-             ON CONFLICT (player_id, milestone_n) DO NOTHING`,
-            [tgUser.id, milestone]
-          );
-        }
-
-        if (cheatFlag) {
-          await client.query("UPDATE players SET flagged = flagged + 1 WHERE id = $1", [tgUser.id]);
-          console.warn("[sync] anti-cheat: clamped + flagged player", tgUser.id, "claimed", claimedBal, "cap", prevBal + gainCap);
-        }
-
         await client.query("COMMIT");
       } catch (err) {
         await client.query("ROLLBACK");

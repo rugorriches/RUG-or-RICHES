@@ -64,6 +64,10 @@ CREATE TABLE public.players (
     war_week        VARCHAR(20),
     war_score       BIGINT          DEFAULT 0      NOT NULL,
     war_claim       BOOLEAN         DEFAULT FALSE  NOT NULL,
+    last_cashout_at TIMESTAMPTZ,
+    earn_window_start TIMESTAMPTZ,
+    earn_window_amount BIGINT       DEFAULT 0      NOT NULL,
+    last_auto_claim_at TIMESTAMPTZ,
     created_at      TIMESTAMPTZ     DEFAULT now()  NOT NULL
 );
 
@@ -103,10 +107,20 @@ CREATE TABLE public.quests (
     social_tg_state INT              DEFAULT 0            NOT NULL,
     social_tg_group_state INT        DEFAULT 0            NOT NULL,
     social_ig_state INT              DEFAULT 0            NOT NULL,
+    period_day      DATE             DEFAULT CURRENT_DATE NOT NULL,
+    period_week     VARCHAR(20),
+    period_month    VARCHAR(7),
     daily_taps      INT              DEFAULT 0            NOT NULL,
     daily_max_price DOUBLE PRECISION DEFAULT 1.0          NOT NULL,
     daily_big_sell  BIGINT           DEFAULT 0            NOT NULL,
     daily_invites   INT              DEFAULT 0            NOT NULL,
+    weekly_taps     BIGINT           DEFAULT 0            NOT NULL,
+    weekly_max_price DOUBLE PRECISION DEFAULT 1.0         NOT NULL,
+    weekly_big_sell BIGINT           DEFAULT 0            NOT NULL,
+    weekly_invites  INT              DEFAULT 0            NOT NULL,
+    monthly_taps    BIGINT           DEFAULT 0            NOT NULL,
+    monthly_big_sell BIGINT          DEFAULT 0            NOT NULL,
+    monthly_invites INT              DEFAULT 0            NOT NULL,
     claimed_ids     TEXT[]           DEFAULT '{}'          NOT NULL,  -- quest IDs claimed today
     last_quest_reset DATE            DEFAULT CURRENT_DATE NOT NULL
 );
@@ -163,7 +177,32 @@ CREATE TABLE public.stars_transactions (
 );
 
 -- ============================================================
--- 8. WEBHOOK LOGS
+-- 8. CASHOUT NONCES
+-- Prevents replaying an already-settled round.
+-- ============================================================
+CREATE TABLE public.cashout_nonces (
+    player_id BIGINT       NOT NULL REFERENCES public.players(id) ON DELETE CASCADE,
+    nonce     VARCHAR(80)  NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    PRIMARY KEY (player_id, nonce)
+);
+
+-- ============================================================
+-- 9. ROUND SETTLEMENTS
+-- Tracks stake already debited across partial sells in one round.
+-- ============================================================
+CREATE TABLE public.round_settlements (
+    player_id BIGINT       NOT NULL REFERENCES public.players(id) ON DELETE CASCADE,
+    round_id  VARCHAR(80)  NOT NULL,
+    debited_invested BIGINT DEFAULT 0 NOT NULL,
+    reported_clicks INT     DEFAULT 0 NOT NULL,
+    closed     BOOLEAN      DEFAULT FALSE NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    PRIMARY KEY (player_id, round_id)
+);
+
+-- ============================================================
+-- 10. WEBHOOK LOGS
 -- Stores raw Telegram webhook events/errors for payment auditability.
 -- ============================================================
 CREATE TABLE public.webhook_logs (
@@ -175,7 +214,7 @@ CREATE TABLE public.webhook_logs (
 );
 
 -- ============================================================
--- 9. CREWS TABLE
+-- 11. CREWS TABLE
 -- ============================================================
 CREATE TABLE public.crews (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

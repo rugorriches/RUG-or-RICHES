@@ -4,8 +4,6 @@ const crypto = require("crypto");
 const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
-
 // MUST match moontap.html UP[] (base, mul). cost = floor(base * mul^level)
 const UP = {
   power:     { base: 50,  mul: 1.6 },
@@ -64,7 +62,12 @@ module.exports = async (req, res) => {
       const { rows: ur } = await client.query("SELECT * FROM upgrades WHERE player_id = $1 FOR UPDATE", [uid]);
       const level = ur.length ? (ur[0][key] || 0) : 0;
       if (level >= MAX_LEVEL) { await client.query("ROLLBACK"); return json(res, 400, { error: "Max level" }); }
-      const cost = Math.floor(UP[key].base * Math.pow(UP[key].mul, level));
+      const rawCost = UP[key].base * Math.pow(UP[key].mul, level);
+      if (!Number.isFinite(rawCost) || rawCost > Number.MAX_SAFE_INTEGER) {
+        await client.query("ROLLBACK");
+        return json(res, 400, { error: "Upgrade cost exceeds supported range" });
+      }
+      const cost = Math.floor(rawCost);
       if ((pr[0].balance || 0) < cost) { await client.query("ROLLBACK"); return json(res, 400, { error: "Insufficient balance", cost }); }
 
       await client.query("UPDATE players SET balance = GREATEST(balance - $2, 0) WHERE id = $1", [uid, cost]);
@@ -75,7 +78,12 @@ module.exports = async (req, res) => {
       const { rows: out } = await client.query("SELECT balance FROM players WHERE id = $1", [uid]);
       const { rows: uout } = await client.query("SELECT * FROM upgrades WHERE player_id = $1", [uid]);
       await client.query("COMMIT");
-      return json(res, 200, { ok: true, balance: out[0].balance, upgrades: uout[0], spent: cost });
+      return json(res, 200, {
+        ok: true,
+        spent: cost,
+        player: { balance: out[0].balance },
+        upgrades: uout[0]
+      });
     } catch (e) { await client.query("ROLLBACK"); throw e; }
     finally { client.release(); }
   } catch (err) {
