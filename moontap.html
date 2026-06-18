@@ -99,12 +99,12 @@
   .price-now .x{font-size:14px; opacity:.7;}
   .price-chg{font-size:12px; font-weight:800;}
   .price-meta{text-align:right; font-size:9px; color:#9a82c9; line-height:1.35;}
-  #chart{width:100%; height:140px; display:block;}
+  #chart{width:100%; height:130px; display:block;}
   .chart-card.danger{animation:cardDanger .5s infinite alternate;}
   @keyframes cardDanger{to{box-shadow:0 8px 38px rgba(255,59,92,.5), inset 0 1px 0 rgba(255,255,255,.08);}}
   .ticker{position:absolute; top:9px; right:11px; font-size:9px; color:#8fdcff; background:rgba(0,0,0,.35); padding:2px 7px; border-radius:6px; animation:livepulse 1.4s ease-in-out infinite;}
   @keyframes livepulse{50%{opacity:.5;}}
-  .feed{height:13px; overflow:hidden; margin-top:1px; font-size:9px; line-height:13px; position:relative;}
+  .feed{display:none;}   /* hidden to declutter the Trade screen — pressure bar + market stats still convey activity */
   .feed div{position:absolute; width:100%; animation:feedup .5s ease;}
   @keyframes feedup{from{transform:translateY(16px);opacity:0;}to{transform:none;opacity:1;}}
   .feed .b{color:var(--green);} .feed .s{color:var(--red);}
@@ -679,7 +679,7 @@
     <div class="predict-sub" id="predSub">Call the next 5s — win 1.8× · stake = your bet</div>
   </div>
 
-  <div class="pot compact">
+  <div class="pot compact" id="potRow" style="display:none">
     <span class="lab">AT RISK</span><span class="amt" id="pot">0</span>
     <span class="combo" id="combo"></span><span class="wintag" id="winTag"></span>
   </div>
@@ -1566,6 +1566,7 @@
     dPot+=(pot-dPot)*0.3;dBal+=(S.balance-dBal)*0.2;dAir+=(S.airdrop-dAir)*0.2;
     if(Math.abs(pot-dPot)<1)dPot=pot;if(Math.abs(S.balance-dBal)<1)dBal=S.balance;if(Math.abs(S.airdrop-dAir)<1)dAir=S.airdrop;
     $("pot").textContent=fmt(dPot);$("balance").textContent=fmt(dBal);$("airdrop").textContent=fmt(dAir);
+    {const pr=$("potRow");if(pr)pr.style.display=(pot>=1)?"flex":"none";}   // only show AT RISK when you actually hold a position
     $("streak").textContent=S.streak+"🔥";
     const cr=$("coinRing");if(cr)cr.style.setProperty("--xp",clamp(S.coinXp/(S.coinLevel*50)*100,0,100)+"%");const cl=$("coinLvl");if(cl)cl.textContent="Lv "+S.coinLevel;
     const me=maxEnergy();const ef=$("energyFill");ef.style.width=(energy/me*100)+"%";ef.classList.toggle("low",energy/me<0.25);$("energyTxt").textContent=Math.floor(energy)+"/"+Math.floor(me);
