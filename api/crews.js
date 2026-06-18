@@ -41,18 +41,24 @@ function cleanName(value, fallback) {
   return name.slice(0, 18) || "degen";
 }
 
+let crewSchemaReady;
 async function ensureSchema() {
-  await db.query("ALTER TABLE crews ADD COLUMN IF NOT EXISTS leader_id BIGINT REFERENCES players(id) ON DELETE SET NULL");
-  // NOTE: no FK to crews(id) — crews.id type differs from BIGINT on some deploys, which makes the
-  // FK "cannot be implemented" and blocks the whole table. We store crew_id loosely and clean orphans separately.
-  await db.query(`CREATE TABLE IF NOT EXISTS crew_chat (
-    id BIGSERIAL PRIMARY KEY,
-    crew_id BIGINT,
-    player_id BIGINT,
-    name VARCHAR(24),
-    msg VARCHAR(200),
-    created_at TIMESTAMPTZ DEFAULT now())`);
-  await db.query("CREATE INDEX IF NOT EXISTS crew_chat_idx ON crew_chat(crew_id, created_at DESC)");
+  if (crewSchemaReady) return crewSchemaReady;
+  crewSchemaReady = (async () => {
+    await db.query("ALTER TABLE crews ADD COLUMN IF NOT EXISTS leader_id BIGINT REFERENCES players(id) ON DELETE SET NULL");
+    // crews.id is a UUID, so crew_id must be TEXT (no FK). store it loosely; clean orphans separately.
+    await db.query(`CREATE TABLE IF NOT EXISTS crew_chat (
+      id BIGSERIAL PRIMARY KEY,
+      crew_id TEXT,
+      player_id BIGINT,
+      name VARCHAR(24),
+      msg VARCHAR(200),
+      created_at TIMESTAMPTZ DEFAULT now())`);
+    // migrate any earlier table that shipped with a BIGINT crew_id (which rejected UUID crew ids)
+    await db.query("ALTER TABLE crew_chat ALTER COLUMN crew_id TYPE TEXT USING crew_id::text").catch(() => {});
+    await db.query("CREATE INDEX IF NOT EXISTS crew_chat_idx ON crew_chat(crew_id, created_at DESC)");
+  })();
+  return crewSchemaReady;
 }
 
 async function postChat(playerId, text) {

@@ -261,7 +261,7 @@ module.exports = async (req, res) => {
           inline_keyboard: [
             [{ text: "🎮 Play RUG OR RICHES", web_app: { url: WEBAPP_URL } }],
             [{ text: "📢 Channel", url: CHANNEL_URL }, { text: "💬 Group", url: GROUP_URL }],
-            [{ text: "🐦 Follow on X", url: X_URL }, { text: "🪂 Airdrop", web_app: { url: WEBAPP_URL } }]
+            [{ text: "🐦 Follow on X", url: X_URL }, { text: "🪂 Airdrop", web_app: { url: WEBAPP_URL + (WEBAPP_URL.includes("?") ? "&" : "?") + "tab=airdrop" } }]
           ]
         };
         // try a rich photo message; if the image URL isn't reachable yet, fall back to text so /start never breaks
