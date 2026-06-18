@@ -33,9 +33,10 @@
   body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--bg);
     overflow-x:hidden; line-height:1.5;}
   /* persistent neon frame around the page content at any screen size */
-  .page-frame{position:fixed; inset:10px; border:1.5px solid rgba(124,77,255,.40); border-radius:18px; pointer-events:none; z-index:120;
+  .page-frame{position:fixed; top:10px; bottom:10px; left:max(10px,calc(50% - 600px)); right:max(10px,calc(50% - 600px));
+    border:1.5px solid rgba(124,77,255,.45); border-radius:18px; pointer-events:none; z-index:120;
     box-shadow:inset 0 0 40px rgba(124,77,255,.10), 0 0 26px rgba(35,240,255,.06);}
-  @media(max-width:600px){ .page-frame{inset:6px; border-radius:13px;} }
+  @media(max-width:600px){ .page-frame{top:6px; bottom:6px; left:6px; right:6px; border-radius:13px;} }
   a{color:inherit; text-decoration:none;}
   /* ambient background */
   .bg{position:fixed; inset:0; z-index:-2; overflow:hidden; background:radial-gradient(130% 90% at 50% -10%,#34125e 0%,var(--bg2) 45%,var(--bg) 85%);}
