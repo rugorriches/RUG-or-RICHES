@@ -7,7 +7,7 @@ const AIRDROP_CAP = 100000000;
 
 // /start message config — override any of these with Vercel env vars
 const WEBAPP_URL = process.env.WEBAPP_URL || "https://rugorriches.app/play";
-const WELCOME_IMAGE = process.env.WELCOME_IMAGE_URL || "https://rugorriches.app/assets/brand/social-share.jpg";
+const WELCOME_IMAGE = process.env.WELCOME_IMAGE_URL || "https://rugorriches.app/assets/brand/welcome.png";
 const CHANNEL_URL = process.env.CHANNEL_URL || "https://t.me/rugorricheslounge";
 const GROUP_URL = process.env.GROUP_URL || "https://t.me/rugorricheslounge";
 const X_URL = process.env.X_URL || "https://x.com/RUGorRICHESApp";
@@ -252,11 +252,13 @@ module.exports = async (req, res) => {
         const caption =
           `🦈 <b>Welcome to RUG OR RICHES</b> ($MOON)\n` +
           `<i>Pump it. Bank it. Before it rugs.</i>\n\n` +
-          `📈 Tap to pump a live $MOON chart, ride the gains as high as you dare — then cash out before the rug wipes your bag.\n` +
-          `🪂 Stack <b>Airdrop Points</b> all Season 1.\n` +
-          `🤝 Invite friends — you <b>both</b> bank 5,000 $MOON.\n` +
-          `🏆 Climb the global leaderboard 🦐 → 🦖\n\n` +
-          `Tap <b>Play</b> and don't get rekt. 💀`;
+          `📈 Tap to pump a live $MOON chart, ride the gains, then cash out before the rug wipes your bag.\n` +
+          `🎭 Earn <b>Airdrop Points</b> during Season 1.\n` +
+          `🤝 Invite friends and climb faster.\n` +
+          `🏆 Climb the global leaderboard from Shrimp to Megalodon.\n\n` +
+          `Free to play. No wallet needed.\n` +
+          `Tap <b>Play</b> and don't get rekt. 💀\n\n` +
+          `<i>Beta build — some features may have small issues while we polish. No financial advice. No token value promises.</i>`;
         const keyboard = {
           inline_keyboard: [
             [{ text: "🎮 Play RUG OR RICHES", web_app: { url: WEBAPP_URL } }],
