@@ -4521,8 +4521,7 @@
           <div class="emo">👑</div>
           <div class="grow">
             <div class="nm">VIP & bet limits</div>
-            <div class="ds">Your <b>max bet per click is capped by VIP tier</b> (None 1K → Bronze 5K → Silver 25K → Gold
-              150K → Diamond 1M). VIP also boosts earnings, energy and rug protection.</div>
+            <div class="ds">Your <b>max bet per click is set by rank × VIP multiplier</b> (rank sets the base: Shrimp 1K → Megalodon 1M; VIP multiplies it: None 1× → Diamond 5×, up to 5M). VIP also boosts earnings, energy, and rug protection.</div>
           </div>
         </div>
       </div>
@@ -6369,6 +6368,21 @@
           '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you\'ve banked. The chest just doesn\'t unlock that week. A fresh rival is matched next week.</div></details>' +
           '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
         wrap.appendChild(f);
+      }
+      async function renderDaily() {
+        const wrap = $("dailyView"); if (!wrap) return;
+        wrap.innerHTML = '<div class="dly-load">Loading today’s degens…</div>';
+        let d = null;
+        try { d = await cloudAction("/api/daily", {}); } catch (e) { }
+        if (!d) { try { const r = await fetch("/api/daily"); d = await r.json(); } catch (e) { } }
+        if (!d || !d.top) { wrap.innerHTML = '<div class="dly-load">Daily board unavailable — try again soon.</div>'; return; }
+        const secs = d.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
+        let html = '<div class="dly-head"><div class="dly-title">🏆 Daily Challenge</div><div class="dly-sub">Biggest single bank today · resets in ' + hh + 'h ' + mm + 'm</div></div>';
+        html += '<div class="dly-prize">💰 Prize pool: ' + fmt(d.prizePool || 0) + ' $MOON · top 10</div>';
+        if (d.me) { html += '<div class="dly-me">You: ' + (d.me.rank ? ('#' + d.me.rank + ' of ' + d.me.players) : 'unranked — bank a run to enter') + (d.me.bank ? (' · best ' + fmt(d.me.bank) + ' (' + (d.me.mult || 1).toFixed(2) + 'x)') : '') + '</div>'; }
+        if (!d.top.length) { html += '<div class="dly-empty">No banks yet today — be the first! 🦈</div>'; }
+        else { d.top.forEach(r => { html += '<div class="crewrow' + (d.me && d.me.rank === r.rank ? ' me' : '') + '"><div class="rk">' + r.rank + '</div><div class="nm">' + esc(r.name) + '<div class="ds">' + (r.mult || 1).toFixed(2) + 'x · ' + (r.runs || 0) + ' runs</div></div><div class="sc">' + fmt(r.bank) + '</div></div>'; }); }
+        wrap.innerHTML = html;
       }
       async function renderCrash() {
         const wrap = $("crashView"); if (!wrap) return;

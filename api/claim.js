@@ -13,8 +13,8 @@ const COMBO_TAPS = 300;
 const SOCIAL_IDS = new Set(["x", "tg_channel", "tg_group", "ig"]);
 const MILESTONES = new Map([[1, 10000], [3, 35000], [5, 90000], [10, 250000], [25, 900000]]);
 const VIP_MOON = new Map([
-  [1, { cost: 250000, lifetime: 250000 }],
-  [2, { cost: 2000000, lifetime: 2500000 }]
+  [1, { cost: 250000, lifetime: 500000 }],
+  [2, { cost: 2000000, lifetime: 7500000 }]
 ]);
 const RANKS = [
   { min: 0, energy: 0, daily: 1 },
