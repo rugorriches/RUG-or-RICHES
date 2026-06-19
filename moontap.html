@@ -34,7 +34,7 @@
   #gameScroll{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   #gameScroll::-webkit-scrollbar{width:0; height:0;}
   #gameScroll>*{flex-shrink:1;}
-  #gameScroll>.coin-stage{flex:1 1 auto; min-height:64px;}   /* BUY area absorbs slack (incl. the AT-RISK row after a bet) so the screen never needs to scroll */
+  #gameScroll>.coin-stage{flex:1 1 auto; min-height:96px;}   /* slot must fit the BUY button so it can't overflow onto energy/rug rows; if the screen is too tight #gameScroll scrolls instead of overlapping */
   #gameScroll>.chart-card{flex:0 0 auto;}
   @media(max-height:760px){ #chart{height:100px;} }   /* short phones: trim the chart so the nav stays on-screen */
 
@@ -137,7 +137,7 @@
   .wintag:not(:empty){height:13px;}
   .coin-stage{flex:0 0 auto; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; padding:0; margin-top:0;}
   /* clicker = in-theme crypto BUY button (obsidian base + gold glow + cyan/magenta ring) */
-  #coin{width:min(96%,360px); min-height:96px; height:104px; border-radius:24px; cursor:pointer; position:relative; overflow:hidden;
+  #coin{width:min(96%,360px); height:100%; min-height:60px; max-height:104px; border-radius:24px; cursor:pointer; position:relative; overflow:hidden;
     background:radial-gradient(130% 150% at 50% -25%, #2b1a5c 0%, #1a0f3e 52%, #0e0826 100%);
     display:flex; align-items:center; gap:15px; padding:0 22px; transition:transform .07s, box-shadow .2s;
     box-shadow:0 14px 34px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), 0 0 30px -8px var(--coin-accent,#ffd400);}
