@@ -80,8 +80,8 @@
     backdrop-filter:blur(6px); border-radius:12px; padding:4px 4px; text-align:center;
     box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .15s;}
   .stat:active{transform:translateY(-2px) scale(1.02);}
-  .stat .v{font-size:15px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
-  .stat .l{font-size:8px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase; margin-top:1px;}
+  .stat .v{font-size:18px; font-weight:800; text-shadow:0 0 10px rgba(35,240,255,.35);}
+  .stat .l{font-size:10px; letter-spacing:.5px; color:#a78fd6; text-transform:uppercase; margin-top:2px;}
   #balance{color:var(--gold);}
 
   /* chart */
@@ -115,7 +115,7 @@
 
   /* rug meter */
   .rug-wrap{padding:4px 14px 2px;}
-  .rug-label{display:flex; justify-content:space-between; font-size:9px; letter-spacing:.5px; color:#cbb6ff; margin-bottom:2px;}
+  .rug-label{display:flex; justify-content:space-between; font-size:11px; font-weight:700; letter-spacing:.3px; color:#cbb6ff; margin-bottom:3px;}
   .rug-bar{height:18px; border-radius:10px; background:#1c0e36; border:1px solid var(--line); position:relative; overflow:visible;}
   #rugFill{height:100%; width:0%; border-radius:10px; background:linear-gradient(90deg,var(--green),var(--gold) 55%,var(--red)); transition:width .12s linear; position:relative; overflow:hidden;}
   #rugFill::after{content:""; position:absolute; inset:0; background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 8px,transparent 8px 16px); opacity:0;}
@@ -196,7 +196,7 @@
   .energy-bar .en-count{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); letter-spacing:.3px;}
   .en-buy{flex:0 0 auto; border:none; border-radius:9px; padding:6px 11px; font-size:11px; font-weight:900; cursor:pointer; color:#13002a; background:linear-gradient(90deg,var(--gold),#ffe169); box-shadow:0 2px 8px rgba(255,212,0,.35); transition:transform .08s, filter .15s;}
   .en-buy:active{transform:scale(.94);}
-  .en-sub{padding:2px 14px 0; font-size:9.5px; color:#9c92c4; letter-spacing:.02em;}
+  .en-sub{padding:2px 14px 0; font-size:11px; color:#9c92c4; letter-spacing:.02em;}
   .en-sub b{color:var(--cyan);}
   /* rewards hub */
   .reward-card{align-items:center;}
@@ -441,7 +441,7 @@
   .betmid{flex:1; text-align:center; min-width:0;}
   .betval{font-size:17px; font-weight:900; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:7px; line-height:1;}
   .curtog{border:none; background:rgba(35,240,255,.18); color:var(--cyan); border-radius:9px; padding:3px 9px; font-size:13px; cursor:pointer;}
-  .betsub{font-size:11px; color:#a78fd6; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
+  .betsub{font-size:12px; color:#a78fd6; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
   .betrow{display:flex; align-items:center; gap:14px; justify-content:center;}
   .betbig{font-size:24px; font-weight:900; color:var(--gold); min-width:170px; text-align:center;}
   .presets{display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; justify-content:center;}
@@ -528,7 +528,7 @@
   .sicon:hover{border-color:rgba(35,240,255,.5);}
   .sicon:active{transform:scale(.88); background:rgba(255,255,255,.16);}
   /* trade console (cleaner bet area) */
-  .console{margin:5px 10px 3px; padding:5px 10px 6px; border-radius:16px; border:1px solid rgba(35,240,255,.26);
+  .console{margin:2px 10px 4px; padding:6px 10px 7px; border-radius:16px; border:1px solid rgba(35,240,255,.26);
     background:linear-gradient(180deg,rgba(35,240,255,.07),rgba(124,77,255,.12) 42%,rgba(8,4,20,.72));
     box-shadow:0 -6px 24px rgba(0,0,0,.42), inset 0 1px 0 rgba(124,77,255,.38), 0 0 24px rgba(35,240,255,.08);}
   .console .energy-row{margin-bottom:4px;}
@@ -683,16 +683,6 @@
     <div class="rug-bar" id="rugBar"><div id="rugFill"></div><div id="rugSkull">💀</div><div id="rugPct">0%</div></div>
   </div>
 
-  <button class="predict-toggle" id="predictToggle">🔮 Predict next move <span class="caret">▾</span></button>
-  <div class="predict collapsed" id="predictBar">
-    <div class="predict-h">🔮 PREDICT next move <span id="predTimer"></span></div>
-    <div class="predict-btns">
-      <button class="pbtn long" id="predLong">📈 LONG</button>
-      <button class="pbtn short" id="predShort">📉 SHORT</button>
-    </div>
-    <div class="predict-sub" id="predSub">Call the next 5s — win 1.8× · stake = your bet</div>
-  </div>
-
   <div class="pot compact" id="potRow" style="display:none">
     <span class="lab">AT RISK</span><span class="amt" id="pot">0</span>
     <span class="combo" id="combo"></span><span class="wintag" id="winTag"></span>
@@ -712,6 +702,16 @@
       <button class="betadj" id="betUp" aria-label="Increase bet">+</button>
     </div>
     <div class="actions"><button class="btn half" id="sellHalf">✂️ SELL 50%</button><button class="btn sell" id="cashout">💰 SELL ALL</button></div>
+  </div>
+
+  <button class="predict-toggle" id="predictToggle">🔮 Predict next move <span class="caret">▾</span></button>
+  <div class="predict collapsed" id="predictBar">
+    <div class="predict-h">🔮 PREDICT next move <span id="predTimer"></span></div>
+    <div class="predict-btns">
+      <button class="pbtn long" id="predLong">📈 LONG</button>
+      <button class="pbtn short" id="predShort">📉 SHORT</button>
+    </div>
+    <div class="predict-sub" id="predSub">Call the next 5s — win 1.8× · stake = your bet</div>
   </div>
   </div><!-- /gameScroll -->
 
