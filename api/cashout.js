@@ -57,6 +57,19 @@ async function ensureSchema() {
           PRIMARY KEY (player_id, round_id)
         )
       `);
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS daily_scores (
+          player_id BIGINT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+          day DATE NOT NULL,
+          best_bank BIGINT DEFAULT 0 NOT NULL,
+          best_mult DOUBLE PRECISION DEFAULT 1 NOT NULL,
+          banked_total BIGINT DEFAULT 0 NOT NULL,
+          runs INT DEFAULT 0 NOT NULL,
+          updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+          PRIMARY KEY (player_id, day)
+        )
+      `);
+      await db.query("CREATE INDEX IF NOT EXISTS daily_scores_day_bank ON daily_scores(day, best_bank DESC)");
     })();
   }
   return schemaReady;
@@ -291,6 +304,22 @@ module.exports = async (req, res) => {
          WHERE player_id = $1 AND round_id = $2`,
         [playerId, roundId, roundInvested, clicks, outcome !== "half"]
       );
+
+      // Daily Seed Challenge — record this validated bank against today's leaderboard (UTC day)
+      if (successfulCashout && payout > 0) {
+        const dayKey = now.toISOString().slice(0, 10);
+        await client.query(
+          `INSERT INTO daily_scores (player_id, day, best_bank, best_mult, banked_total, runs)
+           VALUES ($1, $2::date, $3, $4, $3, 1)
+           ON CONFLICT (player_id, day) DO UPDATE SET
+             best_bank = GREATEST(daily_scores.best_bank, EXCLUDED.best_bank),
+             best_mult = GREATEST(daily_scores.best_mult, EXCLUDED.best_mult),
+             banked_total = daily_scores.banked_total + EXCLUDED.best_bank,
+             runs = daily_scores.runs + 1,
+             updated_at = now()`,
+          [playerId, dayKey, payout, peak]
+        );
+      }
 
       await client.query("INSERT INTO quests (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [playerId]);
       await resetQuestPeriods(client, playerId, now);

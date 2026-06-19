@@ -16,6 +16,7 @@
     { "src": "/api/cashout", "dest": "/api/cashout.js" },
     { "src": "/api/upgrade", "dest": "/api/upgrade.js" },
     { "src": "/api/claim", "dest": "/api/claim.js" },
+    { "src": "/api/daily", "dest": "/api/daily.js" },
     { "src": "/api/gift", "dest": "/api/gift.js" },
     { "src": "/api/cron", "dest": "/api/cron.js" },
     { "src": "/play", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/moontap.html" },
