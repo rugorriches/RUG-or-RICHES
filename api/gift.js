@@ -106,8 +106,4 @@ module.exports = async (req, res) => {
       return json(res, 200, { ok: true, balance: Number(out[0].balance) || 0, sent: amount });
     } catch (e) { await client.query("ROLLBACK"); throw e; }
     finally { client.release(); }
-  } catch (err) {
-    console.error("[gift] error:", err.message);
-    return json(res, 500, { error: err.message });
-  }
-};
+  } catch

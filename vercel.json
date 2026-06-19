@@ -32,9 +32,4 @@
     { "src": "/tokenomics", "dest": "/tokenomics.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ],
-  "crons": [
-    { "path": "/api/cron?job=nudge", "schedule": "0 17 * * *" },
-    { "path": "/api/cron?job=recap", "schedule": "0 16 * * 1" },
-    { "path": "/api/cron?job=payouts", "schedule": "0 15 * * 1" }
-  ]
-}
+  "cron
