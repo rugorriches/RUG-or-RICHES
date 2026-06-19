@@ -4572,6 +4572,13 @@
     (function () {
       "use strict";
       const $ = id => document.getElementById(id);
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (tg) {
+        try {
+          tg.ready();
+          tg.expand();
+        } catch (e) { }
+      }
       const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
       const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       const fmt = n => {
