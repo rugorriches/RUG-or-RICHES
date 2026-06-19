@@ -56,10 +56,13 @@ module.exports = async (req, res) => {
   const data = verifyInitData(body.initData);
   if (!data || !data.user) return json(res, 401, { error: "Unauthorized initData" });
   const fromId = data.user.id;
-  const toCode = String(body.toCode || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  let toUsername = String(body.toUsername || "").trim();
+  if (toUsername.startsWith("@")) {
+    toUsername = toUsername.slice(1);
+  }
   const amount = Math.floor(Number(body.amount) || 0);
 
-  if (!toCode) return json(res, 400, { error: "Missing recipient code" });
+  if (!toUsername) return json(res, 400, { error: "Missing recipient username" });
   if (amount < MIN_GIFT) return json(res, 400, { error: "Minimum gift is " + MIN_GIFT + " $MOON" });
   if (amount > MAX_GIFT) return json(res, 400, { error: "Max " + MAX_GIFT + " $MOON per gift" });
 
@@ -68,8 +71,8 @@ module.exports = async (req, res) => {
     const client = await db.pool.connect();
     try {
       await client.query("BEGIN");
-      const { rows: toRows } = await client.query("SELECT id FROM players WHERE ref_code = $1", [toCode]);
-      if (toRows.length === 0) { await client.query("ROLLBACK"); return json(res, 404, { error: "No player with that code" }); }
+      const { rows: toRows } = await client.query("SELECT id FROM players WHERE LOWER(username) = LOWER($1)", [toUsername]);
+      if (toRows.length === 0) { await client.query("ROLLBACK"); return json(res, 404, { error: "No player with that username" }); }
       const toId = toRows[0].id;
       if (String(toId) === String(fromId)) { await client.query("ROLLBACK"); return json(res, 400, { error: "You can't gift yourself" }); }
 
