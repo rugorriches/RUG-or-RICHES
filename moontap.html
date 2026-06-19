@@ -1543,7 +1543,9 @@
   function startBust(type){if(busting)return;busting=true;bustFrames=14;S.rugs++;unlock("first");
     bustType=type||"hard";bustTarget=bustType==="soft"?price*0.45:price*0.12;
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
-    const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
+    let rescued=Math.floor(pot*(vaultPct()+keep));
+    rescued=Math.min(rescued,Math.floor(invested*(bustType==="soft"?0.9:0.8)));   // a rug must always sting — never recover more than your stake (no profitable rugs)
+    if(rescued>0)addCur(cur,rescued);
     const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+lost);
     const wiped=Math.max(0,Math.floor(pot-rescued));   // value actually dumped from the at-risk pot (what the player sees lost)
     const settlement={cur:"moon",payout:rescued,invested:Math.max(1,Math.floor(invested)),roundInvested:Math.max(1,Math.floor(roundInvestedTotal||invested)),peak:roundPeak,clicks:roundClicks,outcome:"rug",roundId:roundId||actionToken()};
