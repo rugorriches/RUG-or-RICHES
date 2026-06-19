@@ -97,7 +97,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      padding-bottom: calc(4px + env(safe-area-inset-bottom));
     }
 
     #gameScroll::-webkit-scrollbar {
@@ -121,7 +121,7 @@
 
     @media(max-height:760px) {
       #chart {
-        height: 72px;
+        height: 60px;
       }
       header {
         padding: 3px 12px 1px;
@@ -167,12 +167,12 @@
         font-size: 10px;
       }
       #gameScroll>.coin-stage {
-        min-height: 76px;
+        min-height: 66px;
       }
       #coin {
-        height: 72px;
-        min-height: 60px;
-        max-height: 76px;
+        height: 64px;
+        min-height: 56px;
+        max-height: 68px;
         border-radius: 20px;
         gap: 12px;
         padding: 0 18px;
@@ -559,7 +559,7 @@
 
     #chart {
       width: 100%;
-      height: 116px;
+      height: 80px;
       display: block;
     }
 
@@ -3748,7 +3748,7 @@
       }
 
       .console {
-        margin: 16px 10px 1px;
+        margin: 2px 10px 1px;
         padding: 4px 8px 5px;
         border-radius: 13px;
       }
@@ -4300,6 +4300,7 @@
         <button class="rtab" data-rt="mycrew">My Crew</button>
         <button class="rtab" data-rt="wars">⚔️ Wars</button>
         <button class="rtab" data-rt="daily">🏆 Daily</button>
+        <button class="rtab" data-rt="crash">💥 Crash</button>
       </div>
       <div class="rt" id="rt-rank">
         <div class="rank-hero">
@@ -4332,6 +4333,9 @@
       </div>
       <div class="rt" id="rt-daily" style="display:none">
         <div id="dailyView"></div>
+      </div>
+      <div class="rt" id="rt-crash" style="display:none">
+        <div id="crashView"></div>
       </div>
     </div>
 
@@ -6366,27 +6370,143 @@
           '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
         wrap.appendChild(f);
       }
-      async function renderDaily() {
-        const wrap = $("dailyView"); if (!wrap) return;
-        wrap.innerHTML = '<div class="dly-load">Loading today’s degens…</div>';
+      async function renderCrash() {
+        const wrap = $("crashView"); if (!wrap) return;
+        wrap.innerHTML = '<div class="dly-load">Loading Daily Crash...</div>';
+        const headers = {};
+        if (tg && tg.initData) {
+          headers["Authorization"] = "tma " + tg.initData;
+        }
+        let url = "/api/crash";
+        if (tg && tg.initData) {
+          url += "?initData=" + encodeURIComponent(tg.initData);
+        }
         let d = null;
-        try { d = await cloudAction("/api/daily", {}); } catch (e) { }
-        if (!d) { try { const r = await fetch("/api/daily"); d = await r.json(); } catch (e) { } }
-        if (!d || !d.top) { wrap.innerHTML = '<div class="dly-load">Daily board unavailable — try again soon.</div>'; return; }
+        try {
+          const res = await fetch(url, { headers });
+          d = await res.json();
+        } catch (e) { }
+        if (!d || !d.today) {
+          wrap.innerHTML = '<div class="dly-load">Daily Crash unavailable — try again soon.</div>';
+          return;
+        }
         const secs = d.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
-        let html = '<div class="dly-head"><div class="dly-title">🏆 Daily Challenge</div><div class="dly-sub">Biggest single bank today · resets in ' + hh + 'h ' + mm + 'm</div></div>';
-        html += '<div class="dly-prize">💰 Prize pool: ' + fmt(d.prizePool || 0) + ' $MOON · top 10</div>';
-        if (d.me) { html += '<div class="dly-me">You: ' + (d.me.rank ? ('#' + d.me.rank + ' of ' + d.me.players) : 'unranked — bank a run to enter') + (d.me.bank ? (' · best ' + fmt(d.me.bank) + ' (' + (d.me.mult || 1).toFixed(2) + 'x)') : '') + '</div>'; }
-        if (!d.top.length) { html += '<div class="dly-empty">No banks yet today — be the first! 🦈</div>'; }
-        else { d.top.forEach(r => { html += '<div class="crewrow' + (d.me && d.me.rank === r.rank ? ' me' : '') + '"><div class="rk">' + r.rank + '</div><div class="nm">' + esc(r.name) + '<div class="ds">' + (r.mult || 1).toFixed(2) + 'x · ' + (r.runs || 0) + ' runs</div></div><div class="sc">' + fmt(r.bank) + '</div></div>'; }); }
+        let html = '<div class="dly-head"><div class="dly-title">💥 Daily Crash Pick</div><div class="dly-sub">Resets in ' + hh + 'h ' + mm + 'm</div></div>';
+        
+        html += '<div class="card"><div class="ds" style="line-height:1.5;font-size:12px">' +
+                'Pick a multiplier from <b>1.01x</b> to <b>100.00x</b>. Today\'s secret crash point is already committed on the server. ' +
+                'If the crash point is <b>equal to or above</b> your pick, you survive! Otherwise, you get rekt. ' +
+                '<br><span style="color:var(--gold);font-weight:bold">Provably Fair:</span> yesterday\'s seed is revealed below so you can verify the results.' +
+                '</div></div>';
+
+        if (d.myPlay) {
+          html += '<div class="card" style="border:1px dashed var(--gold);background:rgba(255,212,0,0.04);margin-top:10px;text-align:center;padding:12px 10px">' +
+                  '<div style="font-size:16px;font-weight:900;color:var(--gold);margin-bottom:4px">🔒 Locked — Pending Reveal</div>' +
+                  '<div class="ds">Your target: <b style="color:#fff">' + d.myPlay.target.toFixed(2) + 'x</b></div>' +
+                  '<div class="ds" style="font-size:10px;color:#a78fd6;margin-top:6px">Your pick is locked. Tomorrow\'s seed reveal will prove if the crash point cleared your target.</div>' +
+                  '</div>';
+        } else {
+          html += '<div class="card" style="margin-top:10px;padding:12px">' +
+                  '<div class="sec-h" style="margin:0 0 8px;font-size:12px">Lock in your pick</div>' +
+                  '<div class="ds" style="margin-bottom:8px">Enter target multiplier (1.01x to 100.00x):</div>' +
+                  '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">' +
+                  '<input id="crashTarget" type="number" step="0.01" min="1.01" max="100.00" placeholder="2.00" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid var(--line);border-radius:10px;padding:9px;color:#fff;font-weight:900;font-size:16px;text-align:center">' +
+                  '<span style="font-weight:bold;color:#a78fd6">x</span>' +
+                  '</div>' +
+                  '<button class="big-btn" id="crashSubmit" style="margin:0">🔒 Lock in multiplier</button>' +
+                  '<div class="ds" style="font-size:10px;color:var(--red);margin-top:8px;text-align:center">⚠️ Warning: you get only ONE pick per day. Cannot be changed!</div>' +
+                  '</div>';
+        }
+
+        html += '<div class="sec-h">Provable Fairness</div>' +
+                '<div class="card" style="font-size:10px;line-height:1.4;word-break:break-all;padding:10px 12px">' +
+                '<b>Today\'s Committed Hash:</b><br><code style="color:var(--cyan)">' + d.today.commitHash + '</code><br><br>';
+
+        if (d.latestReveal && d.latestReveal.seed) {
+          html += '<b>Yesterday\'s Reveal (' + d.latestReveal.day + '):</b><br>' +
+                  'Seed: <code style="color:var(--gold)">' + d.latestReveal.seed + '</code><br>' +
+                  'Crash Point: <b style="color:var(--green)">' + d.latestReveal.crashPoint.toFixed(2) + 'x</b><br>';
+          if (d.myLatestReveal) {
+            const isWin = d.myLatestReveal.win;
+            html += '<div style="margin-top:6px;font-weight:bold;color:' + (isWin ? 'var(--green)' : 'var(--red)') + '">' +
+                    'Your Pick: ' + d.myLatestReveal.target.toFixed(2) + 'x — ' + (isWin ? '🏆 SURVIVED' : '💀 REKT') + '</div>';
+          } else {
+            html += '<div style="margin-top:6px;color:#a78fd6">You did not participate yesterday.</div>';
+          }
+        } else {
+          html += 'Yesterday\'s reveal will appear here tomorrow.';
+        }
+        html += '<div style="margin-top:8px;font-size:9.5px;color:#a78fd6;line-height:1.35">' +
+                'Today\'s hash proves the server committed to the crash seed before picks were made. Tomorrow, the raw seed is revealed so anyone can verify the crash point.' +
+                '</div></div>';
+
+        html += '<div class="sec-h" style="display:flex;justify-content:space-between;align-items:center">' +
+                '<span>🏆 Yesterday\'s Survivors</span>' +
+                '<span style="font-size:9.5px;text-transform:none;color:#a78fd6">Picks locked today: ' + (d.todayLockedCount || 0) + '</span>' +
+                '</div>';
+
+        if (!d.leaderboard || !d.leaderboard.length) {
+          html += '<div class="dly-empty">No survivors recorded yesterday.</div>';
+        } else {
+          d.leaderboard.forEach(r => {
+            const isMe = S.name && r.name && S.name.toLowerCase() === r.name.toLowerCase();
+            html += '<div class="crewrow' + (isMe ? ' me' : '') + '">' +
+                    '<div class="rk">' + r.rank + '</div>' +
+                    '<div class="nm">' + esc(r.name) + (r.vip ? (' <span class="vip-badge" style="font-size:8px;padding:0px 4px;border-radius:4px;background:var(--gold);color:#000">VIP ' + r.vip + '</span>') : '') + '</div>' +
+                    '<div class="sc">' + r.target.toFixed(2) + 'x</div>' +
+                    '</div>';
+          });
+        }
         wrap.innerHTML = html;
+
+        const sub = $("crashSubmit");
+        if (sub) {
+          sub.addEventListener("click", async () => {
+            const val = parseFloat($("crashTarget").value);
+            if (isNaN(val) || val < 1.01 || val > 100.00) {
+              toast("⚠️", "Invalid multiplier", "Enter a multiplier between 1.01x and 100.00x");
+              return;
+            }
+            if (!tg || !tg.initData) {
+              toast("🔒", "Telegram required", "Open inside Telegram to participate");
+              return;
+            }
+            sub.disabled = true;
+            sub.textContent = "Locking in…";
+            try {
+              const body = { target: val };
+              body.initData = tg.initData;
+              const res = await fetch("/api/crash", {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  "Authorization": "tma " + tg.initData
+                },
+                body: JSON.stringify(body)
+              });
+              const resData = await res.json();
+              if (resData && resData.ok) {
+                toast("🔒", "Pick Locked", "Your multiplier of " + val.toFixed(2) + "x is locked!");
+                renderCrash();
+              } else {
+                toast("⚠️", "Lock failed", (resData && resData.error) || "Try again");
+                sub.disabled = false;
+                sub.textContent = "🔒 Lock in multiplier";
+              }
+            } catch (err) {
+              toast("⚠️", "Network error", "Failed to contact server");
+              sub.disabled = false;
+              sub.textContent = "🔒 Lock in multiplier";
+            }
+          });
+        }
       }
-      function resetRankTab() { document.querySelectorAll(".rtab").forEach((x, i) => x.classList.toggle("on", i === 0));["rank", "players", "crews", "mycrew", "wars", "daily"].forEach((k, i) => { const el = $("rt-" + k); if (el) el.style.display = i === 0 ? "block" : "none"; }); }
+      function resetRankTab() { document.querySelectorAll(".rtab").forEach((x, i) => x.classList.toggle("on", i === 0));["rank", "players", "crews", "mycrew", "wars", "daily", "crash"].forEach((k, i) => { const el = $("rt-" + k); if (el) el.style.display = i === 0 ? "block" : "none"; }); }
       document.querySelectorAll(".rtab").forEach(b => {
         b.addEventListener("click", () => {
           document.querySelectorAll(".rtab").forEach(x => x.classList.remove("on")); b.classList.add("on");
-          const t = b.dataset.rt;["rank", "players", "crews", "mycrew", "wars", "daily"].forEach(k => { const el = $("rt-" + k); if (el) el.style.display = (k === t) ? "block" : "none"; });
-          if (t === "crews") renderCrews(); else if (t === "mycrew") renderMyCrew(); else if (t === "wars") renderWars(); else if (t === "daily") renderDaily();
+          const t = b.dataset.rt;["rank", "players", "crews", "mycrew", "wars", "daily", "crash"].forEach(k => { const el = $("rt-" + k); if (el) el.style.display = (k === t) ? "block" : "none"; });
+          if (t === "crews") renderCrews(); else if (t === "mycrew") renderMyCrew(); else if (t === "wars") renderWars(); else if (t === "daily") renderDaily(); else if (t === "crash") renderCrash();
         });
       });
 
