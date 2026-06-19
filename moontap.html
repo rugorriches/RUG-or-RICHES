@@ -1545,13 +1545,14 @@
     const cur=roundCur||S.betCur;const keep=bustType==="soft"?0.4:0;
     const rescued=Math.floor(pot*(vaultPct()+keep));if(rescued>0)addCur(cur,rescued);
     const lost=Math.max(0,invested-rescued);S.pnlLost=Math.min(MOON_CAP,(S.pnlLost||0)+lost);
+    const wiped=Math.max(0,Math.floor(pot-rescued));   // value actually dumped from the at-risk pot (what the player sees lost)
     const settlement={cur:"moon",payout:rescued,invested:Math.max(1,Math.floor(invested)),roundInvested:Math.max(1,Math.floor(roundInvestedTotal||invested)),peak:roundPeak,clicks:roundClicks,outcome:"rug",roundId:roundId||actionToken()};
     if(panelOpen==="game"){
       $("rugOverlay").style.opacity=(bustType==="soft"?".5":".78");setTimeout(()=>$("rugOverlay").style.opacity="0",170);
       $("app").classList.add("shake");setTimeout(()=>$("app").classList.remove("shake"),400);
-      toast(bustType==="soft"?"🩸":"💀",bustType==="soft"?"SOFT RUG":"RUGGED!",(bustType==="soft"?"Saved "+fmt(rescued)+" · lost ":"Lost ")+fmt(lost)+" "+(cur==="pts"?"pts":"$MOON"));
+      toast(bustType==="soft"?"🩸":"💀",bustType==="soft"?"SOFT RUG":"RUGGED!",(bustType==="soft"?"Saved "+fmt(rescued)+" · lost ":"Lost ")+fmt(wiped)+" "+(cur==="pts"?"pts":"$MOON"));
       sfxRug();if(navigator.vibrate)navigator.vibrate(bustType==="soft"?[40,30,60]:[60,40,140]);
-      if(bustType!=="soft"&&cur==="moon")showReaction(false,"−"+fmt(lost)+" $MOON","The chart dumped on you. Bank earlier next time.");}
+      if(bustType!=="soft"&&cur==="moon")showReaction(false,"−"+fmt(wiped)+" $MOON","The chart dumped on you. Bank earlier next time.");}
     holders=Math.floor(holders*(bustType==="soft"?0.93:0.85));
     pot=0;invested=0;roundClicks=0;roundCur=null;combo=0;winStreak=0;heat=0;pumpVel=0;dumpWarn=0;roundId=null;roundInvestedTotal=0;$("combo").textContent="";save();renderStats();renderDash();settleRoundCloud(settlement);}
 
