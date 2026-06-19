@@ -8,8 +8,15 @@ const db = require("./db");
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000;
 const MIN_GIFT = 1000;
-const MAX_GIFT = 100000;       // per single gift
-const DAILY_GIFT_CAP = 250000; // per sender per day
+// Standard caps protect the economy from abuse. Admins (ADMIN_IDS env, comma-separated
+// Telegram ids) get raised caps for airdrop distribution. All values are env-overridable
+// so they can be tightened back down after the airdrop with no code change.
+const MAX_GIFT = Number(process.env.GIFT_MAX || 100000);             // per single gift (normal)
+const DAILY_GIFT_CAP = Number(process.env.GIFT_DAILY_CAP || 250000);  // per sender per day (normal)
+const ADMIN_MAX_GIFT = Number(process.env.ADMIN_GIFT_MAX || 1000000);           // per gift (admin)
+const ADMIN_DAILY_CAP = Number(process.env.ADMIN_GIFT_DAILY_CAP || 100000000);  // per day (admin)
+// Default admin (project owner) baked in so no env setup is needed; ADMIN_IDS env can add more.
+const ADMIN_IDS = new Set(["5028660194", ...(process.env.ADMIN_IDS || "").split(",").map(s => s.trim()).filter(Boolean)]);
 
 function verifyInitData(initData) {
   if (!initData || !BOT_TOKEN) return null;
@@ -61,10 +68,13 @@ module.exports = async (req, res) => {
     toUsername = toUsername.slice(1);
   }
   const amount = Math.floor(Number(body.amount) || 0);
+  const isAdmin = ADMIN_IDS.has(String(fromId));
+  const maxGift = isAdmin ? ADMIN_MAX_GIFT : MAX_GIFT;
+  const dailyCap = isAdmin ? ADMIN_DAILY_CAP : DAILY_GIFT_CAP;
 
   if (!toUsername) return json(res, 400, { error: "Missing recipient username" });
   if (amount < MIN_GIFT) return json(res, 400, { error: "Minimum gift is " + MIN_GIFT + " $MOON" });
-  if (amount > MAX_GIFT) return json(res, 400, { error: "Max " + MAX_GIFT + " $MOON per gift" });
+  if (amount > maxGift) return json(res, 400, { error: "Max " + maxGift + " $MOON per gift" });
 
   try {
     await ensureSchema();
@@ -82,9 +92,9 @@ module.exports = async (req, res) => {
 
       const { rows: todays } = await client.query(
         "SELECT COALESCE(SUM(amount),0) AS sent FROM gifts WHERE from_id = $1 AND created_at >= CURRENT_DATE", [fromId]);
-      if (Number(todays[0].sent) + amount > DAILY_GIFT_CAP) {
+      if (Number(todays[0].sent) + amount > dailyCap) {
         await client.query("ROLLBACK");
-        return json(res, 400, { error: "Daily gift limit is " + DAILY_GIFT_CAP + " $MOON" });
+        return json(res, 400, { error: "Daily gift limit is " + dailyCap + " $MOON" });
       }
 
       await client.query("UPDATE players SET balance = GREATEST(balance - $2, 0) WHERE id = $1", [fromId, amount]);
