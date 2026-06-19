@@ -18,11 +18,11 @@ const VIP_MOON = new Map([
 ]);
 const RANKS = [
   { min: 0, energy: 0, daily: 1 },
-  { min: 250000, energy: 20, daily: 1 },
-  { min: 2500000, energy: 40, daily: 1.1 },
-  { min: 15000000, energy: 65, daily: 1.25 },
-  { min: 75000000, energy: 90, daily: 1.5 },
-  { min: 300000000, energy: 120, daily: 1.75 },
+  { min: 500000, energy: 20, daily: 1 },
+  { min: 7500000, energy: 40, daily: 1.1 },
+  { min: 50000000, energy: 65, daily: 1.25 },
+  { min: 200000000, energy: 90, daily: 1.5 },
+  { min: 600000000, energy: 120, daily: 1.75 },
   { min: 1000000000, energy: 160, daily: 2 }
 ];
 

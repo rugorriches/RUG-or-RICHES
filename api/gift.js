@@ -98,6 +98,9 @@ module.exports = async (req, res) => {
       }
 
       await client.query("UPDATE players SET balance = GREATEST(balance - $2, 0) WHERE id = $1", [fromId, amount]);
+      // Gifts credit SPENDABLE balance ONLY — intentionally NOT airdrop_pts, lifetime_banked,
+      // taps, cashouts, or any qualification metric. So gifted $MOON cannot inflate airdrop
+      // standings, rank, or leaderboards. Do not add point/lifetime credits here.
       await client.query("UPDATE players SET balance = LEAST(balance + $2, $3) WHERE id = $1", [toId, amount, MOON_CAP]);
       await client.query("INSERT INTO gifts (from_id, to_id, amount) VALUES ($1, $2, $3)", [fromId, toId, amount]);
 
@@ -106,4 +109,8 @@ module.exports = async (req, res) => {
       return json(res, 200, { ok: true, balance: Number(out[0].balance) || 0, sent: amount });
     } catch (e) { await client.query("ROLLBACK"); throw e; }
     finally { client.release(); }
-  } catch
+  } catch (err) {
+    console.error("[gift] error:", err.message);
+    return json(res, 500, { error: err.message });
+  }
+};

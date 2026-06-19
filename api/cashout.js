@@ -7,7 +7,11 @@ const AIRDROP_CAP = 100000000;
 const PIGGY_CAP = 150000;
 const PRICE_CAP = 100;
 const AIRDROP_BANK_RATE = 0.08;
-const BET_MAX = [1000, 5000, 25000, 150000, 1000000];
+// Max bet = rank-based base × VIP multiplier. KEEP IN SYNC WITH moontap.html (RANK_BET / VIP_BET_MULT).
+const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
+const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
+const VIP_BET_MULT = [1, 1.5, 2, 3, 5];
+function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 const EARN_PER_MINUTE = [250000, 1000000, 5000000, 25000000, 100000000];
 const MAX_ROI = 30;
 const MAX_CASHOUTS_PER_MINUTE = 10;
@@ -176,7 +180,7 @@ module.exports = async (req, res) => {
     try {
       await client.query("BEGIN");
       const { rows } = await client.query(
-        `SELECT balance, vip_tier, earn_window_start, earn_window_amount
+        `SELECT balance, vip_tier, lifetime_banked, earn_window_start, earn_window_amount
          FROM players
          WHERE id = $1
          FOR UPDATE`,
@@ -190,7 +194,9 @@ module.exports = async (req, res) => {
       const player = rows[0];
       const vip = Math.max(0, Math.min(4, Number(player.vip_tier) || 0));
       const clickLimit = 20 + vip * 10 + 20;
-      const maxInvested = BET_MAX[vip] * clickLimit;
+      const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
+      const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
+      const maxInvested = maxBet * clickLimit;
       const outcomeRoi = outcome === "prediction" ? 1.8 : MAX_ROI;
       const maxPayout = Math.ceil(invested * outcomeRoi);
 

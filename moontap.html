@@ -5022,10 +5022,10 @@
 
       // ---------- VIP ----------
       const VIP = [{ nm: "None" },
-      { nm: "Bronze VIP", emo: "🥉", cost: 250000, vstars: 150, req: 1, cls: "t1", perks: "+12% earnings · +25 energy · faster pumps" },
-      { nm: "Silver VIP", emo: "🥈", cost: 2000000, vstars: 600, req: 2, cls: "t2", perks: "+30% earnings · lower rug risk · silver badge" },
-      { nm: "Gold VIP", emo: "🥇", cost: 12000000, vstars: 2500, req: 3, buyOnly: true, cls: "t3", perks: "+60% earnings · 25% rug auto-rescue · gold badge" },
-      { nm: "Diamond VIP", emo: "💎", cost: 75000000, vstars: 10000, req: 4, buyOnly: true, cls: "t4", perks: "+120% earnings · whale shield · diamond badge" }];
+      { nm: "Bronze VIP", emo: "🥉", cost: 250000, vstars: 150, req: 1, cls: "t1", perks: "+12% earnings · +25 energy · 1.5× bet cap · faster pumps" },
+      { nm: "Silver VIP", emo: "🥈", cost: 2000000, vstars: 600, req: 2, cls: "t2", perks: "+30% earnings · lower rug risk · 2× bet cap · silver badge" },
+      { nm: "Gold VIP", emo: "🥇", cost: 12000000, vstars: 2500, req: 3, buyOnly: true, cls: "t3", perks: "+60% earnings · 25% rug auto-rescue · 3× bet cap · gold badge" },
+      { nm: "Diamond VIP", emo: "💎", cost: 75000000, vstars: 10000, req: 4, buyOnly: true, cls: "t4", perks: "+120% earnings · whale shield · 5× bet cap · diamond badge" }];
       const vipMult = () => [1, 1.12, 1.3, 1.6, 2.2][effVip()] || 1;
       // ---- $MOON packs purchasable with Telegram Stars ----
       // $MOON granted = 10 x the Stars price (flat, predictable rate)
@@ -5038,9 +5038,11 @@
       const STARTER = { stars: 150, moon: 500000, vip: 1 }, WHALE = { stars: 5000, moon: 12000000, vip: 3 },
         VIPSUB = { stars: 800, days: 30 }, DEAL = { stars: 250, moon: 700000 }, COMEBACK = { stars: 50, moon: 200000 },
         SEASON = { stars: 400 }, PIGGYCAP = 150000;
-      // ---- betting currency + max bet (scales with VIP) ----
-      const BETMAX = [1000, 5000, 25000, 150000, 1000000];
-      const betMax = () => BETMAX[effVip()] || 1000;
+      // ---- max bet = rank-based base × VIP multiplier (VIP's bet-cap perk) ----
+      // KEEP THESE ARRAYS IN SYNC WITH /api/cashout.js (server enforces the same cap).
+      const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];   // by rank index 0-6
+      const VIP_BET_MULT = [1, 1.5, 2, 3, 5];                                  // by VIP tier 0-4
+      const betMax = () => Math.floor((RANK_BET[rankIdx()] || 1000) * (VIP_BET_MULT[effVip()] || 1));
       let bonusBets = 0;   // temporary +bets from a boost (resets each round)
       const betsPerRound = () => 20 + effVip() * 10 + bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
       const curBal = c => c === "pts" ? S.airdrop : S.balance;
@@ -5050,11 +5052,11 @@
       // ---------- RANKS ----------
       const RANKS = [
         { min: 0, nm: "Shrimp", e: "🦐", p: "Where every degen starts. Tap, bet, and bank your first $MOON.", eb: 0, db: 1, ben: ["Tap, bet & bank — the journey begins"] },
-        { min: 250000, nm: "Crab", e: "🦀", p: "You're climbing.", eb: 20, db: 1, ben: ["⚡ +20 max energy", "🥉 Unlocks Bronze VIP $MOON route"] },
-        { min: 2500000, nm: "Fish", e: "🐟", p: "A real trader now.", eb: 40, db: 1.1, ben: ["⚡ +40 max energy", "🎁 +10% daily login bonus", "🥈 Unlocks Silver VIP $MOON route"] },
-        { min: 15000000, nm: "Dolphin", e: "🐬", p: "Smart money.", eb: 65, db: 1.25, ben: ["⚡ +65 max energy", "🎁 +25% daily login bonus", "🥇 Unlocks Gold VIP $MOON route", "🏆 Bigger leaderboard & airdrop standing"] },
-        { min: 75000000, nm: "Shark", e: "🦈", p: "Apex predator.", eb: 90, db: 1.5, ben: ["⚡ +90 max energy", "🎁 +50% daily login bonus", "💎 Unlocks Diamond VIP $MOON route", "🦈 Shark achievement"] },
-        { min: 300000000, nm: "Orca", e: "🐋", p: "Elite whale tier.", eb: 120, db: 1.75, ben: ["⚡ +120 max energy", "🎁 +75% daily login bonus", "🐋 Elite whale status"] },
+        { min: 500000, nm: "Crab", e: "🦀", p: "You're climbing.", eb: 20, db: 1, ben: ["⚡ +20 max energy", "🥉 Unlocks Bronze VIP $MOON route"] },
+        { min: 7500000, nm: "Fish", e: "🐟", p: "A real trader now.", eb: 40, db: 1.1, ben: ["⚡ +40 max energy", "🎁 +10% daily login bonus", "🥈 Unlocks Silver VIP $MOON route"] },
+        { min: 50000000, nm: "Dolphin", e: "🐬", p: "Smart money.", eb: 65, db: 1.25, ben: ["⚡ +65 max energy", "🎁 +25% daily login bonus", "🥇 Unlocks Gold VIP $MOON route", "🏆 Bigger leaderboard & airdrop standing"] },
+        { min: 200000000, nm: "Shark", e: "🦈", p: "Apex predator.", eb: 90, db: 1.5, ben: ["⚡ +90 max energy", "🎁 +50% daily login bonus", "💎 Unlocks Diamond VIP $MOON route", "🦈 Shark achievement"] },
+        { min: 600000000, nm: "Orca", e: "🐋", p: "Elite whale tier.", eb: 120, db: 1.75, ben: ["⚡ +120 max energy", "🎁 +75% daily login bonus", "🐋 Elite whale status"] },
         { min: 1000000000, nm: "Megalodon", e: "🦖", p: "Max rank — apex of the food chain. 👑", eb: 160, db: 2, ben: ["⚡ +160 max energy", "🎁 2× daily login bonus", "👑 Apex badge — top of the food chain"] }];
       function rankPerk() { return RANKS[rankIdx()] || RANKS[0]; }
       function rankIdx() { let i = 0; for (let j = 0; j < RANKS.length; j++)if (S.lifetime >= RANKS[j].min) i = j; return i; }
@@ -5590,7 +5592,7 @@
         $("d-clicks").textContent = roundClicks + " / " + betsPerRound(); $("d-invested").textContent = fmt(invested) + " " + ((roundCur || S.betCur) === "pts" ? "pts" : "$MOON");
         $("d-pos").textContent = fmt(pot); const exp = pot - invested; const de = $("d-exp"); de.textContent = (exp >= 0 ? "+" : "") + fmt(exp); de.style.color = exp >= 0 ? "var(--green)" : "var(--red)";
         $("dBetAmt").textContent = fmt(S.bet); $("dBetCur").textContent = "$MOON";
-        $("betMaxTxt").textContent = "Max bet (" + VIP[S.vip].nm + "): " + fmt(betMax()) + (S.vip < 4 ? " — raise it by leveling VIP" : "");
+        $("betMaxTxt").textContent = "Max bet: " + fmt(betMax()) + " — grows with your rank × VIP" + (S.vip < 4 ? " (rank up or level VIP to raise it)" : "");
         $("d-won").textContent = fmt(S.pnlWon || 0); $("d-lost").textContent = fmt(S.pnlLost || 0);
         const net = (S.pnlWon || 0) - (S.pnlLost || 0); const dn = $("d-net"); dn.textContent = (net >= 0 ? "+" : "") + fmt(net); dn.style.color = net >= 0 ? "var(--green)" : "var(--red)";
         const refEarned = S.friends.reduce((a, f) => a + (Number(f.b) || 0), 0), nm = nextMile();
@@ -5706,7 +5708,7 @@
 
       // ---------- VIP ----------
       function vipBenefits(i) {
-        const m = [0, 12, 30, 60, 120][i] || 0; const b = ["💰 +" + m + "% earnings", "🔋 +" + (i * 25) + " energy", "🛡️ " + (i * 7) + "% safer rug", "🎯 bet max " + fmt(BETMAX[i])];
+        const m = [0, 12, 30, 60, 120][i] || 0; const b = ["💰 +" + m + "% earnings", "🔋 +" + (i * 25) + " energy", "🛡️ " + (i * 7) + "% safer rug", "🎯 " + (VIP_BET_MULT[i] || 1) + "× bet cap"];
         if (i >= 3) b.push("💎 25% rug rescue"); if (i >= 4) b.push("🐋 whale shield"); return b;
       }
       function renderVip() {
@@ -6105,4 +6107,611 @@
         const pointOk = A >= AIRDROP_QUALIFY, dayOk = days >= AIRDROP_MIN_DAYS, tapOk = taps >= AIRDROP_MIN_TAPS, cashOk = cash >= AIRDROP_MIN_CASHOUTS;
         const qualified = pointOk && dayOk && tapOk && cashOk, elite = A >= AIRDROP_ELITE && qualified;
         const reqPct = Math.min(A / AIRDROP_QUALIFY, days / AIRDROP_MIN_DAYS, taps / AIRDROP_MIN_TAPS, cash / AIRDROP_MIN_CASHOUTS) * 100;
-        const share = (Math.min(A, 
+        const share = (Math.min(A, AIRDROP_CAP) / 12000000000 * 100);
+        const sr = 'style="display:flex;justify-content:space-between;font-size:12px;margin-top:7px;color:#cdbff0"';
+        box.innerHTML = '<div class="card"><div class="sec-h" style="margin-top:0">🏆 Season 1 stakes</div>' +
+          '<div class="ds">Airdrop qualification is separate from VIP and rank. You need sustained play during your first 30-day season, not just one huge lucky run.</div>' +
+          '<div ' + sr + '><span>Status</span><b style="color:' + (qualified ? 'var(--green)' : 'var(--red)') + '">' + (elite ? '👑 Elite qualified' : qualified ? '✅ Qualified' : '⛏ Not qualified yet') + '</b></div>' +
+          '<div ' + sr + '><span>Points</span><b style="color:' + (pointOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(A) + ' / ' + fmt(AIRDROP_QUALIFY) + '</b></div>' +
+          '<div ' + sr + '><span>Active days</span><b style="color:' + (dayOk ? 'var(--green)' : 'var(--gold)') + '">' + days + ' / ' + AIRDROP_MIN_DAYS + '</b></div>' +
+          '<div ' + sr + '><span>Taps</span><b style="color:' + (tapOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(taps) + ' / ' + fmt(AIRDROP_MIN_TAPS) + '</b></div>' +
+          '<div ' + sr + '><span>Cash-outs</span><b style="color:' + (cashOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(cash) + ' / ' + fmt(AIRDROP_MIN_CASHOUTS) + '</b></div>' +
+          '<div ' + sr + '><span>Est. pool share</span><b style="color:var(--cyan)">' + share.toFixed(4) + '%</b></div>' +
+          '<div class="pbar2" style="margin-top:9px"><i style="width:' + clamp(reqPct, 3, 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';
+      }
+      const COMBO_TAPS_NEEDED = 300;
+      function renderCombo() {
+        const wrap = $("comboCard"); if (!wrap) return;
+        // normalize to a stable YYYY-MM-DD so the once-a-day guard survives cloud-sync date formats (was claimable every refresh)
+        const todayISO = new Date().toLocaleDateString('en-CA');
+        const norm = v => { if (!v) return ""; const dt = new Date(v); return isNaN(dt) ? String(v).slice(0, 10) : dt.toLocaleDateString('en-CA'); };
+        const done = norm(S.comboDay) === todayISO;
+        const tapsToday = qprog("taps") || 0, ready = tapsToday >= COMBO_TAPS_NEEDED;
+        let label, sub;
+        if (done) { label = "✓"; sub = "Claimed — come back tomorrow"; }
+        else if (!ready) { label = "🔒 " + tapsToday + "/" + COMBO_TAPS_NEEDED; sub = "Tap " + COMBO_TAPS_NEEDED + " times today to unlock"; }
+        else { label = "Claim 10K"; sub = "Unlocked! Claim your daily bonus"; }
+        wrap.innerHTML = '<div class="emo">🔥</div><div class="grow"><div class="nm">Daily Combo</div><div class="ds">' + sub + '</div></div><button class="qclaim ' + (done ? "done" : "") + '"' + ((done || !ready) ? " disabled" : "") + '>' + label + '</button>';
+        if (!done && ready) wrap.querySelector("button").addEventListener("click", () => {
+          if (norm(S.comboDay) === todayISO) return;
+          if (cloudAuth()) {
+            const b = wrap.querySelector("button"); b.disabled = true; b.textContent = "Checking…"; claimCloud("combo", "daily").then(data => { if (data && data.ok) { S.comboDay = todayISO; save(); renderAirdrop(); renderLive(); renderStats(); confetti(); toast("🔥", "Daily Combo!", "+" + fmt(data.reward || 10000) + " $MOON"); } })
+              .catch(err => { toast("⚠️", "Combo rejected", err.message); renderCombo(); }); return;
+          }
+          S.comboDay = todayISO; bank(10000); save(); renderAirdrop(); renderLive(); renderStats(); confetti(); toast("🔥", "Daily Combo!", "+10,000 $MOON");
+        }, { once: true });
+      }
+
+      // ---------- RANKS + LEADERBOARD ----------
+      let boardMode = "banked";
+      function renderRanks() {
+        const ri = rankIdx(); const cur = RANKS[ri], next = RANKS[ri + 1];
+        $("myRankEmo").innerHTML = '<img src="' + rankIconURL(cur) + '" alt="" style="width:46px;height:46px;object-fit:contain" onerror="this.parentNode.textContent=\'' + cur.e + '\'">'; $("myRankName").textContent = cur.nm;
+        if (next) {
+          const span = next.min - cur.min, prog = clamp((S.lifetime - cur.min) / span * 100, 0, 100);
+          $("myRankNext").textContent = fmt(next.min - S.lifetime) + " more to " + next.nm + " " + next.e; $("myRankBar").style.width = prog + "%";
+        }
+        else { $("myRankNext").textContent = "Max rank reached 👑"; $("myRankBar").style.width = "100%"; }
+        const rl = $("rankList"); rl.innerHTML = "";
+        RANKS.forEach((r, i) => {
+          const d = document.createElement("div"); d.className = "rankrow" + (i === ri ? " cur" : (i < ri ? " done" : "")); d.style.cursor = "pointer";
+          const col = RANK_COLORS[i] || "#23f0ff";
+          d.innerHTML = '<div class="rk-ic"><img src="' + rankIconURL(r) + '" alt="" onerror="this.parentNode.textContent=\'' + r.e + '\'"></div>' +
+            '<div class="grow"><div class="rk-nm" style="color:' + col + '">' + r.nm.toUpperCase() + '</div><div class="rk-th" style="color:' + col + '">' + fmt(r.min) + '+ banked</div><div class="rk-ds">' + (r.p || "") + '</div></div>' +
+            '<div class="rk-spark">' + rankSpark(col) + '</div>';
+          d.addEventListener("click", () => openRank(i)); rl.appendChild(d);
+        });
+
+        const BOTS = [["0xWhaleKing", 8.4e6], ["satoshi_jr", 5.1e6], ["rugproof.eth", 3.9e6], ["DiamondHandz", 2.7e6], ["paperhands99", 1.4e6], ["moonboy_420", 920000], ["anon_degen", 610000], ["ngmi_chad", 340000], ["frenly_fox", 180000], ["tap_tap_rev", 96000]];
+        const list = BOTS.map(x => ({ n: x[0], b: x[1] * (0.8 + Math.random() * 0.4), me: false }));
+        list.push({ n: S.name + " (you)", b: S.balance, me: true }); list.sort((a, b) => b.b - a.b);
+
+        const renderList = (data, isCount) => {
+          const wrap = $("boardList"); wrap.innerHTML = "";
+          if (!data.length) { wrap.innerHTML = '<p class="sub">No entries yet — be the first!</p>'; return; }
+          data.forEach((x, i) => {
+            const d = document.createElement("div"); d.className = "lb-row" + (x.me ? " me" : "");
+            const rk = i === 0 ? '<span class="medal">🥇</span>' : i === 1 ? '<span class="medal">🥈</span>' : i === 2 ? '<span class="medal">🥉</span>' : (i + 1);
+            d.innerHTML = '<div class="rk">' + rk + '</div><div class="nm">' + esc(x.n) + '</div><div class="sc">' + (isCount ? (fmt(x.b) + ' 🤝') : fmt(x.b)) + '</div>'; wrap.appendChild(d);
+          });
+        };
+        const bl = $("boardList");
+        if (bl && !$("boardToggle")) {
+          const tg2 = document.createElement("div"); tg2.id = "boardToggle"; tg2.style.cssText = "display:flex;gap:6px;margin-bottom:9px";
+          tg2.innerHTML = '<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button>';
+          bl.parentNode.insertBefore(tg2, bl);
+          const note = document.createElement("div"); note.className = "qsum"; note.style.cssText = "text-align:center;margin:-2px 0 9px;color:var(--gold)"; note.innerHTML = "🏆 Top 10 each week win $MOON — paid out automatically";
+          bl.parentNode.insertBefore(note, bl);
+          tg2.querySelectorAll(".lb-tg").forEach(b => b.addEventListener("click", () => { boardMode = b.dataset.m; loadBoard(); }));
+        }
+        const tgw = window.Telegram && window.Telegram.WebApp;
+        const myRegion = (tgw && tgw.initDataUnsafe && tgw.initDataUnsafe.user && tgw.initDataUnsafe.user.language_code) || null;
+        function loadBoard() {
+          const bt = $("boardToggle"); if (bt) bt.querySelectorAll(".lb-tg").forEach(b => b.classList.toggle("active", b.dataset.m === boardMode));
+          if (!hasCloudAuth) { renderList(list); return; }
+          if (boardMode === "referral") {
+            fetch("/api/leaderboard?type=referral&period=week").then(r => r.json())
+              .then(d => renderList(Array.isArray(d) ? d.map(x => ({ n: x.name, b: x.refs, me: x.name === S.name })) : [], true))
+              .catch(() => renderList([], true));
+            return;
+          }
+          const url = (boardMode === "region" && myRegion) ? ("/api/leaderboard?region=" + encodeURIComponent(myRegion)) : "/api/leaderboard";
+          fetch(url).then(r => r.json()).then(dbList => {
+            if (Array.isArray(dbList) && dbList.length > 0) {
+              const formatted = dbList.map(r => ({ n: r.name, b: r.banked, me: r.name === S.name }));
+              if (!formatted.some(x => x.me)) formatted.push({ n: S.name + " (you)", b: S.balance, me: true });
+              formatted.sort((a, b) => b.b - a.b); renderList(formatted);
+            } else renderList(list);
+          }).catch(() => renderList(list));
+        }
+        loadBoard();
+      }
+      // ---------- CREWS (real server-backed teams) ----------
+      function applyCrewPayload(data) {
+        if (!data) return;
+        S.crewBoard = Array.isArray(data.crews) ? data.crews : [];
+        if (data.mine) { S.crew = data.mine.name; S.crewId = data.mine.id; S.crewLeaderId = data.mine.leaderId; S.crewMembers = Array.isArray(data.mine.members) ? data.mine.members : []; S.crewChat = Array.isArray(data.mine.chat) ? data.mine.chat : []; }
+        else { S.crew = null; S.crewId = null; S.crewLeaderId = null; S.crewMembers = []; S.crewChat = []; }
+        crewLoaded = true; save();
+      }
+      async function crewApi(action, payload) {
+        const tg = window.Telegram && window.Telegram.WebApp; if (!tg || !tg.initData) { toast("🔒", "Telegram required", "Open inside Telegram to manage crews"); return null; }
+        const body = Object.assign({ initData: tg.initData, action: action || "list" }, payload || {});
+        const r = await fetch("/api/crews", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+        const data = await r.json().catch(() => null);
+        if (!r.ok) throw new Error((data && data.error) || "Crew action failed");
+        applyCrewPayload(data); return data;
+      }
+      function refreshCrews(render) { return crewApi("list").then(() => { if (render) { renderCrews(); renderMyCrew(); renderWars(); } }).catch(e => { crewLoaded = true; toast("⚠️", "Crew sync failed", e.message); }); }
+      function isCrewCaptain() { return S.crewLeaderId && currentUserId && String(S.crewLeaderId) === String(currentUserId); }
+      function crewTotal() { return S.crewMembers.reduce((a, m) => a + (Number(m.banked) || 0), 0); }
+      function renderCrews() {
+        const wrap = $("crewBoard"); if (!wrap) return; wrap.innerHTML = "";
+        if (!crewLoaded) { wrap.innerHTML = '<p class="sub">Loading real crews...</p>'; refreshCrews(true); return; }
+        const list = (S.crewBoard || []).slice().sort((a, b) => (b.totalBanked || 0) - (a.totalBanked || 0));
+        if (list.length === 0) { wrap.innerHTML = '<p class="sub">No crews exist yet. Create the first one in <b>My Crew</b>.</p>'; return; }
+        list.forEach((c, i) => {
+          const d = document.createElement("div"); d.className = "crewrow" + (S.crewId === c.id ? " me" : "");
+          const rk = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+          d.innerHTML = '<div class="rk">' + rk + '</div><div class="nm">' + esc(c.name) + (S.crewId === c.id ? ' (you)' : '') + '<div class="ds">captain ' + esc(c.leaderName || "—") + ' · ' + fmt(c.members || 0) + ' members</div></div><div class="sc">' + fmt(c.totalBanked || 0) + '</div>';
+          wrap.appendChild(d);
+        });
+      }
+      function crewForm() { return '<div class="card"><div class="sec-h" style="margin-top:0">Create your crew</div><div class="ds">Become captain, recruit players, manage members, and fight weekly wars.</div><input id="crewNameInput" maxlength="24" placeholder="Crew name" style="width:100%;margin-top:10px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:11px;padding:12px;color:#fff;font-weight:800;outline:none"><button class="big-btn" id="crewCreateBtn" style="margin-top:10px">Create Crew</button></div>'; }
+      function renderMyCrew() {
+        const wrap = $("myCrewView"); if (!wrap) return; wrap.innerHTML = "";
+        if (!crewLoaded) { wrap.innerHTML = '<p class="sub">Loading crew controls...</p>'; refreshCrews(true); return; }
+        if (!S.crew) {
+          wrap.innerHTML = '<p class="sub">Create your own crew or join a real player crew. Fake prefilled crews have been removed.</p>' + crewForm() + '<div class="sec-h">Join a crew</div>';
+          const btn = $("crewCreateBtn"), inp = $("crewNameInput");
+          if (btn) btn.addEventListener("click", async () => { try { btn.disabled = true; await crewApi("create", { name: inp.value }); renderMyCrew(); renderCrews(); toast("👑", "Crew created", "You are the captain of " + S.crew); } catch (e) { toast("⚠️", "Crew not created", e.message); } finally { btn.disabled = false; } });
+          (S.crewBoard || []).forEach(c => {
+            const d = document.createElement("div"); d.className = "crewrow";
+            d.innerHTML = '<div class="nm">' + esc(c.name) + '<div class="ds">captain ' + esc(c.leaderName || "—") + ' · ' + fmt(c.members || 0) + ' members</div></div><div class="sc" style="margin-right:8px">' + fmt(c.totalBanked || 0) + '</div><button class="buy">Join</button>';
+            d.querySelector("button").addEventListener("click", async () => { try { await crewApi("join", { crewId: c.id }); renderMyCrew(); renderCrews(); toast("🤝", "Joined " + c.name, "Climb the board together"); } catch (e) { toast("⚠️", "Join failed", e.message); } });
+            wrap.appendChild(d);
+          }); return;
+        }
+        const total = crewTotal(), cap = isCrewCaptain();
+        const hero = document.createElement("div"); hero.className = "crewhero";
+        hero.innerHTML = '<div class="ds">' + (cap ? 'YOUR CREW · CAPTAIN' : 'YOUR CREW') + '</div><div class="big">' + esc(S.crew) + '</div><div class="v">' + fmt(total) + '</div><div class="ds">combined lifetime banked · ' + fmt(S.crewMembers.length) + ' members</div>';
+        wrap.appendChild(hero);
+        const sec = document.createElement("div"); sec.className = "sec-h"; sec.textContent = cap ? "Manage members" : "Member stats"; wrap.appendChild(sec);
+        (S.crewMembers || []).forEach((m, i) => {
+          const me = currentUserId && String(m.id) === String(currentUserId), leader = S.crewLeaderId && String(m.id) === String(S.crewLeaderId);
+          const d = document.createElement("div"); d.className = "crewrow" + (me ? " me" : "");
+          d.innerHTML = '<div class="rk">' + (i + 1) + '</div><div class="nm">' + esc(m.name) + (me ? ' (you)' : '') + (leader ? ' <span class="pill">CAPTAIN</span>' : '') + '<div class="ds">war pts ' + fmt(m.warScore || 0) + ' · VIP ' + (m.vip || 0) + '</div></div><div class="sc">' + fmt(m.banked || 0) + '</div>' + (cap && !me ? '<button class="qclaim">Kick</button>' : '');
+          const kick = d.querySelector("button"); if (kick) kick.addEventListener("click", async () => { if (!confirm("Remove " + m.name + " from " + S.crew + "?")) return; try { await crewApi("kick", { memberId: m.id }); renderMyCrew(); renderCrews(); toast("🧹", "Member removed", m.name + " was kicked"); } catch (e) { toast("⚠️", "Kick failed", e.message); } });
+          wrap.appendChild(d);
+        });
+        const chatWrap = document.createElement("div"); chatWrap.className = "card"; chatWrap.style.marginTop = "12px";
+        chatWrap.innerHTML = '<div class="sec-h" style="margin-top:0">💬 Crew chat</div><div id="crewChatLog" style="max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:8px"></div><div style="display:flex;gap:7px"><input id="crewChatInput" maxlength="200" placeholder="Message your crew…" style="flex:1;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:11px;padding:10px;color:#fff;font-weight:700;outline:none"><button class="buy" id="crewChatSend">Send</button></div>';
+        wrap.appendChild(chatWrap); renderCrewChat();
+        const ci = $("crewChatInput"), cs = $("crewChatSend");
+        const sendChat = async () => { const t = (ci.value || "").trim(); if (!t) return; ci.value = ""; try { await crewApi("chat", { text: t }); renderCrewChat(); } catch (e) { toast("⚠️", "Not sent", e.message); } };
+        if (cs) cs.addEventListener("click", sendChat);
+        if (ci) ci.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); sendChat(); } });
+        const leave = document.createElement("button"); leave.className = "big-btn"; leave.style.cssText = "background:#3a2456;color:#fff;margin-top:12px"; leave.textContent = cap ? "Leave crew / transfer captain" : "Leave crew";
+        leave.addEventListener("click", async () => {
+          if (!confirm("Leave " + S.crew + "?" + (cap ? " Captain transfers to the highest-ranked remaining member." : ""))) return;
+          try { await crewApi("leave"); renderMyCrew(); renderCrews(); renderWars(); toast("🚪", "Left crew", "You can create or join another crew anytime"); } catch (e) { toast("⚠️", "Leave failed", e.message); }
+        });
+        wrap.appendChild(leave);
+      }
+      function renderCrewChat() {
+        const log = $("crewChatLog"); if (!log) return; const msgs = S.crewChat || [];
+        if (msgs.length === 0) { log.innerHTML = '<div class="ds" style="opacity:.6">No messages yet — say gm 👋</div>'; return; }
+        log.innerHTML = msgs.map(m => '<div style="font-size:12px;line-height:1.35"><b style="color:var(--cyan)">' + esc(m.name) + ':</b> ' + esc(m.msg) + '</div>').join("");
+        log.scrollTop = log.scrollHeight;
+      }
+      setInterval(() => { if (panelOpen === "ranks" && S.crew && $("crewChatLog") && hasCloudAuth) { crewApi("list").then(() => renderCrewChat()).catch(() => { }); } }, 6000);
+      // ---------- CREW WARS ----------
+      function weekId() { return Math.floor(Date.now() / (7 * 864e5)); }
+      function crewHash(n) { let h = 0; for (let i = 0; i < String(n).length; i++)h = (h * 31 + String(n).charCodeAt(i)) >>> 0; return h; }
+      function openRank(i) {
+        const r = RANKS[i], ri = rankIdx();
+        $("rankMEmo").innerHTML = '<img src="' + rankIconURL(r) + '" alt="" style="width:44px;height:44px;object-fit:contain" onerror="this.parentNode.textContent=\'' + r.e + '\'">'; $("rankMName").textContent = r.nm;
+        $("rankMReq").textContent = fmt(r.min) + "+ lifetime $MOON banked";
+        const ben = (r.ben && r.ben.length) ? r.ben : [r.p || ""];
+        $("rankMPerk").innerHTML = '<div style="font-weight:800;color:#e7deff;margin-bottom:6px">This tier gets you:</div>' +
+          ben.map(b => '<div style="margin:3px 0">• ' + esc(b) + '</div>').join("");
+        let st, col;
+        if (i < ri) { st = "✅ Achieved — you've passed this rank."; col = "var(--green)"; }
+        else if (i === ri) { st = "⭐ This is your current rank."; col = "var(--gold)"; }
+        else { st = "🔒 " + fmt(Math.max(0, r.min - S.lifetime)) + " more lifetime $MOON to reach " + r.nm + "."; col = "var(--cyan)"; }
+        $("rankMStatus").textContent = st; $("rankMStatus").style.color = col;
+        $("rankModal").classList.add("show");
+      }
+      $("rankMClose") && $("rankMClose").addEventListener("click", () => $("rankModal").classList.remove("show"));
+      $("rankModal") && $("rankModal").addEventListener("click", e => { if (e.target.id === "rankModal") $("rankModal").classList.remove("show"); });
+      function renderWars() {
+        const wrap = $("warView"); if (!wrap) return; wrap.innerHTML = "";
+        if (!S.crew) { wrap.innerHTML = '<p class="sub">Join a crew in the <b>My Crew</b> tab to fight in Crew Wars.</p>'; return; }
+        const wk = weekId(); if (S.warWeek !== wk) { S.warWeek = wk; S.warScore = 0; S.warClaim = false; save(); }
+        if (!crewLoaded) { wrap.innerHTML = '<p class="sub">Loading real crew war...</p>'; refreshCrews(true); return; }
+        const frac = (Date.now() % (7 * 864e5)) / (7 * 864e5);
+        const mine = (S.crewBoard || []).find(c => c.id === S.crewId) || { name: S.crew, warScore: S.warScore, totalBanked: crewTotal() };
+        const rivals = (S.crewBoard || []).filter(c => c.id !== S.crewId);
+        const rival = rivals.length ? rivals[crewHash(S.crewId + ":" + wk) % rivals.length] : { name: "BlackRug Capital", warScore: 12000, totalBanked: 2500000 };
+        const your = Number(mine.warScore) || 0;
+        const rivalScore = Math.max(1, Math.floor((Number(rival.warScore) || 0) + (9000 + (crewHash(rival.name + wk) % 12) * 750) * (0.35 + frac)));
+        const winning = your >= rivalScore, maxs = Math.max(your, rivalScore, 1);
+        const left = 7 * 864e5 - (Date.now() % (7 * 864e5)), dd = Math.floor(left / 864e5), hh = Math.floor((left % 864e5) / 36e5);
+        const hero = document.createElement("div"); hero.className = "crewhero";
+        hero.innerHTML = '<div class="ds">⚔️ REAL CREW WAR · ends in ' + dd + 'd ' + hh + 'h</div><div class="big">' + esc(S.crew) + ' vs ' + esc(rival.name) + '</div><div class="v" style="color:' + (winning ? "var(--green)" : "var(--red)") + '">' + (winning ? "WINNING 🏆" : "LOSING 😤") + '</div>';
+        wrap.appendChild(hero);
+        const bars = document.createElement("div"); bars.className = "card";
+        bars.innerHTML = '<div class="sec-h" style="margin-top:0">War score</div><div class="ds" style="display:flex;justify-content:space-between"><span style="color:var(--cyan)">' + esc(S.crew) + '</span><b>' + fmt(your) + '</b></div><div class="pbar2"><i style="width:' + (your / maxs * 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></div><div class="ds" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--red)">' + esc(rival.name) + '</span><b>' + fmt(rivalScore) + '</b></div><div class="pbar2"><i style="width:' + (rivalScore / maxs * 100) + '%;background:linear-gradient(90deg,var(--red),#ff7a3b)"></i></div><div class="ds" style="margin-top:10px">Your contribution: <b style="color:var(--gold)">' + fmt(S.warScore) + '</b> war pts · crew total updates after sync</div>';
+        wrap.appendChild(bars);
+        const rcost = Math.max(1000, Math.floor(S.bet * 3)), rgain = Math.floor(rcost * 1.6 * (1 + effVip() * 0.08)), canR = S.balance >= rcost;
+        const ra = document.createElement("div"); ra.className = "card row";
+        ra.innerHTML = '<div class="emo">⚔️</div><div class="grow"><div class="nm">Rally the crew</div><div class="ds">spend ' + fmt(rcost) + ' $MOON → +' + fmt(rgain) + ' war pts</div></div><button class="buy"' + (canR ? "" : " disabled") + '>Rally</button>';
+        wrap.appendChild(ra);
+        ra.querySelector("button").addEventListener("click", () => {
+          if (S.balance < rcost) return; const b = ra.querySelector("button");
+          if (cloudAuth()) {
+            b.disabled = true; b.textContent = "Rallying…"; claimCloud("crew_rally", "weekly").then(data => { if (data && data.ok) { save(); refreshCrews(true); renderLive(); renderStats(); sfxBuy(); toast("⚔️", "Rallied!", "+" + fmt(data.gained || rgain) + " war pts"); } })
+              .catch(err => { toast("⚠️", "Rally rejected", err.message); renderWars(); }); return;
+          }
+          S.balance -= rcost; S.warScore += rgain; save(); renderWars(); renderLive(); renderStats(); sfxBuy(); toast("⚔️", "Rallied!", "+" + fmt(rgain) + " war pts");
+        });
+        const lead = Math.max(0, your - rivalScore), reward = Math.min(250000, Math.max(25000, Math.floor(25000 + lead * 0.35 + S.warScore * 0.6)));
+        const cl = document.createElement("div"); cl.className = "card row"; const canClaim = winning && !S.warClaim && S.warScore >= 5000;
+        cl.innerHTML = '<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">' + (S.warClaim ? "Claimed this week ✓" : (winning ? (S.warScore >= 5000 ? "Claim scales with lead + contribution" : "Contribute 5K war pts to unlock") : "Pull ahead of " + esc(rival.name) + " to unlock")) + '</div></div><button class="qclaim ' + (S.warClaim ? "done" : "") + '"' + (canClaim ? "" : " disabled") + '>' + (S.warClaim ? "✓" : "Claim " + fmt(reward)) + '</button>';
+        wrap.appendChild(cl);
+        if (canClaim) cl.querySelector("button").addEventListener("click", () => {
+          const b = cl.querySelector("button");
+          if (cloudAuth()) {
+            b.disabled = true; b.textContent = "Checking…"; claimCloud("war_chest", "weekly").then(data => { if (data && data.ok) { S.warClaim = true; save(); renderWars(); renderLive(); renderStats(); confetti(); toast("🏆", "Victory chest!", "+" + fmt(data.reward || reward) + " $MOON — gg"); } })
+              .catch(err => { toast("⚠️", "Chest rejected", err.message); renderWars(); }); return;
+          }
+          S.warClaim = true; bank(reward); save(); renderWars(); renderLive(); renderStats(); confetti(); toast("🏆", "Victory chest!", "+" + fmt(reward) + " $MOON — gg");
+        });
+        const f = document.createElement("div"); f.innerHTML =
+          '<div class="sec-h">🎯 How Crew Wars works</div>' +
+          '<div class="card"><div class="ds" style="line-height:2">' +
+          '<b style="color:var(--cyan)">1.</b> Join or create a crew in the <b>My Crew</b> tab.<br>' +
+          '<b style="color:var(--cyan)">2.</b> Each week your crew is matched against a rival crew.<br>' +
+          '<b style="color:var(--cyan)">3.</b> Tap <b>⚔️ Rally</b> to convert $MOON into <b>war points</b> — every member\'s rallies stack into the crew total.<br>' +
+          '<b style="color:var(--cyan)">4.</b> Out-score the rival before the weekly timer hits zero.<br>' +
+          '<b style="color:var(--cyan)">5.</b> If you\'re winning <i>and</i> contributed 5,000+ war pts, claim the <b>🏆 Victory Chest</b> (25K–250K $MOON).' +
+          '</div></div>' +
+          '<div class="sec-h">❔ Crew Wars FAQ</div>' +
+          '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Whichever crew has more <b>war points</b> when the weekly timer ends wins. Your crew\'s score is the sum of every member\'s war points.</div></details>' +
+          '<details class="faq"><summary>How do I earn war points?</summary><div class="a">Tap <b>⚔️ Rally</b> to spend $MOON for instant war points. It\'s the main way to contribute — spend only what you\'re comfortable with.</div></details>' +
+          '<details class="faq"><summary>Do I need a crew?</summary><div class="a">Yes — join or create one on the <b>My Crew</b> tab. Solo players can\'t enter wars.</div></details>' +
+          '<details class="faq"><summary>Does VIP help?</summary><div class="a">Yes — higher VIP tiers give more war points per rally.</div></details>' +
+          '<details class="faq"><summary>What\'s the Victory Chest worth?</summary><div class="a">25K–250K $MOON, scaling with how far ahead your crew is plus your personal contribution. You must contribute at least <b>5,000 war pts</b> to be eligible.</div></details>' +
+          '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you\'ve banked. The chest just doesn\'t unlock that week. A fresh rival is matched next week.</div></details>' +
+          '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
+        wrap.appendChild(f);
+      }
+      async function renderDaily() {
+        const wrap = $("dailyView"); if (!wrap) return;
+        wrap.innerHTML = '<div class="dly-load">Loading today’s degens…</div>';
+        let d = null;
+        try { d = await cloudAction("/api/daily", {}); } catch (e) { }
+        if (!d) { try { const r = await fetch("/api/daily"); d = await r.json(); } catch (e) { } }
+        if (!d || !d.top) { wrap.innerHTML = '<div class="dly-load">Daily board unavailable — try again soon.</div>'; return; }
+        const secs = d.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
+        let html = '<div class="dly-head"><div class="dly-title">🏆 Daily Challenge</div><div class="dly-sub">Biggest single bank today · resets in ' + hh + 'h ' + mm + 'm</div></div>';
+        html += '<div class="dly-prize">💰 Prize pool: ' + fmt(d.prizePool || 0) + ' $MOON · top 10</div>';
+        if (d.me) { html += '<div class="dly-me">You: ' + (d.me.rank ? ('#' + d.me.rank + ' of ' + d.me.players) : 'unranked — bank a run to enter') + (d.me.bank ? (' · best ' + fmt(d.me.bank) + ' (' + (d.me.mult || 1).toFixed(2) + 'x)') : '') + '</div>'; }
+        if (!d.top.length) { html += '<div class="dly-empty">No banks yet today — be the first! 🦈</div>'; }
+        else { d.top.forEach(r => { html += '<div class="crewrow' + (d.me && d.me.rank === r.rank ? ' me' : '') + '"><div class="rk">' + r.rank + '</div><div class="nm">' + esc(r.name) + '<div class="ds">' + (r.mult || 1).toFixed(2) + 'x · ' + (r.runs || 0) + ' runs</div></div><div class="sc">' + fmt(r.bank) + '</div></div>'; }); }
+        wrap.innerHTML = html;
+      }
+      function resetRankTab() { document.querySelectorAll(".rtab").forEach((x, i) => x.classList.toggle("on", i === 0));["rank", "players", "crews", "mycrew", "wars", "daily"].forEach((k, i) => { const el = $("rt-" + k); if (el) el.style.display = i === 0 ? "block" : "none"; }); }
+      document.querySelectorAll(".rtab").forEach(b => {
+        b.addEventListener("click", () => {
+          document.querySelectorAll(".rtab").forEach(x => x.classList.remove("on")); b.classList.add("on");
+          const t = b.dataset.rt;["rank", "players", "crews", "mycrew", "wars", "daily"].forEach(k => { const el = $("rt-" + k); if (el) el.style.display = (k === t) ? "block" : "none"; });
+          if (t === "crews") renderCrews(); else if (t === "mycrew") renderMyCrew(); else if (t === "wars") renderWars(); else if (t === "daily") renderDaily();
+        });
+      });
+
+      // ---------- INVITE ----------
+      $("refCode").textContent = S.refCode;
+      const BOT_USER = "RugorRichesBot", APP_NAME = "play";   // @BotFather bot username + web-app short name
+      // Telegram-native referral: startapp=<refCode> arrives server-side as start_param and is attributed in /api/sync
+      const inviteLink = () => "https://t.me/" + BOT_USER + "/" + APP_NAME + "?startapp=" + encodeURIComponent(S.refCode);
+      function nextMile() { return REF_MILE.find(m => S.friends.length < m.n); }
+      function renderInvite() {
+        const n = S.friends.length; $("invBig").textContent = n;
+        $("invEarned").textContent = fmt(S.friends.reduce((a, f) => a + (f.b || 0), 0));
+        const nm = nextMile(); $("invNext").textContent = nm ? (nm.n + (nm.n === 1 ? " friend" : " friends")) : "All done 👑";
+        if (nm) {
+          const idx = REF_MILE.indexOf(nm); const lo = idx > 0 ? REF_MILE[idx - 1].n : 0;
+          $("invBar").style.width = clamp((n - lo) / (nm.n - lo) * 100, 0, 100) + "%"; $("invNextTxt").textContent = (nm.n - n) + " more → " + fmt(nm.r) + " $MOON";
+        }
+        else { $("invBar").style.width = "100%"; $("invNextTxt").textContent = "All milestones claimed 👑"; }
+        const ml = $("mileList"); ml.innerHTML = "";
+        const needCloud = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData), refVerified = !needCloud || referralsLoaded;
+        REF_MILE.forEach(m => {
+          const reached = n >= m.n, claimed = S.refMiles.indexOf(m.n) >= 0;
+          const d = document.createElement("div"); d.className = "mile" + (reached ? " done" : "");
+          d.innerHTML = '<div class="emo">🎁</div><div class="grow"><div class="nm">Invite ' + m.n + ' friends</div><div class="ds">' + (refVerified ? 'reward ' + fmt(m.r) + ' $MOON' : 'syncing verified referrals...') + '</div></div><button class="qclaim ' + (claimed ? "done" : "") + '"' + ((!refVerified || !reached || claimed) ? " disabled" : "") + '>' + (claimed ? "✓" : "Claim") + '</button>';
+          d.querySelector(".qclaim").addEventListener("click", () => {
+            if (!refVerified || S.friends.length < m.n || S.refMiles.indexOf(m.n) >= 0) return;
+            if (cloudAuth()) {
+              const b = d.querySelector(".qclaim"); b.disabled = true; b.textContent = "Checking…"; claimCloud("milestone", String(m.n)).then(data => { if (data && data.ok) { if (S.refMiles.indexOf(m.n) < 0) S.refMiles.push(m.n); save(); sfxCash(); renderInvite(); renderLive(); renderStats(); toast("🎁", "Milestone reward!", "+" + fmt(data.reward || m.r) + " $MOON"); } })
+                .catch(err => { toast("⚠️", "Milestone rejected", err.message); renderInvite(); }); return;
+            }
+            if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
+              window._moonWS.send(JSON.stringify({ t: "claim_milestone", n: m.n }));
+              return;
+            }
+            S.refMiles.push(m.n); bank(m.r); save(); sfxCash(); renderInvite(); renderLive(); renderStats(); toast("🎁", "Milestone reward!", "+" + fmt(m.r) + " $MOON");
+          });
+          ml.appendChild(d);
+        });
+        const fl = $("friendList");
+        if (n === 0) { fl.innerHTML = '<div class="brand-empty"><img src="/assets/brand/empty-state.webp" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="nm" style="font-weight:800">No crew yet</div><div class="ds">Share your code — you both bank 5,000 $MOON.</div></div>'; }
+        else {
+          fl.innerHTML = ""; S.friends.slice().reverse().forEach(f => {
+            const d = document.createElement("div"); d.className = "friend";
+            d.addEventListener("click", () => {
+              $("giftCode").value = f.n;
+              $("giftCode").focus();
+              toast("💝", "Recipient selected", "Added @" + f.n + " to the gift entry box");
+            });
+            d.innerHTML = '<div class="av">' + (f.n ? f.n[0].toUpperCase() : "?") + '</div><div><div class="nm" style="font-size:12px">' + f.n + (f.prem ? ' <span class="pill">PREMIUM</span>' : '') + '</div><div class="ds">' + (f.d || "") + '</div></div><div class="b">+' + fmt(f.b || 0) + '</div>'; fl.appendChild(d);
+          });
+        }
+      }
+      // open an external/Telegram link reliably inside the Telegram WebView (window.open is blocked there)
+      function openExt(url) {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        try {
+          if (tg && /(^|\.)t\.me\//.test(url) && tg.openTelegramLink) { tg.openTelegramLink(url); return; }
+          if (tg && tg.openLink) { tg.openLink(url); return; }
+        } catch (e) { }
+        try { window.open(url, "_blank"); } catch (e) { location.href = url; }
+      }
+      $("copyCode").addEventListener("click", doShare);
+      function sendGift() {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg || !tg.initData) { toast("🔒", "Telegram required", "Open inside Telegram to send gifts"); return; }
+        let username = ($("giftCode").value || "").trim();
+        if (username.startsWith("@")) {
+          username = username.slice(1);
+        }
+        const amt = Math.floor(Number($("giftAmt").value) || 0);
+        if (username.length < 3) { toast("⚠️", "Invalid username", "Enter your friend's Telegram username"); return; }
+        if (amt < 1000) { toast("⚠️", "Minimum 1,000", "Gift at least 1,000 $MOON"); return; }
+        if (S.balance < amt) { toast("💸", "Not enough $MOON", "Bank more before gifting"); return; }
+        const btn = $("giftSend"); btn.disabled = true; btn.textContent = "Sending…";
+        fetch("/api/gift", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ initData: tg.initData, toUsername: username, amount: amt }) })
+          .then(r => r.json().then(d => ({ ok: r.ok, d })))
+          .then(({ ok, d }) => {
+            if (ok && d && d.ok) { S.balance = typeof d.balance === "number" ? d.balance : S.balance - amt; save(); renderLive(); renderStats(); sfxCash(); $("giftCode").value = ""; $("giftAmt").value = ""; toast("💝", "Gift sent!", "−" + fmt(amt) + " $MOON to @" + username); }
+            else toast("⚠️", "Gift failed", (d && d.error) || "Try again");
+          })
+          .catch(() => toast("⚠️", "Gift failed", "Network error"))
+          .finally(() => { btn.disabled = false; btn.textContent = "💝 Send Gift"; });
+      }
+      $("giftSend") && $("giftSend").addEventListener("click", sendGift);
+      function shareTo(p) {
+        const url = inviteLink(); const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
+        const t = encodeURIComponent(txt), u = encodeURIComponent(url);
+        if (p === "x") openExt("https://twitter.com/intent/tweet?text=" + t + "&url=" + u);
+        else if (p === "tg") openExt("https://t.me/share/url?url=" + u + "&text=" + t);
+        else if (p === "wa") openExt("https://wa.me/?text=" + t + "%20" + u);
+        else if (p === "ig") { if (navigator.clipboard) navigator.clipboard.writeText(txt + " " + url); toast("📸", "Copied for Instagram", "Paste it in your story or bio"); }
+        else { if (navigator.clipboard) navigator.clipboard.writeText(txt + " " + url); toast("🔗", "Link copied!", "Paste it anywhere 👀"); }
+      }
+      document.querySelectorAll(".sicon").forEach(b => b.addEventListener("click", () => shareTo(b.dataset.s)));
+      async function doShare() {
+        const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we BOTH get 5,000 $MOON:"; const url = inviteLink();
+        if (navigator.share) { try { await navigator.share({ title: "RUG OR RICHES", text: txt, url }); return; } catch (e) { } }
+        try { await navigator.clipboard.writeText(txt + " " + url); toast("📋", "Link copied!", "Paste it in your group chat 👀"); } catch (e) { toast("🔗", "Your link", url); }
+      }
+      // ---------- FLEX CARD ----------
+      $("cardBtn").addEventListener("click", makeCard);
+      function makeCard() {
+        const c = $("card"), g = c.getContext("2d"); const W = 1080, H = 1350; const ri = rankIdx();
+        const icon = new Image(); icon.onload = () => render(icon); icon.onerror = () => render(null); icon.src = rankIconURL(RANKS[ri]);
+        function render(ic) {
+          const grad = g.createLinearGradient(0, 0, W, H); grad.addColorStop(0, "#34125e"); grad.addColorStop(.55, "#140826"); grad.addColorStop(1, "#05010f");
+          g.fillStyle = grad; g.fillRect(0, 0, W, H);
+          // glow blobs
+          g.globalAlpha = .5; g.fillStyle = "#ff2bd6"; g.beginPath(); g.arc(120, 120, 180, 0, 7); g.fill(); g.fillStyle = "#23f0ff"; g.beginPath(); g.arc(960, 260, 160, 0, 7); g.fill(); g.globalAlpha = 1;
+          g.textAlign = "center";
+          const rnm = RANKS[ri].nm.toUpperCase(); g.font = "900 64px Segoe UI,sans-serif"; g.fillStyle = "#fff";
+          if (ic) { const isz = 74, gap = 18, tw = g.measureText(rnm).width, total = isz + gap + tw, sx = W / 2 - total / 2; g.drawImage(ic, sx, 150 - isz + 8, isz, isz); g.textAlign = "left"; g.fillText(rnm, sx + isz + gap, 150); g.textAlign = "center"; }
+          else g.fillText(RANKS[ri].e + "  " + rnm, W / 2, 150);
+          g.fillStyle = "#ffd400"; g.font = "900 76px Segoe UI"; g.fillText("RUG OR RICHES", W / 2, 250);
+          g.fillStyle = "#23f0ff"; g.font = "700 34px Segoe UI"; g.fillText("$MOON · Airdrop Season 1", W / 2, 300);
+          // chart sparkline
+          g.save(); g.translate(120, 360); const cw = 840, ch = 210; const mx = Math.max.apply(null, hist), mn = Math.min.apply(null, hist), sp = Math.max(.4, mx - mn);
+          g.beginPath(); g.moveTo(0, ch); hist.forEach((v, i) => g.lineTo(i / (hist.length - 1) * cw, ch - ((v - mn) / sp) * ch)); g.lineTo(cw, ch); g.closePath();
+          const cg = g.createLinearGradient(0, 0, 0, ch); cg.addColorStop(0, "rgba(29,255,143,.4)"); cg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = cg; g.fill();
+          g.beginPath(); hist.forEach((v, i) => { const x = i / (hist.length - 1) * cw, y = ch - ((v - mn) / sp) * ch; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+          g.strokeStyle = "#1dff8f"; g.lineWidth = 6; g.shadowColor = "#1dff8f"; g.shadowBlur = 20; g.stroke(); g.restore(); g.shadowBlur = 0;
+          g.font = "900 150px Segoe UI"; g.fillStyle = "#1dff8f"; g.fillText(fmt(S.balance), W / 2, 790);
+          g.fillStyle = "#fff"; g.font = "700 40px Segoe UI"; g.fillText("BANKED $MOON", W / 2, 850);
+          g.font = "700 38px Segoe UI"; g.fillStyle = "#ff2bd6"; g.fillText("🔥 " + S.streak + "d    💀 " + S.rugs + " rugs    📈 ATH " + S.bestPrice.toFixed(1) + "x", W / 2, 940);
+          if (S.vip > 0) { g.fillStyle = "#ffd400"; g.font = "900 44px Segoe UI"; g.fillText(VIP[S.vip].emo + " " + VIP[S.vip].nm, W / 2, 1010); }
+          // code box
+          g.fillStyle = "rgba(0,0,0,.35)"; roundRect(g, W / 2 - 300, 1070, 600, 150, 24); g.fill();
+          g.strokeStyle = "#23f0ff"; g.lineWidth = 3; g.setLineDash([12, 10]); roundRect(g, W / 2 - 300, 1070, 600, 150, 24); g.stroke(); g.setLineDash([]);
+          g.fillStyle = "#cbb6ff"; g.font = "700 30px Segoe UI"; g.fillText("JOIN WITH MY CODE — WE BOTH GET 5,000 🪙", W / 2, 1118);
+          g.fillStyle = "#ffd400"; g.font = "900 70px Segoe UI"; g.fillText(S.refCode, W / 2, 1192);
+          g.fillStyle = "#8fdcff"; g.font = "700 30px Segoe UI"; g.fillText("t.me/RugorRichesBot/play", W / 2, 1272);
+          g.fillStyle = "#b9a7e8"; g.font = "700 26px Segoe UI"; g.fillText("shared by @" + S.name, W / 2, 1315);
+          c.toBlob(b => {
+            const link = inviteLink(), txt = "My $MOON run on RUG OR RICHES 🪙💀 — tap my link, we both get 5,000:";
+            try {
+              const file = new File([b], "moon-flex.png", { type: "image/png" });
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], text: txt, url: link }).then(() => toast("🚀", "Shared!", "Nice flex 👀")).catch(() => { }); return;
+              }
+            } catch (e) { }
+            const url = URL.createObjectURL(b); const a = document.createElement("a"); a.href = url; a.download = "moon-flex.png"; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 2000); toast("🖼️", "Flex card saved!", "Post it & drop your link 👀");
+          });
+        }
+      }
+      function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+      // ---------- SOUND / RENAME / RESET ----------
+      function syncSound() { $("soundBtn").textContent = S.sound ? "🔊" : "🔇"; const sw = $("soundSw"); if (sw) sw.classList.toggle("on", S.sound); }
+      $("soundBtn").addEventListener("click", () => { S.sound = !S.sound; save(); syncSound(); if (S.sound) sfxBuy(); sendSettings({ sound: S.sound }); });
+      $("soundSw").addEventListener("click", () => { S.sound = !S.sound; save(); syncSound(); sendSettings({ sound: S.sound }); });
+      syncSound();
+      function openNameModal() { $("nameInput").value = S.name; $("nameModal").classList.add("show"); setTimeout(() => { try { $("nameInput").focus(); } catch (e) { } }, 60); }
+      $("renameBtn").addEventListener("click", openNameModal);
+      $("nameCancel").addEventListener("click", () => $("nameModal").classList.remove("show"));
+      $("nameSave").addEventListener("click", () => { const v = $("nameInput").value.trim(); if (v) { S.name = v.slice(0, 18); S.nameSet = true; save(); renderStats(); renderLive(); sendSettings({ name: S.name }); if (hasCloudAuth) syncWithCloud(S).catch(() => { }); } $("nameModal").classList.remove("show"); });
+      $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSave").click(); });
+      $("resetBtn").addEventListener("click", () => {
+        if (confirm("Reset ALL progress? Cannot be undone.")) {
+          ["moontap", "moontap_last", "moontap_referred", "moontap_season", "moontap_tut"].forEach(k => lsDel(k)); location.href = location.origin + location.pathname;
+        }
+      });
+
+      // ---------- TABS ----------
+      const panels = { shop: "panel-shop", vip: "panel-vip", store: "panel-store", dash: "panel-dash", help: "panel-help", airdrop: "panel-airdrop", ranks: "panel-ranks", invite: "panel-invite", profile: "panel-profile" };
+      function closeAll() { Object.values(panels).forEach(id => $(id).classList.remove("show")); }
+      function openPanel(p) {
+        panelOpen = p; closeAll();
+        if (p === "game") { updateQuestDot(); return; }
+        if (p === "shop") renderShop(); else if (p === "vip") renderVip(); else if (p === "store") renderStore(); else if (p === "dash") { renderPresets(); renderDash(); }
+        else if (p === "airdrop") { renderAirdrop(); renderQuests(); renderAch(); }
+        else if (p === "ranks") { renderRanks(); renderCrews(); renderMyCrew(); resetRankTab(); } else if (p === "invite") renderInvite(); else if (p === "profile") renderStats();
+        if (panels[p]) $(panels[p]).classList.add("show"); updateQuestDot();
+      }
+      document.querySelectorAll("nav button").forEach(b => {
+        b.addEventListener("click", () => {
+          document.querySelectorAll("nav button").forEach(x => x.classList.remove("on")); b.classList.add("on"); openPanel(b.dataset.p);
+        });
+      });
+      $("profileBtn").addEventListener("click", () => { document.querySelectorAll("nav button").forEach(x => x.classList.remove("on")); openPanel("profile"); });
+      $("rankPill").addEventListener("click", () => {
+        document.querySelectorAll("nav button").forEach(x => x.classList.remove("on"));
+        const rb = document.querySelector('nav button[data-p="ranks"]'); if (rb) rb.classList.add("on"); openPanel("ranks");
+      });
+
+      // ---------- FX ----------
+      function floater(t, x, y) { const f = document.createElement("div"); f.className = "floater"; f.textContent = t; f.style.left = (x - 10) + "px"; f.style.top = (y - 10) + "px"; stage.appendChild(f); setTimeout(() => f.remove(), 900); }
+      function burst(x, y) {
+        for (let i = 0; i < 7; i++) {
+          const p = document.createElement("div"); p.className = "spark"; const a = Math.random() * 6.283, d = 28 + Math.random() * 46;
+          p.style.left = x + "px"; p.style.top = y + "px"; stage.appendChild(p);
+          requestAnimationFrame(() => { p.style.transform = "translate(" + Math.cos(a) * d + "px," + (Math.sin(a) * d - 18) + "px) scale(0)"; p.style.opacity = "0"; }); setTimeout(() => p.remove(), 560);
+        }
+      }
+      let tiltTO = 0;
+      function ripple(x, y) { const r = document.createElement("div"); r.className = "ripple"; r.style.left = x + "px"; r.style.top = y + "px"; stage.appendChild(r); setTimeout(() => r.remove(), 500); }
+      function confetti() {
+        const cols = ["#ff2bd6", "#23f0ff", "#ffd400", "#1dff8f"]; const app = $("app"); for (let i = 0; i < 22; i++) {
+          const p = document.createElement("div"); p.className = "confp";
+          p.style.left = (40 + Math.random() * 20) + "%"; p.style.top = "18%"; p.style.background = cols[i % 4]; app.appendChild(p);
+          const dx = (Math.random() - 0.5) * 280, dy = 220 + Math.random() * 240, rot = Math.random() * 540;
+          requestAnimationFrame(() => { p.style.transform = "translate(" + dx + "px," + dy + "px) rotate(" + rot + "deg)"; p.style.opacity = "0"; }); setTimeout(() => p.remove(), 900);
+        }
+      }
+      function flashEnergy() { const e = $("energyFill"); e.style.background = "var(--red)"; setTimeout(() => e.style.background = "linear-gradient(90deg,var(--cyan),var(--neon))", 250); }
+      let toastTO; function toast(big, t, s) {
+        $("toastBig").textContent = big; $("toastT").textContent = t; $("toastS").textContent = s;
+        $("toast").classList.add("show"); clearTimeout(toastTO); toastTO = setTimeout(() => $("toast").classList.remove("show"), 1900);
+      }
+
+      // ---------- SEASON ----------
+      function seasonTick() {
+        let end = parseInt(lsGet("moontap_season") || "0");
+        if (!end) { end = Date.now() + 30 * 864e5; lsSet("moontap_season", end); }
+        let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const d = Math.floor(s / 86400); s %= 86400; const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); const sec = s % 60;
+        const txt = d + "d " + h + "h " + m + "m " + sec + "s"; $("seasonTimer").textContent = txt; const ad = $("adSeason"); if (ad) ad.textContent = txt;
+        renderEventBanner();
+      }
+
+      // ---------- TUTORIAL ----------
+      const TUT = [{ em: "🪙", h: "Every tap is a bet", p: "Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered." },
+      { em: "👥", h: "It's a live market", p: "Other traders buy & sell in real time, moving the price on their own. Whales can dump and crash it." },
+      { em: "💰", h: "Sell before it rugs", p: "CASH OUT banks your position (stake + profit). If it rugs first, you lose what you invested — so time it." },
+      { em: "👑", h: "Rank up & invite", p: "Upgrades & VIP raise your bet limits and edge. Climb the ranks and invite friends — you both get 5,000 $MOON." }];
+      let tutI = 0;
+      function renderTut() {
+        const t = TUT[tutI]; $("tutEm").textContent = t.em; $("tutH").textContent = t.h; $("tutP").textContent = t.p;
+        const dd = $("tutDots"); dd.innerHTML = ""; TUT.forEach((_, i) => { const s = document.createElement("i"); if (i === tutI) s.className = "on"; dd.appendChild(s); });
+        $("tutNext").textContent = tutI < TUT.length - 1 ? "Next" : "Let's go 🚀";
+      }
+      $("tutNext").addEventListener("click", () => { if (tutI < TUT.length - 1) { tutI++; renderTut(); } else { $("tut").classList.remove("show"); try { localStorage.setItem("moontap_tut", "1"); } catch (e) { } } });
+      $("replayTut").addEventListener("click", () => { tutI = 0; renderTut(); $("tut").classList.add("show"); });
+
+      // ---------- INIT ----------
+      // global safety net — never let one stray error white-screen the app
+      window.addEventListener("error", function (e) { if (window.console && console.warn) console.warn("[moontap] error:", e && e.message); });
+      // optional real-time backend (off by default; set CONFIG.serverUrl to enable). Safe no-op when null.
+      function connectBackend() {
+        isOnline = false;
+        syncWithCloud().catch(() => { });
+      }
+      function fitViewport() {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        // cap to the SMALLEST sane height so the app never extends past the visible webview (keeps the bottom nav on-screen)
+        const cands = [tg && tg.viewportStableHeight, tg && tg.viewportHeight, window.innerHeight].filter(v => typeof v === "number" && v > 120);
+        const h = cands.length ? Math.min.apply(null, cands) : window.innerHeight;
+        if (h > 120) document.documentElement.style.setProperty("--app-h", h + "px");
+        if (typeof sizeChart === "function") sizeChart();
+      }
+      function initTelegram() {
+        const tg = window.Telegram && window.Telegram.WebApp; if (!tg) { fitViewport(); return; }
+        try {
+          tg.ready(); tg.expand && tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#05010f"); tg.setBackgroundColor && tg.setBackgroundColor("#05010f");
+          tg.onEvent && tg.onEvent("viewportChanged", fitViewport); fitViewport();
+          // Telegram (esp. iOS) often opens the mini-app sheet collapsed and ignores the first expand() — retry a few
+          // times as the viewport settles so the bottom nav is on-screen without the user dragging the sheet up.
+          [60, 250, 600, 1200, 2500].forEach(t => setTimeout(() => { try { tg.expand && tg.expand(); } catch (e) { } fitViewport(); }, t));
+          tg.onEvent && tg.onEvent("fullscreenChanged", fitViewport);
+          // Many iOS Telegram clients only honor expand() after a user gesture — force it on the first touch/click.
+          const forceExpand = () => {
+            try { tg.expand && tg.expand(); } catch (e) { } fitViewport();
+            document.removeEventListener("touchstart", forceExpand); document.removeEventListener("pointerdown", forceExpand);
+          };
+          document.addEventListener("touchstart", forceExpand, { passive: true });
+          document.addEventListener("pointerdown", forceExpand, { passive: true });
+          try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) { }   // stop the sheet from collapsing on in-app scroll
+          const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+          if (u) {
+            if (u.id) { currentUserId = String(u.id); S.refCode = refFromId(u.id); }                 // referral code tied to the Telegram account
+            if (!HADSAVE) S.name = String(u.username || u.first_name || S.name).slice(0, 18);
+            const rc = $("refCode"); if (rc) rc.textContent = S.refCode;
+            const nm = $("invName"); if (nm) nm.textContent = u.username ? ("@" + u.username) : (u.first_name || S.name);
+            const av = $("invAv"); if (av) { if (u.photo_url) { av.style.backgroundImage = "url('" + u.photo_url + "')"; av.textContent = ""; } else av.textContent = String(u.first_name || u.username || "D").charAt(0).toUpperCase(); }
+            save();
+          }
+        } catch (e) { }
+      }
+      // in-browser smoke test: validates core wiring on load (see console; add ?test to the URL for an on-screen badge)
+      function selfTest() {
+        let pass = 0, fail = 0; const errs = []; const ck = (c, m) => { if (c) pass++; else { fail++; errs.push(m); } };
+        ["panel-shop", "panel-vip", "panel-store", "panel-dash", "panel-help", "panel-airdrop", "panel-ranks", "panel-invite", "panel-profile", "coin", "chart", "cashout", "sellHalf", "rugBar", "dashSpark", "nameModal", "upModal", "socialList", "adPoints"].forEach(id => ck(!!$(id), "#" + id));
+        [renderShop, renderVip, renderStore, renderDash, renderRanks, renderInvite, renderQuests, renderAirdrop, renderSocial, renderCrews, renderMyCrew, shareTo, cashOut, sellHalf, triggerRug, startBust, openUpgrade, upEffect].forEach(fn => ck(typeof fn === "function", "fn"));
+        ck(fmt(1500) === "1.50K", "fmt"); ck(clamp(5, 0, 3) === 3, "clamp"); ck(typeof upEffect(UP[0], 0).now === "string", "upEffect");
+        ck(VIP.length === 5 && RANKS.length === 7, "defs"); ck(RANK_BET.length === 7 && VIP_BET_MULT.length === 5, "betmax");
+        if (window.console) console.log("[moontap] self-test: " + pass + " passed, " + fail + " failed" + (fail ? " — " + errs.join("; ") : " ✅"));
+        if (/[?&]test/.test(location.search)) {
+          const b = document.createElement("div"); b.textContent = fail ? ("⚠ " + fail + " FAIL") : ("✅ " + pass + " checks OK");
+          b.style.cssText = "position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:90;font:700 11px sans-serif;padding:3px 9px;border-radius:8px;color:#06121f;background:" + (fail ? "#ff3b5c" : "#1dff8f"); $("app").appendChild(b);
+        }
+        return fail === 0;
+      }
+      // ---------- WIN / LOSS REACTION ----------
+      function showReaction(win, amount, sub) {
+        const m = $("reactModal"); if (!m) return;
+        const img = $("reactImg"); img.src = win ? "/assets/brand/win-card.webp" : "/assets/brand/loss-card.webp"; img.style.display = "";
+        $("reactAmt").textContent = amount || ""; $("reactAmt").style.color = win ? "var(--green)" : "var(--red)";
+        $("reactSub").textContent = sub || ""; $("reactBtn").textContent = win ? "Continue" : "Try again";
+        m.classList.add("show");
+      }
+      function closeReaction() { const m = $("reactModal"); if (m) m.classList.remove("show"); }
+      $("reactBtn") && $("reactBtn").addEventListener("click", closeReaction);
+      $("reactModal") && $("reactModal").addEventListener("click", e => { if (e.target.id === "reactModal") closeReaction(); });
+
+      function init() {
+        initTelegram(); sizeChart(); applySkin(); renderLive(); renderBetChips(); renderBetHUD(); updatePredict(); renderStats(); updateQuestDot(); connectBackend(); selfTest();
+        // deep-link: ?tab=airdrop (etc.) from the bot button / shared links opens that tab on load
+        try {
+          const dt = new URLSearchParams(location.search).get("tab");
+          if (dt && panels[dt]) {
+            document.querySelectorAll("nav button").forEach(x => x.classList.remove("on"));
+            const nb = document.querySelector('nav button[data-p="' + dt + '"]'); if (nb) nb.classList.add("on"); openPanel(dt);
+          }
+        } catch (e) { }
+        if (!lsGet("moontap_tut")) { $("tut").classList.add("show"); renderTut(); }
+        // finish the loading bar, then fade out the branded splash once the app is up
+        { const f = $("splashFill"); if (f) f.style.width = "100%"; }
+        setTimeout(() => { const s = $("splash"); if (s) { s.classList.add("hide"); setTimeout(() => { s.style.display = "none"; }, 650); } }, 900);
+        requestAnimationFrame(loop);
+      }
+      window.addEventListener("resize", fitViewport);
+      window.addEventListener("orientationchange", () => setTimeout(fitViewport, 250));
+      setInterval(achCheck, 2000); seasonTick(); setInterval(seasonTick, 1000);
+      init();
+    })();
+  </script>
+</body>
+
+</html>
