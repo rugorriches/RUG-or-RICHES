@@ -6,7 +6,7 @@ const MOON_CAP = 1000000000;
 const AIRDROP_CAP = 100000000;
 
 // /start message config — override any of these with Vercel env vars
-const WEBAPP_URL = process.env.WEBAPP_URL || "https://rugorriches.app/play";
+const WEBAPP_URL = process.env.WEBAPP_URL || "https://rugorriches.app/play?v=3";
 const WELCOME_IMAGE = process.env.WELCOME_IMAGE_URL || "https://rugorriches.app/assets/brand/welcome.png";
 const CHANNEL_URL = process.env.CHANNEL_URL || "https://t.me/rugorricheslounge";
 const GROUP_URL = process.env.GROUP_URL || "https://t.me/rugorricheslounge";

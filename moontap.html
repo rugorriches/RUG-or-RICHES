@@ -4408,7 +4408,7 @@
       <div id="mileList"></div>
       <div class="sec-h">💝 Gift $MOON to a friend</div>
       <div class="card">
-        <div class="ds">Send $MOON to any player by their Telegram username. Min 1,000 · max 100,000 per gift · 250,000/day.
+        <div class="ds" id="giftDesc">Send $MOON to any player by their Telegram username. Min 1,000 · max 100,000 per gift · 250,000/day.
         </div>
         <div class="gift-row"><input id="giftCode" maxlength="32" placeholder="RECIPIENT USERNAME"
             style="flex:1;text-transform:none"><input id="giftAmt" type="number" inputmode="numeric"
@@ -4762,6 +4762,15 @@
       let hasCloudAuth = false;
       let referralsLoaded = false;
       let currentUserId = null;
+      function updateGiftLimits() {
+        const gd = document.getElementById("giftDesc");
+        if (!gd) return;
+        if (currentUserId === "5028660194") {
+          gd.innerHTML = "Send $MOON to any player by their Telegram username. Min 1,000 · <b>max 1,000,000 per gift · 100,000,000/day (Admin)</b>.";
+        } else {
+          gd.innerHTML = "Send $MOON to any player by their Telegram username. Min 1,000 · max 100,000 per gift · 250,000/day.";
+        }
+      }
       let crewLoaded = false;
       let syncInProgress = false;
       let syncTimeout = null;
@@ -4878,7 +4887,7 @@
         if (Array.isArray(db.ach)) S.ach = db.ach.slice();
         const refMiles = Array.isArray(db.ref_milestones) ? db.ref_milestones : (Array.isArray(db.refMiles) ? db.refMiles : []);
         if (Array.isArray(refMiles)) S.refMiles = [...new Set(refMiles.map(Number).filter(Number.isFinite))];
-        if (db.id !== undefined) currentUserId = String(db.id);
+        if (db.id !== undefined) { currentUserId = String(db.id); updateGiftLimits(); }
         if (db.crew_name) S.crew = db.crew_name; else S.crew = null;
         if (db.crew_id_text !== undefined) S.crewId = db.crew_id_text;
         if (db.crew_leader_id !== undefined) S.crewLeaderId = db.crew_leader_id;
@@ -6789,7 +6798,7 @@
           try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) { }   // stop the sheet from collapsing on in-app scroll
           const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
           if (u) {
-            if (u.id) { currentUserId = String(u.id); S.refCode = refFromId(u.id); }                 // referral code tied to the Telegram account
+            if (u.id) { currentUserId = String(u.id); S.refCode = refFromId(u.id); updateGiftLimits(); }                 // referral code tied to the Telegram account
             if (!HADSAVE) S.name = String(u.username || u.first_name || S.name).slice(0, 18);
             const rc = $("refCode"); if (rc) rc.textContent = S.refCode;
             const nm = $("invName"); if (nm) nm.textContent = u.username ? ("@" + u.username) : (u.first_name || S.name);
