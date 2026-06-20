@@ -5220,7 +5220,7 @@
       function startEvent() {
         mevent = pick(EVENTS); eventTime = mevent.dur; const b = $("evtBadge");
         if (b) { b.style.display = "block"; b.textContent = mevent.emo + " " + mevent.txt; b.style.color = mevent.color || "#fff"; b.style.background = "rgba(0,0,0,.5)"; }
-        if (panelOpen === "game") toast(mevent.emo, mevent.txt, "Market event for " + mevent.dur + "s");
+        // market events already show non-intrusively in the badge; no toast needed
       }
 
       // ---------- CHART ----------
@@ -5478,7 +5478,7 @@
           if (energy < maxEnergy()) energy = Math.min(maxEnergy(), energy + regenRate() * dt);
           if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { combo = 0; $("combo").textContent = ""; } }
           if (boost > 0) { boost -= dt; if (boost <= 0) $("boostBadge").style.display = "none"; }
-          boostAcc += dt; if (boostAcc > 1) { boostAcc = 0; if (boost <= 0 && Math.random() < 0.015) { boost = 8; $("boostBadge").style.display = "block"; if (panelOpen === "game") toast("🚀", "2x BOOST!", "Double pumps for 8s — tap fast!"); } }
+          boostAcc += dt; if (boostAcc > 1) { boostAcc = 0; if (boost <= 0 && Math.random() < 0.015) { boost = 8; $("boostBadge").style.display = "block"; } }
           if (mevent) { eventTime -= dt; if (eventTime <= 0) { mevent = null; $("evtBadge").style.display = "none"; } }
           else { eventAcc += dt; if (eventAcc > 1) { eventAcc = 0; if (Math.random() < 0.05) startEvent(); } }
           tickAcc += dt; while (tickAcc >= 0.12) { tickAcc -= 0.12; if (busting) bustStep(); else if (!isOnline) idleTick(); }
