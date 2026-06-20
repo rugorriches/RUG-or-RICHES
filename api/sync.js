@@ -245,6 +245,36 @@ async function loadPlayerProfile(playerId) {
   const { rows: upRows } = await db.query("SELECT * FROM upgrades WHERE player_id = $1", [playerId]);
   player.up = upRows[0] || { power: 0, energy: 0, regen: 0, insure: 0, auto: 0, combo: 0, vault: 0, cashbonus: 0 };
 
+  // Server-authoritative achievements evaluation
+  const lt = Number(player.lifetime_banked) || 0;
+  const streak = Number(player.streak) || 0;
+  const bestPrice = Number(player.best_price) || 1;
+  const rugs = Number(player.rugs) || 0;
+  const vip = Number(player.vip_tier) || 0;
+
+  const { rows: friendRows } = await db.query("SELECT COUNT(*)::int as cnt FROM friends WHERE player_id = $1", [playerId]);
+  const friendCount = friendRows[0]?.cnt || 0;
+
+  const rankI = rankIdxFromLifetime(lt);
+
+  const achievementsToUnlock = [];
+  if (rugs >= 1) achievementsToUnlock.push("first");
+  if (lt >= 1000000) achievementsToUnlock.push("whale");
+  if (bestPrice >= 8) achievementsToUnlock.push("moon");
+  if (streak >= 7) achievementsToUnlock.push("streak7");
+  if (friendCount >= 5) achievementsToUnlock.push("social");
+  if (vip >= 1) achievementsToUnlock.push("vip");
+  if (rankI >= 4) achievementsToUnlock.push("shark");
+
+  if (achievementsToUnlock.length > 0) {
+    for (const achId of achievementsToUnlock) {
+      await db.query(
+        "INSERT INTO achievements (player_id, achievement_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+        [playerId, achId]
+      );
+    }
+  }
+
   // Achievements
   const { rows: achRows } = await db.query("SELECT achievement_id FROM achievements WHERE player_id = $1", [playerId]);
   player.ach = achRows.map(r => r.achievement_id);
@@ -457,6 +487,17 @@ module.exports = async (req, res) => {
             skin
           ]
         );
+        if (Array.isArray(state.ach)) {
+          const validAch = new Set(["first", "diamond", "whale", "moon", "streak7", "social", "vip", "shark"]);
+          for (const achId of state.ach) {
+            if (validAch.has(achId)) {
+              await client.query(
+                "INSERT INTO achievements (player_id, achievement_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                [tgUser.id, achId]
+              );
+            }
+          }
+        }
         await client.query("COMMIT");
       } catch (err) {
         await client.query("ROLLBACK");

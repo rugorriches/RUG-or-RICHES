@@ -4782,7 +4782,8 @@
         betCur: "moon",
         autoSell: state && state.autoSell,
         stopLoss: state && state.stopLoss,
-        skin: state && state.skin
+        skin: state && state.skin,
+        ach: state && state.ach
       });
       const cloudAuth = () => { const tg = window.Telegram && window.Telegram.WebApp; return tg && tg.initData ? tg : null; };
       const actionToken = () => { try { return crypto.randomUUID().replace(/-/g, ""); } catch (e) { return Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); } };
