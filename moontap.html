@@ -2689,6 +2689,21 @@
       to { transform: scale(1.05); box-shadow: 0 6px 24px rgba(255, 59, 92, 0.95); }
     }
 
+    /* clutch-bank celebration — gold burst when you bank deep in the danger zone */
+    #clutchFlash {
+      position: absolute; inset: 0; z-index: 56; pointer-events: none; opacity: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% 44%, rgba(255, 212, 0, .34), rgba(29, 255, 143, .12) 46%, transparent 72%);
+    }
+    #clutchFlash .cf-txt {
+      font-size: 30px; font-weight: 900; letter-spacing: .4px; color: #fff; text-align: center; transform: scale(.6);
+      text-shadow: 0 0 18px var(--gold), 0 0 38px var(--neon);
+    }
+    #clutchFlash.show { animation: clutchFlashAnim .75s ease-out; }
+    #clutchFlash.show .cf-txt { animation: clutchTxtAnim .75s cubic-bezier(.2, 1.5, .4, 1); }
+    @keyframes clutchFlashAnim { 0% { opacity: 0; } 16% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes clutchTxtAnim { 0% { transform: scale(.6); opacity: 0; } 28% { transform: scale(1.14); opacity: 1; } 72% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.05); opacity: 0; } }
+
     @media (prefers-reduced-motion: reduce) {
       #chartCard,
       .btn,
@@ -2696,6 +2711,8 @@
       #rugFill::after,
       #dangerVig.crit,
       #app.shake,
+      #clutchFlash.show,
+      #clutchFlash.show .cf-txt,
       .pulse-danger,
       .pulse-nuclear,
       .pulse-btn-clutch,
@@ -4058,6 +4075,7 @@
   <div id="app">
     <div id="rugOverlay"></div>
     <div id="dangerVig"></div>
+    <div id="clutchFlash"><div class="cf-txt"></div></div>
     <div class="react-modal" id="reactModal">
       <div class="react-box">
         <img id="reactImg" src="" alt="" onerror="this.style.display='none'">
@@ -5599,6 +5617,13 @@
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; winStreak = 0; heat = 0; pumpVel = 0; dumpWarn = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; save(); renderStats(); renderDash(); settleRoundCloud(settlement);
       }
 
+      function flashClutchBank(nuclear) {
+        if (prefersReducedMotion()) return;
+        const f = $("clutchFlash"); if (!f) return;
+        const t = f.querySelector(".cf-txt"); if (t) t.textContent = nuclear ? "☢️ NUCLEAR BANK!" : "🔥 CLUTCH BANK!";
+        f.classList.remove("show"); void f.offsetWidth; f.classList.add("show");
+        setTimeout(() => f.classList.remove("show"), 820);
+      }
       function cashOut(auto) {
         if (pot < 1 || busting) return;
         logTelemetry("bank_clicked", { auto: !!auto, actionType: "cashout" });
@@ -5621,6 +5646,7 @@
         if (panelOpen === "game") {
           toast(auto ? "🎯" : "💰", auto ? "AUTO-SOLD" : "SOLD", "+" + fmt(payout) + " " + (cur === "pts" ? "pts" : "$MOON") + " · profit " + (profit >= 0 ? "+" : "") + fmt(profit) + (winStreak > 1 ? " · 🏆x" + winStreak : "")); sfxCash(); triggerHaptic("success"); if (profit > 0 && r >= 0.5) confetti();
           if (!auto && profit > 0 && cur === "moon" && r >= 0.5) showReaction(true, "+" + fmt(payout) + " $MOON", "You banked it before the rug — gains locked.");
+          if (profit > 0 && r >= 0.8) { flashClutchBank(r >= 0.95); triggerHaptic("heavy"); }   // clutch/nuclear bank payoff
         }
         mktBuy = clamp(mktBuy - 0.12, 0.05, 0.9);   // your sell adds sell pressure
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; heat = 0; pumpVel = 0; dumpWarn = 0; bonusBets = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; price = Math.max(1.0, 1 + (price - 1) * 0.25); ath = price; roundPeak = price;
