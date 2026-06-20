@@ -15,6 +15,7 @@ const routes = {
   crash: require("./crash"),
   gift: require("./gift"),
   cron: require("./cron"),
+  boards: require("./boards"),
 };
 
 module.exports = async (req, res) => {

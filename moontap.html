@@ -3038,8 +3038,14 @@
     .rtabs {
       display: flex;
       gap: 6px;
-      margin: 2px 0 12px;
+      margin: 2px 0 10px;
     }
+
+    /* secondary segmented control inside a top group */
+    .subtabs { display: flex; gap: 6px; margin: 0 0 12px; }
+    .subtabs:empty { display: none; }
+    .subtab { flex: 1; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); color: #b9a7e8; border-radius: 9px; padding: 7px 3px; font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s; }
+    .subtab.on { color: #fff; background: rgba(124, 77, 255, .28); border-color: rgba(124, 77, 255, .55); }
 
     .rtab {
       flex: 1;
@@ -4343,14 +4349,11 @@
     <div class="panel" id="panel-ranks">
       <h2>🏆 Ranks & Crews</h2>
       <div class="rtabs">
-        <button class="rtab on" data-rt="rank">My Rank</button>
-        <button class="rtab" data-rt="players">Players</button>
-        <button class="rtab" data-rt="crews">Crews</button>
-        <button class="rtab" data-rt="mycrew">My Crew</button>
-        <button class="rtab" data-rt="wars">⚔️ Wars</button>
-        <button class="rtab" data-rt="daily">🏆 Daily</button>
-        <button class="rtab" data-rt="crash">💥 Crash</button>
+        <button class="rtab on" data-grp="ranks">🏆 Ranks</button>
+        <button class="rtab" data-grp="crews">🤝 Crews</button>
+        <button class="rtab" data-grp="compete">💥 Compete</button>
       </div>
+      <div class="subtabs" id="subTabs"></div>
       <div class="rt" id="rt-rank">
         <div class="rank-hero">
           <div class="rh-top">
@@ -4369,6 +4372,8 @@
       <div class="rt" id="rt-players" style="display:none">
         <div class="sec-h">Season Leaderboard</div>
         <div id="boardList"></div>
+        <div class="sec-h" style="margin-top:16px">🐋 Live Boards</div>
+        <div id="liveBoards"></div>
       </div>
       <div class="rt" id="rt-crews" style="display:none">
         <div class="sec-h">Top Crews</div>
@@ -6707,6 +6712,25 @@
           '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
         wrap.appendChild(f);
       }
+      async function renderBoards() {
+        const wrap = $("liveBoards"); if (!wrap) return;
+        wrap.innerHTML = '<div class="dly-load">Loading boards…</div>';
+        let d = null;
+        try { const r = await fetch("/api/boards"); d = await r.json(); } catch (e) {}
+        if (!d || !d.boards) { wrap.innerHTML = '<div class="dly-load">Boards unavailable — try again soon.</div>'; return; }
+        const sec = (title, arr, fmtVal) => {
+          if (!arr || !arr.length) return "";
+          let h = '<div class="sec-h" style="margin-top:10px">' + title + '</div>';
+          arr.forEach((r, i) => { h += '<div class="crewrow"><div class="rk">' + (i + 1) + '</div><div class="nm">' + esc(r.name) + '</div><div class="sc">' + fmtVal(r.value) + '</div></div>'; });
+          return h;
+        };
+        let html = "";
+        if (d.whaleOfTheDay) html += '<div class="dly-prize">🐋 Whale of the Day: <b>' + esc(d.whaleOfTheDay.name) + '</b> · ' + fmt(d.whaleOfTheDay.value) + ' $MOON</div>';
+        html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
+        html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
+        html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
+        wrap.innerHTML = html || '<div class="dly-load">No board activity yet today — be the first! 🦈</div>';
+      }
       async function renderDaily() {
         const wrap = $("dailyView"); if (!wrap) return;
         wrap.innerHTML = '<div class="dly-load">Loading today’s degens…</div>';
@@ -6853,14 +6877,31 @@
           });
         }
       }
-      function resetRankTab() { document.querySelectorAll(".rtab").forEach((x, i) => x.classList.toggle("on", i === 0));["rank", "players", "crews", "mycrew", "wars", "daily", "crash"].forEach((k, i) => { const el = $("rt-" + k); if (el) el.style.display = i === 0 ? "block" : "none"; }); }
-      document.querySelectorAll(".rtab").forEach(b => {
-        b.addEventListener("click", () => {
-          document.querySelectorAll(".rtab").forEach(x => x.classList.remove("on")); b.classList.add("on");
-          const t = b.dataset.rt;["rank", "players", "crews", "mycrew", "wars", "daily", "crash"].forEach(k => { const el = $("rt-" + k); if (el) el.style.display = (k === t) ? "block" : "none"; });
-          if (t === "crews") renderCrews(); else if (t === "mycrew") renderMyCrew(); else if (t === "wars") renderWars(); else if (t === "daily") renderDaily(); else if (t === "crash") renderCrash();
-        });
-      });
+      // ---- grouped rank tabs: 3 top groups, each with a small sub-toggle ----
+      const RT_GROUPS = {
+        ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
+        crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }]
+      };
+      const RT_RENDER = { crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), players: () => renderBoards() };
+      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash"];
+      function showRtView(k) {
+        RT_ALL.forEach(x => { const el = $("rt-" + x); if (el) el.style.display = (x === k) ? "block" : "none"; });
+        document.querySelectorAll("#subTabs .subtab").forEach(b => b.classList.toggle("on", b.dataset.rt === k));
+        if (RT_RENDER[k]) RT_RENDER[k]();
+      }
+      function showRtGroup(grp) {
+        document.querySelectorAll(".rtab[data-grp]").forEach(b => b.classList.toggle("on", b.dataset.grp === grp));
+        const subs = RT_GROUPS[grp] || [];
+        const st = $("subTabs");
+        if (st) {
+          st.innerHTML = subs.length > 1 ? subs.map(s => '<button class="subtab" data-rt="' + s.k + '">' + s.l + '</button>').join("") : "";
+          st.querySelectorAll(".subtab").forEach(b => b.addEventListener("click", () => showRtView(b.dataset.rt)));
+        }
+        showRtView(subs[0] ? subs[0].k : "rank");
+      }
+      function resetRankTab() { showRtGroup("ranks"); }
+      document.querySelectorAll(".rtab[data-grp]").forEach(b => b.addEventListener("click", () => showRtGroup(b.dataset.grp)));
 
       // ---------- INVITE ----------
       $("refCode").textContent = S.refCode;
