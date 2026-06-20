@@ -69,276 +69,120 @@
 <body>
 <div class="wrap" style="display:flex;gap:15px;align-items:center;padding:11px 22px;font-size:13px;font-weight:700;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap">
   <a href="/" style="color:var(--gold)">🏠 Home</a>
-  <a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper" style="color:#fff">Litepaper</a>
+  <a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper" style="color:#fff">Litepaper</a><a href="/faq">FAQ</a>
   <a href="https://t.me/RugorRichesBot/play" style="margin-left:auto;color:var(--cyan)">▶ Play</a>
 </div>
 <header class="top">
   <div class="wrap">
     <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
     <h1><span class="grad">Litepaper</span></h1>
-    <div class="tagline">Pump it. Bank it. Before it rugs.</div>
-    <div class="updated">v2.0 · June 18, 2026</div>
+    <div class="tagline">Ecosystem model, security architecture, and roadmap.</div>
+    <div class="updated">v2.0 · June 20, 2026</div>
   </div>
 </header>
-
 <nav class="toc">
   <div class="wrap">
-    <a href="#idea">The idea</a>
-    <a href="#walkthrough">Walkthrough</a>
-    <a href="#features">Features</a>
-    <a href="#progression">Progression</a>
-    <a href="#social">Crews &amp; Wars</a>
-    <a href="#points">Points</a>
-    <a href="#cycles">6 Airdrop Cycles</a>
-    <a href="#tokenomics">Tokenomics</a>
-    <a href="#utility">Utility</a>
-    <a href="#postlaunch">Post-launch</a>
-    <a href="#fairplay">Fair play</a>
-    <a href="#roadmap">Roadmap</a>
-    <a href="#risks">Risks</a>
+    <a href="#summary">1. Executive Summary</a>
+    <a href="#status">2. Product Status</a>
+    <a href="#loop">3. Game Loop</a>
+    <a href="#economy">4. Economy Design</a>
+    <a href="#points">5. Season Points</a>
+    <a href="#tokenomics">6. Tokenomics Overview</a>
+    <a href="#sustainability">7. Sinks &amp; Slices</a>
+    <a href="#fairplay">8. Fairness &amp; Safety</a>
+    <a href="#roadmap">9. Roadmap</a>
+    <a href="#risks">10. Risks</a>
   </div>
 </nav>
 
 <main class="wrap">
-  <div class="card muted"><strong>Important:</strong> This litepaper describes a game and a <em>proposed</em> design. <strong>$MOON</strong> and "Airdrop Points" are in-game points with <strong>no guaranteed monetary value</strong>. They are not currency, securities, or an investment, and any future token, allocation, cycle percentage, or distribution is illustrative, subject to legal review, and may change or never occur. Nothing here is a promise of value or financial advice.</div>
-
-  <h2 id="idea">1. The idea</h2>
-  <p>RUG OR RICHES is a <strong>press-your-luck crypto tapper</strong> built as a Telegram Mini App. It distills the exact emotion of degen trading — the thrill of riding a pump and the gut-punch of a rug — into a 10-second loop anyone can play, free, with no wallet.</p>
-  <p>You tap to pump a live $MOON chart. The longer you ride, the higher the multiplier — and the higher the rug risk. Cash out in time and you bank the gains; hold one tap too long and the chart rugs, wiping your unbanked position. It is self-aware crypto humour turned into a game of nerve.</p>
-  <div class="grid">
-    <div class="card"><h3>📈 Real tension</h3><p class="muted">A live market with buyers, sellers, fakeouts, soft rugs and hard rugs — outcomes you can read and time, not pure chance.</p></div>
-    <div class="card"><h3>⚡ Instant loop</h3><p class="muted">Every round is seconds long. "One more round" is the entire design — fast, screenshot-worthy, shareable.</p></div>
-    <div class="card"><h3>🤝 Social by default</h3><p class="muted">Crews, crew wars, referrals, chat, and global + regional leaderboards turn solo play into competition.</p></div>
-    <div class="card"><h3>🪂 A reason to stay</h3><p class="muted">Airdrop Points reward sustained, legitimate play across six pre-launch cycles — not one lucky run.</p></div>
+  <div class="card" style="border: 1px solid var(--gold); background: rgba(255, 212, 0, 0.05); color: #fff; padding: 20px; border-radius: 14px; margin-bottom: 24px; font-size: 14px; line-height: 1.6;">
+    <strong>⚠️ Master Disclaimer Notice:</strong><br>
+    This litepaper describes a proposed design for the RUG OR RICHES gaming ecosystem. In-game $MOON and Season Points are virtual gameplay trackers with <strong>no guaranteed monetary value</strong>. No token is offered, and a future launch is not guaranteed. Read Section 10 for full risk disclosures.
   </div>
 
-  <h2 id="walkthrough">2. Full walkthrough — A to Z</h2>
-  <p>This is the entire journey, not just the tap screen.</p>
-  <ol class="steps">
-    <li><b>Open the app.</b> Launch from the Telegram bot (<a href="https://t.me/RugorRichesBot/play">@RugorRichesBot</a>) or the website Play button. No wallet, no signup — your Telegram identity is your account, verified server-side.</li>
-    <li><b>Get your starting stack.</b> New players begin with a small $MOON balance and starting Airdrop Points so you can play immediately.</li>
-    <li><b>Set your bet.</b> Choose a stake per round. Bigger bets mean bigger pumps and bigger swings.</li>
-    <li><b>Tap to pump.</b> Each tap stakes your bet and pushes the live price up, building your in-round position (the "pot").</li>
-    <li><b>Read the heat.</b> A multi-factor rug-risk meter climbs as you ride. Market events (FOMO surge, bear raid, whale accumulation, volatility) shift the odds in real time.</li>
-    <li><b>Manage the position.</b> Sell half to lock partial profit, set an auto-sell target, or set a stop-loss. Watch for the "DUMP INCOMING" warning.</li>
-    <li><b>Cash out.</b> Bank your position before it rugs. Clutch high-risk exits pay a bonus; ignore the warning and a hard rug wipes the unbanked pot.</li>
-    <li><b>Bank builds your rank.</b> Lifetime banked $MOON levels you from Shrimp to Megalodon, each unlocking energy, daily-bonus and VIP perks.</li>
-    <li><b>Spend energy, refill it.</b> Tapping is free, but a separate energy tank gates extended rushes; it regenerates over time, scales with rank, and can be refilled.</li>
-    <li><b>Buy upgrades.</b> Spend banked $MOON on eight permanent upgrades across Offense, Defense and Economy.</li>
-    <li><b>Climb VIP.</b> Earn or unlock four VIP tiers for earnings multipliers, rug protection and perks.</li>
-    <li><b>Clear quests.</b> Daily, weekly, monthly and VIP quests pay $MOON and feed your Airdrop Points.</li>
-    <li><b>Claim daily rewards.</b> Login streaks, a spin wheel, mystery boxes and a lucky draw keep you coming back.</li>
-    <li><b>Go social.</b> Join or create a crew, chat, fight weekly Crew Wars, and invite friends for referral rewards.</li>
-    <li><b>Qualify for the airdrop.</b> Sustained, legitimate play across the season builds your Airdrop Points toward qualification, Elite status, and a snapshot at the end of each cycle.</li>
-    <li><b>Repeat across six cycles.</b> Each pre-launch cycle is a fresh season with its own rising allocation — the earlier you start, the more cycles you can stack.</li>
-  </ol>
+  <!-- SECTION 1 -->
+  <h2 id="summary">1. Executive Summary</h2>
+  <p>RUG OR RICHES is a press-your-luck game designed as a Telegram Mini App. It distills the psychological adrenaline of degen trading into a fast, engaging, simulated loop. The ecosystem operates on a sustainable dual-layer system separating off-chain gameplay points from proposed on-chain scarcity.</p>
 
-  <h2 id="features">3. Game features &amp; definitions</h2>
-
-  <h3>Core trading</h3>
-  <div class="feat"><div class="e">👆</div><div><div class="nm">Tap to pump</div><div class="ds">Each tap stakes your bet and pushes the live price higher, growing your unbanked pot.</div></div></div>
-  <div class="feat"><div class="e">🌡️</div><div><div class="nm">Rug-risk meter (heat)</div><div class="ds">A live gauge that climbs the longer/higher you ride. High heat triggers a "DUMP INCOMING" warning before a possible rug.</div></div></div>
-  <div class="feat"><div class="e">🎭</div><div><div class="nm">Fakeouts, soft &amp; hard rugs</div><div class="ds">Not every dip is the end. Fakeouts shake out weak hands; soft rugs partly cut your pot; hard rugs wipe the unbanked position.</div></div></div>
-  <div class="feat"><div class="e">✂️</div><div><div class="nm">Sell half</div><div class="ds">Bank half your pot to lock partial profit while keeping a position riding.</div></div></div>
-  <div class="feat"><div class="e">🤖</div><div><div class="nm">Auto-sell &amp; stop-loss</div><div class="ds">Pre-set a multiplier to bank at automatically, or a floor to bail at — disciplined exits without the nerves.</div></div></div>
-  <div class="feat"><div class="e">📈</div><div><div class="nm">High-risk cash-out bonus</div><div class="ds">Banking at very high heat pays a bonus — reward for steel nerves, scaled by the Profit Taker upgrade.</div></div></div>
-  <div class="feat"><div class="e">🔥</div><div><div class="nm">Combos &amp; win streaks</div><div class="ds">Consecutive profitable rounds build combos and streaks for bonus earnings, raised by the Combo Master upgrade.</div></div></div>
-  <div class="feat"><div class="e">🎲</div><div><div class="nm">Market events</div><div class="ds">In-round events shift odds live: FOMO Surge &amp; Bullish News (pump up), Bear Raid (sell pressure), Whale Accumulation, High Volatility.</div></div></div>
-
-  <h3>Energy &amp; upgrades</h3>
-  <div class="feat"><div class="e">🔋</div><div><div class="nm">Energy</div><div class="ds">A tank that gates extended play. It regenerates over time, grows with rank and the Max Energy upgrade, and can be refilled.</div></div></div>
-  <div class="feat"><div class="e">⚔️</div><div><div class="nm">Offense — Tap Power, Combo Master</div><div class="ds">Bigger pumps and earnings per tap; higher combo cap and bonus.</div></div></div>
-  <div class="feat"><div class="e">🛡️</div><div><div class="nm">Defense — Rug Insurance, Diamond Vault</div><div class="ds">Lowers rug chance; rescues a percentage of the pot when you do get rugged.</div></div></div>
-  <div class="feat"><div class="e">⚙️</div><div><div class="nm">Economy — Max Energy, Energy Regen, Auto-Trader, Profit Taker</div><div class="ds">Bigger/faster energy; earns banked $MOON while you're away; bigger high-risk cash-out bonuses.</div></div></div>
-
-  <h3>Daily &amp; rewards</h3>
-  <div class="feat"><div class="e">📅</div><div><div class="nm">Login streaks &amp; daily combo</div><div class="ds">Consecutive-day logins grow a streak multiplier; a daily combo claim pays bonus $MOON.</div></div></div>
-  <div class="feat"><div class="e">🎡</div><div><div class="nm">Spin wheel &amp; lucky draw</div><div class="ds">Free daily spins and ticket-based draws paying $MOON, energy, bonus boxes, or rare skins.</div></div></div>
-  <div class="feat"><div class="e">🎁</div><div><div class="nm">Mystery boxes</div><div class="ds">Random reward chests ranging from $MOON and energy up to a legendary skin.</div></div></div>
-  <div class="feat"><div class="e">🎯</div><div><div class="nm">Quests</div><div class="ds">Daily (5), weekly (4), monthly (3) and VIP-only quests with $MOON rewards that also feed Airdrop Points.</div></div></div>
-  <div class="feat"><div class="e">🏅</div><div><div class="nm">Achievements</div><div class="ds">Milestones like Diamond Hands (cash out at 70%+ risk), Whale, To The Moon, and Apex Predator.</div></div></div>
-
-  <h3>Cosmetics &amp; store</h3>
-  <div class="feat"><div class="e">🎨</div><div><div class="nm">Coin skins</div><div class="ds">Collectible skins with Common→Legendary rarity. Some are bought with Telegram Stars; the rarest are win-only and cannot be purchased.</div></div></div>
-  <div class="feat"><div class="e">⭐</div><div><div class="nm">Telegram Stars store</div><div class="ds">Optional purchases — VIP tiers, energy refills, boosts, $MOON packs, Season Pass — granting in-game items only, never real-world value.</div></div></div>
-  <div class="feat"><div class="e">🐷</div><div><div class="nm">Piggy bank</div><div class="ds">Auto-saves a small percentage of profitable cash-outs; crack it later for a lump of $MOON.</div></div></div>
-
-  <h2 id="progression">4. Ranks &amp; VIP</h2>
-  <h3>Ranks (lifetime $MOON banked)</h3>
-  <table>
-    <tr><th>Rank</th><th>Banked</th><th>Perks</th></tr>
-    <tr><td><img src="/assets/brand/ric-shrimp.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🦐')">Shrimp</td><td>0+</td><td>The journey begins</td></tr>
-    <tr><td><img src="/assets/brand/ric-crab.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🦀')">Crab</td><td>500K+</td><td>+20 max energy · Bronze VIP route</td></tr>
-    <tr><td><img src="/assets/brand/ric-fish.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🐟')">Fish</td><td>7.5M+</td><td>+40 energy · +10% daily bonus · Silver route</td></tr>
-    <tr><td><img src="/assets/brand/ric-dolphin.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🐬')">Dolphin</td><td>50M+</td><td>+65 energy · +25% daily · Gold route · bigger airdrop standing</td></tr>
-    <tr><td><img src="/assets/brand/ric-shark.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🦈')">Shark</td><td>200M+</td><td>+90 energy · +50% daily · Diamond route</td></tr>
-    <tr><td><img src="/assets/brand/ric-orca.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🐳')">Orca</td><td>600M+</td><td>+120 energy · +75% daily · elite whale status</td></tr>
-    <tr><td><img src="/assets/brand/ric-megalodon.webp" alt="" style="height:1.4em;vertical-align:-.35em;margin-right:8px" onerror="this.replaceWith('🦖')">Megalodon</td><td>1B+</td><td>+160 energy · 2× daily bonus · apex badge</td></tr>
-  </table>
-  <h3>VIP tiers</h3>
-  <p>VIP is <strong>earnable with $MOON</strong> (the grind) or unlockable with Stars (skip the grind). Higher tiers stack earnings multipliers and protection.</p>
-  <ul>
-    <li><strong>🥉 Bronze</strong> — +12% earnings, +25 energy, <strong>1.5× bet cap</strong>, faster pumps.</li>
-    <li><strong>🥈 Silver</strong> — +30% earnings, lower rug risk, <strong>2× bet cap</strong>, silver badge.</li>
-    <li><strong>🥇 Gold</strong> — +60% earnings, 25% rug auto-rescue, <strong>3× bet cap</strong>, gold badge.</li>
-    <li><strong>💎 Diamond</strong> — +120% earnings, whale shield, <strong>5× bet cap</strong>, diamond badge.</li>
-  </ul>
-  <h3>Max bet — scales with rank × VIP</h3>
-  <p>Your maximum bet is set by your <strong>rank</strong> and multiplied by your <strong>VIP tier</strong>. Rank base: Shrimp 1K · Crab 3K · Fish 10K · Dolphin 35K · Shark 100K · Orca 300K · Megalodon 1M. VIP multiplies it (Bronze 1.5× → Diamond 5×), so a fully-ranked Megalodon with Diamond VIP can bet up to <strong>5,000,000 $MOON</strong> per round. Ranking up is the main way to raise your ceiling.</p>
-  <ul style="display:none">
-  </ul>
-
-  <h2 id="social">5. Crews &amp; Crew Wars</h2>
-  <p><strong>Crews</strong> are player teams. Join an existing crew or create your own, chat in-crew, and pool your banked $MOON onto a shared crew leaderboard. Each crew has a captain who can manage the roster.</p>
-  <p><strong>Crew Wars</strong> run on a <strong>weekly cycle</strong>. Members earn <em>war points</em> for the crew through play and by rallying. Each week your crew is matched against a rival; pull ahead and the crew unlocks a <strong>Victory Chest</strong> whose reward scales with your lead and your personal contribution. War points and the matchup reset every week.</p>
-  <div class="card muted"><strong>Honest note:</strong> crew leaderboards and member contributions are real and server-tracked. In the current build the weekly <em>rival</em> opponent is simulated for pacing; true crew-vs-crew live PvP matchmaking is on the roadmap.</div>
-
-  <h2 id="points">6. $MOON &amp; Airdrop Points</h2>
-  <p>The game uses two separate in-game scores:</p>
-  <ul>
-    <li><strong>$MOON</strong> — your spendable in-game balance, earned by banking profitable rounds. Used for upgrades, VIP and progression. It can be spent and lost.</li>
-    <li><strong>Airdrop Points</strong> — your season qualification score, earned through sustained, legitimate play and quests. Points <strong>cannot be wagered or spent</strong> and are designed to reward real engagement over time.</li>
-  </ul>
-  <h3>How Airdrop Points are earned</h3>
-  <p>A fraction of every profitable cash-out, plus quest completions, daily rewards, achievements, social tasks, and the Season Pass (+50,000 points) all add to your points total.</p>
-  <h3>How to qualify (per cycle)</h3>
-  <p>Qualification is deliberately about <em>consistency</em>, not one lucky run. A typical cycle target:</p>
-  <ul>
-    <li><strong>10,000,000 points</strong> accumulated in the cycle</li>
-    <li><strong>20 active days</strong> of play</li>
-    <li><strong>5,000 taps</strong></li>
-    <li><strong>100 cash-outs</strong></li>
-  </ul>
-  <p><strong>👑 Elite status</strong> starts at <strong>30,000,000 points</strong> and earns a larger share of the cycle pool. Thresholds are illustrative and may be tuned per cycle.</p>
-  <p class="muted">Both scores are off-chain in-game points today. They are not a cryptocurrency and carry no guaranteed value.</p>
-
-  <h2 id="cycles">7. The six pre-launch airdrop cycles</h2>
-  <p>Before any token event, the airdrop runs across <strong>six sequential cycles</strong>, each roughly a 30-day season with its own snapshot. Because the player base grows each cycle, the <strong>share of total supply allocated rises with every cycle</strong> — later cycles fund a bigger crowd, while the earliest players enjoy the largest slice <em>per person</em> and can stack rewards across all six.</p>
-  <table class="cyc">
-    <tr><th>Cycle</th><th>Name</th><th>Supply</th><th>$MOON pool</th><th>Who it rewards</th></tr>
-    <tr><td>1</td><td>Genesis</td><td><b>3%</b></td><td>30,000,000</td><td>Earliest believers — smallest crowd, biggest per-player slice. Founding crews form here.</td></tr>
-    <tr><td>2</td><td>Ignition</td><td><b>4%</b></td><td>40,000,000</td><td>Early adopters as word spreads; referrals start compounding</td></tr>
-    <tr><td>3</td><td>Momentum</td><td><b>5%</b></td><td>50,000,000</td><td>Growing community + first crew wars</td></tr>
-    <tr><td>4</td><td>Surge</td><td><b>7%</b></td><td>70,000,000</td><td>Viral growth phase — biggest jump in new players</td></tr>
-    <tr><td>5</td><td>Frenzy</td><td><b>9%</b></td><td>90,000,000</td><td>Peak pre-launch hype; tournaments &amp; events</td></tr>
-    <tr><td>6</td><td>Launch</td><td><b>12%</b></td><td>120,000,000</td><td>Largest crowd, right before the token event &amp; claim portal</td></tr>
-  </table>
-  <p><strong>Total to pre-launch airdrops: 40% of supply (400,000,000 $MOON of a fixed 1B).</strong></p>
-  <h3>How your slice is calculated</h3>
-  <ul>
-    <li><strong>Per cycle, per player:</strong> your share = your Airdrop Points ÷ total points of all <em>qualified</em> players that cycle × the cycle pool.</li>
-    <li><strong>Elite weighting:</strong> Elite players (30M points) carry a higher weighting, rewarding depth over volume farming.</li>
-    <li><strong>Stacking:</strong> cycles are independent — qualify in all six and you earn from all six pools.</li>
-    <li><strong>Integrity:</strong> only server-validated points count; flagged or ineligible accounts are removed before each snapshot.</li>
-  </ul>
-  <p>Each cycle also runs its own <strong>leaderboard payouts</strong> (top bankers &amp; inviters) and weekly <strong>Crew Wars Victory Chests</strong> on top of the snapshot allocation. → <a href="/airdrop"><strong>Full cycle breakdown &amp; how to qualify</strong></a>.</p>
-  <p class="note">All cycle names, percentages, pool sizes and timing are illustrative and may change, be combined, or be cancelled. Pools assume the illustrative 1,000,000,000 $MOON supply. Participation never requires payment.</p>
-
-  <h2 id="tokenomics">8. Proposed tokenomics</h2>
-  <p>Most first-generation play-to-earn economies failed for one reason: they minted rewards faster than the game could absorb them and assumed growth would never stop. The $MOON model is built on the opposite principles — <strong>cap supply, release it slowly, and engineer real demand sinks into the game</strong> so the economy survives the quiet months, not just the hype. Everything below is <em>proposed and illustrative</em>; no token is offered or promised.</p>
-
-  <h3>8.1 A two-layer model</h3>
-  <p>The game separates the <em>fun money</em> from the <em>real asset</em> — the structure that keeps modern GameFi economies stable:</p>
-  <div class="grid">
-    <div class="card"><h3>🎮 Game layer (off-chain, uncapped)</h3><p class="muted">In-game <strong>$MOON balance</strong> and <strong>Airdrop Points</strong> are earned and spent inside the game — upgrades, VIP, rank, progression. They flow with seasons and are never a tradeable asset, so unlimited grinding can't inflate the token.</p></div>
-    <div class="card"><h3>🪙 Token layer (on-chain, capped)</h3><p class="muted">The proposed <strong>$MOON token</strong> is a fixed-supply on-chain asset. The game layer only ever <em>qualifies</em> you for a bounded share via airdrop snapshots — it cannot mint new tokens. Scarcity is protected by design.</p></div>
-  </div>
-
-  <h3>8.2 Supply</h3>
-  <p>Total supply is <strong>fixed at 1,000,000,000 $MOON</strong> — hard-capped, with no inflation mechanism and no ability to mint beyond the cap. The only direction supply moves is <em>down</em>, via burns (§8.7). There is <strong>no private sale and no venture allocation.</strong></p>
-
-  <h3>8.3 Allocation</h3>
-  <p>Roughly two-thirds is community-directed — airdrops, ongoing play-to-earn, and referral/crew rewards:</p>
-  <div class="card alloc">
-    <div class="bar"><span class="t">🪂 Pre-launch airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
-    <div class="bar"><span class="t">🎮 Post-launch play-to-earn</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
-    <div class="bar"><span class="t">🤝 Referrals &amp; crews</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),#9b5cff)"></i></span><b>10%</b></div>
-    <div class="bar"><span class="t">💧 Liquidity &amp; exchange</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
-    <div class="bar"><span class="t">🛠️ Team &amp; ops (vested)</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.4)"></i></span><b>10%</b></div>
-    <div class="bar"><span class="t">🏛️ Treasury &amp; ecosystem</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,#7c4dff,var(--cyan))"></i></span><b>10%</b></div>
-  </div>
-
-  <h3>8.4 Vesting &amp; unlock schedule</h3>
-  <p>Vesting stops anyone — team, treasury, or airdrop farmers — from dumping into thin early liquidity. Every allocation unlocks gradually, with cliffs and locks aligned to long-term commitment:</p>
-  <table>
-    <tr><th>Allocation</th><th>Share</th><th>Unlock schedule</th></tr>
-    <tr><td>🪂 Airdrops (per cycle)</td><td>40%</td><td><strong>30% at claim</strong>, remaining <strong>70% linear over 4 months</strong> — rewards the community while spreading sell pressure.</td></tr>
-    <tr><td>🎮 Post-launch P2E</td><td>15%</td><td>Released on a <strong>declining 4-year emission curve</strong> (§8.5). Never a flat, perpetual faucet.</td></tr>
-    <tr><td>🤝 Referrals &amp; crews</td><td>10%</td><td>Streamed with the seasons, <strong>linear over ~3 years</strong>, earned only by real activity.</td></tr>
-    <tr><td>💧 Liquidity</td><td>15%</td><td><strong>100% at launch</strong> to seed liquidity; provided <strong>LP locked 12+ months.</strong></td></tr>
-    <tr><td>🛠️ Team &amp; ops</td><td>10%</td><td><strong>12-month cliff</strong> (zero in year one), then <strong>linear over 24 months.</strong></td></tr>
-    <tr><td>🏛️ Treasury &amp; ecosystem</td><td>10%</td><td><strong>6-month cliff</strong>, then <strong>linear over 48 months</strong>, multisig-controlled.</td></tr>
+  <!-- SECTION 2 -->
+  <h2 id="status">2. Product Status (Live vs Proposed)</h2>
+  <p>To support trust and transparency, the operational status of all key features is listed below:</p>
+  <table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Feature System</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Operational Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>Telegram Mini App</td><td><b>Live</b> (Beta-stage game client)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>In-game $MOON</td><td><b>Live</b> as off-chain gameplay points</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Season Points</td><td><b>Live</b> as off-chain engagement tracking</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Token contract</td><td><b>Proposed</b> (Subject to launch approvals)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Claim portal</td><td><b>Proposed</b> (Not Live)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Buyback/burn</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Staking</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Governance</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Provably fair rounds</td><td><b>Roadmap / Planned</b> (Commit-reveal backend)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Crews &amp; leaderboards</td><td><b>Live</b> (Crew Wars use simulated rivals for pacing)</td></tr>
+    </tbody>
   </table>
 
-  <h3>8.5 Emission curve</h3>
-  <p>The post-launch P2E pool (150M $MOON) is the only ongoing source of new circulating tokens, and it <strong>declines every year</strong> so rewards can't outrun demand: roughly <strong>40% in Year 1, 30% in Year 2, 20% in Year 3, 10% in Year 4</strong> — front-loaded to bootstrap the economy, then tapering toward a low baseline. After Year 4 the pool is effectively exhausted and the game runs on a recycled, circulating economy rather than fresh emissions.</p>
+  <!-- SECTION 3 -->
+  <h2 id="loop">3. Game Loop</h2>
+  <p>The core game loop consists of tap-to-bet mechanics, real-time risk escalation via the heat meter, and strategic cash-outs. Detailed explanations of auto-sell, stop-loss, combos, and permanent stat upgrades are documented in the <a href="/guide">Game Guide</a>.</p>
 
-  <h3>8.6 The sustainability engine — sinks vs sources</h3>
-  <p>A healthy economy keeps demand (sinks) at or above new supply (sources). Nearly every system that pays out tokens is matched by one that consumes them:</p>
-  <div class="grid">
-    <div class="card" style="border-color:rgba(255,59,92,.35)"><h3>⬆️ Sources (supply in)</h3><p class="muted">Airdrop claims (one-time, vested, capped) · declining P2E rewards · referral &amp; crew milestones. All bounded, server-validated, none perpetual.</p></div>
-    <div class="card" style="border-color:rgba(29,255,143,.35)"><h3>⬇️ Sinks (demand out)</h3><p class="muted">Cosmetics marketplace · VIP, boosts &amp; energy · tournament entry fees · permanent upgrades · staking locks · crew treasuries &amp; wagered wars · a portion of every spend is <strong>burned</strong>.</p></div>
-  </div>
-
-  <h3>8.7 Value accrual &amp; deflation</h3>
+  <!-- SECTION 4 -->
+  <h2 id="economy">4. Economy Design</h2>
+  <p>The economy utilizes a dual-layer structure to protect scarcity:</p>
   <ul>
-    <li><strong>🔥 Buyback &amp; burn</strong> — a share of marketplace fees and Telegram Stars revenue buys back and permanently burns $MOON, turning real product revenue into deflationary pressure.</li>
-    <li><strong>🔒 Staking</strong> — lock $MOON for boosts, energy and seasonal multipliers; staked tokens leave circulation.</li>
-    <li><strong>🏆 Utility demand</strong> — tournaments, marketplace, VIP, fee discounts and cross-app access all require $MOON, tying demand to active play.</li>
-  </ul>
-  <p>Because supply is capped and burns are permanent, sustained sinks make the circulating supply <strong>deflationary over time</strong> — the opposite of the infinite-mint models that collapsed.</p>
-
-  <p class="muted">Illustrative supply: 1,000,000,000 $MOON. All figures, schedules and mechanics are design intentions and may change. There is no commitment that a token will launch, that these proportions will apply, or that points will convert to any token or value.</p>
-  <p>→ <a href="/tokenomics"><strong>See the full visual tokenomics page</strong></a> for the allocation chart, emission graph and the complete sustainability breakdown.</p>
-
-  <h2 id="utility">9. Token utility (proposed)</h2>
-  <p>If launched, $MOON is designed as the fuel of the game economy — never a promise of price:</p>
-  <ul>
-    <li><strong>Tournaments</strong> — entry and prize pools for competitive events and seasons.</li>
-    <li><strong>Cosmetics marketplace</strong> — buy, trade and craft skins and collectibles.</li>
-    <li><strong>VIP &amp; boosts</strong> — unlock tiers, energy and multipliers with token instead of (or alongside) Stars.</li>
-    <li><strong>Staking</strong> — lock $MOON for passive energy/boosts and seasonal multipliers.</li>
-    <li><strong>Crew treasuries &amp; wagered wars</strong> — crews pool and stake on outcomes.</li>
-    <li><strong>Governance-lite</strong> — token-weighted votes on seasons, events and feature priorities.</li>
-    <li><strong>Ecosystem access</strong> — fee discounts and entry to collaborations with other mini-apps.</li>
+    <li><strong>Gameplay Layer:</strong> Off-chain, uncapped in-game $MOON points used for progression, upgrades, and ranks (Shrimp to Megalodon).</li>
+    <li><strong>Proposed Token Layer:</strong> Hard-capped on-chain token model ($MOON token) that cannot be inflated by active grinding.</li>
   </ul>
 
-  <h2 id="postlaunch">10. Post-launch plan</h2>
-  <ol class="steps">
-    <li><b>Final snapshot &amp; claim portal.</b> After Cycle 6, a snapshot of server-validated points determines allocations; a claim portal opens for any token event.</li>
-    <li><b>Liquidity &amp; listing.</b> Seed liquidity and list, with the liquidity allocation backing trading.</li>
-    <li><b>Utilities go live.</b> Tournaments, marketplace, staking and token-based VIP switch on in phases.</li>
-    <li><b>Play-to-earn seasons continue.</b> The post-launch allocation funds ongoing seasons so new players still earn.</li>
-    <li><b>Ecosystem &amp; governance.</b> Collaborations, cross-app events, and token-weighted community votes.</li>
-  </ol>
+  <!-- SECTION 5 -->
+  <h2 id="points">5. Season Points &amp; Proposed Airdrop</h2>
+  <p>Season Points measure seasonal engagement. Points are off-chain and carry no monetary value or conversion guarantees. If a future token distribution is approved, snapshot cycles (Genesis to Launch) may consider Season Points and gameplay logs, subject to eligibility audits. For details, see the <a href="/airdrop">Airdrop Page</a>.</p>
 
-  <h2 id="fairplay">11. Fair play &amp; anti-cheat</h2>
-  <p>The economy is <strong>server-authoritative</strong>. Your client never reports its own balance — it only requests actions (cash out, buy an upgrade, claim a reward), and the server validates and applies every balance and point change. The sync endpoint saves cosmetic settings only, so a tampered client cannot inject fake totals.</p>
-  <p>Each request carries Telegram's <strong>cryptographically signed identity</strong>, verified server-side, so every action is tied to a real account. Cash-out payouts are <strong>capped</strong> to the most a player's tier could plausibly win in a round, rewards are <strong>idempotent</strong> (each credits at most once), and implausible jumps are <strong>flagged</strong> — flagged accounts can be reset or made ineligible for rewards and the airdrop. <strong>Leaderboards read directly from the server database</strong>, so they only ever contain server-validated scores, and every cycle snapshot comes from that same authoritative data.</p>
-  <p><strong>Provably-fair rounds</strong> are next on the roadmap: a commit-reveal scheme where the server publishes a hash of each round's secret seed before you play and reveals the seed after, so the rug outcome is locked in advance and independently verifiable — the house can't rug you for winning.</p>
+  <!-- SECTION 6 -->
+  <h2 id="tokenomics">6. Proposed Tokenomics Overview</h2>
+  <p>The proposed token model has a fixed supply of 1,000,000,000 $MOON tokens. Roughly 65% is allocated for community-led systems (airdrops, seasons, referral bonuses), with team and treasury allocations subject to multi-year linear vesting cliffs. The full allocation chart is available on the <a href="/tokenomics">Tokenomics Page</a>.</p>
 
-  <h2 id="roadmap">12. Roadmap</h2>
-  <div class="grid">
-    <div class="card"><span class="pill live">PHASE 1 · LIVE</span><h3>Launch &amp; go viral</h3><p class="muted">Telegram Mini App, live market &amp; rug mechanics, eight upgrades, four VIP tiers, crews, crew wars &amp; chat, referrals, daily rewards (spins, boxes, lucky draw, streaks), live events, leaderboard payouts, verified quests, and Season 1 points.</p></div>
-    <div class="card"><span class="pill now">PHASE 2 · NOW</span><h3>Economy hardening</h3><p class="muted">Full server-authoritative economy (live), provably-fair commit-reveal rounds, regional &amp; seasonal expansion, deeper anti-cheat.</p></div>
-    <div class="card"><span class="pill">PHASE 3</span><h3>Airdrop cycles 1–6</h3><p class="muted">Six sequential pre-launch seasons with rising allocations and a snapshot per cycle. Qualification and Elite tiers as above.</p></div>
-    <div class="card"><span class="pill">PHASE 4</span><h3>Token review</h3><p class="muted">Points snapshot consolidation and a legal/compliance review of any potential token event. Subject to outcome; not guaranteed.</p></div>
-    <div class="card"><span class="pill">PHASE 5</span><h3>Launch &amp; utility</h3><p class="muted">Claim portal, liquidity &amp; listing, and token utilities — tournaments, marketplace, staking, governance-lite — switched on in phases.</p></div>
-    <div class="card"><span class="pill">PHASE 6</span><h3>Ecosystem</h3><p class="muted">Ongoing play-to-earn seasons, tournaments, cross-mini-app collaborations, and community governance.</p></div>
-  </div>
+  <!-- SECTION 7 -->
+  <h2 id="sustainability">7. Sinks &amp; Slices</h2>
+  <p>Long-term sustainability relies on balancing token sources (limited emissions) with sinks (cosmetic marketplaces, tournament fees, staking, and optional buyback/burn programs funded by Stars revenue). These mechanisms are proposed and subject to legal, tax, and governance reviews.</p>
 
-  <h2 id="risks">13. Risks &amp; disclaimers</h2>
+  <!-- SECTION 8 -->
+  <h2 id="fairplay">8. Fairness &amp; Anti-Cheat</h2>
+  <p>The RUG OR RICHES economy is strictly **server-authoritative**. Taps, bets, and point syncs are validated on our secure backend, rendering client-side memory editors useless. Identity verification uses cryptographically signed Telegram hashes. Automated accounts, bots, and Sybil behaviors are automatically flagged and excluded from leaderboards and proposed snapshots.</p>
+
+  <!-- SECTION 9 -->
+  <h2 id="roadmap">9. Roadmap</h2>
   <ul>
-    <li>$MOON and Airdrop Points have no guaranteed value and may never have any.</li>
-    <li>No token is offered or promised. Any future token, cycle percentage, or distribution is subject to legal review and may not happen or may differ from this document.</li>
-    <li>Nothing here is financial, investment, legal, or tax advice, or an offer or solicitation to buy any asset.</li>
-    <li>Availability, cycles, thresholds and features may change, and the airdrop may be modified, reset, or cancelled at any time.</li>
-    <li>This is a beta-stage product and may contain bugs.</li>
+    <li><strong>Phase 1 (Live):</strong> Telegram game loop launch, permanent upgrades, VIP tiers, and Season Points tracking.</li>
+    <li><strong>Phase 2 (Active Now):</strong> Hardened server authority, anti-cheat upgrades, and provably fair commit-reveal protocol design.</li>
+    <li><strong>Phase 3 (Proposed):</strong> Launching proposed pre-launch seasonal snapshot cycles.</li>
+    <li><strong>Phase 4 (Proposed):</strong> Comprehensive legal, compliance, and jurisdictional audits.</li>
+    <li><strong>Phase 5-6 (Proposed):</strong> Ecosystem launches, DEX listing, utility integration (staking, tournaments), and governance-lite features.</li>
   </ul>
+
+  <!-- SECTION 10 -->
+  <h2 id="risks">10. Risks &amp; Disclaimers</h2>
+  <p>Participation in the RUG OR RICHES ecosystem carries the following risk factors:</p>
+  <ul>
+    <li><strong>Beta Product Status:</strong> The game is in a beta stage and may contain bugs, balance discrepancies, or technical service interruptions.</li>
+    <li><strong>No Token Guarantees:</strong> No token launch is guaranteed, and in-game points/Season Points have no cash value.</li>
+    <li><strong>Regulatory Changes:</strong> International laws regarding digital items and token claims are subject to change. Players in restricted jurisdictions may be excluded from claims.</li>
+    <li><strong>Eligibility Audits:</strong> Exploit attempts, botting, or multiple account setups will void all points and allocations. All token claim participants must be 18+.</li>
+    <li><strong>Optional Purchases:</strong> Purchases of Telegram Stars or VIP perks are strictly optional and do not guarantee odds, prizes, or token eligibility.</li>
+  </ul>
+  <p>For common inquiries and answers, view our <a href="/faq">FAQ Page</a>.</p>
 
   <footer>
+    RUG OR RICHES is an entertainment game. In-game $MOON, Season Points, Airdrop Points, rewards, ranks, and leaderboards have no guaranteed monetary value. Never share private keys or seed phrases.<br>
     © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br>
-    <a href="/">← Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/cookies">Cookies</a>
+    <a href="/">← Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a href="/tokenomics">Tokenomics</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/faq">FAQ</a>
   </footer>
 </main>
 </body>

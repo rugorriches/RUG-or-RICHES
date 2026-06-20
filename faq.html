@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05010f">
+<meta name="robots" content="index,follow">
+<meta name="description" content="FAQ | RUG OR RICHES — Answers about RUG OR RICHES gameplay, Season Points, in-game $MOON, Telegram Stars, rewards, safety, and future token disclaimers.">
+<link rel="canonical" href="https://rugorriches.app/faq">
+<title>FAQ | RUG OR RICHES — $MOON</title>
+<style>
+  :root{
+    --bg:#05010f; --bg2:#140826; --neon:#ff2bd6; --cyan:#23f0ff; --gold:#ffd400;
+    --green:#1dff8f; --red:#ff3b5c; --purple:#9b5cff; --ink:#f3eeff; --muted:#b6a3e0; --line:rgba(255,255,255,.1);
+    --card:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif; color:var(--ink);
+    background:radial-gradient(130% 90% at 50% -10%,#34125e 0%,var(--bg2) 45%,var(--bg) 85%) fixed;
+    line-height:1.7; padding:0 0 80px;}
+  .wrap{max-width:960px; margin:0 auto; padding:0 22px;}
+  header.top{padding:54px 0 22px; text-align:center; border-bottom:1px solid var(--line); margin-bottom:14px;}
+  .logo{font-weight:900; font-size:24px; letter-spacing:1px;}
+  .logo small{color:var(--gold);}
+  .grad{background:linear-gradient(90deg,var(--neon),var(--cyan),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  h1{font-size:clamp(30px,6vw,46px); font-weight:900; margin-top:14px; letter-spacing:-1px;}
+  .tagline{color:var(--muted); margin-top:10px; font-size:15px;}
+  
+  .faq-layout{display:grid; grid-template-columns:220px 1fr; gap:30px; margin-top:30px;}
+  .faq-sidebar{position:sticky; top:80px; align-self:start; display:flex; flex-direction:column; gap:6px;}
+  .faq-sidebar a{font-size:13.5px; font-weight:700; color:var(--muted); padding:8px 12px; border-radius:10px; border:1px solid transparent; transition:all .2s; text-decoration:none;}
+  .faq-sidebar a:hover{color:#fff; border-color:var(--line); background:rgba(255,255,255,.03);}
+  .faq-sidebar a.active{color:var(--cyan); border-color:rgba(35,240,255,.3); background:rgba(35,240,255,.05);}
+  
+  .faq-section{scroll-margin-top:90px; margin-bottom:40px;}
+  .faq-section h2{font-size:22px; font-weight:800; margin:0 0 16px; color:var(--cyan); border-bottom:1px solid var(--line); padding-bottom:8px;}
+  
+  details{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:0 20px; margin-bottom:12px; transition:border-color .2s;}
+  details:hover{border-color:rgba(35,240,255,.35);}
+  summary{list-style:none; cursor:pointer; padding:18px 0; font-weight:800; font-size:15.5px; display:flex; justify-content:space-between; gap:12px; align-items:center; user-select:none;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+"; color:var(--cyan); font-size:22px; font-weight:900; transition:transform .2s;}
+  details[open] summary::after{content:"−";}
+  details .a{color:var(--muted); padding:0 0 18px; font-size:14.5px; line-height:1.7;}
+  details .a a{color:var(--cyan); text-decoration:none;}
+  details .a a:hover{text-decoration:underline;}
+  
+  .cta-section{margin-top:50px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:30px; text-align:center;}
+  .cta-section h3{font-size:20px; font-weight:800; margin-bottom:10px;}
+  .cta-section p{font-size:14px; color:var(--muted); margin-bottom:18px;}
+  .btn{display:inline-block; font-weight:800; font-size:14px; padding:12px 24px; border-radius:30px; border:1px solid var(--line); cursor:pointer; transition:transform .12s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:linear-gradient(120deg,var(--neon),var(--purple)); color:#fff; border:none; box-shadow:0 6px 20px rgba(255,43,214,.35);}
+  .btn.primary:hover{box-shadow:0 8px 25px rgba(255,43,214,.55);}
+  
+  footer{margin-top:60px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; text-align:center; line-height:1.6;}
+  .footer-safety{font-size:12px; color:#7a6ba3; margin-bottom:14px;}
+  .footer-links{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:12px;}
+  .footer-links a{color:#8fdcff; text-decoration:none;}
+  .footer-links a:hover{text-decoration:underline;}
+
+  @media(max-width:760px){
+    .faq-layout{grid-template-columns:1fr;}
+    .faq-sidebar{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" style="display:flex;gap:15px;align-items:center;padding:11px 22px;font-size:13px;font-weight:700;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap">
+  <a href="/" style="color:var(--gold)">🏠 Home</a>
+  <a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper">Litepaper</a><a href="/faq" style="color:#fff">FAQ</a>
+  <a href="https://t.me/RugorRichesBot/play" style="margin-left:auto;color:var(--cyan)">▶ Play</a>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
+    <h1><span class="grad">Frequently Asked Questions</span></h1>
+    <p class="tagline">Clear answers on gameplay, Season Points, Telegram Stars, and safety.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="faq-layout">
+    <aside class="faq-sidebar">
+      <a href="#basics" class="active">Basics</a>
+      <a href="#gameplay">Gameplay</a>
+      <a href="#rewards">Rewards</a>
+      <a href="#airdrop">Season Points</a>
+      <a href="#tokenomics">Tokenomics</a>
+      <a href="#fairness">Security</a>
+      <a href="#payments">Stars & Payments</a>
+      <a href="#community">Community</a>
+    </aside>
+
+    <div class="faq-content">
+      <!-- BASICS -->
+      <section id="basics" class="faq-section">
+        <h2>Basics</h2>
+        <details>
+          <summary>What is RUG OR RICHES?</summary>
+          <div class="a">RUG OR RICHES is a viral press-your-luck crypto game built as a Telegram Mini App. Players tap to pump a simulated candlestick chart, attempting to lock in their gains before the chart inevitably rugs. For more gameplay info, see our <a href="/guide">Game Guide</a>.</div>
+        </details>
+        <details>
+          <summary>Is RUG OR RICHES free to play?</summary>
+          <div class="a">Yes. Playing is 100% free with no purchase required. You start with free in-game $MOON and can tap to earn more.</div>
+        </details>
+        <details>
+          <summary>Do I need a crypto wallet?</summary>
+          <div class="a">No wallet is needed to play. RUG OR RICHES runs inside Telegram and never asks for seed phrases, private keys, or recovery words.</div>
+        </details>
+        <details>
+          <summary>Is this real trading?</summary>
+          <div class="a">No. The game uses a simulated entertainment loop. It is not real trading, not investment advice, and not a financial product.</div>
+        </details>
+        <details>
+          <summary>What is in-game $MOON?</summary>
+          <div class="a">Inside the game, $MOON refers to virtual in-game points/currency used to purchase upgrades, unlock VIP routes, and climb the ranks. It has no monetary value.</div>
+        </details>
+        <details>
+          <summary>Is $MOON already a real token?</summary>
+          <div class="a">No. Currently, $MOON refers strictly to off-chain in-game points. Any future token launch is proposed, not guaranteed, and would require separate final terms and legal/regulatory review.</div>
+        </details>
+        <details>
+          <summary>Where do I play?</summary>
+          <div class="a">You can play directly inside Telegram by launching our official mini-app bot or clicking the Play button on our website.</div>
+        </details>
+        <details>
+          <summary>Is RUG OR RICHES on Telegram?</summary>
+          <div class="a">Yes, RUG OR RICHES is built native to the Telegram platform as a Mini App, allowing it to load and play instantly without downloading external apps.</div>
+        </details>
+      </section>
+
+      <!-- GAMEPLAY -->
+      <section id="gameplay" class="faq-section">
+        <h2>Gameplay</h2>
+        <details>
+          <summary>How do I play?</summary>
+          <div class="a">Set your simulated bet, tap to pump the chart, watch the heat meter climb, and click 'Bank' to lock in your gains before the chart rugs. It is a game of quick reflexes and nerve.</div>
+        </details>
+        <details>
+          <summary>What does “rug” mean in the game?</summary>
+          <div class="a">A 'rug' or 'rug pull' refers to the simulated market crash. If the chart rugs before you cash out, your unbanked position for that round is wiped out.</div>
+        </details>
+        <details>
+          <summary>What is the heat meter?</summary>
+          <div class="a">The heat meter shows the current risk level of the round. The higher the price goes, the hotter it gets, and the closer you are to a potential rug pull.</div>
+        </details>
+        <details>
+          <summary>What is a soft rug?</summary>
+          <div class="a">A soft rug is a partial crash where only a portion of your unbanked round pot is lost, allowing you to salvage the remaining amount.</div>
+        </details>
+        <details>
+          <summary>What is a hard rug?</summary>
+          <div class="a">A hard rug is a total crash. It wipes out 100% of your unbanked round gains, leaving you rekt for that round.</div>
+        </details>
+        <details>
+          <summary>What does Bank do?</summary>
+          <div class="a">Clicking Bank cashes out your current round gains, transferring them permanently into your permanent, spendable in-game $MOON balance.</div>
+        </details>
+        <details>
+          <summary>What does Sell Half do?</summary>
+          <div class="a">Sell Half cashes out 50% of your current round pot, securing partial gains while letting the other half continue to ride the chart.</div>
+        </details>
+        <details>
+          <summary>What is auto-sell?</summary>
+          <div class="a">Auto-sell is a feature where you set a target multiplier (e.g. 2.0x). If the chart pumps to this level, the game automatically banks your pot.</div>
+        </details>
+        <details>
+          <summary>What is stop-loss?</summary>
+          <div class="a">Stop-loss lets you define a safety floor multiplier. If the chart dips below this level, the game automatically banks your pot to preserve points.</div>
+        </details>
+        <details>
+          <summary>How does energy work?</summary>
+          <div class="a">Active taps consume energy. Your energy tank slowly regenerates over time, and you can increase its capacity and speed via permanent upgrades.</div>
+        </details>
+        <details>
+          <summary>How do ranks work?</summary>
+          <div class="a">Ranks represent your lifetime banked in-game $MOON. Ranks climb from Shrimp up to Megalodon, unlocking higher bet ceilings and energy perks. Check the full chart on the <a href="/guide#ranks">Guide page</a>.</div>
+        </details>
+        <details>
+          <summary>How does VIP work?</summary>
+          <div class="a">VIP tiers (Bronze, Silver, Gold, Diamond) offer in-game benefits like earnings multipliers, bet cap boosts, and rug shields. They represent in-game upgrades only.</div>
+        </details>
+        <details>
+          <summary>Are paid boosts required to win?</summary>
+          <div class="a">No. All upgrades and features can be unlocked over time using in-game $MOON earned from playing. Paid items are optional convenience tools.</div>
+        </details>
+      </section>
+
+      <!-- REWARDS -->
+      <section id="rewards" class="faq-section">
+        <h2>Rewards</h2>
+        <details>
+          <summary>What are daily spins?</summary>
+          <div class="a">Daily spins are a free login reward giving you a chance to spin the wheel daily for in-game $MOON, energy refills, lucky draw tickets, and mystery boxes.</div>
+        </details>
+        <details>
+          <summary>What are streaks?</summary>
+          <div class="a">Streaks reward consecutive daily logins. The longer your streak, the higher your daily claim multiplier. Missing a day resets the streak.</div>
+        </details>
+        <details>
+          <summary>What are mystery boxes?</summary>
+          <div class="a">Mystery boxes contain randomized in-game loot, ranging from basic energy refills to rare cosmetic skins. Odds are fully published in the app.</div>
+        </details>
+        <details>
+          <summary>What is the lucky draw?</summary>
+          <div class="a">The lucky draw is a daily promotional jackpot. Tickets are collected during active gameplay, and a random drawing awards in-game $MOON pots.</div>
+        </details>
+        <details>
+          <summary>Do purchases improve lucky draw odds?</summary>
+          <div class="a">No. Making a purchase does not increase your ticket count, improve your odds in any draw, or guarantee any prize. Ticket collection is purely gameplay-based.</div>
+        </details>
+        <details>
+          <summary>Are rewards real money?</summary>
+          <div class="a">No. All in-game prizes, boxes, streaks, and spin rewards are strictly virtual entertainment items with no cash value.</div>
+        </details>
+        <details>
+          <summary>Can rewards change?</summary>
+          <div class="a">Yes. We reserve the right to tune, balance, or adjust in-game reward values, multipliers, and items to keep the game economy fair and functional.</div>
+        </details>
+        <details>
+          <summary>Are odds published?</summary>
+          <div class="a">Yes. We believe in transparency, so the odds for mystery boxes and the daily spin wheel are fully published in-game.</div>
+        </details>
+      </section>
+
+      <!-- SEASON POINTS / AIRDROP -->
+      <section id="airdrop" class="faq-section">
+        <h2>Season Points &amp; Airdrop</h2>
+        <details>
+          <summary>What are Season Points?</summary>
+          <div class="a">Season Points (referred to as Airdrop Points in some app builds) track your gameplay activity, quest progress, and achievements across the current season.</div>
+        </details>
+        <details>
+          <summary>Are Season Points the same as tokens?</summary>
+          <div class="a">No. Season Points are in-game points only and have no value or guaranteed conversion to on-chain tokens.</div>
+        </details>
+        <details>
+          <summary>Do Season Points guarantee an airdrop?</summary>
+          <div class="a">No. Season Points are in-game tracking points. They do not guarantee tokens, cash value, allocation, or any future reward. If a future distribution is approved, final eligibility and terms may consider gameplay history, anti-cheat review, jurisdiction, and legal/platform requirements.</div>
+        </details>
+        <details>
+          <summary>Is a future $MOON token guaranteed?</summary>
+          <div class="a">No. A future token is not guaranteed. Any potential token event is hypothetical, proposed, and subject to final regulatory and legal clearances.</div>
+        </details>
+        <details>
+          <summary>Can paid items increase token allocation?</summary>
+          <div class="a">No. Paid items may improve the in-game experience, cosmetics, energy, or convenience, but they do not guarantee token eligibility, token allocation, prize odds, rewards, or monetary value.</div>
+        </details>
+        <details>
+          <summary>How is eligibility reviewed?</summary>
+          <div class="a">If a future token distribution is approved, eligibility will be audited based on genuine gameplay logs, compliance with local laws, and verification by our anti-cheat systems.</div>
+        </details>
+        <details>
+          <summary>Can cheating void eligibility?</summary>
+          <div class="a">Yes. Any use of bots, auto-clickers, multi-accounting, API tampering, or exploit abuse will void all in-game points and cancel any potential distribution eligibility.</div>
+        </details>
+        <details>
+          <summary>Can some regions be restricted?</summary>
+          <div class="a">Yes. Due to varying international regulations, residents of certain countries or jurisdictions may be ineligible to claim any future token distributions.</div>
+        </details>
+        <details>
+          <summary>Can the airdrop terms change?</summary>
+          <div class="a">Yes. The parameters, snapshot schedules, and allocations of the proposed airdrop are subject to change, revision, or cancellation at any time. For more information, visit the <a href="/airdrop">Airdrop page</a>.</div>
+        </details>
+      </section>
+
+      <!-- TOKENOMICS -->
+      <section id="tokenomics" class="faq-section">
+        <h2>Tokenomics</h2>
+        <details>
+          <summary>What is the planned supply?</summary>
+          <div class="a">The proposed model establishes a fixed maximum supply of 1,000,000,000 (1 Billion) tokens. No new tokens can ever be minted once deployed.</div>
+        </details>
+        <details>
+          <summary>Is there a private sale or VC allocation?</summary>
+          <div class="a">No. The proposed token distribution includes 0% for private investors or venture capital, prioritizing public players and community growth. For details, see the <a href="/tokenomics">Tokenomics page</a>.</div>
+        </details>
+        <details>
+          <summary>What does fixed supply mean?</summary>
+          <div class="a">Fixed supply means that the total number of tokens is permanently capped at launch, protecting the ecosystem from supply inflation.</div>
+        </details>
+        <details>
+          <summary>What is the two-layer economy?</summary>
+          <div class="a">It is a system that separates unlimited in-game points (for bet limits, upgrades) from the capped, proposed on-chain token. This prevents gameplay loop inflation from diluting token scarcity.</div>
+        </details>
+        <details>
+          <summary>What are proposed sinks?</summary>
+          <div class="a">Sinks are mechanisms that consume or lock up tokens (such as entry fees for competitive matches, cosmetic skins marketplace, and staking).</div>
+        </details>
+        <details>
+          <summary>What is buyback/burn?</summary>
+          <div class="a">A proposed framework where a portion of game revenue could be used to purchase tokens from the market and permanently burn them to support ecosystem sustainability.</div>
+        </details>
+        <details>
+          <summary>Is any of this financial advice?</summary>
+          <div class="a">No. Nothing in our game, website, guide, litepaper, or tokenomics documentation is financial or investment advice. Read the full <a href="/litepaper">Litepaper</a> for complete disclosures.</div>
+        </details>
+      </section>
+
+      <!-- FAIRNESS & SECURITY -->
+      <section id="fairness" class="faq-section">
+        <h2>Fairness &amp; Security</h2>
+        <details>
+          <summary>Is the game server-authoritative?</summary>
+          <div class="a">Yes. Every tap, bet, cash-out, and reward claim is computed and saved directly on our secure backend database, preventing client-side hacking.</div>
+        </details>
+        <details>
+          <summary>Can users cheat?</summary>
+          <div class="a">Our servers enforce strict verification limits (e.g. max tap frequency, bet caps, request verification). Suspicious or automated accounts are flagged and excluded.</div>
+        </details>
+        <details>
+          <summary>What is provably fair?</summary>
+          <div class="a">Provably fair is a cryptographic protocol that lets players verify that each round's rug crash multiplier was pre-determined and not altered during play.</div>
+        </details>
+        <details>
+          <summary>Is commit-reveal live?</summary>
+          <div class="a">Provably fair commit-reveal rounds are on the roadmap as a planned future update and are not yet live in the current build.</div>
+        </details>
+        <details>
+          <summary>Do I ever need to share a seed phrase?</summary>
+          <div class="a">No. RUG OR RICHES will never ask for your seed phrase, private keys, passwords, or recovery words. If anyone does, block and report them immediately.</div>
+        </details>
+        <details>
+          <summary>What data does the app collect?</summary>
+          <div class="a">We collect basic Telegram profile info (user ID, username), game state data, and Telegram Stars payment references for verification. Read our <a href="/privacy">Privacy Policy</a>.</div>
+        </details>
+      </section>
+
+      <!-- TELEGRAM STARS / PAYMENTS -->
+      <section id="payments" class="faq-section">
+        <h2>Telegram Stars &amp; Payments</h2>
+        <details>
+          <summary>What are Telegram Stars?</summary>
+          <div class="a">Telegram Stars are digital tokens introduced by Telegram to purchase virtual goods and services inside mini-apps and bots.</div>
+        </details>
+        <details>
+          <summary>What can I buy with Stars?</summary>
+          <div class="a">You can optionally spend Stars to purchase VIP tiers, energy refills, speed boosts, cosmetic button skins, or unlock a Season Pass.</div>
+        </details>
+        <details>
+          <summary>Are purchases required?</summary>
+          <div class="a">No. Purchases are strictly optional. The entire game loop, ranks, upgrades, and normal progression are fully accessible to free players.</div>
+        </details>
+        <details>
+          <summary>Are Stars purchases refundable?</summary>
+          <div class="a">Generally no. All Stars transactions are processed by Telegram and are final. Refund policies are governed by Telegram's Terms of Service.</div>
+        </details>
+        <details>
+          <summary>How do I get payment support?</summary>
+          <div class="a">For Telegram Stars purchase issues, use the official bot support flow or community support channel. The team should support Telegram’s <code>/paysupport</code> flow for Stars-related payment issues. Refunds and support requests may require Telegram payment charge details.</div>
+        </details>
+        <details>
+          <summary>Do Stars purchases guarantee future value?</summary>
+          <div class="a">No. Stars purchases are purely for virtual in-game entertainment items and do not guarantee or convey any real-world value or future token allocation.</div>
+        </details>
+      </section>
+
+      <!-- COMMUNITY -->
+      <section id="community" class="faq-section">
+        <h2>Community</h2>
+        <details>
+          <summary>What are crews?</summary>
+          <div class="a">Crews are in-game clubs where players band together, chat, and accumulate their scores onto a joint crew leaderboard.</div>
+        </details>
+        <details>
+          <summary>Are Crew Wars real players or simulated?</summary>
+          <div class="a">Crew features may include simulated in-game rivals or pacing opponents until fully live crew matchmaking is available. The site will label simulated systems clearly and will not present sample or simulated activity as real live user data.</div>
+        </details>
+        <details>
+          <summary>How do referrals work?</summary>
+          <div class="a">You share a unique invitation link with friends. When they launch and play, you both receive bonus in-game $MOON.</div>
+        </details>
+        <details>
+          <summary>Do I need to disclose rewarded shares?</summary>
+          <div class="a">Yes. If you share RUG OR RICHES because you may receive in-game rewards, disclose that connection clearly (e.g., '#ad' or '#sponsored').</div>
+        </details>
+        <details>
+          <summary>Where are the official links?</summary>
+          <div class="a">Our official Telegram community lounge is at <a href="https://t.me/rugorricheslounge" target="_blank">t.me/rugorricheslounge</a> and our X account is <a href="https://x.com/RUGorRICHESApp" target="_blank">@RUGorRICHESApp</a>. Watch out for impersonators.</div>
+        </details>
+        <details>
+          <summary>How do I report a bug or abuse?</summary>
+          <div class="a">Please report detailed bug reports or player abuse via the official Telegram bot support flow or by notifying moderators in the official community lounge.</div>
+        </details>
+      </section>
+    </div>
+  </div>
+
+  <section class="cta-section">
+    <h3>Have More Questions?</h3>
+    <p>Join our official Telegram community lounge to chat with other degens and get support.</p>
+    <a href="https://t.me/rugorricheslounge" target="_blank" class="btn primary">Join Telegram Lounge</a>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="footer-safety">
+    RUG OR RICHES is an entertainment game. In-game $MOON, Season Points, Airdrop Points, rewards, ranks, and leaderboards have no guaranteed monetary value. Never share private keys or seed phrases.
+  </div>
+  <div>
+    © 2026 RUG OR RICHES — for entertainment only. Not financial advice.
+  </div>
+  <div class="footer-links">
+    <a href="/">Home</a> ·
+    <a href="/guide">Guide</a> ·
+    <a href="/airdrop">Airdrop</a> ·
+    <a href="/tokenomics">Tokenomics</a> ·
+    <a href="/litepaper">Litepaper</a> ·
+    <a href="/terms">Terms</a> ·
+    <a href="/privacy">Privacy</a> ·
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+
+<script>
+  // Simple sidebar highlight scroll-spy
+  const sidebarLinks = document.querySelectorAll('.faq-sidebar a');
+  const sections = document.querySelectorAll('.faq-section');
+  
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      if (pageYOffset >= sectionTop - 110) {
+        current = section.getAttribute('id');
+      }
+    });
+    
+    sidebarLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href').substring(1) === current) {
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

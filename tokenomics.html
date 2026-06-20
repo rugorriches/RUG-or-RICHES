@@ -79,149 +79,145 @@
 <body>
 <div class="wrap" style="display:flex;gap:15px;align-items:center;padding:11px 22px;font-size:13px;font-weight:700;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap">
   <a href="/" style="color:var(--gold)">🏠 Home</a>
-  <a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics" style="color:#fff">Tokenomics</a><a href="/litepaper">Litepaper</a>
+  <a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics" style="color:#fff">Tokenomics</a><a href="/litepaper">Litepaper</a><a href="/faq">FAQ</a>
   <a href="https://t.me/RugorRichesBot/play" style="margin-left:auto;color:var(--cyan)">▶ Play</a>
 </div>
 <header class="top">
   <div class="wrap">
     <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
     <h1><span class="grad">Tokenomics</span></h1>
-    <div class="tagline">A sustainable, community-first model — built for cycles, not just the next pump.</div>
-    <div class="updated">Proposed &amp; illustrative · v1.0 · June 18, 2026</div>
+    <div class="tagline">A sustainable, community-first model — built for gameplay loop cycles.</div>
+    <div class="updated">Proposed &amp; illustrative · v1.0 · June 20, 2026</div>
   </div>
 </header>
 
 <nav class="toc">
   <div class="wrap">
     <a href="#model">The model</a>
-    <a href="#supply">Supply</a>
+    <a href="#status">Live vs Proposed</a>
     <a href="#allocation">Allocation</a>
     <a href="#vesting">Vesting</a>
-    <a href="#emissions">Emissions</a>
-    <a href="#engine">Sinks vs sources</a>
-    <a href="#value">Value accrual</a>
+    <a href="#sustainability">Sustainability</a>
     <a href="#liquidity">Liquidity</a>
     <a href="#governance">Governance</a>
-    <a href="#sustain">Sustainability</a>
   </div>
 </nav>
 
 <main class="wrap">
-  <div class="card muted"><strong>Important:</strong> This page describes a <em>proposed, illustrative</em> token model. <strong>$MOON</strong> and "Airdrop Points" are in-game points with <strong>no guaranteed monetary value</strong>. No token is offered or promised. Every figure, percentage, schedule and mechanism here is subject to legal review and may change, be replaced, or never occur. Nothing on this page is financial, investment, legal or tax advice, or an offer to sell any asset.</div>
+  <div class="card" style="border: 1px solid var(--gold); background: rgba(255, 212, 0, 0.05); color: #fff; padding: 20px; border-radius: 14px; margin-bottom: 24px; font-size: 14px; line-height: 1.6;">
+    <strong>⚠️ Compliance Notice:</strong><br>
+    Tokenomics are proposed until final launch terms are published. Nothing on this page is financial advice or a promise of future value. In-game points and Season Points have no guaranteed cash value.
+  </div>
 
-  <p>Most play-to-earn economies failed for one reason: they printed rewards faster than the game could absorb them, and assumed growth would never stop. Modern, sustainable GameFi design does the opposite — it <strong>caps supply, releases it slowly, and builds real demand sinks into the game so the economy survives the quiet months, not just the hype.</strong> The $MOON model below is built on those principles.</p>
+  <p>Most play-to-earn economies printed rewards faster than the game loop could absorb them. Modern GameFi design does the opposite — it <strong>caps proposed supply, releases it slowly, and builds gameplay sinks into the app so the economy remains stable.</strong> The proposed $MOON model is designed on these core sustainability rules.</p>
 
   <div class="kpi">
-    <div class="k"><div class="v grad">1B</div><div class="l">Fixed max supply</div></div>
-    <div class="k"><div class="v grad">~65%</div><div class="l">Community-directed</div></div>
+    <div class="k"><div class="v grad">1B</div><div class="l">Proposed max supply</div></div>
+    <div class="k"><div class="v grad">~65%</div><div class="l">Proposed Community-directed</div></div>
     <div class="k"><div class="v grad">0%</div><div class="l">Private/VC pre-sale</div></div>
   </div>
 
   <h2 id="model">1. A two-layer model</h2>
-  <p>RUG OR RICHES separates the <em>fun money</em> from the <em>real asset</em> — the structure that keeps sustainable economies stable:</p>
+  <p>RUG OR RICHES separates off-chain gameplay tokens from proposed on-chain assets:</p>
   <div class="grid">
-    <div class="card"><h3>🎮 Game layer (off-chain, uncapped)</h3><p class="muted">In-game <strong>$MOON balance</strong> and <strong>Airdrop Points</strong> are earned and spent inside the game. They power upgrades, VIP and rank, reset and flow with seasons, and are <strong>never</strong> a tradeable asset. This is where unlimited grinding lives — so it can't inflate the real token.</p></div>
+    <div class="card"><h3>🎮 Game layer (off-chain, uncapped)</h3><p class="muted">In-game <strong>$MOON balance</strong> and <strong>Season Points</strong> are earned and spent inside the game. They power upgrades, VIP and rank, reset and flow with seasons, and are <strong>never</strong> a tradeable asset. Unlimited grinding is restricted to this layer.</p></div>
     <div class="card"><h3>🪙 Token layer (on-chain, capped)</h3><p class="muted">The proposed <strong>$MOON token</strong> is a fixed-supply, on-chain asset. The game layer only ever <em>qualifies</em> you for a bounded share of it via airdrop snapshots — it cannot mint new tokens. Scarcity is protected by design.</p></div>
   </div>
-  <p class="note">This is the dual-layer pattern modern GameFi uses to avoid the hyperinflation that collapsed first-generation play-to-earn tokens.</p>
 
-  <h2 id="supply">2. Supply</h2>
-  <p>Total supply is <strong>fixed at 1,000,000,000 $MOON</strong> — hard-capped, with <strong>no inflation mechanism and no ability to mint beyond the cap.</strong> The only path supply ever moves is <em>down</em>, through burns (see §7). There is no private sale and no venture allocation; the economy is built for players first.</p>
-
-  <h2 id="allocation">3. Allocation</h2>
-  <div class="card alloc">
-    <div class="bar"><span class="t">🪂 Pre-launch airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
-    <div class="bar"><span class="t">🎮 Post-launch play-to-earn</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
-    <div class="bar"><span class="t">🤝 Referrals &amp; crews</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
-    <div class="bar"><span class="t">💧 Liquidity &amp; exchange</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
-    <div class="bar"><span class="t">🛠️ Team &amp; ops (vested)</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.45)"></i></span><b>10%</b></div>
-    <div class="bar"><span class="t">🏛️ Treasury &amp; ecosystem</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--purple),var(--cyan))"></i></span><b>10%</b></div>
-  </div>
-  <p>Roughly <strong>two-thirds of supply is community-directed</strong> — airdrops, ongoing play-to-earn, and referral/crew rewards — versus 10% to the team and 10% to a transparent treasury. There is no allocation to private investors.</p>
-
-  <h2 id="vesting">4. Vesting &amp; unlock schedule</h2>
-  <p>Vesting exists to stop anyone — team, treasury, or even airdrop farmers — from dumping into thin early liquidity. Every allocation unlocks gradually, with cliffs and locks aligned to long-term commitment:</p>
-  <table>
-    <tr><th>Allocation</th><th>Share</th><th>Unlock schedule</th></tr>
-    <tr><td>🪂 Airdrops (per cycle)</td><td><b>40%</b></td><td>Each cycle's portion: <strong>30% at claim</strong>, remaining <strong>70% linear over 4 months</strong> — rewards the community immediately while spreading sell pressure.</td></tr>
-    <tr><td>🎮 Post-launch P2E</td><td><b>15%</b></td><td>Released on a <strong>declining 4-year emission curve</strong> (see §5). Never a flat, perpetual faucet.</td></tr>
-    <tr><td>🤝 Referrals &amp; crews</td><td><b>10%</b></td><td>Streamed with the seasons, <strong>linear over ~3 years</strong>, earned only by real referrals and crew activity.</td></tr>
-    <tr><td>💧 Liquidity &amp; exchange</td><td><b>15%</b></td><td><strong>100% at launch</strong> to seed deep liquidity; provided <strong>LP locked 12+ months.</strong></td></tr>
-    <tr><td>🛠️ Team &amp; ops</td><td><b>10%</b></td><td><strong>12-month cliff</strong> (zero unlocked in year one), then <strong>linear over 24 months.</strong></td></tr>
-    <tr><td>🏛️ Treasury &amp; ecosystem</td><td><b>10%</b></td><td><strong>6-month cliff</strong>, then <strong>linear over 48 months</strong> for grants, listings and partnerships — multisig-controlled.</td></tr>
+  <h2 id="status">2. Live vs Proposed Feature Status</h2>
+  <p>To ensure absolute clarity, here is the implementation status of all key features:</p>
+  <table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Feature</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>In-game $MOON</td><td><b>Live</b> as game points</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Season Points</td><td><b>Live</b> as in-game tracking</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Token contract</td><td><b>Proposed / Not Live</b> (subject to approval)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Claim portal</td><td><b>Proposed / Not Live</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Buyback/burn</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Staking</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Governance</td><td><b>Proposed / Subject to Review</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Liquidity lock</td><td><b>Planned/Proposed</b> (upon launch approval)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Provably fair rounds</td><td><b>Roadmap / Planned</b> (in development)</td></tr>
+    </tbody>
   </table>
-  <p class="note">Cliffs and linear vesting follow standard anti-dump practice: a 12-month team cliff acts as a loyalty lock, and gradual release keeps circulating supply predictable.</p>
 
-  <h2 id="emissions">5. Emission curve</h2>
-  <p>The post-launch play-to-earn pool (15%, 150M $MOON) is the only ongoing source of new circulating tokens — and it <strong>declines every year</strong> so rewards can never outrun demand. Roughly:</p>
-  <div class="emit">
-    <div class="col"><i style="height:120px"></i><b>40%</b><span>Year 1</span></div>
-    <div class="col"><i style="height:90px"></i><b>30%</b><span>Year 2</span></div>
-    <div class="col"><i style="height:60px"></i><b>20%</b><span>Year 3</span></div>
-    <div class="col"><i style="height:30px"></i><b>10%</b><span>Year 4</span></div>
+  <h2 id="allocation">3. Proposed Allocation</h2>
+  <p>The proposed tokenomics earmarks the majority of the token supply for community efforts and active gameplay systems:</p>
+  <div class="card alloc">
+    <div class="bar"><span class="t">🪂 Proposed Airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
+    <div class="bar"><span class="t">🎮 Proposed play-to-earn seasons</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
+    <div class="bar"><span class="t">🤝 Referrals &amp; crew bonuses</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
+    <div class="bar"><span class="t">💧 Liquidity allocation</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
+    <div class="bar"><span class="t">🛠️ Team &amp; ops (vested)</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.45)"></i></span><b>10%</b></div>
+    <div class="bar"><span class="t">🏛️ Proposed Ecosystem treasury</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--purple),var(--cyan))"></i></span><b>10%</b></div>
   </div>
-  <p>Front-loaded to bootstrap the post-launch economy, then tapering toward a low, predictable baseline. After Year 4 the pool is effectively exhausted, leaving the game to run on a circulating, recycled economy rather than fresh emissions.</p>
 
-  <h2 id="engine">6. The sustainability engine — sinks vs sources</h2>
-  <p>A healthy token economy keeps <strong>demand (sinks) at or above new supply (sources)</strong>. The game is designed so nearly every system that pays out tokens is matched by a system that consumes them:</p>
-  <div class="twoeng">
-    <div class="eng src"><h3>⬆️ Sources (supply in)</h3><ul>
-      <li>Airdrop claims (one-time, vested, capped)</li>
-      <li>Post-launch P2E rewards (declining)</li>
-      <li>Referral &amp; crew milestone rewards</li>
-    </ul><p class="muted" style="margin:8px 0 0">All bounded, all server-validated, none perpetual.</p></div>
-    <div class="eng sink"><h3>⬇️ Sinks (demand out)</h3><ul>
-      <li>Cosmetics &amp; skins marketplace</li>
-      <li>VIP tiers, boosts &amp; energy</li>
-      <li>Tournament entry fees &amp; prize pools</li>
-      <li>Permanent upgrades</li>
-      <li>Staking locks (removes circulating supply)</li>
-      <li>Crew treasury deposits &amp; wagered wars</li>
-      <li>A portion of every spend is <strong>burned</strong></li>
-    </ul></div>
-  </div>
-  <p>Sinks are embedded where players already want to spend — customization, status, competition and progression — so demand grows naturally with engagement instead of relying on new buyers.</p>
+  <h2 id="vesting">4. Proposed Vesting &amp; Unlock Schedule</h2>
+  <p>Vesting restricts the speed at which tokens enter circulation to protect early liquidity depth:</p>
+  <table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Allocation</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Share</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Unlock Schedule</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>🪂 Proposed Airdrops</td><td><b>40%</b></td><td>Each cycle: <strong>30% at claim</strong>, remaining <strong>70% linear over 4 months</strong> to manage supply flow.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🎮 Proposed P2E</td><td><b>15%</b></td><td>Released on a <strong>declining 4-year emission curve</strong>. Never a flat, perpetual faucet.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🤝 Referrals &amp; crews</td><td><b>10%</b></td><td>Streamed with seasons, <strong>linear over ~3 years</strong>, earned via active referrers only.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>💧 Liquidity &amp; exchange</td><td><b>15%</b></td><td><strong>100% at launch</strong> to seed deep liquidity; LP locked for 12+ months.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🛠️ Team &amp; ops</td><td><b>10%</b></td><td><strong>12-month cliff</strong> (zero unlocked in year one), then <strong>linear over 24 months.</strong></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🏛️ Treasury &amp; ecosystem</td><td><b>10%</b></td><td><strong>6-month cliff</strong>, then <strong>linear over 48 months</strong> for operations and development.</td></tr>
+    </tbody>
+  </table>
 
-  <h2 id="value">7. Value accrual &amp; deflation</h2>
-  <div class="grid3">
-    <div class="card"><h3>🔥 Buyback &amp; burn</h3><p class="muted">A share of marketplace fees and Telegram Stars revenue is used to buy back $MOON and permanently burn it — turning real product revenue into deflationary pressure.</p></div>
-    <div class="card"><h3>🔒 Staking</h3><p class="muted">Lock $MOON for in-game boosts, energy and seasonal multipliers. Staked tokens leave circulation, rewarding holders who play the long game.</p></div>
-    <div class="card"><h3>🏆 Utility demand</h3><p class="muted">Tournaments, marketplace, VIP, fee discounts and cross-app access all require $MOON, tying token demand directly to active play.</p></div>
-  </div>
-  <p>Because supply is capped and burns are permanent, sustained sinks make the circulating supply <strong>deflationary over time</strong> — the opposite of the infinite-mint models that collapsed.</p>
+  <h2 id="sustainability">5. Sustainability Model</h2>
+  <p>A healthy ecosystem keeps sinks (demand) balanced with sources (supply):</p>
+  <table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">System Element</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Source or Sink</th>
+        <th style="text-align:left; padding:9px 10px; color:var(--cyan);">Why It Helps</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>Stars purchases</td><td>Revenue source</td><td>Funds operations, security, and game development.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Cosmetics marketplace</td><td>Sink</td><td>Optional cosmetic spending without pay-to-win mechanics.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>VIP perks</td><td>In-game monetization</td><td>Improves user retention, in-game bet multipliers, and convenience.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Season Points</td><td>Engagement tracking</td><td>Rewards active play without causing token inflation.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Treasury reserves</td><td>Reserve</td><td>Supports long-term game operations and updates.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Ecosystem programs (Burns)</td><td>Proposed Sink</td><td>A portion of future platform revenue may be allocated to buybacks and permanent burns, subject to legal, tax, platform, and governance review.</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Tournaments &amp; events</td><td>Proposed Sink/Source</td><td>Adds competitive utility and entry fee token sinks.</td></tr>
+    </tbody>
+  </table>
 
-  <h2 id="liquidity">8. Liquidity &amp; launch</h2>
+  <h2 id="liquidity">6. Liquidity &amp; Launch</h2>
   <ul>
-    <li><strong>Deep initial liquidity</strong> seeded from the 15% allocation at launch, with <strong>LP locked 12+ months</strong> to protect the market.</li>
-    <li><strong>Claim portal</strong> opens after Cycle 6 against a snapshot of server-validated points — no off-chain trust required at distribution.</li>
-    <li><strong>Phased listings</strong>, starting with a DEX and expanding as the ecosystem matures.</li>
-    <li><strong>Transparent unlock calendar</strong> published so the community can see exactly what enters circulation and when.</li>
+    <li><strong>Deep initial liquidity:</strong> Seeded from the liquidity allocation at launch, with LP locks implemented to support stability.</li>
+    <li><strong>Phased listings:</strong> Designed to expand DEX exposure as the gaming ecosystem matures.</li>
+    <li><strong>Vesting calendars:</strong> Clear schedules will be published to keep circulating figures fully transparent.</li>
   </ul>
 
-  <h2 id="governance">9. Treasury &amp; governance</h2>
-  <p>The 10% treasury is <strong>multisig-controlled</strong> and reserved for liquidity support, listings, audits, partnerships and grants — with a long 48-month vest so it can never be drained quickly. Over time, <strong>governance-lite</strong> lets token holders vote on seasons, events, prize pools and feature priorities, gradually shifting direction to the community that built the game.</p>
-
-  <h2 id="sustain">10. Why this is built to last</h2>
-  <div class="grid">
-    <div class="card"><h3>✅ Capped &amp; deflationary</h3><p class="muted">Hard 1B cap, no inflation, permanent burns from real revenue.</p></div>
-    <div class="card"><h3>✅ Declining emissions</h3><p class="muted">P2E tapers over 4 years — designed for cycles, not perpetual growth.</p></div>
-    <div class="card"><h3>✅ Sinks ≥ sources</h3><p class="muted">Demand is engineered into cosmetics, status, competition and staking.</p></div>
-    <div class="card"><h3>✅ Anti-dump vesting</h3><p class="muted">Team cliff, locked liquidity, vested airdrop claims, multisig treasury.</p></div>
-    <div class="card"><h3>✅ Community-first</h3><p class="muted">~65% to players; 0% to private investors.</p></div>
-    <div class="card"><h3>✅ Server-authoritative</h3><p class="muted">Every reward and snapshot is validated server-side — see the litepaper's Fair Play section.</p></div>
-  </div>
+  <h2 id="governance">7. Proposed Treasury &amp; Governance</h2>
+  <p>The proposed treasury is intended to support operations, and it will be vested over 48 months to prevent rapid drainage. Over time, community governance-lite may be introduced to allow players to vote on upcoming seasonal themes and feature releases.</p>
 
   <div class="cta">
     <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Start earning $MOON</a>
-    <a class="btn ghost" href="/airdrop">🪂 The 6 airdrop cycles</a>
-    <a class="btn ghost" href="/litepaper">Full litepaper</a>
+    <a class="btn ghost" href="/airdrop">View Season Points</a>
+    <a class="btn ghost" href="/litepaper">Read the Litepaper</a>
   </div>
 
-  <div class="card muted"><strong>Disclaimers:</strong> $MOON and Airdrop Points have no guaranteed value and may never have any. No token is offered or promised; any future token, allocation, schedule, percentage or mechanism is subject to legal/compliance review and may change materially or never happen. Vesting, emission and burn mechanics are design intentions, not commitments. This is a beta-stage product. Nothing here is financial, investment, legal or tax advice or a solicitation to buy any asset.</div>
-
   <footer>
+    RUG OR RICHES is an entertainment game. In-game $MOON, Season Points, Airdrop Points, rewards, ranks, and leaderboards have no guaranteed monetary value. Never share private keys or seed phrases.<br>
     © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br>
-    <a href="/">← Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+    <a href="/">← Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/faq">FAQ</a>
   </footer>
 </main>
 </body>

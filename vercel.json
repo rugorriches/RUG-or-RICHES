@@ -30,6 +30,7 @@
     { "src": "/guide", "dest": "/guide.html" },
     { "src": "/airdrop", "dest": "/airdrop.html" },
     { "src": "/tokenomics", "dest": "/tokenomics.html" },
+    { "src": "/faq", "dest": "/faq.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ],
   "crons": [

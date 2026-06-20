@@ -2657,6 +2657,55 @@
       }
     }
 
+    .pulse-danger {
+      animation: containerPulseDanger 1s infinite alternate;
+    }
+    @keyframes containerPulseDanger {
+      from { box-shadow: 0 0 10px rgba(255, 59, 92, 0.2); }
+      to { box-shadow: 0 0 25px rgba(255, 59, 92, 0.45); }
+    }
+
+    .pulse-nuclear {
+      animation: containerPulseNuclear 0.4s infinite alternate;
+    }
+    @keyframes containerPulseNuclear {
+      from { box-shadow: 0 0 15px rgba(255, 59, 92, 0.35); }
+      to { box-shadow: 0 0 35px rgba(255, 59, 92, 0.8); }
+    }
+
+    .pulse-btn-clutch {
+      animation: buttonPulseClutch 0.8s infinite alternate;
+    }
+    @keyframes buttonPulseClutch {
+      from { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 59, 92, 0.3); }
+      to { transform: scale(1.03); box-shadow: 0 6px 18px rgba(255, 59, 92, 0.6); }
+    }
+
+    .pulse-btn-nuclear {
+      animation: buttonPulseNuclear 0.35s infinite alternate;
+    }
+    @keyframes buttonPulseNuclear {
+      from { transform: scale(1.01); box-shadow: 0 4px 12px rgba(255, 59, 92, 0.45); }
+      to { transform: scale(1.05); box-shadow: 0 6px 24px rgba(255, 59, 92, 0.95); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #chartCard,
+      .btn,
+      .rug-bar,
+      #rugFill::after,
+      #dangerVig.crit,
+      #app.shake,
+      .pulse-danger,
+      .pulse-nuclear,
+      .pulse-btn-clutch,
+      .pulse-btn-nuclear {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+
     #tut {
       position: absolute;
       inset: 0;
@@ -4719,7 +4768,98 @@
         heatHazard: 0.075, tapHazard: 0.065, tapHazardFloor: 58, warnHeat: 84,
         fakeoutChance: 0.18, softChance: 0.50, vipEarn: [1, 1.08, 1.18, 1.35, 1.65], serverUrl: PRODUCTION_BACKEND_URL, invoiceEndpoint: "/api/invoice", verifyEndpoint: "/api/verify"
       };
+      const BEGINNER_ROUNDS = 10;
+      const SAFE_RAMP_SECONDS = 5;
+      const TARGET_AVG_ROUND_SECS_MIN = 20;
+      const TARGET_AVG_ROUND_SECS_MAX = 35;
+      const MIN_HARD_RUG_MULT_NORMAL = 1.15;
+      const MIN_HARD_RUG_MULT_BEGINNER = 1.25;
+      const HEAT_GROWTH_MULT = {
+        calm: 0.6,
+        spicy: 1.0,
+        danger: 1.0,
+        clutch: 1.4,
+        nuclear: 2.0
+      };
+      const BEGINNER_HEAT_MULT = 0.7;
+
+      let roundDuration = 0;
+      let lastHeatZone = "calm";
+      let hbTimer = 0;
+      let audioUnlocked = false;
+      let lastHapticZone = null;
+
       const MOON_CAP = 1000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 100, PRICE_SOFTCAP = 18;
+
+      function getHeatZone(heatPercent) {
+        const h = clamp(Number(heatPercent) || 0, 0, 100);
+        if (h < 40) return { id: "calm", label: "CALM", min: 0, max: 40, severity: "low", copy: "Build it." };
+        if (h < 65) return { id: "spicy", label: "SPICY", min: 40, max: 65, severity: "medium", copy: "Greed zone." };
+        if (h < 80) return { id: "danger", label: "DANGER", min: 65, max: 80, severity: "high", copy: "Careful." };
+        if (h < 95) return { id: "clutch", label: "CLUTCH", min: 80, max: 95, severity: "clutch", copy: "Bank or pray." };
+        return { id: "nuclear", label: "NUCLEAR", min: 95, max: 100, severity: "extreme", copy: "One tap from rekt." };
+      }
+
+      function prefersReducedMotion() {
+        return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }
+
+      function triggerHaptic(type) {
+        try {
+          const hf = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback;
+          if (hf) {
+            if (type === "success") return hf.notificationOccurred("success");
+            if (type === "error") return hf.notificationOccurred("error");
+            if (type === "warning") return hf.notificationOccurred("warning");
+            if (type === "heavy") return hf.impactOccurred("heavy");
+            if (type === "medium") return hf.impactOccurred("medium");
+            return hf.impactOccurred("light");
+          }
+          if (navigator.vibrate) {
+            navigator.vibrate(type === "heavy" ? 40 : 20);
+          }
+        } catch (_) {}
+      }
+
+      const DEBUG_TELEMETRY = false;
+      function logTelemetry(eventName, customMeta = {}) {
+        if (!DEBUG_TELEMETRY) return;
+        const h = heat;
+        const zone = getHeatZone(h);
+        const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
+        
+        let durationBucket = "< 5s";
+        if (roundDuration >= 35) durationBucket = "35s+";
+        else if (roundDuration >= 20) durationBucket = "20-35s";
+        else if (roundDuration >= 10) durationBucket = "10-20s";
+        else if (roundDuration >= 5) durationBucket = "5-10s";
+
+        const metadata = Object.assign({
+          heatZone: zone.id,
+          multiplier: Number(price.toFixed(2)),
+          durationBucket: durationBucket,
+          rank: (typeof rankIdx === "function" && RANKS && RANKS[rankIdx()]) ? RANKS[rankIdx()].nm : "Shrimp",
+          vipTier: S.vip,
+          beginner: roundsPlayed < BEGINNER_ROUNDS
+        }, customMeta);
+        console.info("[telemetry]", eventName, metadata);
+      }
+
+      function triggerCoaching(type) {
+        try {
+          if (localStorage.getItem("coach_" + type)) return;
+          if (type === "first_round") {
+            toast("👆", "First Tap", "Tap to pump. Bank before the rug.");
+          } else if (type === "first_danger") {
+            toast("🚨", "Danger Zone", "Heat means danger. Banking locks your run.");
+          } else if (type === "first_rug") {
+            toast("💀", "Rugged!", "Next time, bank earlier or use Sell Half.");
+          } else if (type === "first_bank") {
+            toast("💰", "Nice bank!", "Higher heat means higher risk.");
+          }
+          localStorage.setItem("coach_" + type, "1");
+        } catch (_) {}
+      }
       const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
       const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };
       const lsDel = k => { try { localStorage.removeItem(k); } catch (e) { } };
@@ -5116,6 +5256,18 @@
       // ---------- AUDIO ----------
       let AC = null;
       function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } } return AC; }
+      function unlockAudio() {
+        if (audioUnlocked) return;
+        const c = ac();
+        if (c && c.state === "suspended") {
+          try {
+            c.resume();
+            audioUnlocked = true;
+          } catch (_) {}
+        } else if (c) {
+          audioUnlocked = true;
+        }
+      }
       function beep(f1, f2, dur, type, vol) {
         if (!S.sound) return; const c = ac(); if (!c) return;
         const o = c.createOscillator(), g = c.createGain(); o.type = type || "sine";
@@ -5128,6 +5280,20 @@
       const sfxCash = () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, f * 1.3, 0.18, "triangle", 0.08), i * 60)); };
       const sfxRug = () => beep(300, 40, 0.6, "sawtooth", 0.13);
       const sfxBuy = () => beep(700, 900, 0.12, "triangle", 0.07);
+      function sfxHeartbeat(isNuclear) {
+        if (!S.sound || !audioUnlocked || prefersReducedMotion()) return;
+        const c = ac(); if (!c) return;
+        if (c.state === "suspended") {
+          c.resume().catch(() => {});
+        }
+        const vol = isNuclear ? 0.05 : 0.035;
+        beep(75, 45, 0.08, "sine", vol);
+        setTimeout(() => {
+          if (pot > 0 && !busting && S.sound) {
+            beep(70, 40, 0.08, "sine", vol);
+          }
+        }, 120);
+      }
 
       // ---------- DAILY STREAK ----------
       (function () {
@@ -5294,7 +5460,13 @@
         const stake = Math.max(1, Math.min(S.bet, betMax()));
         if (curBal(cur) < stake) { faucetOrWarn(cur); return; }
         if (roundClicks >= betsPerRound()) { if (panelOpen === "game" && Date.now() - lastLimitT > 2000) { lastLimitT = Date.now(); toast("🛑", "Round bet limit", "Cash out to start a fresh round — VIP raises the cap"); } return; }
-        if (invested === 0 && !roundId) { roundId = actionToken(); roundInvestedTotal = 0; }
+        if (invested === 0 && !roundId) {
+          roundId = actionToken();
+          roundInvestedTotal = 0;
+          unlockAudio();
+          triggerCoaching("first_round");
+          logTelemetry("round_started");
+        }
 
         // snappier feedback: trigger audio & visuals immediately
         floater("+" + fmt(stake), x, y); burst(x, y); sfxTap();
@@ -5358,13 +5530,52 @@
       }
 
       function triggerRug() {
-        if (busting) return; const r = Math.random();
+        if (busting) return;
+        const r = Math.random();
+        
+        const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
+        const minHardMult = (roundsPlayed < BEGINNER_ROUNDS) ? MIN_HARD_RUG_MULT_BEGINNER : MIN_HARD_RUG_MULT_NORMAL;
+        const isProtected = (roundDuration < SAFE_RAMP_SECONDS) || (price < minHardMult);
+
+        if (isProtected) {
+          // Inside safe ramp or below minimum multiplier: force a visual fakeout dip (flash crash) or soft rug
+          if (Math.random() < 0.85) {
+            price *= 0.6;
+            capPrice();
+            pumpVel = 0;
+            heat = Math.max(0, heat - 45);
+            if (panelOpen === "game") {
+              toast("😱", "FLASH CRASH", "Fakeout dip — hold or fold?");
+              if (navigator.vibrate) navigator.vibrate(30);
+            }
+            return;
+          } else {
+            startBust("soft");
+            return;
+          }
+        }
+
         if (r < CONFIG.fakeoutChance) { price *= 0.6; capPrice(); pumpVel = 0; heat = Math.max(0, heat - 45); if (panelOpen === "game") { toast("😱", "FLASH CRASH", "Fakeout dip — hold or fold?"); if (navigator.vibrate) navigator.vibrate(30); } return; }
         startBust(r < CONFIG.softChance ? "soft" : "hard");
       }
       function startBust(type) {
-        if (busting) return; busting = true; bustFrames = 14; S.rugs++; unlock("first");
-        bustType = type || "hard"; bustTarget = bustType === "soft" ? price * 0.45 : price * 0.12;
+        if (busting) return;
+        
+        const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
+        const minHardMult = (roundsPlayed < BEGINNER_ROUNDS) ? MIN_HARD_RUG_MULT_BEGINNER : MIN_HARD_RUG_MULT_NORMAL;
+        const isProtected = (roundDuration < SAFE_RAMP_SECONDS) || (price < minHardMult);
+        
+        let resolvedType = type || "hard";
+        if (resolvedType === "hard" && isProtected) {
+          resolvedType = "soft";
+        }
+        
+        busting = true; bustFrames = 14; S.rugs++; unlock("first");
+        logTelemetry("rug_hit", { rugType: resolvedType });
+        triggerCoaching("first_rug");
+        triggerHaptic("error");
+
+        bustType = resolvedType; bustTarget = bustType === "soft" ? price * 0.45 : price * 0.12;
         const cur = roundCur || S.betCur; const keep = bustType === "soft" ? 0.4 : 0;
         let rescued = Math.floor(pot * (vaultPct() + keep));
         rescued = Math.min(rescued, Math.floor(invested * (bustType === "soft" ? 0.9 : 0.8)));   // a rug must always sting — never recover more than your stake (no profitable rugs)
@@ -5385,6 +5596,7 @@
 
       function cashOut(auto) {
         if (pot < 1 || busting) return;
+        logTelemetry("bank_clicked", { auto: !!auto, actionType: "cashout" });
         if (!cloudAuth() && isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "cashout" }));
           return;
@@ -5399,8 +5611,10 @@
         if (profit > 0) { S.pnlWon = Math.min(MOON_CAP, (S.pnlWon || 0) + profit); winStreak++; if (cur === "moon") S.lifetime = Math.min(MOON_CAP, S.lifetime + Math.floor(profit)); } else { S.pnlLost = Math.min(MOON_CAP, (S.pnlLost || 0) + (-profit)); winStreak = 0; }
         S.cashouts++; if (payout > S.bestPot) S.bestPot = payout; if (r >= 0.7) unlock("diamond"); bumpQuest("bigSell", payout, "max");
         if (profit > 0) S.piggy = Math.min(PIGGYCAP, S.piggy + Math.floor(payout * 0.04));   // piggy bank fills as you cash out
+        logTelemetry("bank_success", { auto: !!auto, actionType: "cashout", profit: profit });
+        if (profit > 0) triggerCoaching("first_bank");
         if (panelOpen === "game") {
-          toast(auto ? "🎯" : "💰", auto ? "AUTO-SOLD" : "SOLD", "+" + fmt(payout) + " " + (cur === "pts" ? "pts" : "$MOON") + " · profit " + (profit >= 0 ? "+" : "") + fmt(profit) + (winStreak > 1 ? " · 🏆x" + winStreak : "")); sfxCash(); if (navigator.vibrate) navigator.vibrate(40); if (profit > 0 && r >= 0.5) confetti();
+          toast(auto ? "🎯" : "💰", auto ? "AUTO-SOLD" : "SOLD", "+" + fmt(payout) + " " + (cur === "pts" ? "pts" : "$MOON") + " · profit " + (profit >= 0 ? "+" : "") + fmt(profit) + (winStreak > 1 ? " · 🏆x" + winStreak : "")); sfxCash(); triggerHaptic("success"); if (profit > 0 && r >= 0.5) confetti();
           if (!auto && profit > 0 && cur === "moon" && r >= 0.5) showReaction(true, "+" + fmt(payout) + " $MOON", "You banked it before the rug — gains locked.");
         }
         mktBuy = clamp(mktBuy - 0.12, 0.05, 0.9);   // your sell adds sell pressure
@@ -5423,6 +5637,7 @@
       $("enBuy") && $("enBuy").addEventListener("click", buyEnergy);
       function sellHalf() {
         if (pot < 2 || busting) return;
+        logTelemetry("bank_clicked", { actionType: "sell_half" });
         if (!cloudAuth() && isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "sell_half" }));
           return;
@@ -5434,7 +5649,9 @@
         const soldInvested = Math.max(1, Math.floor(invested * 0.5)); const profit = payout - soldInvested; if (profit > 0) { S.pnlWon = Math.min(MOON_CAP, (S.pnlWon || 0) + profit); if (cur === "moon") S.lifetime = Math.min(MOON_CAP, S.lifetime + Math.floor(profit)); } else { S.pnlLost = Math.min(MOON_CAP, (S.pnlLost || 0) + (-profit)); }
         const settlement = { cur: "moon", payout: payout, invested: soldInvested, roundInvested: Math.max(1, Math.floor(roundInvestedTotal || invested)), peak: roundPeak, clicks: roundClicks, outcome: "half", roundId: roundId || actionToken() };
         pot -= half; invested *= 0.5; heat = Math.max(0, heat - 25);   // scaling out locks profit & cools the rug heat
-        if (panelOpen === "game") { toast("✂️", "Sold half", "+" + fmt(payout) + " " + (cur === "pts" ? "pts" : "$MOON") + " · riding the rest"); sfxCash(); if (navigator.vibrate) navigator.vibrate(25); }
+        logTelemetry("bank_success", { actionType: "sell_half", profit: profit });
+        if (profit > 0) triggerCoaching("first_bank");
+        if (panelOpen === "game") { toast("✂️", "Sold half", "+" + fmt(payout) + " " + (cur === "pts" ? "pts" : "$MOON") + " · riding the rest"); sfxCash(); triggerHaptic("success"); }
         save(); renderLive(); renderStats(); renderDash(); settleRoundCloud(settlement);
       }
       $("sellHalf").addEventListener("click", sellHalf);
@@ -5464,7 +5681,22 @@
         const blowoff = price >= roundPeak * 0.985 ? 0.12 : 0;   // riding the very top is extra fragile
         const overextended = clamp((price - 8) / 20, 0, 1);
         const target = over * 45 + overextended * 35 + posRisk * 28 + sellers * 18 + frenzy * 8;
-        heat += (target - heat) * 0.06 + pumpVel * 10 + blowoff * 4; pumpVel *= 0.85; heat = clamp(heat, 0, 100);
+        
+        // Paced heat growth scaling:
+        const currentZoneObj = getHeatZone(heat);
+        let growthMult = HEAT_GROWTH_MULT[currentZoneObj.id] || 1.0;
+        const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
+        if (roundsPlayed < BEGINNER_ROUNDS) {
+          growthMult *= BEGINNER_HEAT_MULT;
+        }
+        let heatDiff = (target - heat) * 0.06 + pumpVel * 10 + blowoff * 4;
+        if (heatDiff > 0) {
+          heatDiff *= growthMult;
+        }
+        heat += heatDiff;
+        pumpVel *= 0.85;
+        heat = clamp(heat, 0, 100);
+
         if (pot > 0 && price > 8) heat = Math.min(100, heat + Math.min(6, price - 8) * 0.02);   // high multipliers heat up on their own — can't park at 300x risk-free
         if (pot > 0 && !busting && heat >= 90 && Math.random() < 0.008) startBust("hard");  // extreme-heat surprise rug, no warning
         feedAcc++; if (feedAcc >= 2) { feedAcc = 0; spawnTrade(); }
@@ -5472,6 +5704,29 @@
         if (Math.random() < (0.003 + (heat / 100) * 0.012) * whaleSafe) { pushFeed("🐋 " + pick(WHALES) + " DUMPED", false, true); heat = Math.min(100, heat + 22); price *= 0.9; capPrice(); }
         if (pot > 0 && heat >= CONFIG.warnHeat && dumpWarn <= 0) { dumpWarn = 1.7; if (panelOpen === "game") { toast("🚨", "DUMP INCOMING", "Sell NOW or get rugged!"); sfxRug(); } }
         if (Math.random() < Math.pow(heat / 100, 3) * CONFIG.heatHazard * rugResist()) triggerRug();
+        
+        // Haptics and Telemetry on zone transition:
+        if (pot > 0) {
+          const nextZoneObj = getHeatZone(heat);
+          if (nextZoneObj.id !== lastHeatZone) {
+            if (nextZoneObj.id === "danger") {
+              triggerHaptic("medium");
+              triggerCoaching("first_danger");
+            } else if (nextZoneObj.id === "clutch") {
+              triggerHaptic("warning");
+              logTelemetry("clutch_zone_entered");
+              triggerCoaching("first_danger");
+            } else if (nextZoneObj.id === "nuclear") {
+              triggerHaptic("heavy");
+              logTelemetry("nuclear_zone_entered");
+              triggerCoaching("first_danger");
+            }
+            logTelemetry("heat_zone_entered", { fromZone: lastHeatZone, toZone: nextZoneObj.id });
+            lastHeatZone = nextZoneObj.id;
+          }
+        } else {
+          lastHeatZone = "calm";
+        }
         updatePressure(); pushTick();
       }
       function bustStep() {
@@ -5486,6 +5741,33 @@
         requestAnimationFrame(loop); try {
           const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;   // clamp dt so a backgrounded tab can't spike the sim
           if (energy < maxEnergy()) energy = Math.min(maxEnergy(), energy + regenRate() * dt);
+          
+          if (pot > 0) {
+            roundDuration += dt;
+          } else {
+            roundDuration = 0;
+          }
+          
+          if (pot > 0 && !busting && S.sound && audioUnlocked && !prefersReducedMotion()) {
+            const h = heat;
+            if (h >= 95) {
+              hbTimer -= dt;
+              if (hbTimer <= 0) {
+                sfxHeartbeat(true);
+                hbTimer = 0.4;
+              }
+            } else if (h >= 80) {
+              hbTimer -= dt;
+              if (hbTimer <= 0) {
+                sfxHeartbeat(false);
+                hbTimer = 0.8;
+              }
+            } else {
+              hbTimer = 0;
+            }
+          } else {
+            hbTimer = 0;
+          }
           if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { combo = 0; $("combo").textContent = ""; } }
           if (boost > 0) { boost -= dt; if (boost <= 0) $("boostBadge").style.display = "none"; }
           boostAcc += dt; if (boostAcc > 1) { boostAcc = 0; if (boost <= 0 && Math.random() < 0.015) { boost = 8; $("boostBadge").style.display = "block"; } }
@@ -5514,19 +5796,65 @@
         const r = risk() * 100; $("rugFill").style.width = r + "%"; $("rugPct").textContent = Math.floor(r) + "%";
         $("rugSkull").style.left = clamp(r, 2, 98) + "%";
         const rb = $("rugBar"); rb.classList.toggle("risky", r >= 35); rb.classList.toggle("danger", r >= 70);
-        $("chartCard").classList.toggle("danger", r >= 70);
-        { const dv = $("dangerVig"); if (dv) { dv.style.opacity = (pot > 0 ? clamp((r - 40) / 60, 0, 1) * 0.65 : 0); dv.classList.toggle("crit", pot > 0 && r >= 72); } }   // escalating danger vignette
+        
+        const zone = getHeatZone(r);
+        const cc = $("chartCard");
+        const co = $("cashout");
+        
+        cc.classList.remove("pulse-danger", "pulse-nuclear");
+        co.classList.remove("pulse-btn-clutch", "pulse-btn-nuclear");
+        cc.classList.toggle("danger", r >= 70);
+        
+        if (pot > 0) {
+          if (zone.id === "clutch") {
+            cc.classList.add("pulse-danger");
+            co.classList.add("pulse-btn-clutch");
+          } else if (zone.id === "nuclear") {
+            cc.classList.add("pulse-nuclear");
+            co.classList.add("pulse-btn-nuclear");
+          }
+        }
+        
+        const dv = $("dangerVig");
+        if (dv) {
+          let opacity = 0;
+          if (pot > 0) {
+            if (r >= 95) opacity = 0.85;
+            else if (r >= 80) opacity = 0.68;
+            else if (r >= 40) opacity = clamp((r - 40) / 40, 0, 1) * 0.45;
+          }
+          dv.style.opacity = opacity;
+          dv.classList.toggle("crit", pot > 0 && r >= 80);
+        }
+        
         const rs = $("rugState");
-        if (dumpWarn > 0) { rs.textContent = "🚨 SELL NOW!"; rs.style.color = "var(--red)"; }
-        else if (r < 35) { rs.textContent = "STABLE"; rs.style.color = "var(--green)"; }
-        else if (r < 70) { rs.textContent = "HEATING UP"; rs.style.color = "var(--gold)"; }
-        else { rs.textContent = "DANGER!"; rs.style.color = "var(--red)"; }
+        if (dumpWarn > 0) {
+          rs.textContent = "🚨 SELL NOW!";
+          rs.style.color = "var(--red)";
+        } else {
+          let zoneLabel = zone.label;
+          if (zone.id === "clutch") zoneLabel = "🚨 CLUTCH ZONE";
+          else if (zone.id === "nuclear") zoneLabel = "☢️ NUCLEAR";
+          rs.textContent = zoneLabel + " — " + zone.copy;
+          
+          if (zone.severity === "low") rs.style.color = "var(--green)";
+          else if (zone.severity === "medium") rs.style.color = "var(--gold)";
+          else rs.style.color = "var(--red)";
+        }
         const pn = $("priceNow"); pn.innerHTML = price.toFixed(2) + '<span class="x">x</span>';
         pn.style.color = busting ? "var(--red)" : (price >= hist[0] ? "var(--green)" : "var(--red)");
         const chg = (price - 1) * 100; const pc = $("priceChg"); pc.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(1) + "%"; pc.style.color = chg >= 0 ? "var(--green)" : "var(--red)";
         $("athTxt").textContent = ath.toFixed(2) + "x"; $("mktTxt").textContent = "mcap $" + fmt(price * liq * 12);
         const tr = trend > 0.06 ? "📈 bullish" : trend < -0.06 ? "📉 bearish" : "➖ flat";
         $("mstats").innerHTML = "👥 <b>" + fmt(holders) + "</b> holders   💧 <b>$" + fmt(liq) + "</b> liq   " + tr;
+        
+        let cashoutLabel = "💰 Bank";
+        if (pot >= 1) {
+          if (zone.id === "danger") cashoutLabel = "💰 Bank now?";
+          else if (zone.id === "clutch") cashoutLabel = "💰 BANK OR PRAY";
+          else if (zone.id === "nuclear") cashoutLabel = "💰 BANK NOW";
+        }
+        $("cashout").textContent = cashoutLabel;
         $("cashout").disabled = pot < 1 || busting;
         const sh = $("sellHalf"); if (sh) sh.disabled = pot < 2 || busting;
         let wt = ""; if (winStreak > 1) wt = "🏆 win streak x" + winStreak + " (+" + (Math.min(winStreak, 10) * 5) + "% payout)";
@@ -6680,8 +7008,8 @@
 
       // ---------- SOUND / RENAME / RESET ----------
       function syncSound() { $("soundBtn").textContent = S.sound ? "🔊" : "🔇"; const sw = $("soundSw"); if (sw) sw.classList.toggle("on", S.sound); }
-      $("soundBtn").addEventListener("click", () => { S.sound = !S.sound; save(); syncSound(); if (S.sound) sfxBuy(); sendSettings({ sound: S.sound }); });
-      $("soundSw").addEventListener("click", () => { S.sound = !S.sound; save(); syncSound(); sendSettings({ sound: S.sound }); });
+      $("soundBtn").addEventListener("click", () => { S.sound = !S.sound; unlockAudio(); save(); syncSound(); if (S.sound) sfxBuy(); sendSettings({ sound: S.sound }); });
+      $("soundSw").addEventListener("click", () => { S.sound = !S.sound; unlockAudio(); save(); syncSound(); sendSettings({ sound: S.sound }); });
       syncSound();
       function openNameModal() { $("nameInput").value = S.name; $("nameModal").classList.add("show"); setTimeout(() => { try { $("nameInput").focus(); } catch (e) { } }, 60); }
       $("renameBtn").addEventListener("click", openNameModal);

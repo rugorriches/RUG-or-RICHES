@@ -54,19 +54,22 @@
   .btn.ghost{color:var(--cyan); border-color:rgba(35,240,255,.4);}
   footer{margin-top:48px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; text-align:center;}
   .note{font-size:12.5px; color:#8d7db5;}
+  summary{cursor:pointer; font-weight:700; color:#fff; padding:12px; background:var(--card); border-radius:8px;}
+  details[open] summary{border-bottom-left-radius:0; border-bottom-right-radius:0;}
+  .a{padding:12px; background:rgba(255,255,255,.03); border-bottom-left-radius:8px; border-bottom-right-radius:8px; margin-bottom:12px; font-size:14px;}
 </style>
 </head>
 <body>
 <div class="wrap" style="display:flex;gap:15px;align-items:center;padding:11px 22px;font-size:13px;font-weight:700;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap">
   <a href="/" style="color:var(--gold)">🏠 Home</a>
-  <a href="/guide" style="color:#fff">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper">Litepaper</a>
+  <a href="/guide" style="color:#fff">Guide</a><a href="/airdrop">Airdrop</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper">Litepaper</a><a href="/faq">FAQ</a>
   <a href="https://t.me/RugorRichesBot/play" style="margin-left:auto;color:var(--cyan)">▶ Play</a>
 </div>
 <header class="top">
   <div class="wrap">
     <div class="logo">RUG <small>OR</small> RICHES <small style="color:var(--cyan)">$MOON</small></div>
     <h1><span class="grad">Game Guide</span></h1>
-    <div class="tagline">Everything — not just the tap screen.</div>
+    <div class="tagline">Learn the loop, ranks, upgrades, and systems.</div>
   </div>
 </header>
 
@@ -74,122 +77,158 @@
   <div class="wrap">
     <a href="#about">About</a>
     <a href="#how">How it works</a>
-    <a href="#walkthrough">Full walkthrough</a>
-    <a href="#features">Game features</a>
+    <a href="#systems">Game Systems</a>
+    <a href="#upgrades">Upgrades</a>
+    <a href="#rewards">Rewards</a>
     <a href="#ranks">Ranks &amp; VIP</a>
-    <a href="#crews">Crews &amp; Wars</a>
-    <a href="#airdrop">Airdrop</a>
+    <a href="#crews">Crews</a>
+    <a href="#airdrop">Season Points</a>
   </div>
 </nav>
 
 <main class="wrap">
 
   <h2 id="about">About</h2>
-  <p>RUG OR RICHES is a <strong>press-your-luck crypto tapper</strong> built as a Telegram Mini App. It turns the exact emotion of degen trading — the rush of a pump and the gut-punch of a rug — into a free, 10-second loop anyone can play with no wallet and no signup.</p>
-  <p>Your guide is the <strong>$MOON shark</strong> — pixel shades, gold chain, zero fear — the apex predator who's survived a thousand rugs and banked through every one. You start as a Shrimp and grind your way up the food chain to Megalodon, banking $MOON, building a crew, and stacking Airdrop Points along the way.</p>
+  <p>RUG OR RICHES is a <strong>press-your-luck crypto game</strong> built as a Telegram Mini App. It turns the exact emotion of degen trading — the rush of a pump and the gut-punch of a rug pull — into a simulated game loop that anyone can play for free with no wallet and no signup.</p>
+  <p>Your guide is the <strong>$MOON shark</strong> who has survived a thousand rugs and banked through every one. Grind from Shrimp to Megalodon, bank in-game $MOON, form crews, and earn Season Points along the way.</p>
   <div class="cta">
     <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a>
-    <a class="btn ghost" href="/litepaper">Read the litepaper</a>
+    <a class="btn ghost" href="/litepaper">Read the Litepaper</a>
   </div>
 
-  <h2 id="how">How it works</h2>
-  <p>The core loop is simple to learn and brutal to master:</p>
+  <h2 id="how">Learn the loop in under a minute</h2>
+  <p class="sub">Tap to pump the chart, watch the heat, and bank before the rug. The deeper you go, the bigger the run — and the closer you get to rekt.</p>
   <div class="grid">
-    <div class="card"><h3>1 · Pump</h3><p class="muted">Tap to stake your bet and push the live $MOON price up. The higher it climbs, the bigger your unbanked pot — and the hotter the rug risk.</p></div>
-    <div class="card"><h3>2 · Read the heat</h3><p class="muted">A rug-risk meter rises as you ride. Market events swing the odds live, and a "DUMP INCOMING" warning fires before a likely rug.</p></div>
-    <div class="card"><h3>3 · Bank it</h3><p class="muted">Cash out before the rug to bank your gains. Clutch high-risk exits pay a bonus; one tap too greedy and a hard rug wipes the pot.</p></div>
-    <div class="card"><h3>4 · Climb</h3><p class="muted">Banked $MOON levels your rank, funds upgrades and VIP, and a slice of every cash-out feeds your Airdrop Points.</p></div>
+    <div class="card"><h3>1 · Tap to pump</h3><p class="muted">Tap to stake your simulated bet and push the price up. The higher it goes, the larger your round pot.</p></div>
+    <div class="card"><h3>2 · Watch the heat</h3><p class="muted">The rug-risk meter rises as you ride. Market events swing the risk live; cash out before a crash wipes your pot.</p></div>
+    <div class="card"><h3>3 · Bank before rug</h3><p class="muted">Click Bank to lock in round gains. Clutch high-risk exits pay bonuses, while a hard rug wipes the round's unbanked pot.</p></div>
+    <div class="card"><h3>4 · Rank up</h3><p class="muted">Banked in-game $MOON determines your permanent rank, unlocking VIP routes, energy capacities, and bet caps.</p></div>
   </div>
 
-  <h2 id="walkthrough">Full walkthrough — A to Z</h2>
-  <ol class="steps">
-    <li><b>Open the app.</b> Launch from <a href="https://t.me/RugorRichesBot/play">@RugorRichesBot</a> or the website Play button. No wallet, no signup — your Telegram identity is your account, verified server-side.</li>
-    <li><b>Get your starting stack.</b> New players begin with a small $MOON balance and starting Airdrop Points so you can play right away.</li>
-    <li><b>Set your bet.</b> Pick a stake per round — bigger bets mean bigger pumps and bigger swings.</li>
-    <li><b>Tap to pump.</b> Each tap stakes your bet and pushes the live price up, building your in-round pot.</li>
-    <li><b>Read the heat.</b> The rug-risk meter climbs as you ride; market events (FOMO, bear raid, whale, volatility) shift the odds in real time.</li>
-    <li><b>Manage the position.</b> Sell half to lock partial profit, set an auto-sell target or a stop-loss, and watch for the dump warning.</li>
-    <li><b>Cash out.</b> Bank before it rugs. High-risk exits pay a bonus; ignore the warning and the unbanked pot is gone.</li>
-    <li><b>Rank up.</b> Lifetime banked $MOON levels you Shrimp → Megalodon, unlocking energy, daily-bonus and VIP perks.</li>
-    <li><b>Manage energy.</b> Tapping is free, but an energy tank gates long rushes; it regenerates over time, grows with rank, and can be refilled.</li>
-    <li><b>Buy upgrades.</b> Spend $MOON on eight permanent upgrades across Offense, Defense and Economy.</li>
-    <li><b>Climb VIP.</b> Earn or unlock four VIP tiers for earnings multipliers and rug protection.</li>
-    <li><b>Clear quests.</b> Daily, weekly, monthly and VIP quests pay $MOON and feed Airdrop Points.</li>
-    <li><b>Claim daily rewards.</b> Login streaks, a spin wheel, mystery boxes and a lucky draw keep the rewards flowing.</li>
-    <li><b>Go social.</b> Join or create a crew, chat, fight weekly Crew Wars, and invite friends for referral rewards (you both get 5,000 $MOON).</li>
-    <li><b>Qualify for the airdrop.</b> Sustained, legitimate play builds your points toward qualification, Elite status, and the cycle snapshot.</li>
-    <li><b>Stack across six cycles.</b> Each pre-launch cycle is a fresh season with a rising allocation — start early to stack the most.</li>
-  </ol>
+  <h2 id="systems">Game Systems</h2>
+  <div style="margin: 16px 0;">
+    <details>
+      <summary>🌡️ Heat meter</summary>
+      <div class="a">The heat meter displays the current round risk. The higher the price pumps, the hotter the meter gets, signaling a higher chance of a crash.</div>
+    </details>
+    <details>
+      <summary>🎭 Soft rugs vs hard rugs</summary>
+      <div class="a">A hard rug pull wipes out your entire unbanked pot for the round. A soft rug pull is a partial crash that preserves a portion of your unbanked earnings.</div>
+    </details>
+    <details>
+      <summary>💰 Bank</summary>
+      <div class="a">Cashing out transfers your current unbanked round gains into your permanent spendable in-game $MOON balance.</div>
+    </details>
+    <details>
+      <summary>✂️ Sell Half</summary>
+      <div class="a">Banks 50% of your round pot to secure partial gains while letting the remaining 50% continue riding the chart.</div>
+    </details>
+    <details>
+      <summary>🤖 Auto-sell</summary>
+      <div class="a">Allows you to set a pre-defined multiplier target. If the chart reaches this level, the game automatically banks your pot.</div>
+    </details>
+    <details>
+      <summary>🛡️ Stop-loss</summary>
+      <div class="a">Sets a floor multiplier to automatically cash out if the chart dips below it, helping manage risk.</div>
+    </details>
+    <details>
+      <summary>🔥 Combos</summary>
+      <div class="a">Consecutive profitable rounds build multiplier streaks that grant bonus payouts on subsequent cashouts.</div>
+    </details>
+    <details>
+      <summary>🔋 Energy</summary>
+      <div class="a">Each round consumes energy. Energy refuels automatically over time or can be boosted via upgrades.</div>
+    </details>
+    <details>
+      <summary>🎁 Daily rewards</summary>
+      <div class="a">Includes streaks, mystery boxes, spins, and lucky draws that grant random in-game assets.</div>
+    </details>
+  </div>
 
-  <h2 id="features">Game features &amp; definitions</h2>
+  <h2 id="upgrades">Upgrades (8 permanent)</h2>
+  <p class="sub">Invest your banked in-game $MOON to permanently increase your trading stats.</p>
+  <div class="grid">
+    <div class="card"><h3>💪 Tap Power</h3><p class="muted">Bigger pumps and in-game $MOON earnings per tap.</p></div>
+    <div class="card"><h3>🔥 Combo Master</h3><p class="muted">Increases your max combo limit and cash-out multipliers.</p></div>
+    <div class="card"><h3>🛡️ Rug Insurance</h3><p class="muted">Reduces the baseline chance of hard rugs occurring.</p></div>
+    <div class="card"><h3>💎 Diamond Vault</h3><p class="muted">Saves a percentage of unbanked points during a crash.</p></div>
+    <div class="card"><h3>🔋 Max Energy</h3><p class="muted">Expands your overall active energy capacity tank.</p></div>
+    <div class="card"><h3>⚡ Energy Regen</h3><p class="muted">Speeds up the automatic energy regeneration rate.</p></div>
+    <div class="card"><h3>🤖 Auto-Trader</h3><p class="muted">Passively generates banked in-game $MOON while you are offline.</p></div>
+    <div class="card"><h3>📈 Profit Taker</h3><p class="muted">Boosts the bonus received for banking at high risk.</p></div>
+  </div>
 
-  <h3>Core trading</h3>
-  <div class="feat"><div class="e">👆</div><div><div class="nm">Tap to pump</div><div class="ds">Each tap stakes your bet and pushes the live price higher, growing your unbanked pot.</div></div></div>
-  <div class="feat"><div class="e">🌡️</div><div><div class="nm">Rug-risk meter (heat)</div><div class="ds">A live gauge that climbs the longer/higher you ride. High heat triggers a "DUMP INCOMING" warning.</div></div></div>
-  <div class="feat"><div class="e">🎭</div><div><div class="nm">Fakeouts, soft &amp; hard rugs</div><div class="ds">Fakeouts shake out weak hands; soft rugs partly cut your pot; hard rugs wipe the unbanked position entirely.</div></div></div>
-  <div class="feat"><div class="e">✂️</div><div><div class="nm">Sell half</div><div class="ds">Bank half your pot to lock partial profit while keeping a position riding.</div></div></div>
-  <div class="feat"><div class="e">🤖</div><div><div class="nm">Auto-sell &amp; stop-loss</div><div class="ds">Pre-set a multiplier to bank at, or a floor to bail at — disciplined exits without the nerves.</div></div></div>
-  <div class="feat"><div class="e">📈</div><div><div class="nm">High-risk cash-out bonus</div><div class="ds">Banking at very high heat pays a bonus, scaled by the Profit Taker upgrade.</div></div></div>
-  <div class="feat"><div class="e">🔥</div><div><div class="nm">Combos &amp; win streaks</div><div class="ds">Consecutive profitable rounds build bonus earnings, raised by the Combo Master upgrade.</div></div></div>
-  <div class="feat"><div class="e">🎲</div><div><div class="nm">Market events</div><div class="ds">In-round swings: FOMO Surge &amp; Bullish News (up), Bear Raid (sell pressure), Whale Accumulation, High Volatility.</div></div></div>
-
-  <h3>Upgrades (8 permanent)</h3>
-  <div class="feat"><div class="e">💪</div><div><div class="nm">Tap Power · Offense</div><div class="ds">Bigger pumps and earnings per tap.</div></div></div>
-  <div class="feat"><div class="e">🔥</div><div><div class="nm">Combo Master · Offense</div><div class="ds">Higher combo cap and bonus.</div></div></div>
-  <div class="feat"><div class="e">🛡️</div><div><div class="nm">Rug Insurance · Defense</div><div class="ds">Lowers your rug chance.</div></div></div>
-  <div class="feat"><div class="e">💎</div><div><div class="nm">Diamond Vault · Defense</div><div class="ds">Rescues a percentage of the pot when you get rugged.</div></div></div>
-  <div class="feat"><div class="e">🔋</div><div><div class="nm">Max Energy · Economy</div><div class="ds">Bigger energy tank.</div></div></div>
-  <div class="feat"><div class="e">⚡</div><div><div class="nm">Energy Regen · Economy</div><div class="ds">Energy refills faster.</div></div></div>
-  <div class="feat"><div class="e">🤖</div><div><div class="nm">Auto-Trader · Economy</div><div class="ds">Earns banked $MOON while you're away.</div></div></div>
-  <div class="feat"><div class="e">📈</div><div><div class="nm">Profit Taker · Economy</div><div class="ds">Bigger high-risk cash-out bonus.</div></div></div>
-
-  <h3>Daily &amp; rewards</h3>
-  <div class="feat"><div class="e">📅</div><div><div class="nm">Login streaks &amp; daily combo</div><div class="ds">Consecutive logins grow a streak multiplier; a daily combo claim pays bonus $MOON.</div></div></div>
-  <div class="feat"><div class="e">🎡</div><div><div class="nm">Spin wheel &amp; lucky draw</div><div class="ds">Free daily spins and ticket draws paying $MOON, energy, bonus boxes, or rare skins.</div></div></div>
-  <div class="feat"><div class="e">🎁</div><div><div class="nm">Mystery boxes</div><div class="ds">Random chests from $MOON and energy up to a legendary skin.</div></div></div>
-  <div class="feat"><div class="e">🎯</div><div><div class="nm">Quests</div><div class="ds">Daily (5), weekly (4), monthly (3) and VIP-only quests — $MOON rewards that also feed Airdrop Points.</div></div></div>
-  <div class="feat"><div class="e">🏅</div><div><div class="nm">Achievements</div><div class="ds">Milestones like Diamond Hands (cash out at 70%+ risk), Whale, To The Moon, Apex Predator.</div></div></div>
-
-  <h3>Cosmetics &amp; store</h3>
-  <div class="feat"><div class="e">🎨</div><div><div class="nm">Coin skins</div><div class="ds">Collectible skins, Common → Legendary. Some bought with Telegram Stars; the rarest are win-only.</div></div></div>
-  <div class="feat"><div class="e">⭐</div><div><div class="nm">Telegram Stars store</div><div class="ds">Optional VIP, refills, boosts, $MOON packs and Season Pass — in-game items only, never real-world value.</div></div></div>
-  <div class="feat"><div class="e">🐷</div><div><div class="nm">Piggy bank</div><div class="ds">Auto-saves a small % of profitable cash-outs; crack it for a lump of $MOON.</div></div></div>
+  <h2 id="rewards">Daily Rewards &amp; Events</h2>
+  <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="card" style="margin: 4px;"><h3>🎡 Daily Spin</h3><p class="muted" style="font-size:12px;">Free daily wheel spins for in-game $MOON, energy refills, or lucky draw tickets.</p></div>
+    <div class="card" style="margin: 4px;"><h3>🎁 Mystery Boxes</h3><p class="muted" style="font-size:12px;">Earn random loot chests. optional paid items do not guarantee or modify box odds.</p></div>
+    <div class="card" style="margin: 4px;"><h3>🎟️ Lucky Draw</h3><p class="muted" style="font-size:12px;">Ticket drawings for daily in-game $MOON jackpots. Ticket collection is gameplay-based.</p></div>
+    <div class="card" style="margin: 4px;"><h3>🔥 Login Streaks</h3><p class="muted" style="font-size:12px;">Consecutive daily logins build earnings multipliers. Missing a day resets the streak.</p></div>
+    <div class="card" style="margin: 4px;"><h3>🎨 Coin Skins</h3><p class="muted" style="font-size:12px;">Common to legendary customization skins to change your buy button design.</p></div>
+    <div class="card" style="margin: 4px;"><h3>💝 Crew Gifting</h3><p class="muted" style="font-size:12px;">Send in-game currency to crewmates and climb referral leaderboards.</p></div>
+  </div>
+  <p class="note" style="text-align:center;margin-top:10px;">*Note: Rewards are in-game entertainment features. Purchases do not guarantee prizes, tokens, eligibility, allocation, odds, or future value.</p>
 
   <h2 id="ranks">Ranks &amp; VIP</h2>
-  <p>Your <strong>rank</strong> is set by lifetime banked $MOON and unlocks energy, daily-bonus and VIP routes:</p>
-  <p style="line-height:2.4">
-    <img src="/assets/brand/ric-shrimp.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦐')"><strong>Shrimp</strong> 0+ ·
-    <img src="/assets/brand/ric-crab.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦀')"><strong>Crab</strong> 500K+ ·
-    <img src="/assets/brand/ric-fish.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐟')"><strong>Fish</strong> 7.5M+ ·
-    <img src="/assets/brand/ric-dolphin.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐬')"><strong>Dolphin</strong> 50M+ ·
-    <img src="/assets/brand/ric-shark.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦈')"><strong>Shark</strong> 200M+ ·
-    <img src="/assets/brand/ric-orca.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🐳')"><strong>Orca</strong> 600M+ ·
-    <img src="/assets/brand/ric-megalodon.webp" alt="" style="height:1.5em;vertical-align:-.4em;margin:0 4px" onerror="this.replaceWith('🦖')"><strong>Megalodon</strong> 1B+
-  </p>
-  <p><strong>VIP tiers</strong> stack on top, earnable with $MOON or unlockable with Stars:</p>
-  <ul>
-    <li><strong>🥉 Bronze</strong> — +12% earnings, +25 energy, 1.5× bet cap, faster pumps</li>
-    <li><strong>🥈 Silver</strong> — +30% earnings, lower rug risk, 2× bet cap</li>
-    <li><strong>🥇 Gold</strong> — +60% earnings, 25% rug auto-rescue, 3× bet cap</li>
-    <li><strong>💎 Diamond</strong> — +120% earnings, whale shield, 5× bet cap</li>
-  </ul>
-  <p style="margin-top:10px">Your <strong>max bet scales with rank × VIP</strong>: rank sets the base (Shrimp 1K → Megalodon 1M), VIP multiplies it (up to 5×). Rank up to raise your ceiling.</p>
+  <p>Your permanent rank is determined by your lifetime banked in-game $MOON, which unlocks bet ceilings and stats:</p>
+  
+  <table style="width:100%; border-collapse:collapse; margin:16px 0; font-size:14px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Rank</th>
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Banked $MOON Required</th>
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Key Perks Unlocked</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>🦐 Shrimp</td><td>0+</td><td>Start your journey</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🦀 Crab</td><td>500K+</td><td>+20 Max Energy, Bronze VIP tier access</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🐟 Fish</td><td>7.5M+</td><td>+40 Max Energy, +10% Daily Streak Bonus, Silver VIP access</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🐬 Dolphin</td><td>50M+</td><td>+65 Max Energy, +25% Daily Streak Bonus, Gold VIP access</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🦈 Shark</td><td>200M+</td><td>+90 Max Energy, +50% Daily Streak Bonus, Diamond VIP access</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🐋 Orca</td><td>600M+</td><td>+120 Max Energy, +75% Daily Streak Bonus, Whale ranking badge</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🦖 Megalodon</td><td>1B+</td><td>+160 Max Energy, 2x Daily Streak Bonus, Apex Predator badge</td></tr>
+    </tbody>
+  </table>
+
+  <p>VIP tiers stack on top of your rank and are earnable with in-game $MOON or unlockable with Stars:</p>
+  
+  <table style="width:100%; border-collapse:collapse; margin:16px 0; font-size:14px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--line);">
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">VIP Tier</th>
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Main In-Game Perks</th>
+        <th style="text-align:left; padding:10px; color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px;">Bet Cap Multiplier</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--line);"><td>🥉 Bronze</td><td>+12% in-game earnings, +25 energy</td><td>1.5x Bet Cap</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🥈 Silver</td><td>+30% in-game earnings, lower rug risk</td><td>2.0x Bet Cap</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>🥇 Gold</td><td>+60% in-game earnings, 25% auto-rescue</td><td>3.0x Bet Cap</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>💎 Diamond</td><td>+120% in-game earnings, whale shield</td><td>5.0x Bet Cap</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--muted);margin-top:6px;">Max bet = rank base bet &times; VIP multiplier.</p>
+  <p class="note" style="margin-top:8px;">*Note: VIP perks improve in-game progression only. VIP does not guarantee token eligibility, token allocation, prizes, odds, or future monetary value.</p>
 
   <h2 id="crews">Crews &amp; Crew Wars</h2>
-  <p><strong>Crews</strong> are player teams. Join one or create your own, chat in-crew, and pool your banked $MOON onto a shared crew leaderboard. Each crew has a captain who manages the roster.</p>
-  <p><strong>Crew Wars</strong> run weekly. Members earn <em>war points</em> for the crew through play and by rallying. Each week your crew is matched against a rival; pull ahead and unlock a <strong>Victory Chest</strong> whose reward scales with your lead and your personal contribution (claim from 5,000 war points). War points and the matchup reset every week.</p>
-  <div class="card muted"><strong>Straight talk:</strong> crew leaderboards and member contributions are real and server-tracked. In the current build the weekly rival is simulated for pacing; live crew-vs-crew matchmaking is on the roadmap.</div>
+  <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="card" style="margin: 4px;"><h3>👥 Join a Crew</h3><p class="muted" style="font-size:12.5px;">Band together with other players to pool scores and build custom teams.</p></div>
+    <div class="card" style="margin: 4px;"><h3>🏆 Compete Together</h3><p class="muted" style="font-size:12.5px;">Climb the public crew leaderboards to establish crew dominance.</p></div>
+    <div class="card" style="margin: 4px;"><h3>⚔️ Crew Wars</h3><p class="muted" style="font-size:12.5px;">Complete weekly battles to claim chests. Some crew events may use simulated in-game rivals for pacing until fully live crew matchmaking is available.</p></div>
+  </div>
 
-  <h2 id="airdrop">The airdrop</h2>
-  <p>Sustained play earns <strong>Airdrop Points</strong> — a separate season score you can't wager — across <strong>six pre-launch cycles</strong> with rising allocations. Full cycle breakdown, rewards and qualification rules are on the dedicated page.</p>
-  <div class="cta">
-    <a class="btn primary" href="/airdrop">🪂 Airdrop details</a>
-    <a class="btn ghost" href="/litepaper">Litepaper</a>
+  <h2 id="airdrop">Season Points</h2>
+  <p>Your active gameplay, quest completions, and crew contributions accumulate **Season Points** (in-game tracking points). Season Points are used exclusively to monitor leaderboard standings and game activity.</p>
+  <div class="cta" style="margin-top:20px;">
+    <a class="btn primary" href="/airdrop">🪂 Airdrop Page</a>
+    <a class="btn ghost" href="/litepaper">Read the Litepaper</a>
   </div>
 
   <footer>
+    RUG OR RICHES is an entertainment game. In-game $MOON, Season Points, Airdrop Points, rewards, ranks, and leaderboards have no guaranteed monetary value. Never share private keys or seed phrases.<br>
     © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br>
-    <a href="/">← Home</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+    <a href="/">← Home</a> · <a href="/airdrop">Airdrop</a> · <a href="/litepaper">Litepaper</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/faq">FAQ</a>
   </footer>
 </main>
 </body>
