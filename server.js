@@ -349,14 +349,20 @@ const VIP = [
   { nm: "Gold",    cost: 12000000, vstars: 2500,  req: 3, buyOnly: true },
   { nm: "Diamond", cost: 75000000, vstars: 10000, req: 4, buyOnly: true },
 ];
-const VIP_EARN = [1, 1.08, 1.18, 1.35, 1.65];
-const BETMAX = [1000, 5000, 25000, 150000, 1000000];
+const VIP_EARN = [1, 1.12, 1.30, 1.60, 2.20];
+const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
+const VIP_BET_MULT = [1, 1.5, 2, 3, 5];
 const BETS_PER_ROUND = (vip) => 20 + vip * 10;
 
 // ---------- RANK DEFINITIONS ----------
 const RANKS = [
-  { min: 0, nm: "Shrimp" }, { min: 100000, nm: "Crab" }, { min: 750000, nm: "Fish" },
-  { min: 3e6, nm: "Dolphin" }, { min: 15e6, nm: "Shark" }, { min: 5e7, nm: "Orca" }, { min: 1e8, nm: "Megalodon" },
+  { min: 0, nm: "Shrimp" },
+  { min: 500000, nm: "Crab" },
+  { min: 7500000, nm: "Fish" },
+  { min: 50000000, nm: "Dolphin" },
+  { min: 200000000, nm: "Shark" },
+  { min: 600000000, nm: "Orca" },
+  { min: 1000000000, nm: "Megalodon" },
 ];
 function rankIdx(lifetime) {
   let i = 0;
@@ -486,6 +492,15 @@ const server = http.createServer(async (req, res) => {
   res.setHeader("access-control-allow-origin", "*");
   res.setHeader("access-control-allow-headers", "content-type");
   if (req.method === "OPTIONS") { res.statusCode = 204; return res.end(); }
+
+  // Standalone mode routing to Serverless API router
+  if (req.url.startsWith("/api/")) {
+    if (req.method === "POST") {
+      req.body = await readBody(req);
+    }
+    const mainHandler = require("./api/main");
+    return mainHandler(req, res);
+  }
 
   // --- Leaderboard ---
   if (req.url === "/leaderboard") {
@@ -736,8 +751,9 @@ wss.on("connection", (ws) => {
         return;
       }
 
-      // Bet limits
-      const betMax = BETMAX[session.vipTier] || 1000;
+      // Bet limits (max bet = rank-based base × VIP multiplier)
+      const rIdx = rankIdx(session.lifetime || 0);
+      const betMax = Math.floor((RANK_BET[rIdx] || 1000) * (VIP_BET_MULT[session.vipTier] || 1));
       const maxClicks = BETS_PER_ROUND(session.vipTier);
       if (session.roundClicks >= maxClicks) {
         ws.send(JSON.stringify({ t: "error", error: "Round bet limit" }));

@@ -219,6 +219,15 @@ async function loadPurchaseEntitlements(playerId) {
   return entitlements;
 }
 
+const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
+function rankIdxFromLifetime(lt) {
+  let i = 0;
+  for (let j = 0; j < RANK_MIN.length; j++) {
+    if (lt >= RANK_MIN[j]) i = j;
+  }
+  return i;
+}
+
 // Load full player profile from DB
 async function loadPlayerProfile(playerId) {
   const { rows: players } = await db.query(
@@ -252,8 +261,8 @@ async function loadPlayerProfile(playerId) {
   const rugs = Number(player.rugs) || 0;
   const vip = Number(player.vip_tier) || 0;
 
-  const { rows: friendRows } = await db.query("SELECT COUNT(*)::int as cnt FROM friends WHERE player_id = $1", [playerId]);
-  const friendCount = friendRows[0]?.cnt || 0;
+  const { rows: friendRowsCount } = await db.query("SELECT COUNT(*)::int as cnt FROM friends WHERE player_id = $1", [playerId]);
+  const friendCount = friendRowsCount[0]?.cnt || 0;
 
   const rankI = rankIdxFromLifetime(lt);
 
