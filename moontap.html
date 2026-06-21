@@ -5720,7 +5720,7 @@
         if (roundsPlayed < BEGINNER_ROUNDS) {
           growthMult *= BEGINNER_HEAT_MULT;
         }
-        let heatDiff = (target - heat) * 0.06 + pumpVel * 10 + blowoff * 4;
+        let heatDiff = (target - heat) * 0.045 + pumpVel * 10 + blowoff * 4;   // slower passive heat climb → cautious rounds can stretch toward ~2 min (rare); aggressive tapping still spikes fast
         if (heatDiff > 0) {
           heatDiff *= growthMult;
         }
