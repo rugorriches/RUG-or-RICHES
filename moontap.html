@@ -5707,6 +5707,23 @@
         capPrice(); if (price > ath) { ath = price; if (ath > S.bestPrice) S.bestPrice = ath; }
         if (pot > 0) pot *= price / oldP;
         // ---- refined rug pressure: heat builds from overvaluation, position size vs liquidity, sell pressure & pump speed ----
+        // live market movement — the chart drifts UP and DOWN like a real coin, driven by buy/sell
+        // sentiment. Your taps add buy pressure (mktBuy up → upward bias); selling pressure pulls it
+        // down. Boosts / bullish events amplify the UPSIDE only. Symmetric volatility = real red/green
+        // candles. Tapping still adds a bigger active pump on top. Per 0.12s step.
+        if (pot > 0) {
+          const preP = price;
+          const sentiment = clamp((mktBuy - 0.5) * 2, -1, 1);   // -1 heavy selling .. +1 heavy buying
+          const evtMul = (mevent && mevent.pumpMul) ? mevent.pumpMul : 1;
+          const boostMul = boost > 0 ? 1.5 : 1;
+          const upAmp = sentiment > 0 ? evtMul * boostMul : 1;   // boosts/FOMO push the upside only
+          const drift = (0.001 + sentiment * 0.013) * upAmp;     // near-flat when idle; bullish → up, bearish → down
+          const vol = (Math.random() - 0.5) * 0.026;             // symmetric jitter — real up/down candles
+          price = Math.max(1, price * (1 + drift + vol));
+          capPrice();
+          pot *= price / preP;   // your position rides the price both ways
+          if (price > ath) { ath = price; if (ath > S.bestPrice) S.bestPrice = ath; }
+        }
         if (price > roundPeak) roundPeak = price;
         const over = clamp((price - 1) / 6, 0, 1), posRisk = pot > 0 ? clamp(invested / liq, 0, 1) : 0, sellers = clamp(0.5 - mktBuy, 0, 0.5) * 2, frenzy = clamp(combo / 120, 0, 1);
         const blowoff = price >= roundPeak * 0.985 ? 0.12 : 0;   // riding the very top is extra fragile
