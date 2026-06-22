@@ -4515,6 +4515,7 @@
     <div class="panel" id="panel-profile">
       <h2>👤 Profile</h2>
       <p class="sub">Everything counts toward your airdrop allocation.</p>
+      <button class="big-btn" id="adminOpen" style="display:none;margin-bottom:10px;background:linear-gradient(90deg,#ff2bd6,#7b5bff)">🛠️ Admin · Live Stats</button>
       <div class="card">
         <div class="toggle"><span>Name: <b id="nameTxt" style="color:var(--cyan)"></b></span><button class="buy"
             id="renameBtn">Rename</button></div>
@@ -4805,6 +4806,14 @@
       </div>
     </div>
 
+    <div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-label="Admin stats">
+      <div class="box" style="max-width:420px;max-height:82vh;overflow:auto">
+        <h3>🛠️ Admin · Live Stats</h3>
+        <div class="ds" id="adminBody" style="font-size:12px">Loading…</div>
+        <div class="mbtns" style="margin-top:10px"><button class="ok" id="adminRefresh" style="flex:1">↻ Refresh</button><button id="adminClose">Close</button></div>
+      </div>
+    </div>
+
     <div id="tut">
       <div class="em" id="tutEm">📈</div>
       <h3 id="tutH"></h3>
@@ -4977,6 +4986,7 @@
       let referralsLoaded = false;
       let currentUserId = null;
       function updateGiftLimits() {
+        const ab = document.getElementById("adminOpen"); if (ab) ab.style.display = (String(currentUserId) === "5028660194") ? "block" : "none";   // reveal admin stats entry only for the admin
         const gd = document.getElementById("giftDesc");
         if (!gd) return;
         if (currentUserId === "5028660194") {
@@ -7379,6 +7389,46 @@
       $("giftModalSend") && $("giftModalSend").addEventListener("click", giftModalSend);
       $("giftModalClose") && $("giftModalClose").addEventListener("click", () => $("giftModal").classList.remove("show"));
       $("giftModal") && $("giftModal").addEventListener("click", e => { if (e.target.id === "giftModal") $("giftModal").classList.remove("show"); });
+      // ---- Admin · Live Stats (Telegram-id gated; read-only) ----
+      function renderAdminData(d) {
+        const body = $("adminBody"); if (!body) return;
+        if (!d || !d.ok) { body.innerHTML = '<div style="color:#ff6b6b">' + ((d && d.error) || "Failed to load") + '</div>'; return; }
+        const t = d.totals || {}, a = d.active || {}, nu = d.newUsers || {}, q = d.qualified || {}, s = d.stars || {}, g = d.gifts || {};
+        const F = n => fmt(Math.floor(Number(n) || 0));
+        const row = (l, v) => '<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="color:#9c92c4">' + l + '</span><b>' + v + '</b></div>';
+        const conv = (t.n && Number(t.n) > 0) ? " (" + (100 * (Number(s.payers) || 0) / Number(t.n)).toFixed(1) + "% conv)" : "";
+        let h = '<div class="sec-h" style="margin-top:0">Players</div>';
+        h += row("Total players", F(t.n));
+        h += row("Active 24h / 7d / 30d", F(a.d1) + " / " + F(a.d7) + " / " + F(a.d30));
+        h += row("New 24h / 7d", F(nu.d1) + " / " + F(nu.d7));
+        h += '<div class="sec-h">Economy</div>';
+        h += row("Lifetime banked", F(t.banked) + " $MOON");
+        h += row("Total taps", F(t.taps));
+        h += row("Cash-outs / rugs", F(t.cashouts) + " / " + F(t.rugs));
+        h += row("Spendable balance (Σ)", F(t.bal) + " $MOON");
+        h += '<div class="sec-h">Monetization</div>';
+        h += row("Stars spent (total)", F(s.spent) + " ⭐");
+        h += row("Paying users", F(s.payers) + conv);
+        h += row("Gifts (count / volume)", F(g.n) + " / " + F(g.vol));
+        h += '<div class="sec-h">Airdrop</div>';
+        h += row("Points-qualified", F(q.pts));
+        h += row("On track (pts+taps+banks)", F(q.ontrack));
+        if (d.vip && d.vip.length) { const names = ["Free", "Bronze", "Silver", "Gold", "Diamond"]; h += '<div class="sec-h">VIP tiers</div>'; d.vip.forEach(v => h += row(names[v.tier] || ("T" + v.tier), F(v.n))); }
+        if (d.duels && d.duels.length) { h += '<div class="sec-h">Duels</div>'; d.duels.forEach(x => h += row(x.status, F(x.n))); }
+        if (d.top && d.top.length) { h += '<div class="sec-h">Top players</div>'; d.top.forEach(p => h += row("#" + p.rank + " " + esc(p.name), F(p.banked))); }
+        h += '<div class="ds" style="font-size:9px;color:#6b6088;margin-top:8px">Updated ' + (d.generatedAt ? new Date(d.generatedAt).toLocaleString() : "") + '</div>';
+        body.innerHTML = h;
+      }
+      function openAdmin() {
+        if (!$("adminModal")) return;
+        $("adminModal").classList.add("show");
+        $("adminBody").innerHTML = "Loading…";
+        cloudAction("/api/admin", {}).then(renderAdminData).catch(e => { $("adminBody").innerHTML = '<div style="color:#ff6b6b">' + (e.message || "Failed to load") + '</div>'; });
+      }
+      $("adminOpen") && $("adminOpen").addEventListener("click", openAdmin);
+      $("adminRefresh") && $("adminRefresh").addEventListener("click", openAdmin);
+      $("adminClose") && $("adminClose").addEventListener("click", () => $("adminModal").classList.remove("show"));
+      $("adminModal") && $("adminModal").addEventListener("click", e => { if (e.target.id === "adminModal") $("adminModal").classList.remove("show"); });
       function shareTo(p) {
         const url = inviteLink(); const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
         const t = encodeURIComponent(txt), u = encodeURIComponent(url);

@@ -17,6 +17,7 @@ const routes = {
   cron: require("./cron"),
   boards: require("./boards"),
   duel: require("./duel"),
+  admin: require("./admin"),
 };
 
 module.exports = async (req, res) => {
