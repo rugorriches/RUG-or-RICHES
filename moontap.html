@@ -5238,7 +5238,7 @@
       const effVip = () => Math.max(S.vip || 0, (S.vipSubUntil && Date.now() < S.vipSubUntil) ? 4 : 0);   // 30-day VIP Pass grants Diamond perks while active
       const maxEnergy = () => 100 + lvl("energy") * 40 + effVip() * 25 + (rankPerk().eb || 0);
       const regenRate = () => Math.min(0.8 + lvl("regen") * 0.25, 3);   // slower regen for ALL tiers — energy is a real resource again
-      const tapCost = () => 1;                                       // clicking is never rate-limited — every tap costs a flat 1 energy
+      const tapCost = (stake) => Math.min(12, 1 + Math.floor((stake || 0) / 60000));   // energy cost scales with bet size: small bets ~1, whale-size bets up to 12 — keeps energy a real sink (and refill buy-driver) at high stakes
       const autoRate = () => lvl("auto") * 1.2;   // idle nerf — active skill matters more than AFK stacking
       const comboCap = () => 40 + lvl("combo") * 12;
       const comboGain = () => 0.025 + lvl("combo") * 0.004;
@@ -5531,10 +5531,11 @@
       const coin = $("coin"), stage = document.querySelector(".coin-stage");
       function doTap(x, y) {
         if (busting) return;
-        if (energy < tapCost()) { flashEnergy(); if (pot > 0 && !energyNudged) { energyNudged = true; toast("🔋", "Out of energy", "Keep this run alive — grab a ⚡ refill (25⭐) in the Store, or wait for regen"); } return; }
-        energyNudged = false;
         const cur = invested > 0 ? roundCur : S.betCur;
         const stake = Math.max(1, Math.min(S.bet, betMax()));
+        const eCost = tapCost(stake);
+        if (energy < eCost) { flashEnergy(); if (pot > 0 && !energyNudged) { energyNudged = true; toast("🔋", "Out of energy", "Keep this run alive — grab a ⚡ refill (25⭐) in the Store, or wait for regen"); } return; }
+        energyNudged = false;
         if (curBal(cur) < stake) { faucetOrWarn(cur); return; }
         if (roundClicks >= betsPerRound()) { if (panelOpen === "game" && Date.now() - lastLimitT > 2000) { lastLimitT = Date.now(); toast("🛑", "Round bet limit", "Cash out to start a fresh round — VIP raises the cap"); } return; }
         if (invested === 0 && !roundId) {
@@ -5557,7 +5558,7 @@
         if (isOnline && window._moonWS && window._moonWS.readyState === 1) {
           window._moonWS.send(JSON.stringify({ t: "tap", cur: cur, bet: stake }));
           // Snappy local prediction:
-          energy = Math.max(0, energy - tapCost());
+          energy = Math.max(0, energy - eCost);
           if (cur === "pts") S.airdrop = Math.max(0, S.airdrop - stake);
           else S.balance = Math.max(0, S.balance - stake);
           invested += stake;
@@ -5568,7 +5569,7 @@
           pot += stake;
           renderLive();
         } else {
-          ac(); energy -= tapCost(); S.taps++; combo++; comboTimer = 1.2; roundClicks++;
+          ac(); energy -= eCost; S.taps++; combo++; comboTimer = 1.2; roundClicks++;
           subCur(cur, stake); invested += stake; roundCur = cur;
           roundInvestedTotal += stake;
           const oldP = price;
