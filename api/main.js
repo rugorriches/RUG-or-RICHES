@@ -18,6 +18,7 @@ const routes = {
   boards: require("./boards"),
   duel: require("./duel"),
   admin: require("./admin"),
+  ranked: require("./ranked"),
 };
 
 module.exports = async (req, res) => {

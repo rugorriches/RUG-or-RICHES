@@ -4426,6 +4426,9 @@
         <div class="sec-h">🐋 Live Boards</div>
         <div id="liveBoards"></div>
       </div>
+      <div class="rt" id="rt-ranked" style="display:none">
+        <div id="rankedView"></div>
+      </div>
     </div>
 
     <div class="panel" id="panel-invite">
@@ -7230,14 +7233,42 @@
       }
       setTimeout(checkDuelDeepLink, 2600);
 
+      // ============ RANKED LADDER (Phase 4) ============
+      async function renderRanked() {
+        const wrap = $("rankedView"); if (!wrap) return;
+        if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">📊 Ranked needs Telegram. Play duels inside Telegram to earn a rating.</div>'; return; }
+        let d = null;
+        try { d = await cloudAction("/api/ranked", {}); } catch (e) {}
+        if (!d || !d.ok) { wrap.innerHTML = '<div class="dly-load">Ranked unavailable — try again soon.</div>'; return; }
+        let html = '<div class="dly-head"><div class="dly-title">📊 Ranked Ladder</div><div class="dly-sub">Win duels to climb · Season ' + d.season + ' · resets monthly</div></div>';
+        if (d.me) {
+          const m = d.me;
+          html += '<div class="card" style="margin-bottom:10px;border:1px solid rgba(255,212,0,.3)">' +
+            '<div style="display:flex;align-items:center;gap:10px"><div style="font-size:34px">' + m.divisionEmoji + '</div>' +
+            '<div class="grow" style="flex:1"><div style="font-weight:900;font-size:16px">' + m.division + '</div>' +
+            '<div class="ds">MMR <b style="color:var(--gold)">' + m.mmr + '</b>' + (m.rank ? ' · #' + m.rank + ' this season' : ' · play a ranked duel to enter') + '</div></div></div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:8px;color:#cdbff0"><span>W ' + m.wins + ' · L ' + m.losses + (m.draws ? ' · D ' + m.draws : '') + '</span><span>Win rate ' + m.winRate + '%</span><span>Peak ' + m.peak + '</span></div></div>';
+        }
+        if (d.divisions) html += '<div class="ds" style="font-size:10px;color:#9c92c4;margin-bottom:8px">' + d.divisions.map(x => x.e + ' ' + x.n + ' ' + x.min + '+').join(' · ') + '</div>';
+        html += '<div class="sec-h">🏆 Top this season</div>';
+        if (!d.ladder || !d.ladder.length) html += '<div class="ds" style="text-align:center;color:#9c92c4;padding:10px">No ranked duels yet — be the first to climb. Challenge someone in the ⚔️ Duels tab.</div>';
+        else d.ladder.forEach(r => {
+          const me = d.me && r.name === S.name;
+          const rk = r.rank === 1 ? '<span class="medal">🥇</span>' : r.rank === 2 ? '<span class="medal">🥈</span>' : r.rank === 3 ? '<span class="medal">🥉</span>' : r.rank;
+          html += '<div class="lb-row' + (me ? ' me' : '') + '"><div class="rk">' + rk + '</div><div class="nm">' + r.divisionEmoji + ' ' + esc(r.name) + '</div><div class="sc">' + r.mmr + ' <span style="font-size:9px;color:#9c92c4">(' + r.wins + '-' + r.losses + ')</span></div></div>';
+        });
+        html += '<div class="ds" style="font-size:10px;color:#9c92c4;margin-top:8px">Ratings move only on duels where both players submit a run (Elo). New season = soft reset toward the middle.</div>';
+        wrap.innerHTML = html;
+      }
+
       // ---- grouped rank tabs: 3 top groups, each with a small sub-toggle ----
       const RT_GROUPS = {
         ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }, { k: "live", l: "🐋 Live" }]
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }, { k: "ranked", l: "📊 Ranked" }, { k: "live", l: "🐋 Live" }]
       };
-      const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), duels: () => renderDuels(), live: () => renderBoards() };
-      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels", "live"];
+      const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), duels: () => renderDuels(), ranked: () => renderRanked(), live: () => renderBoards() };
+      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels", "ranked", "live"];
       function showRtView(k) {
         RT_ALL.forEach(x => { const el = $("rt-" + x); if (el) el.style.display = (x === k) ? "block" : "none"; });
         document.querySelectorAll("#subTabs .subtab").forEach(b => b.classList.toggle("on", b.dataset.rt === k));

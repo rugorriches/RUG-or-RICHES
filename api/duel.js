@@ -6,6 +6,7 @@
 // earning economy (same principle as gifts not counting toward the airdrop).
 const crypto = require("crypto");
 const db = require("./db");
+const ranked = require("./ranked");   // ranked ladder MMR (fed only by genuine both-submitted duels)
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000;
@@ -301,6 +302,8 @@ module.exports = async (req, res) => {
           await payout(client, d, winnerId);
           const { rows: fd } = await client.query("SELECT * FROM duels WHERE id = $1", [d.id]);
           await client.query("COMMIT");
+          // Update ranked-ladder MMR for both players — best-effort, never blocks the duel payout.
+          try { await ranked.applyDuelResult(d.challenger_id, d.opponent_id, winnerId); } catch (e) { console.error("[duel] ranked update failed:", e.message); }
           return json(res, 200, { ok: true, duel: shapeDuel(fd[0], playerId) });
         }
         await client.query("COMMIT");
