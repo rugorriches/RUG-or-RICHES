@@ -3076,6 +3076,13 @@
     .subtab { flex: 1; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); color: #b9a7e8; border-radius: 9px; padding: 7px 3px; font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s; }
     .subtab.on { color: #fff; background: rgba(124, 77, 255, .28); border-color: rgba(124, 77, 255, .55); }
 
+    /* Duels UI — match brand theme for buttons & fonts (bare .rbtn is only styled inside .reward-card) */
+    #duelsView .rbtn { flex: 0 0 auto; border: none; border-radius: 11px; padding: 9px 14px; font-family: inherit; font-weight: 900; font-size: 12px; cursor: pointer; color: #13002a; background: linear-gradient(90deg, var(--cyan), var(--neon)); box-shadow: 0 2px 9px rgba(35, 240, 255, .3); transition: transform .08s, filter .15s; }
+    #duelsView .rbtn:active { transform: scale(.95); }
+    #duelsView .rbtn.locked { background: #2a1a44; color: #8b7fb0; box-shadow: none; }
+    #duelsView input { font-family: inherit; font-size: 13px; }
+    #duelsView input::placeholder { color: #9c92c4; }
+
     .rtab {
       flex: 1;
       background: rgba(255, 255, 255, .05);
