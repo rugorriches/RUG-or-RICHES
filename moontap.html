@@ -5300,6 +5300,7 @@
       let predActive = false, predDir = 0, predLock = 0, predT = 0, predStake = 0, predRoundId = null;   // long/short prediction round
       let dPot = 0, dBal = S.balance, dAir = S.airdrop;
       let invested = 0, roundCur = null, roundClicks = 0, winStreak = 0, roundId = null, roundInvestedTotal = 0;
+      let energyNudged = false;   // moment-of-need: nudge a Stars energy refill once when you run dry mid-run
       let heat = 0, pumpVel = 0, dumpWarn = 0, bustType = "hard", bustTarget = 0.12, roundPeak = 1;   // refined rug-pressure model
       let mevent = null, eventTime = 0, eventAcc = 0;
       let liq = 45000, holders = 1500 + Math.floor(Math.random() * 3500), trend = 0;   // market depth, holders, momentum
@@ -5529,7 +5530,9 @@
       // ---------- TAP ----------
       const coin = $("coin"), stage = document.querySelector(".coin-stage");
       function doTap(x, y) {
-        if (busting) return; if (energy < tapCost()) { flashEnergy(); return; }
+        if (busting) return;
+        if (energy < tapCost()) { flashEnergy(); if (pot > 0 && !energyNudged) { energyNudged = true; toast("🔋", "Out of energy", "Keep this run alive — grab a ⚡ refill (25⭐) in the Store, or wait for regen"); } return; }
+        energyNudged = false;
         const cur = invested > 0 ? roundCur : S.betCur;
         const stake = Math.max(1, Math.min(S.bet, betMax()));
         if (curBal(cur) < stake) { faucetOrWarn(cur); return; }
@@ -5664,6 +5667,7 @@
           toast(bustType === "soft" ? "🩸" : "💀", bustType === "soft" ? "SOFT RUG" : "RUGGED!", (bustType === "soft" ? "Saved " + fmt(rescued) + " · lost " : "Lost ") + fmt(balanceLoss) + " " + (cur === "pts" ? "pts" : "$MOON"));
           sfxRug(); if (navigator.vibrate) navigator.vibrate(bustType === "soft" ? [40, 30, 60] : [60, 40, 140]);
           if (bustType !== "soft" && cur === "moon") showReaction(false, "−" + fmt(balanceLoss) + " $MOON", "The chart dumped on you. Bank earlier next time.");
+          if (bustType !== "soft" && effVip() === 0 && S.rugs % 3 === 0) setTimeout(() => toast("👑", "Rugged again?", "Silver+ VIP lowers rug risk & auto-rescues your stake — check the VIP tab"), 1100);   // moment-of-need: VIP nudge at the frustration peak
         }
         holders = Math.floor(holders * (bustType === "soft" ? 0.93 : 0.85));
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; winStreak = 0; heat = 0; pumpVel = 0; dumpWarn = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; save(); renderStats(); renderDash(); settleRoundCloud(settlement);
@@ -6159,6 +6163,7 @@
         const hero = document.createElement("div"); hero.className = "viphero";
         hero.innerHTML = '<div class="vh-tier">' + (cur > 0 ? VIP[cur].emo + " " + VIP[cur].nm : "🆓 Free Tier") + '</div><div class="vh-ben">' + vipBenefits(cur).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>';
         wrap.appendChild(hero);
+        wrap.insertAdjacentHTML("beforeend", airdropAccelHTML());   // show how VIP accelerates airdrop qualification
         if (cur > 0) {
           const today = new Date().toDateString(); const claimed = S.vipDay === today; const eClaimed = S.vipEnergyDay === today; const reward = cur * 50000;
           const lng = document.createElement("div"); lng.className = "lounge";
@@ -6243,7 +6248,7 @@
           S.starsSpent += b.stars; save(); renderStore(); renderLive(); renderStats(); renderBetHUD(); sfxCash(); toast(b.emo, b.nm + "!", "Activated");
         });
       }
-      function buySeason() { if (S.seasonPass) return; starsPurchase("Season 1 Pass for " + SEASON.stars + " ⭐?", { type: "season", stars: SEASON.stars }, () => { S.seasonPass = true; addAirdrop(50000); S.starsSpent += SEASON.stars; save(); renderStore(); renderLive(); renderStats(); confetti(); toast("🎟️", "Season Pass!", "+50,000 airdrop pts + daily rewards"); }); }
+      function buySeason() { if (S.seasonPass) return; starsPurchase("Season 1 Pass for " + SEASON.stars + " ⭐?", { type: "season", stars: SEASON.stars }, () => { S.seasonPass = true; addCur("moon", 1000000); energy = maxEnergy(); S.starsSpent += SEASON.stars; save(); renderStore(); renderLive(); renderStats(); confetti(); toast("🎟️", "Season Pass!", "+1,000,000 $MOON · energy refilled · season perks"); }); }   // NOTE: no longer grants airdrop points directly (compliance — airdrop points are earned by play only)
       function crackPiggy() { if (S.piggy < 1) return; const pcost = Math.max(20, Math.round(S.piggy / 3000)); starsPurchase("Crack the piggy bank — claim " + fmt(S.piggy) + " $MOON for " + pcost + " ⭐?", { type: "piggy", stars: pcost, moon: S.piggy }, () => { const amt = S.piggy; S.piggy = 0; bank(amt); S.starsSpent += pcost; save(); renderStore(); renderLive(); renderStats(); confetti(); toast("🐷", "Piggy cracked!", "+" + fmt(amt) + " $MOON"); }); }
       function buyVipStars(i) {
         const v = VIP[i]; if (S.vip >= i) return;
@@ -6402,6 +6407,7 @@
         const wrap = $("storeList"); if (!wrap) return; wrap.innerHTML = "";
         const ss = $("starsSpent"); if (ss) ss.textContent = fmt(S.starsSpent);
         const sb = $("storeBal"); if (sb) sb.textContent = fmt(S.balance);
+        wrap.insertAdjacentHTML("beforeend", airdropAccelHTML());   // airdrop tracker drives mechanic-motivated purchases
         storeSection(wrap, "🎯 Recommended");
         storeCard(wrap, Object.assign({ tag: "For you", best: true }, pickOffer()));
         const today = new Date().toDateString();
@@ -6410,7 +6416,7 @@
         storeCard(wrap, { emo: "🎁", nm: "Starter Pack", ds: "One-time 500K $MOON + Bronze VIP", stars: STARTER.stars, fn: buyStarter, disabled: S.starterBought, label: S.starterBought ? "✓" : "⭐ " + STARTER.stars });
         storeCard(wrap, { emo: "🐋", nm: "Whale Pack", ds: "12M $MOON + Gold VIP instant unlock", stars: WHALE.stars, fn: buyWhale });
         storeCard(wrap, { emo: "👑", nm: "VIP Pass", ds: (S.vipSubUntil > Date.now() ? "Active until " + new Date(S.vipSubUntil).toLocaleDateString() : "30 days of Diamond-level perks"), stars: VIPSUB.stars, fn: buyVipSub });
-        storeCard(wrap, { emo: "🎟️", nm: "Season 1 Pass", ds: S.seasonPass ? "Active for this season" : "+50K airdrop pts and premium season perks", stars: SEASON.stars, fn: buySeason, disabled: S.seasonPass, label: S.seasonPass ? "✓" : "⭐ " + SEASON.stars });
+        storeCard(wrap, { emo: "🎟️", nm: "Season 1 Pass", ds: S.seasonPass ? "Active for this season" : "1M $MOON + premium season perks", stars: SEASON.stars, fn: buySeason, disabled: S.seasonPass, label: S.seasonPass ? "✓" : "⭐ " + SEASON.stars });
         if (S.balance < 5000) storeCard(wrap, { emo: "🆘", nm: "Comeback Pack", ds: "Low-balance rescue: 200K $MOON", stars: COMEBACK.stars, fn: buyComeback });
         storeCard(wrap, { emo: "🐷", nm: "Piggy Bank", ds: S.piggy > 0 ? "Crack " + fmt(S.piggy) + " saved $MOON" : "Fills with 4% of profitable cash-outs", stars: Math.max(20, Math.round((S.piggy || 0) / 3000)), fn: crackPiggy, disabled: S.piggy < 1, label: S.piggy > 0 ? "⭐ " + Math.max(20, Math.round(S.piggy / 3000)) : "Empty" });
         storeSection(wrap, "⚡ Boosts");
@@ -6559,6 +6565,20 @@
           '<div ' + sr + '><span>Cash-outs</span><b style="color:' + (cashOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(cash) + ' / ' + fmt(AIRDROP_MIN_CASHOUTS) + '</b></div>' +
           '<div ' + sr + '><span>Est. pool share</span><b style="color:var(--cyan)">' + share.toFixed(4) + '%</b></div>' +
           '<div class="pbar2" style="margin-top:9px"><i style="width:' + clamp(reqPct, 3, 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';
+      }
+      // Compact, compliant airdrop-progress tracker for the Store & VIP screens.
+      // Points are EARNED by playing; paid items only let you play more/faster (never sells points).
+      function airdropAccelHTML() {
+        const A = S.airdrop || 0, days = seasonActiveDays(), cash = S.cashouts || 0, taps = S.taps || 0;
+        const g = "var(--green)", y = "var(--gold)";
+        const reqPct = Math.min(A / AIRDROP_QUALIFY, days / AIRDROP_MIN_DAYS, taps / AIRDROP_MIN_TAPS, cash / AIRDROP_MIN_CASHOUTS) * 100;
+        const qualified = A >= AIRDROP_QUALIFY && days >= AIRDROP_MIN_DAYS && taps >= AIRDROP_MIN_TAPS && cash >= AIRDROP_MIN_CASHOUTS;
+        const chip = (lbl, c, gg) => '<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:5px;color:#cdbff0"><span>' + lbl + '</span><b style="color:' + (c >= gg ? g : y) + '">' + fmt(c) + ' / ' + fmt(gg) + '</b></div>';
+        return '<div class="card" style="margin-bottom:12px;border:1px solid rgba(35,240,255,.28)">' +
+          '<div class="sec-h" style="margin-top:0">🪂 Airdrop progress' + (qualified ? ' · ✅ Qualified' : '') + '</div>' +
+          '<div class="pbar2" style="margin:2px 0 5px"><i style="width:' + clamp(reqPct, 3, 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div>' +
+          chip("Points", A, AIRDROP_QUALIFY) + chip("Active days", days, AIRDROP_MIN_DAYS) + chip("Taps", taps, AIRDROP_MIN_TAPS) + chip("Cash-outs", cash, AIRDROP_MIN_CASHOUTS) +
+          '<div class="ds" style="font-size:10px;color:#9c92c4;margin-top:7px">Points are earned only by playing. VIP (bigger earnings), energy refills & Turbo just let you <b>play more and faster</b> — so you hit qualification sooner.</div></div>';
       }
       const COMBO_TAPS_NEEDED = 300;
       function renderCombo() {
