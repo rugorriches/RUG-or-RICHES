@@ -16,6 +16,7 @@ const routes = {
   gift: require("./gift"),
   cron: require("./cron"),
   boards: require("./boards"),
+  duel: require("./duel"),
 };
 
 module.exports = async (req, res) => {

@@ -2,6 +2,15 @@
 <html lang="en">
 
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEN0H86B3N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KEN0H86B3N');
+</script>
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -4409,6 +4418,9 @@
       <div class="rt" id="rt-crash" style="display:none">
         <div id="crashView"></div>
       </div>
+      <div class="rt" id="rt-duels" style="display:none">
+        <div id="duelsView"></div>
+      </div>
     </div>
 
     <div class="panel" id="panel-invite">
@@ -4754,6 +4766,28 @@
       </div>
     </div>
 
+    <div class="modal" id="duelModal" role="dialog" aria-modal="true" aria-label="Duel run">
+      <div class="box" style="max-width:380px">
+        <h3 style="margin-bottom:2px">⚔️ <span id="duelTitle">Duel Run</span></h3>
+        <div class="ds" id="duelVs" style="font-size:11px;color:#a78fd6;margin-bottom:8px">Same chart. Higher bank wins.</div>
+        <canvas id="duelChart" width="340" height="120" style="width:100%;height:120px;background:#120a26;border-radius:12px;display:block"></canvas>
+        <div style="display:flex;justify-content:space-between;margin:10px 2px 4px;font-weight:800">
+          <div>📈 <span id="duelMult" style="color:var(--gold)">1.00x</span></div>
+          <div>💰 <span id="duelPot">0</span></div>
+          <div>⚡ <span id="duelTaps">40</span></div>
+        </div>
+        <div style="height:8px;background:#241544;border-radius:6px;overflow:hidden;margin:4px 2px 10px">
+          <div id="duelHeatBar" style="height:100%;width:0%;background:linear-gradient(90deg,#3ad17e,#ffcf33,#ff4d4d);transition:width .1s"></div>
+        </div>
+        <div class="ds" id="duelStatus" style="min-height:16px;font-weight:800;text-align:center;margin-bottom:8px">Tap PUMP to ride it — BANK before the rug.</div>
+        <div class="mbtns">
+          <button class="ok" id="duelTapBtn" style="flex:2;font-size:17px">PUMP 🚀</button>
+          <button id="duelBankBtn" style="flex:1;background:var(--gold);color:#1a1030;font-weight:900">BANK 💰</button>
+        </div>
+        <div class="mbtns" style="margin-top:6px"><button id="duelCloseBtn" style="width:100%">Close</button></div>
+      </div>
+    </div>
+
     <div id="tut">
       <div class="em" id="tutEm">📈</div>
       <h3 id="tutH"></h3>
@@ -4812,7 +4846,7 @@
       let audioUnlocked = false;
       let lastHapticZone = null;
 
-      const MOON_CAP = 1000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 100, PRICE_SOFTCAP = 18;
+      const MOON_CAP = 1000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
 
       function getHeatZone(heatPercent) {
         const h = clamp(Number(heatPercent) || 0, 0, 100);
@@ -5264,7 +5298,7 @@
       function risk() { return clamp(heat / 100, 0, 1); }   // rug risk now driven by multi-factor heat
       const priceDamp = () => price <= PRICE_SOFTCAP ? 1 : Math.max(0.08, Math.pow(PRICE_SOFTCAP / price, 0.85));
       function capPrice() { price = clamp(price, 0.2, PRICE_CAP); ath = Math.min(ath, PRICE_CAP); S.bestPrice = Math.min(S.bestPrice || 1, PRICE_CAP); }
-      const maxRoundRoi = () => 5 + effVip() * 1.5 + Math.min(winStreak, 10) * 0.25;
+      const maxRoundRoi = () => PRICE_CAP * 1.5;   // high safety net only — payout now tracks your real pot/multiplier, not an artificial ROI clamp
       let panelOpen = "game";
       let isOnline = false;
       let resolvedInvoiceEndpoint = CONFIG.invoiceEndpoint;
@@ -5604,14 +5638,15 @@
         rescued = Math.min(rescued, Math.floor(invested * (bustType === "soft" ? 0.9 : 0.8)));   // a rug must always sting — never recover more than your stake (no profitable rugs)
         if (rescued > 0) addCur(cur, rescued);
         const lost = Math.max(0, invested - rescued); S.pnlLost = Math.min(MOON_CAP, (S.pnlLost || 0) + lost);
-        const wiped = Math.max(0, Math.floor(pot - rescued));   // value actually dumped from the at-risk pot (what the player sees lost)
+        const wiped = Math.max(0, Math.floor(pot - rescued));   // paper position value dumped (for flavor)
+        const balanceLoss = Math.max(0, Math.floor(invested - rescued));   // what ACTUALLY leaves your balance — matches P&L
         const settlement = { cur: "moon", payout: rescued, invested: Math.max(1, Math.floor(invested)), roundInvested: Math.max(1, Math.floor(roundInvestedTotal || invested)), peak: roundPeak, clicks: roundClicks, outcome: "rug", roundId: roundId || actionToken() };
         if (panelOpen === "game") {
           $("rugOverlay").style.opacity = (bustType === "soft" ? ".5" : ".78"); setTimeout(() => $("rugOverlay").style.opacity = "0", 170);
           $("app").classList.add("shake"); setTimeout(() => $("app").classList.remove("shake"), 400);
-          toast(bustType === "soft" ? "🩸" : "💀", bustType === "soft" ? "SOFT RUG" : "RUGGED!", (bustType === "soft" ? "Saved " + fmt(rescued) + " · lost " : "Lost ") + fmt(wiped) + " " + (cur === "pts" ? "pts" : "$MOON"));
+          toast(bustType === "soft" ? "🩸" : "💀", bustType === "soft" ? "SOFT RUG" : "RUGGED!", (bustType === "soft" ? "Saved " + fmt(rescued) + " · lost " : "Lost ") + fmt(balanceLoss) + " " + (cur === "pts" ? "pts" : "$MOON"));
           sfxRug(); if (navigator.vibrate) navigator.vibrate(bustType === "soft" ? [40, 30, 60] : [60, 40, 140]);
-          if (bustType !== "soft" && cur === "moon") showReaction(false, "−" + fmt(wiped) + " $MOON", "The chart dumped on you. Bank earlier next time.");
+          if (bustType !== "soft" && cur === "moon") showReaction(false, "−" + fmt(balanceLoss) + " $MOON", "The chart dumped on you. Bank earlier next time.");
         }
         holders = Math.floor(holders * (bustType === "soft" ? 0.93 : 0.85));
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; winStreak = 0; heat = 0; pumpVel = 0; dumpWarn = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; save(); renderStats(); renderDash(); settleRoundCloud(settlement);
@@ -6920,14 +6955,241 @@
           });
         }
       }
+      // ============ ASYNC DUELS (Phase 4) ============
+      // Self-contained, deterministic same-seed sprint. Fully isolated from the live game loop
+      // (idleTick) — zero regression risk. Both duelists ride an identical seeded market; the rug
+      // is heat-driven by YOUR pumping, so knowing the seed doesn't hand you a fixed rug time.
+      // Higher single-run bank wins the escrowed pot. One committed run per player (no retry grind).
+      const DUEL_BOT = "RugorRichesBot", DUEL_APP = "play";
+      const DUEL_TAPS = 40, DUEL_INVEST = 100;   // tap budget + chips per pump
+      function duelLink(code) { return "https://t.me/" + DUEL_BOT + "/" + DUEL_APP + "?startapp=duel_" + code; }
+      // xmur3 seed -> mulberry32 PRNG. Deterministic for a given seed string.
+      function duelRng(seedStr) {
+        let h = 1779033703 ^ seedStr.length;
+        for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+        let a = (h >>> 0);
+        return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      }
+      // Pure market step (mirrored in the verification sim). Draws a FIXED 3 randoms/tick so the
+      // market stream stays identical between players regardless of how they tap.
+      function duelMarketStep(st, rng) {
+        const r1 = rng(), r2 = rng(), r3 = rng();
+        st.trend = clamp(st.trend + (r1 - 0.5) * 0.06, -0.4, 0.4);
+        const drift = st.trend * 0.013;
+        const vol = (r2 - 0.5) * 0.035;
+        const oldP = st.price;
+        st.price = Math.max(1, st.price * (1 + drift + vol));
+        if (st.pot > 0) st.pot *= st.price / oldP;
+        st.heat = clamp(st.heat + Math.max(0, st.price - 2.5) * 0.22 - 0.5, 0, 100);   // passive heat from overextension, cools slightly when low
+        const rugP = Math.pow(st.heat / 100, 3) * 0.09;
+        if (st.price > 1.2 && r3 < rugP) st.rug = true;
+        return st;
+      }
+      let DR = null;   // active duel-run state
+      function duelTapStep(st) {
+        if (st.taps <= 0 || st.rug || st.banked) return;
+        st.taps--; st.invested += DUEL_INVEST;
+        const oldP = st.price;
+        st.price += (0.11 + Math.min(st.price, 25) * 0.012);   // diminishing pump
+        if (st.pot > 0) st.pot *= st.price / oldP;
+        st.pot += DUEL_INVEST;
+        st.heat = clamp(st.heat + 2.6, 0, 100);   // pumping heats it — push too hard and it rugs
+      }
+      function drawDuelChart() {
+        const c = $("duelChart"); if (!c || !DR) return;
+        const ctx = c.getContext("2d"); const W = c.width, H = c.height;
+        ctx.clearRect(0, 0, W, H);
+        const h = DR.hist; if (h.length < 2) return;
+        const mn = Math.min.apply(null, h), mx = Math.max.apply(null, h), rng = Math.max(0.001, mx - mn);
+        ctx.lineWidth = 2.5; ctx.strokeStyle = DR.rug ? "#ff4d4d" : (DR.heat >= 70 ? "#ffcf33" : "#3ad17e");
+        ctx.beginPath();
+        for (let i = 0; i < h.length; i++) { const x = (i / (h.length - 1)) * W; const y = H - 6 - ((h[i] - mn) / rng) * (H - 12); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+        ctx.stroke();
+      }
+      function duelRender() {
+        if (!DR) return;
+        $("duelMult").textContent = DR.price.toFixed(2) + "x";
+        $("duelPot").textContent = fmt(Math.floor(DR.pot));
+        $("duelTaps").textContent = DR.taps;
+        $("duelHeatBar").style.width = DR.heat.toFixed(0) + "%";
+        drawDuelChart();
+      }
+      function duelLoop(now) {
+        if (!DR || !DR.active) return;
+        requestAnimationFrame(duelLoop);
+        const dt = Math.min(0.1, (now - DR.lastT) / 1000); DR.lastT = now;
+        DR.acc += dt; DR.elapsed += dt;
+        while (DR.acc >= 0.1) {
+          DR.acc -= 0.1;
+          duelMarketStep(DR, DR.rng);
+          DR.hist.push(DR.price); if (DR.hist.length > 80) DR.hist.shift();
+          if (DR.rug) { duelEnd("rug"); return; }
+          if (DR.elapsed > 90) { duelEnd("time"); return; }   // hard 90s cap
+        }
+        duelRender();
+      }
+      function duelStartRun(d) {
+        DR = { code: d.code, seed: d.seed, rng: duelRng(d.seed), price: 1, pot: 0, invested: 0, heat: 0, trend: 0, taps: DUEL_TAPS, rug: false, banked: false, active: true, ended: false, hist: [1], acc: 0, elapsed: 0, lastT: performance.now(), wager: d.wager || 0, oppScore: d.oppScore };
+        $("duelTitle").textContent = d.wager > 0 ? fmt(d.wager) + " $MOON Duel" : "Friendly Duel";
+        $("duelVs").textContent = (d.oppScore != null ? "Opponent banked " + fmt(d.oppScore) + " — beat it!" : "Same chart for both. Bank higher to win.") + " · Seed " + d.seed.slice(0, 6);
+        $("duelStatus").textContent = "Tap PUMP to ride it — BANK before the rug.";
+        $("duelStatus").style.color = "";
+        $("duelTapBtn").disabled = false; $("duelBankBtn").disabled = false;
+        $("duelModal").classList.add("show");
+        duelRender();
+        requestAnimationFrame(duelLoop);
+      }
+      function duelDoTap() {
+        if (!DR || !DR.active || DR.rug || DR.banked) return;
+        if (DR.taps <= 0) { $("duelStatus").textContent = "Out of energy — BANK it!"; return; }
+        duelTapStep(DR);
+        try { ac && ac(); } catch (e) {}
+        duelRender();
+      }
+      function duelDoBank() {
+        if (!DR || !DR.active || DR.rug || DR.banked) return;
+        if (DR.pot < 1) { $("duelStatus").textContent = "Pump first — nothing to bank yet."; return; }
+        DR.banked = true; duelEnd("bank");
+      }
+      function duelEnd(reason) {
+        if (!DR || DR.ended) return;
+        DR.ended = true; DR.active = false;
+        const score = reason === "bank" ? Math.floor(DR.pot) : 0;
+        $("duelTapBtn").disabled = true; $("duelBankBtn").disabled = true;
+        if (reason === "rug") { $("duelStatus").textContent = "💀 RUGGED — banked 0. Tough seed."; $("duelStatus").style.color = "#ff6b6b"; try { sfxRug && sfxRug(); triggerHaptic && triggerHaptic("error"); } catch (e) {} }
+        else if (reason === "bank") { $("duelStatus").textContent = "💰 Banked " + fmt(score) + "! Submitting…"; $("duelStatus").style.color = "var(--gold)"; try { sfxCash && sfxCash(); triggerHaptic && triggerHaptic("success"); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) {} }
+        else { $("duelStatus").textContent = "⏱️ Time — banked " + fmt(score) + ". Submitting…"; }
+        duelRender();
+        cloudAction("/api/duel", { action: "submit", code: DR.code, score: score }).then(r => {
+          if (r && r.duel) {
+            const dd = r.duel;
+            if (dd.status === "settled") {
+              const msg = dd.result === "won" ? "🏆 You WON the duel!" + (dd.wager > 0 ? " +" + fmt(dd.wager * 2) + " $MOON" : "") : dd.result === "lost" ? "😤 You lost this one." : "🤝 Draw — wagers refunded.";
+              $("duelStatus").textContent = msg;
+              if (dd.result === "won" && !prefersReducedMotion()) { try { confetti && confetti(); } catch (e) {} }
+              if (dd.wager > 0) syncWithCloud().catch(() => {});
+            } else {
+              $("duelStatus").textContent = "✅ Score locked: " + fmt(score) + ". Waiting for opponent…";
+            }
+          }
+          renderDuels();
+        }).catch(err => { $("duelStatus").textContent = "⚠️ " + (err.message || "Submit failed"); });
+      }
+      function duelCloseModal() {
+        if (DR && DR.active && !DR.ended) {
+          if (!confirm("Leave now and forfeit this run? Your score will be 0.")) return;
+          duelEnd("forfeit");
+        }
+        DR = null;
+        $("duelModal").classList.remove("show");
+        renderDuels();
+      }
+      function duelCreate(wager) {
+        const w = Math.max(0, Math.floor(Number(wager) || 0));
+        const btn = $("duelCreateBtn"); if (btn) { btn.disabled = true; btn.textContent = "Creating…"; }
+        cloudAction("/api/duel", { action: "create", wager: w }).then(r => {
+          if (r && r.duel) {
+            const link = duelLink(r.duel.code);
+            try { navigator.clipboard && navigator.clipboard.writeText(link); } catch (e) {}
+            toast("⚔️", "Duel created!", "Share link copied — send it to a rival");
+            renderDuels();
+          }
+        }).catch(err => toast("⚠️", "Couldn't create", err.message || "Try again"))
+          .finally(() => { if (btn) { btn.disabled = false; btn.textContent = "⚔️ Create Duel"; } });
+      }
+      function duelAccept(code, thenPlay) {
+        cloudAction("/api/duel", { action: "accept", code: code }).then(r => {
+          if (r && r.duel) { toast("✅", "Duel accepted!", r.duel.wager > 0 ? fmt(r.duel.wager) + " $MOON staked" : "Good luck"); renderDuels(); if (thenPlay) duelStartRun(r.duel); }
+        }).catch(err => toast("⚠️", "Couldn't join", err.message || "Try again"));
+      }
+      function duelCancel(code) {
+        cloudAction("/api/duel", { action: "cancel", code: code }).then(() => { toast("🚫", "Duel cancelled", "Wager refunded"); renderDuels(); }).catch(err => toast("⚠️", "Couldn't cancel", err.message));
+      }
+      function duelPlay(code) {
+        cloudAction("/api/duel", { action: "get", code: code }).then(r => {
+          if (r && r.duel && r.duel.status === "active" && !r.duel.iSubmitted) duelStartRun(r.duel);
+          else { toast("⚠️", "Can't play", "This duel isn't awaiting your run"); renderDuels(); }
+        }).catch(err => toast("⚠️", "Error", err.message));
+      }
+      function duelShare(code) {
+        const link = duelLink(code);
+        try { navigator.clipboard && navigator.clipboard.writeText(link); toast("🔗", "Link copied", "Send it to your opponent"); } catch (e) {}
+        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("⚔️ I challenge you to a RUG OR RICHES duel!")); } catch (e) {}
+      }
+      async function renderDuels() {
+        const wrap = $("duelsView"); if (!wrap) return;
+        if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">⚔️ Duels need Telegram. Open the game inside Telegram to challenge rivals.</div>'; return; }
+        let data = null;
+        try { data = await cloudAction("/api/duel", { action: "list" }); } catch (e) {}
+        const duels = (data && data.duels) || [];
+        let html = '<div class="dly-head"><div class="dly-title">⚔️ Async Duels</div><div class="dly-sub">Same chart, head-to-head. Higher bank wins the pot.</div></div>';
+        html += '<div class="card" style="margin-bottom:10px"><div class="ds" style="margin-bottom:6px;font-weight:800">Challenge someone</div>' +
+          '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><input id="duelWager" type="number" min="0" placeholder="Wager $MOON (0 = friendly)" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff"></div>' +
+          '<button class="big-btn" id="duelCreateBtn" style="width:100%">⚔️ Create Duel</button>' +
+          '<div style="display:flex;gap:6px;margin-top:8px"><input id="duelJoinCode" placeholder="Have a code? Enter it" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff;text-transform:uppercase"><button id="duelJoinBtn" class="rbtn">Join</button></div></div>';
+        if (!duels.length) html += '<div class="ds" style="text-align:center;color:#9c92c4;padding:10px">No duels yet. Create one and send the link to a friend or crewmate.</div>';
+        duels.forEach(d => {
+          let line, action = "";
+          if (d.status === "open") {
+            line = (d.role === "challenger") ? "🟡 Waiting for opponent" : "🟡 Open challenge";
+            if (d.role === "challenger") action = '<button class="rbtn" data-share="' + d.code + '">🔗 Share</button><button class="rbtn locked" data-cancel="' + d.code + '">Cancel</button>';
+            else action = '<button class="rbtn" data-accept="' + d.code + '">Accept</button>';
+          } else if (d.status === "active") {
+            if (!d.iSubmitted) { line = "🔥 Your turn — play your run"; action = '<button class="rbtn" data-play="' + d.code + '">▶ Play</button>'; }
+            else if (d.oppScore == null) { line = "⏳ You banked " + fmt(d.myScore) + " — waiting for opponent"; action = '<button class="rbtn" data-share="' + d.code + '">🔗 Nudge</button>'; }
+            else { line = "Scores in — settling…"; }
+          } else if (d.status === "settled") {
+            const tag = d.result === "won" ? '<span style="color:#3ad17e;font-weight:900">WON 🏆</span>' : d.result === "lost" ? '<span style="color:#ff6b6b;font-weight:900">LOST</span>' : '<span style="color:var(--gold);font-weight:900">DRAW</span>';
+            line = tag + " · you " + fmt(d.myScore || 0) + " vs " + fmt(d.oppScore || 0);
+          } else { line = (d.status === "cancelled") ? "🚫 Cancelled" : d.status; }
+          const stake = d.wager > 0 ? '<span style="color:var(--gold)">💰 ' + fmt(d.wager) + '</span>' : '<span style="color:#9c92c4">friendly</span>';
+          html += '<div class="card" style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div class="grow" style="flex:1"><div style="font-weight:800;font-size:13px">' + line + '</div><div class="ds" style="font-size:10px;color:#9c92c4">Code ' + d.code + ' · ' + stake + '</div></div><div style="display:flex;gap:4px">' + action + '</div></div>';
+        });
+        wrap.innerHTML = html;
+        const cb = $("duelCreateBtn"); if (cb) cb.addEventListener("click", () => duelCreate($("duelWager") ? $("duelWager").value : 0));
+        const jb = $("duelJoinBtn"); if (jb) jb.addEventListener("click", () => { const v = $("duelJoinCode") ? $("duelJoinCode").value : ""; if (v) duelAccept(v.trim().toUpperCase(), true); });
+        wrap.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => duelShare(b.dataset.share)));
+        wrap.querySelectorAll("[data-cancel]").forEach(b => b.addEventListener("click", () => duelCancel(b.dataset.cancel)));
+        wrap.querySelectorAll("[data-accept]").forEach(b => b.addEventListener("click", () => duelAccept(b.dataset.accept, true)));
+        wrap.querySelectorAll("[data-play]").forEach(b => b.addEventListener("click", () => duelPlay(b.dataset.play)));
+      }
+      (function wireDuelModal() {
+        const tap = $("duelTapBtn"), bank = $("duelBankBtn"), close = $("duelCloseBtn");
+        if (tap) { tap.addEventListener("pointerdown", e => { e.preventDefault(); duelDoTap(); }, { passive: false }); }
+        if (bank) bank.addEventListener("click", duelDoBank);
+        if (close) close.addEventListener("click", duelCloseModal);
+      })();
+      // Deep link: t.me/<bot>/<app>?startapp=duel_<CODE> opens straight into the challenge.
+      function checkDuelDeepLink() {
+        try {
+          const tg = window.Telegram && window.Telegram.WebApp;
+          const sp = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+          if (!sp || sp.indexOf("duel_") !== 0 || !cloudAuth()) return;
+          const code = sp.slice(5).toUpperCase().replace(/[^A-Z0-9]/g, "");
+          if (!code) return;
+          cloudAction("/api/duel", { action: "get", code: code }).then(r => {
+            if (!r || !r.duel) return;
+            const d = r.duel;
+            if (d.role === "viewer" && d.status === "open") {
+              if (confirm("⚔️ Duel challenge!" + (d.wager > 0 ? " Stake " + fmt(d.wager) + " $MOON to accept?" : " Accept this friendly duel?"))) duelAccept(code, true);
+            } else if (d.role !== "viewer" && d.status === "active" && !d.iSubmitted) {
+              duelStartRun(d);
+            } else {
+              if (typeof showRtGroup === "function") showRtGroup("compete");
+            }
+          }).catch(() => {});
+        } catch (e) {}
+      }
+      setTimeout(checkDuelDeepLink, 2600);
+
       // ---- grouped rank tabs: 3 top groups, each with a small sub-toggle ----
       const RT_GROUPS = {
         ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }]
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }]
       };
-      const RT_RENDER = { crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), players: () => renderBoards() };
-      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash"];
+      const RT_RENDER = { crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), players: () => renderBoards(), duels: () => renderDuels() };
+      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels"];
       function showRtView(k) {
         RT_ALL.forEach(x => { const el = $("rt-" + x); if (el) el.style.display = (x === k) ? "block" : "none"; });
         document.querySelectorAll("#subTabs .subtab").forEach(b => b.classList.toggle("on", b.dataset.rt === k));

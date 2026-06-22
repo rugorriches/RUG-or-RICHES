@@ -5,7 +5,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000;
 const AIRDROP_CAP = 100000000;
 const PIGGY_CAP = 150000;
-const PRICE_CAP = 100;
+const PRICE_CAP = 1000;
 const AIRDROP_BANK_RATE = 0.08;
 // Max bet = rank-based base × VIP multiplier. KEEP IN SYNC WITH moontap.html (RANK_BET / VIP_BET_MULT).
 const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
@@ -13,7 +13,7 @@ const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
 const VIP_BET_MULT = [1, 1.5, 2, 3, 5];
 function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 const EARN_PER_MINUTE = [250000, 1000000, 5000000, 25000000, 100000000];
-const MAX_ROI = 30;
+const MAX_ROI = 4000;   // per-round payout ceiling (multiple of invested). High safety net only — must stay above client maxRoundRoi(1500) × max event mult(1.5) ≈ 2250 so legit banks never get rejected. Real reward is governed by pot/multiplier + the heat/rug risk model, not this clamp.
 const MAX_CASHOUTS_PER_MINUTE = 10;
 const NONCE_RE = /^[A-Za-z0-9_-]{12,80}$/;
 const OUTCOMES = new Set(["cashout", "half", "rug", "prediction"]);
@@ -271,10 +271,11 @@ module.exports = async (req, res) => {
       const windowAmount = sameWindow ? Number(player.earn_window_amount) || 0 : 0;
       const profit = Math.max(0, payout - invested);
       const loss = Math.max(0, invested - payout);
-      if (windowAmount + profit > EARN_PER_MINUTE[vip]) {
-        await client.query("ROLLBACK");
-        return json(res, 429, { error: "Earn-rate limit exceeded", limit: EARN_PER_MINUTE[vip] });
-      }
+      // NOTE: the old per-minute earn-rate limiter was removed — it was rejecting legitimate large
+      // banks after bet caps were scaled up, making banked balance lag displayed profit. Every bank
+      // is still bounded per-round (maxPayout / maxInvested / clickLimit above) and is idempotent,
+      // so this stays cheat-safe without throttling honest play. earn_window_* is still recorded for
+      // telemetry but no longer rejects.
 
       const airdrop = Math.floor(profit * AIRDROP_BANK_RATE);
       const piggy = profit > 0 ? Math.floor(payout * 0.04) : 0;

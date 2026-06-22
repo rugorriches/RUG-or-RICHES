@@ -21,6 +21,7 @@
     { "src": "/api/gift", "dest": "/api/main.js?route=gift" },
     { "src": "/api/cron", "dest": "/api/main.js?route=cron" },
     { "src": "/api/boards", "dest": "/api/main.js?route=boards" },
+    { "src": "/api/duel", "dest": "/api/main.js?route=duel" },
     { "src": "/play", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/moontap.html" },
     { "src": "/", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/index.html" },
     { "src": "/(.*\\.html)", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/$1" },
