@@ -4399,8 +4399,6 @@
       <div class="rt" id="rt-players" style="display:none">
         <div class="sec-h">Season Leaderboard</div>
         <div id="boardList"></div>
-        <div class="sec-h" style="margin-top:16px">🐋 Live Boards</div>
-        <div id="liveBoards"></div>
       </div>
       <div class="rt" id="rt-crews" style="display:none">
         <div class="sec-h">Top Crews</div>
@@ -4420,6 +4418,10 @@
       </div>
       <div class="rt" id="rt-duels" style="display:none">
         <div id="duelsView"></div>
+      </div>
+      <div class="rt" id="rt-live" style="display:none">
+        <div class="sec-h">🐋 Live Boards</div>
+        <div id="liveBoards"></div>
       </div>
     </div>
 
@@ -4499,6 +4501,8 @@
             placeholder="Amount" style="width:104px"></div>
         <button class="big-btn" id="giftSend" style="margin-top:9px">💝 Send Gift</button>
       </div>
+      <div class="sec-h">🤝 Top Inviters this week</div>
+      <div id="inviteBoard"><div class="ds" style="color:#9c92c4">Loading…</div></div>
       <div class="sec-h">👥 Friends you invited</div>
       <div id="friendList">
         <div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div>
@@ -4785,6 +4789,16 @@
           <button id="duelBankBtn" style="flex:1;background:var(--gold);color:#1a1030;font-weight:900">BANK 💰</button>
         </div>
         <div class="mbtns" style="margin-top:6px"><button id="duelCloseBtn" style="width:100%">Close</button></div>
+      </div>
+    </div>
+
+    <div class="modal" id="giftModal" role="dialog" aria-modal="true" aria-label="Gift $MOON">
+      <div class="box" style="max-width:340px">
+        <h3>💝 Gift $MOON</h3>
+        <div class="ds" id="giftModalTo" style="font-weight:800;margin-bottom:2px"></div>
+        <div class="ds" id="giftModalDesc" style="font-size:11px;color:#a78fd6;margin-bottom:8px"></div>
+        <input id="giftModalAmt" type="number" inputmode="numeric" placeholder="Amount $MOON" style="width:100%;padding:10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff">
+        <div class="mbtns" style="margin-top:10px"><button class="ok" id="giftModalSend" style="flex:1">Send 💝</button><button id="giftModalClose">Cancel</button></div>
       </div>
     </div>
 
@@ -5226,7 +5240,7 @@
       const comboCap = () => 40 + lvl("combo") * 12;
       const comboGain = () => 0.025 + lvl("combo") * 0.004;
       const vaultPct = () => Math.min(.45, lvl("vault") * 0.045 + (effVip() >= 3 ? 0.18 : 0));
-      const cashBonus = () => 0.35 + lvl("cashbonus") * 0.06;
+      const cashBonus = () => 0.35 + lvl("cashbonus") * 0.06 + effVip() * 0.15;   // VIP payout edge: higher tiers bank a bigger % when cashing at high heat (risk-gated, no hard clamp)
       // bust resistance: lower = safer (insurance + VIP shield)
       const rugResist = () => Math.max(.28, UP[3].val(lvl("insure")) * (1 - effVip() * 0.045));
 
@@ -6596,18 +6610,18 @@
           data.forEach((x, i) => {
             const d = document.createElement("div"); d.className = "lb-row" + (x.me ? " me" : "");
             const rk = i === 0 ? '<span class="medal">🥇</span>' : i === 1 ? '<span class="medal">🥈</span>' : i === 2 ? '<span class="medal">🥉</span>' : (i + 1);
-            d.innerHTML = '<div class="rk">' + rk + '</div><div class="nm">' + esc(x.n) + '</div><div class="sc">' + (isCount ? (fmt(x.b) + ' 🤝') : fmt(x.b)) + '</div>'; wrap.appendChild(d);
+            const giftable = x.id && !x.me;
+            d.innerHTML = '<div class="rk">' + rk + '</div><div class="nm">' + esc(x.n) + (giftable ? ' <span style="opacity:.5">💝</span>' : '') + '</div><div class="sc">' + (isCount ? (fmt(x.b) + ' 🤝') : fmt(x.b)) + '</div>';
+            if (giftable) { d.style.cursor = "pointer"; d.title = "Gift $MOON"; d.addEventListener("click", () => openGiftModal(x)); }
+            wrap.appendChild(d);
           });
         };
         const bl = $("boardList");
-        if (bl && !$("boardToggle")) {
-          const tg2 = document.createElement("div"); tg2.id = "boardToggle"; tg2.style.cssText = "display:flex;gap:6px;margin-bottom:9px";
-          tg2.innerHTML = '<button class="lb-tg" data-m="banked">💰 Banked</button><button class="lb-tg" data-m="referral">🤝 Inviters</button>';
-          bl.parentNode.insertBefore(tg2, bl);
-          const note = document.createElement("div"); note.className = "qsum"; note.style.cssText = "text-align:center;margin:-2px 0 9px;color:var(--gold)"; note.innerHTML = "🏆 Top 10 each week win $MOON — paid out automatically";
+        if (bl && !$("boardNote")) {
+          const note = document.createElement("div"); note.id = "boardNote"; note.className = "qsum"; note.style.cssText = "text-align:center;margin:-2px 0 9px;color:var(--gold)"; note.innerHTML = "🏆 Top 10 each week win $MOON — paid out automatically · tap a player to gift 💝";
           bl.parentNode.insertBefore(note, bl);
-          tg2.querySelectorAll(".lb-tg").forEach(b => b.addEventListener("click", () => { boardMode = b.dataset.m; loadBoard(); }));
         }
+        boardMode = "banked";   // Inviters board moved to the Invite & Earn section
         const tgw = window.Telegram && window.Telegram.WebApp;
         const myRegion = (tgw && tgw.initDataUnsafe && tgw.initDataUnsafe.user && tgw.initDataUnsafe.user.language_code) || null;
         function loadBoard() {
@@ -6622,7 +6636,7 @@
           const url = (boardMode === "region" && myRegion) ? ("/api/leaderboard?region=" + encodeURIComponent(myRegion)) : "/api/leaderboard";
           fetch(url).then(r => r.json()).then(dbList => {
             if (Array.isArray(dbList) && dbList.length > 0) {
-              const formatted = dbList.map(r => ({ n: r.name, b: r.banked, me: r.name === S.name }));
+              const formatted = dbList.map(r => ({ n: r.name, b: r.banked, me: r.name === S.name, id: r.id, username: r.username }));
               if (!formatted.some(x => x.me)) formatted.push({ n: S.name + " (you)", b: S.balance, me: true });
               formatted.sort((a, b) => b.b - a.b); renderList(formatted);
             } else renderList(list);
@@ -7186,10 +7200,10 @@
       const RT_GROUPS = {
         ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }]
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }, { k: "live", l: "🐋 Live" }]
       };
-      const RT_RENDER = { crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), players: () => renderBoards(), duels: () => renderDuels() };
-      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels"];
+      const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), duels: () => renderDuels(), live: () => renderBoards() };
+      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels", "live"];
       function showRtView(k) {
         RT_ALL.forEach(x => { const el = $("rt-" + x); if (el) el.style.display = (x === k) ? "block" : "none"; });
         document.querySelectorAll("#subTabs .subtab").forEach(b => b.classList.toggle("on", b.dataset.rt === k));
@@ -7243,6 +7257,18 @@
           });
           ml.appendChild(d);
         });
+        const ib = $("inviteBoard");
+        if (ib) {
+          fetch("/api/leaderboard?type=referral&period=week").then(r => r.json()).then(d => {
+            if (!Array.isArray(d) || !d.length) { ib.innerHTML = '<div class="ds" style="color:#9c92c4">No inviters yet — be the first to top this board!</div>'; return; }
+            ib.innerHTML = "";
+            d.slice(0, 10).forEach((x, i) => {
+              const row = document.createElement("div"); row.className = "lb-row" + (x.name === S.name ? " me" : "");
+              const rk = i === 0 ? '<span class="medal">🥇</span>' : i === 1 ? '<span class="medal">🥈</span>' : i === 2 ? '<span class="medal">🥉</span>' : (i + 1);
+              row.innerHTML = '<div class="rk">' + rk + '</div><div class="nm">' + esc(x.name) + '</div><div class="sc">' + fmt(x.refs) + ' 🤝</div>'; ib.appendChild(row);
+            });
+          }).catch(() => { ib.innerHTML = '<div class="ds" style="color:#9c92c4">Couldn\'t load inviters — try again soon.</div>'; });
+        }
         const fl = $("friendList");
         if (n === 0) { fl.innerHTML = '<div class="brand-empty"><img src="/assets/brand/empty-state.webp" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="nm" style="font-weight:800">No crew yet</div><div class="ds">Share your code — you both bank 5,000 $MOON.</div></div>'; }
         else {
@@ -7289,6 +7315,46 @@
           .finally(() => { btn.disabled = false; btn.textContent = "💝 Send Gift"; });
       }
       $("giftSend") && $("giftSend").addEventListener("click", sendGift);
+      // ---- Click-to-gift from the leaderboard ----
+      let giftTarget = null;
+      function openGiftModal(x) {
+        giftTarget = x;
+        const admin = String(currentUserId) === "5028660194";
+        $("giftModalTo").innerHTML = "To: " + esc(x.n);
+        $("giftModalDesc").textContent = admin
+          ? "Min 1,000 · max 1,000,000 per gift · 100,000,000/day (Admin)"
+          : "Min 1,000 · max 100,000 per gift · 250,000/day";
+        $("giftModalAmt").value = "";
+        $("giftModal").classList.add("show");
+        setTimeout(() => { try { $("giftModalAmt").focus(); } catch (e) {} }, 60);
+      }
+      function giftModalSend() {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg || !tg.initData) { toast("🔒", "Telegram required", "Open inside Telegram to send gifts"); return; }
+        if (!giftTarget) return;
+        const amt = Math.floor(Number($("giftModalAmt").value) || 0);
+        if (amt < 1000) { toast("⚠️", "Minimum 1,000", "Gift at least 1,000 $MOON"); return; }
+        if (S.balance < amt) { toast("💸", "Not enough $MOON", "Bank more before gifting"); return; }
+        const btn = $("giftModalSend"); btn.disabled = true; btn.textContent = "Sending…";
+        const payload = { initData: tg.initData, amount: amt };
+        if (giftTarget.id != null) payload.toId = giftTarget.id;
+        if (giftTarget.username) payload.toUsername = giftTarget.username;
+        fetch("/api/gift", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+          .then(r => r.json().then(d => ({ ok: r.ok, d })))
+          .then(({ ok, d }) => {
+            if (ok && d && d.ok) {
+              S.balance = typeof d.balance === "number" ? d.balance : S.balance - amt;
+              save(); renderLive(); renderStats(); sfxCash();
+              $("giftModal").classList.remove("show");
+              toast("💝", "Gift sent!", "−" + fmt(amt) + " $MOON to " + (giftTarget.n || "player"));
+            } else toast("⚠️", "Gift failed", (d && d.error) || "Try again");
+          })
+          .catch(() => toast("⚠️", "Gift failed", "Network error"))
+          .finally(() => { btn.disabled = false; btn.textContent = "Send 💝"; });
+      }
+      $("giftModalSend") && $("giftModalSend").addEventListener("click", giftModalSend);
+      $("giftModalClose") && $("giftModalClose").addEventListener("click", () => $("giftModal").classList.remove("show"));
+      $("giftModal") && $("giftModal").addEventListener("click", e => { if (e.target.id === "giftModal") $("giftModal").classList.remove("show"); });
       function shareTo(p) {
         const url = inviteLink(); const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
         const t = encodeURIComponent(txt), u = encodeURIComponent(url);

@@ -67,12 +67,13 @@ module.exports = async (req, res) => {
   if (toUsername.startsWith("@")) {
     toUsername = toUsername.slice(1);
   }
+  const toIdRaw = String(body.toId || "").replace(/[^0-9]/g, "");   // click-to-gift sends a player id directly
   const amount = Math.floor(Number(body.amount) || 0);
   const isAdmin = ADMIN_IDS.has(String(fromId));
   const maxGift = isAdmin ? ADMIN_MAX_GIFT : MAX_GIFT;
   const dailyCap = isAdmin ? ADMIN_DAILY_CAP : DAILY_GIFT_CAP;
 
-  if (!toUsername) return json(res, 400, { error: "Missing recipient username" });
+  if (!toIdRaw && !toUsername) return json(res, 400, { error: "Missing recipient" });
   if (amount < MIN_GIFT) return json(res, 400, { error: "Minimum gift is " + MIN_GIFT + " $MOON" });
   if (amount > maxGift) return json(res, 400, { error: "Max " + maxGift + " $MOON per gift" });
 
@@ -81,8 +82,10 @@ module.exports = async (req, res) => {
     const client = await db.pool.connect();
     try {
       await client.query("BEGIN");
-      const { rows: toRows } = await client.query("SELECT id FROM players WHERE LOWER(username) = LOWER($1)", [toUsername]);
-      if (toRows.length === 0) { await client.query("ROLLBACK"); return json(res, 404, { error: "No player with that username" }); }
+      const { rows: toRows } = toIdRaw
+        ? await client.query("SELECT id FROM players WHERE id = $1", [toIdRaw])
+        : await client.query("SELECT id FROM players WHERE LOWER(username) = LOWER($1)", [toUsername]);
+      if (toRows.length === 0) { await client.query("ROLLBACK"); return json(res, 404, { error: toIdRaw ? "Recipient not found" : "No player with that username" }); }
       const toId = toRows[0].id;
       if (String(toId) === String(fromId)) { await client.query("ROLLBACK"); return json(res, 400, { error: "You can't gift yourself" }); }
 

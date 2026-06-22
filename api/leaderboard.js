@@ -54,12 +54,14 @@ module.exports = async (req, res) => {
       rows = rows.map(r => ({ name: r.name, refs: Number(r.refs) || 0, vip_tier: Number(r.vip_tier) || 0 }));
     } else {
       const sql =
-        `SELECT name, lifetime_banked AS banked, vip_tier, region
+        `SELECT id, name, username, lifetime_banked AS banked, vip_tier, region
            FROM players
           ${region ? "WHERE region = $1" : ""}
           ORDER BY lifetime_banked DESC
           LIMIT 50`;
       ({ rows } = region ? await db.query(sql, [region]) : await db.query(sql));
+      // id is exposed so the client can gift a player directly from the board; username may be null.
+      rows = rows.map(r => ({ id: String(r.id), name: r.name, username: r.username || null, banked: Number(r.banked) || 0, vip_tier: Number(r.vip_tier) || 0, region: r.region || null }));
     }
     res.statusCode = 200;
     res.setHeader("content-type", "application/json");
