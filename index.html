@@ -17,6 +17,15 @@
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
 <meta name="theme-color" content="#05010f">
 <meta name="description" content="RUG OR RICHES ($MOON) — a free Telegram tapper. Pump the chart, bank before the rug, climb the ranks, and stack Season Points. No wallet needed.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", "@id": "https://rugorriches.app/#org", "name": "RUG OR RICHES", "url": "https://rugorriches.app/", "logo": "https://rugorriches.app/assets/brand/favicon.png", "sameAs": ["https://x.com/RUGorRICHESApp", "https://t.me/rugorricheslounge"] },
+    { "@type": "VideoGame", "name": "RUG OR RICHES ($MOON)", "url": "https://rugorriches.app/", "image": "https://rugorriches.app/assets/brand/welcome.png", "applicationCategory": "GameApplication", "operatingSystem": "Telegram, Web", "gamePlatform": ["Telegram Mini App", "Web"], "description": "A free Telegram press-your-luck tapper — pump the $MOON chart, bank before the rug, climb the ranks, and stack Season Points. No wallet needed.", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "publisher": { "@id": "https://rugorriches.app/#org" } }
+  ]
+}
+</script>
 <link rel="canonical" href="https://rugorriches.app/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="RUG OR RICHES — $MOON">
@@ -215,6 +224,21 @@
   .rd h4{font-size:16px; margin:6px 0;} .rd p{font-size:13px; color:var(--muted);}
   .rd.done .ph{color:var(--green);} .rd.done::before{background:var(--green);box-shadow:0 0 10px var(--green);}
 
+  /* roadmap flowchart (animated, clickable nodes) */
+  .rmap{position:relative; max-width:780px; margin:16px auto 0; padding-left:6px;}
+  .rmap::before{content:""; position:absolute; left:23px; top:12px; bottom:12px; width:3px; background:linear-gradient(180deg,var(--green),var(--cyan),#7c4dff); border-radius:3px; opacity:.5;}
+  @media(max-width:560px){ .rmap::before{left:19px;} }
+  .rnode{position:relative; display:block; padding:15px 18px 15px 60px; margin-bottom:16px; background:var(--card); border:1px solid var(--line); border-radius:16px; text-decoration:none; color:inherit; transition:opacity .7s ease, transform .7s ease, border-color .2s, box-shadow .2s;}
+  @media(max-width:560px){ .rnode{padding-left:52px;} }
+  .rnode:hover{border-color:var(--cyan); box-shadow:0 10px 26px rgba(35,240,255,.13);}
+  .rnode.in:hover{transform:translateY(-2px);}
+  .rnum{position:absolute; left:9px; top:15px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; color:#0a0420; font-size:14px; box-shadow:0 0 12px rgba(35,240,255,.35); z-index:1;}
+  @media(max-width:560px){ .rnum{left:5px;} }
+  .rnode h4{font-size:15px; margin:0 0 5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .rpill{font-size:9px; font-weight:900; letter-spacing:.4px; text-transform:uppercase; padding:3px 9px; border-radius:999px;}
+  .rnode p{font-size:12.5px; color:var(--muted); margin:0; line-height:1.55;}
+  .rmore{font-size:11px; color:var(--cyan); font-weight:800; margin-top:7px; display:inline-block;}
+
   /* faq */
   .faq{max-width:760px; margin:0 auto;}
   details{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:0 20px; margin-bottom:12px;}
@@ -404,25 +428,46 @@
 <section id="roadmap" class="wrap">
   <div class="eyebrow reveal">Ecosystem Development</div>
   <h2 class="reveal">Roadmap</h2>
-  <p class="sub reveal">A high-level view of our planned development stages.</p>
-  <div class="steps" style="grid-template-columns: repeat(3, 1fr);">
-    <div class="step reveal" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;">
-      <div class="num" style="background:var(--green);box-shadow:none;">1</div>
-      <h4>Live Now</h4>
-      <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">Telegram Mini App game loop, upgrades, VIP, crews, spins, and Season Points tracking.</p>
-    </div>
-    <div class="step reveal" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;">
-      <div class="num" style="background:var(--cyan);box-shadow:none;">2</div>
-      <h4>Coming Next</h4>
-      <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">Provably fair commit-reveal mechanics, verified quests, and regional expansion campaigns.</p>
-    </div>
-    <div class="step reveal" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;">
-      <div class="num" style="background:var(--gold);box-shadow:none;">3</div>
-      <h4>Subject to Review</h4>
-      <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">Snapshot consolidation, and compliance review of any potential on-chain token event.</p>
-    </div>
+  <p class="sub reveal">From a live game to a sustainable token — tap any stage for the full detail.</p>
+  <div class="rmap">
+    <a class="rnode reveal" href="/litepaper#phase1">
+      <div class="rnum" style="background:var(--green)">1</div>
+      <h4>Foundation <span class="rpill" style="background:rgba(29,255,143,.18);color:var(--green)">Live</span></h4>
+      <p>Telegram game loop, permanent upgrades, VIP tiers, the rank ladder, the energy economy, and Season Points.</p>
+      <span class="rmore">View details →</span>
+    </a>
+    <a class="rnode reveal" href="/litepaper#phase2">
+      <div class="rnum" style="background:var(--green)">2</div>
+      <h4>Competitive layer <span class="rpill" style="background:rgba(29,255,143,.18);color:var(--green)">Live</span></h4>
+      <p>Async same-seed duels, an Elo ranked ladder, all-crews weekly Crew Wars, live boards, gifting, and provably-fair Daily Crash.</p>
+      <span class="rmore">View details →</span>
+    </a>
+    <a class="rnode reveal" href="/litepaper#phase3">
+      <div class="rnum" style="background:var(--cyan)">3</div>
+      <h4>Real-time &amp; depth <span class="rpill" style="background:rgba(35,240,255,.18);color:var(--cyan)">Next</span></h4>
+      <p>Real-time PvP on a shared live chart, synchronized communal rounds, scheduled tournaments, and spectate/replays.</p>
+      <span class="rmore">View details →</span>
+    </a>
+    <a class="rnode reveal" href="/litepaper#phase4">
+      <div class="rnum" style="background:#7c4dff">4</div>
+      <h4>Pre-launch seasons <span class="rpill" style="background:rgba(124,77,255,.22);color:#c3a8ff">Proposed</span></h4>
+      <p>The six pre-launch airdrop snapshot cycles, qualification audits, and Sybil / anti-bot filtering.</p>
+      <span class="rmore">View details →</span>
+    </a>
+    <a class="rnode reveal" href="/litepaper#phase5">
+      <div class="rnum" style="background:#7c4dff">5</div>
+      <h4>Compliance &amp; token <span class="rpill" style="background:rgba(124,77,255,.22);color:#c3a8ff">Proposed</span></h4>
+      <p>Legal &amp; jurisdictional review, smart-contract audit, TGE on TON, deep locked liquidity, and the Stars-funded buyback-and-burn.</p>
+      <span class="rmore">View details →</span>
+    </a>
+    <a class="rnode reveal" href="/litepaper#phase6">
+      <div class="rnum" style="background:var(--gold)">6</div>
+      <h4>Ecosystem &amp; growth <span class="rpill" style="background:rgba(255,212,0,.2);color:var(--gold)">Proposed</span></h4>
+      <p>Phased DEX/CEX listings, staking &amp; holder perks, governance-lite, partnerships, and ongoing user acquisition.</p>
+      <span class="rmore">View details →</span>
+    </a>
   </div>
-  <p class="sub reveal" style="margin-top:24px">Full details are documented in the proposed <a href="/litepaper" style="color:var(--cyan)">Litepaper</a>.</p>
+  <p class="sub reveal" style="margin-top:24px">Token-related stages are proposed and contingent on legal review — not promises. Full detail in the <a href="/litepaper#roadmap" style="color:var(--cyan)">Litepaper</a>.</p>
 </section>
 
 <section id="explore" class="wrap">
