@@ -10,6 +10,7 @@ node_modules/
 
 # but brand image assets MUST ship with the app (override the ignores above)
 !assets/brand/*.webp
+!assets/brand/*.png
 !assets/brand/welcome.png
 !assets/brand/favicon.png
 !assets/brand/favicon-32.png
