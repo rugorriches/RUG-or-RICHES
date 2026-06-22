@@ -6791,20 +6791,26 @@
         if (!S.crew) { wrap.innerHTML = '<p class="sub">Join a crew in the <b>My Crew</b> tab to fight in Crew Wars.</p>'; return; }
         const wk = weekId(); if (S.warWeek !== wk) { S.warWeek = wk; S.warScore = 0; S.warClaim = false; save(); }
         if (!crewLoaded) { wrap.innerHTML = '<p class="sub">Loading real crew war...</p>'; refreshCrews(true); return; }
-        const frac = (Date.now() % (7 * 864e5)) / (7 * 864e5);
         const mine = (S.crewBoard || []).find(c => c.id === S.crewId) || { name: S.crew, warScore: S.warScore, totalBanked: crewTotal() };
-        const rivals = (S.crewBoard || []).filter(c => c.id !== S.crewId);
-        const rival = rivals.length ? rivals[crewHash(S.crewId + ":" + wk) % rivals.length] : { name: "BlackRug Capital", warScore: 12000, totalBanked: 2500000 };
         const your = Number(mine.warScore) || 0;
-        const rivalScore = Math.max(1, Math.floor((Number(rival.warScore) || 0) + (9000 + (crewHash(rival.name + wk) % 12) * 750) * (0.35 + frac)));
-        const winning = your >= rivalScore, maxs = Math.max(your, rivalScore, 1);
         const left = 7 * 864e5 - (Date.now() % (7 * 864e5)), dd = Math.floor(left / 864e5), hh = Math.floor((left % 864e5) / 36e5);
         const hero = document.createElement("div"); hero.className = "crewhero";
-        hero.innerHTML = '<div class="ds">⚔️ REAL CREW WAR · ends in ' + dd + 'd ' + hh + 'h</div><div class="big">' + esc(S.crew) + ' vs ' + esc(rival.name) + '</div><div class="v" style="color:' + (winning ? "var(--green)" : "var(--red)") + '">' + (winning ? "WINNING 🏆" : "LOSING 😤") + '</div>';
+        hero.innerHTML = '<div class="ds">⚔️ CREW WARS · ALL crews compete · ends in ' + dd + 'd ' + hh + 'h</div><div class="big">' + esc(S.crew) + '</div><div class="v" style="color:var(--gold)">' + fmt(your) + ' war pts this week</div>';
         wrap.appendChild(hero);
-        const bars = document.createElement("div"); bars.className = "card";
-        bars.innerHTML = '<div class="sec-h" style="margin-top:0">War score</div><div class="ds" style="display:flex;justify-content:space-between"><span style="color:var(--cyan)">' + esc(S.crew) + '</span><b>' + fmt(your) + '</b></div><div class="pbar2"><i style="width:' + (your / maxs * 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></div><div class="ds" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--red)">' + esc(rival.name) + '</span><b>' + fmt(rivalScore) + '</b></div><div class="pbar2"><i style="width:' + (rivalScore / maxs * 100) + '%;background:linear-gradient(90deg,var(--red),#ff7a3b)"></i></div><div class="ds" style="margin-top:10px">Your contribution: <b style="color:var(--gold)">' + fmt(S.warScore) + '</b> war pts · crew total updates after sync</div>';
-        wrap.appendChild(bars);
+        // War Standings — every crew ranked by THIS WEEK's war points (server aggregates p.war_score for the current week)
+        const standings = (S.crewBoard || []).map(c => ({ id: c.id, name: c.name, warScore: Number(c.warScore) || 0, members: Number(c.members) || 0 }))
+          .sort((a, b) => (b.warScore - a.warScore) || (b.members - a.members));
+        const myRank = standings.findIndex(c => c.id === S.crewId) + 1;
+        const st = document.createElement("div"); st.className = "card";
+        let sh = '<div class="sec-h" style="margin-top:0">🏆 War Standings · this week' + (myRank ? ' · you\'re #' + myRank : '') + '</div>';
+        if (!standings.some(c => c.warScore > 0)) sh += '<div class="ds" style="color:#9c92c4">No war points scored yet this week — rally your crew to seize the #1 spot.</div>';
+        else standings.slice(0, 15).forEach((c, i) => {
+          const me = c.id === S.crewId;
+          const rk = i === 0 ? '<span class="medal">🥇</span>' : i === 1 ? '<span class="medal">🥈</span>' : i === 2 ? '<span class="medal">🥉</span>' : (i + 1);
+          sh += '<div class="lb-row' + (me ? ' me' : '') + '"><div class="rk">' + rk + '</div><div class="nm">' + esc(c.name) + (me ? ' (you)' : '') + '</div><div class="sc">' + fmt(c.warScore) + ' ⚔️</div></div>';
+        });
+        st.innerHTML = sh;
+        wrap.appendChild(st);
         const rcost = Math.max(1000, Math.floor(S.bet * 3)), rgain = Math.floor(rcost * 1.6 * (1 + effVip() * 0.08)), canR = S.balance >= rcost;
         const ra = document.createElement("div"); ra.className = "card row";
         ra.innerHTML = '<div class="emo">⚔️</div><div class="grow"><div class="nm">Rally the crew</div><div class="ds">spend ' + fmt(rcost) + ' $MOON → +' + fmt(rgain) + ' war pts</div></div><button class="buy"' + (canR ? "" : " disabled") + '>Rally</button>';
@@ -6817,9 +6823,10 @@
           }
           S.balance -= rcost; S.warScore += rgain; save(); renderWars(); renderLive(); renderStats(); sfxBuy(); toast("⚔️", "Rallied!", "+" + fmt(rgain) + " war pts");
         });
-        const lead = Math.max(0, your - rivalScore), reward = Math.min(250000, Math.max(25000, Math.floor(25000 + lead * 0.35 + S.warScore * 0.6)));
-        const cl = document.createElement("div"); cl.className = "card row"; const canClaim = winning && !S.warClaim && S.warScore >= 5000;
-        cl.innerHTML = '<div class="emo">🏆</div><div class="grow"><div class="nm">Victory chest</div><div class="ds">' + (S.warClaim ? "Claimed this week ✓" : (winning ? (S.warScore >= 5000 ? "Claim scales with lead + contribution" : "Contribute 5K war pts to unlock") : "Pull ahead of " + esc(rival.name) + " to unlock")) + '</div></div><button class="qclaim ' + (S.warClaim ? "done" : "") + '"' + (canClaim ? "" : " disabled") + '>' + (S.warClaim ? "✓" : "Claim " + fmt(reward)) + '</button>';
+        const rankBonus = myRank === 1 ? 250000 : myRank === 2 ? 150000 : myRank === 3 ? 100000 : (myRank > 0 && myRank <= 10) ? 50000 : 15000;
+        const reward = Math.min(500000, rankBonus + Math.floor((S.warScore || 0) * 0.5));
+        const cl = document.createElement("div"); cl.className = "card row"; const canClaim = !S.warClaim && S.warScore >= 5000;
+        cl.innerHTML = '<div class="emo">🏆</div><div class="grow"><div class="nm">War chest · rank #' + (myRank || "—") + '</div><div class="ds">' + (S.warClaim ? "Claimed this week ✓" : (S.warScore >= 5000 ? "Scales with your crew\'s rank + your contribution — climb higher for more" : "Contribute 5,000 war pts to unlock")) + '</div></div><button class="qclaim ' + (S.warClaim ? "done" : "") + '"' + (canClaim ? "" : " disabled") + '>' + (S.warClaim ? "✓" : "Claim " + fmt(reward)) + '</button>';
         wrap.appendChild(cl);
         if (canClaim) cl.querySelector("button").addEventListener("click", () => {
           const b = cl.querySelector("button");
@@ -6833,19 +6840,19 @@
           '<div class="sec-h">🎯 How Crew Wars works</div>' +
           '<div class="card"><div class="ds" style="line-height:2">' +
           '<b style="color:var(--cyan)">1.</b> Join or create a crew in the <b>My Crew</b> tab.<br>' +
-          '<b style="color:var(--cyan)">2.</b> Each week your crew is matched against a rival crew.<br>' +
+          '<b style="color:var(--cyan)">2.</b> Every crew competes in one weekly league — all crews vs all crews.<br>' +
           '<b style="color:var(--cyan)">3.</b> Tap <b>⚔️ Rally</b> to convert $MOON into <b>war points</b> — every member\'s rallies stack into the crew total.<br>' +
-          '<b style="color:var(--cyan)">4.</b> Out-score the rival before the weekly timer hits zero.<br>' +
-          '<b style="color:var(--cyan)">5.</b> If you\'re winning <i>and</i> contributed 5,000+ war pts, claim the <b>🏆 Victory Chest</b> (25K–250K $MOON).' +
+          '<b style="color:var(--cyan)">4.</b> Climb the <b>War Standings</b> — the higher your crew ranks when the weekly timer ends, the bigger the chest.<br>' +
+          '<b style="color:var(--cyan)">5.</b> Contribute 5,000+ war pts to claim your <b>🏆 War Chest</b> — it scales with your crew\'s rank + contribution (up to 500K $MOON).' +
           '</div></div>' +
           '<div class="sec-h">❔ Crew Wars FAQ</div>' +
-          '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Whichever crew has more <b>war points</b> when the weekly timer ends wins. Your crew\'s score is the sum of every member\'s war points.</div></details>' +
+          '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Every crew is ranked together by total <b>war points</b> this week — the sum of its members\' points. Top crews win the biggest chests when the timer ends. (1v1 head-to-head lives in the <b>Compete → Duels</b> tab.)</div></details>' +
           '<details class="faq"><summary>How do I earn war points?</summary><div class="a">Tap <b>⚔️ Rally</b> to spend $MOON for instant war points. It\'s the main way to contribute — spend only what you\'re comfortable with.</div></details>' +
           '<details class="faq"><summary>Do I need a crew?</summary><div class="a">Yes — join or create one on the <b>My Crew</b> tab. Solo players can\'t enter wars.</div></details>' +
           '<details class="faq"><summary>Does VIP help?</summary><div class="a">Yes — higher VIP tiers give more war points per rally.</div></details>' +
-          '<details class="faq"><summary>What\'s the Victory Chest worth?</summary><div class="a">25K–250K $MOON, scaling with how far ahead your crew is plus your personal contribution. You must contribute at least <b>5,000 war pts</b> to be eligible.</div></details>' +
-          '<details class="faq"><summary>What if my crew loses?</summary><div class="a">No penalty — you keep everything you\'ve banked. The chest just doesn\'t unlock that week. A fresh rival is matched next week.</div></details>' +
-          '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — scores zero out, a new rival is matched, and the Victory Chest can be claimed again.</div></details>';
+          '<details class="faq"><summary>What\'s the War Chest worth?</summary><div class="a">15K–500K $MOON, scaling with your crew\'s rank in the standings plus your personal contribution. You must contribute at least <b>5,000 war pts</b> to be eligible.</div></details>' +
+          '<details class="faq"><summary>What if my crew finishes low?</summary><div class="a">No penalty — you keep everything you\'ve banked. Finishing lower just means a smaller chest. Standings reset every week so every crew starts fresh.</div></details>' +
+          '<details class="faq"><summary>When does it reset?</summary><div class="a">Every week — war points zero out and the standings reset, so every crew starts even.</div></details>';
         wrap.appendChild(f);
       }
       async function renderBoards() {

@@ -402,38 +402,25 @@ module.exports = async (req, res) => {
         const week = periods.week;
         if (!player.crew_id || (Number(player.war_score) || 0) < 5000) {
           await client.query("ROLLBACK");
-          return json(res, 422, { error: "War chest requirement not met" });
+          return json(res, 422, { error: "Contribute 5,000+ war pts to claim" });
         }
-        const { rows: crews } = await client.query(
-          `SELECT c.id::text, c.name, c.created_at,
-                  COUNT(p.id)::int AS members,
-                  COALESCE(SUM(p.lifetime_banked), 0)::bigint AS total_banked,
+        // All-crews league: rank every crew by THIS WEEK's war points; chest scales with rank + personal contribution.
+        const { rows: crewRanks } = await client.query(
+          `SELECT c.id::text AS id,
                   COALESCE(SUM(CASE WHEN p.war_week = $1 THEN p.war_score ELSE 0 END), 0)::bigint AS war_score
-           FROM crews c
-           LEFT JOIN players p ON p.crew_id = c.id
-           GROUP BY c.id, c.name, c.created_at
+             FROM crews c
+             LEFT JOIN players p ON p.crew_id = c.id
+            GROUP BY c.id
            HAVING COUNT(p.id) > 0
-           ORDER BY total_banked DESC, members DESC, c.created_at ASC
-           LIMIT 50`,
+            ORDER BY war_score DESC`,
           [week]
         );
-        const mine = crews.find(crew => crew.id === String(player.crew_id));
-        const rivals = crews.filter(crew => crew.id !== String(player.crew_id));
-        if (!mine || !rivals.length) {
-          await client.query("ROLLBACK");
-          return json(res, 422, { error: "No eligible rival crew yet" });
-        }
-        const rival = rivals[crewHash(String(player.crew_id) + ":" + week) % rivals.length];
-        const fraction = (Date.now() % 604800000) / 604800000;
-        const rivalScore = Math.max(1, Math.floor((Number(rival.war_score) || 0) + (9000 + (crewHash(rival.name + week) % 12) * 750) * (0.35 + fraction)));
-        const mineScore = Number(mine.war_score) || 0;
-        if (mineScore < rivalScore) {
-          await client.query("ROLLBACK");
-          return json(res, 422, { error: "Your crew is not winning yet" });
-        }
+        const myId = String(player.crew_id);
+        let rank = crewRanks.findIndex(c => String(c.id) === myId) + 1;
+        if (rank < 1) rank = crewRanks.length + 1;
+        const rankBonus = rank === 1 ? 250000 : rank === 2 ? 150000 : rank === 3 ? 100000 : (rank <= 10 ? 50000 : 15000);
         token = "war_chest:" + week;
-        const lead = mineScore - rivalScore;
-        reward = Math.min(250000, Math.max(25000, Math.floor(25000 + lead * 0.35 + (Number(player.war_score) || 0) * 0.6)));
+        reward = Math.min(500000, rankBonus + Math.floor((Number(player.war_score) || 0) * 0.5));
       } else {
         await client.query("ROLLBACK");
         return json(res, 400, { error: "Unknown claim kind" });
