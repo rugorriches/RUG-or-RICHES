@@ -8,7 +8,11 @@ const db = require("./db");
 let schemaReady;
 async function ensureSchema() {
   if (!schemaReady) {
-    schemaReady = db.query("ALTER TABLE players ADD COLUMN IF NOT EXISTS region VARCHAR(8)");
+    schemaReady = (async () => {
+      await db.query("ALTER TABLE players ADD COLUMN IF NOT EXISTS region VARCHAR(8)");
+      // index keeps the banked leaderboard fast as the player base grows well beyond 50
+      await db.query("CREATE INDEX IF NOT EXISTS players_lifetime_banked ON players(lifetime_banked DESC)");
+    })();
   }
   return schemaReady;
 }
@@ -49,7 +53,7 @@ module.exports = async (req, res) => {
           ${weekly ? "WHERE child.created_at >= now() - interval '7 days'" : ""}
           GROUP BY ref.id, ref.name, ref.username, ref.vip_tier
           ORDER BY refs DESC
-          LIMIT 50`;
+          LIMIT 100`;
       ({ rows } = await db.query(sql));
       rows = rows.map(r => ({ name: r.name, refs: Number(r.refs) || 0, vip_tier: Number(r.vip_tier) || 0 }));
     } else {
@@ -58,7 +62,7 @@ module.exports = async (req, res) => {
            FROM players
           ${region ? "WHERE region = $1" : ""}
           ORDER BY lifetime_banked DESC
-          LIMIT 50`;
+          LIMIT 100`;
       ({ rows } = region ? await db.query(sql, [region]) : await db.query(sql));
       // id is exposed so the client can gift a player directly from the board; username may be null.
       rows = rows.map(r => ({ id: String(r.id), name: r.name, username: r.username || null, banked: Number(r.banked) || 0, vip_tier: Number(r.vip_tier) || 0, region: r.region || null }));

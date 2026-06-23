@@ -5093,6 +5093,10 @@
               renderLive();
               renderStats();
               runStartupClaims();
+              if (data.giftsReceived && data.giftsReceived > 0) {
+                try { sfxCash && sfxCash(); } catch (e) {}
+                toast("🎁", "Gift received!", "+" + fmt(data.giftsReceived) + " $MOON from a friend");
+              }
             }
           }
         } catch (e) {

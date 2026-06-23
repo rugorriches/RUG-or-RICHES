@@ -33,6 +33,7 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS skin VARCHAR(40) DEFAULT 'gold',
           ADD COLUMN IF NOT EXISTS skins JSONB DEFAULT '["gold"]'::jsonb,
           ADD COLUMN IF NOT EXISTS war_week VARCHAR(20),
+          ADD COLUMN IF NOT EXISTS gifts_seen_at TIMESTAMPTZ,
           ADD COLUMN IF NOT EXISTS war_score BIGINT DEFAULT 0 NOT NULL,
           ADD COLUMN IF NOT EXISTS war_claim BOOLEAN DEFAULT FALSE NOT NULL,
           ADD COLUMN IF NOT EXISTS last_sync_at TIMESTAMPTZ,
@@ -518,9 +519,23 @@ module.exports = async (req, res) => {
 
     // ---------------- LOAD FRESH PROFILE & RETURN ----------------
     const profile = await loadPlayerProfile(tgUser.id);
+    // Surface $MOON gifts received since the player last synced (cosmetic toast). On the very first
+    // sync the watermark is null — we just initialize it (no historical dump), then notify going forward.
+    let giftsReceived = 0;
+    try {
+      const { rows: pr } = await db.query("SELECT gifts_seen_at FROM players WHERE id = $1", [tgUser.id]);
+      const seenAt = pr[0] && pr[0].gifts_seen_at;
+      if (seenAt) {
+        const { rows: gr } = await db.query(
+          "SELECT COALESCE(SUM(amount),0)::bigint AS amt FROM gifts WHERE to_id = $1 AND created_at > $2",
+          [tgUser.id, seenAt]);
+        giftsReceived = Number(gr[0] && gr[0].amt) || 0;
+      }
+      if (!seenAt || giftsReceived > 0) await db.query("UPDATE players SET gifts_seen_at = now() WHERE id = $1", [tgUser.id]);
+    } catch (e) {}
     res.statusCode = 200;
     res.setHeader("content-type", "application/json");
-    return res.end(JSON.stringify({ player: profile }));
+    return res.end(JSON.stringify({ player: profile, giftsReceived }));
   } catch (err) {
     console.error("[sync-api] Error:", err.message);
     res.statusCode = 500;
