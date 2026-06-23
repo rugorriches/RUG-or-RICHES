@@ -4558,7 +4558,6 @@
       <div class="card" style="margin-top:14px;">
         <div class="toggle"><span>🔊 Sound effects</span><button class="sw on" id="soundSw"></button></div>
       </div>
-      <button class="big-btn" id="resetBtn" style="background:#3a2456;color:#fff;">Reset progress</button>
     </div>
 
     <div class="panel" id="panel-help">
@@ -4692,8 +4691,6 @@
         </div>
       </div>
       <button class="big-btn" id="replayTut">▶️ Replay tutorial</button>
-      <button id="resetProgress" style="width:100%;margin-top:10px;background:transparent;color:#ff6b6b;border:1px solid #5a1a2a;border-radius:12px;padding:11px;font-weight:800;cursor:pointer">🧹 Reset my progress (start over)</button>
-      <div style="text-align:center;opacity:.45;font-size:10px;margin-top:8px">build v6 · 2026-06-23</div>
     </div>
 
     <nav>
@@ -7671,7 +7668,7 @@
       $("nameCancel").addEventListener("click", () => $("nameModal").classList.remove("show"));
       $("nameSave").addEventListener("click", () => { const v = $("nameInput").value.trim(); if (v) { S.name = v.slice(0, 18); S.nameSet = true; save(); renderStats(); renderLive(); sendSettings({ name: S.name }); if (hasCloudAuth) syncWithCloud(S).catch(() => { }); } $("nameModal").classList.remove("show"); });
       $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSave").click(); });
-      $("resetBtn").addEventListener("click", () => {
+      $("resetBtn") && $("resetBtn").addEventListener("click", () => {
         if (confirm("Reset ALL progress? Cannot be undone.")) {
           ["moontap", "moontap_last", "moontap_referred", "moontap_season", "moontap_tut"].forEach(k => lsDel(k)); location.href = location.origin + location.pathname;
         }
@@ -7725,9 +7722,11 @@
       }
 
       // ---------- SEASON ----------
+      // Fixed global Season 1 end — same countdown on every device, and it actually ticks down
+      // (the old per-device localStorage value reset to +30d on every Telegram open, so it never moved).
+      const SEASON_END = Date.parse("2026-07-23T16:00:00Z");
       function seasonTick() {
-        let end = parseInt(lsGet("moontap_season") || "0");
-        if (!end) { end = Date.now() + 30 * 864e5; lsSet("moontap_season", end); }
+        const end = SEASON_END;
         let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const d = Math.floor(s / 86400); s %= 86400; const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); const sec = s % 60;
         const txt = d + "d " + h + "h " + m + "m " + sec + "s"; $("seasonTimer").textContent = txt; const ad = $("adSeason"); if (ad) ad.textContent = txt;
         renderEventBanner();
