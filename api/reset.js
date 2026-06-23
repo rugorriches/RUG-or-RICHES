@@ -52,7 +52,9 @@ module.exports = async (req, res) => {
     await db.query("UPDATE players SET balance=500, airdrop_pts=0, lifetime_banked=0, taps=0, rugs=0, cashouts=0, best_pot=0, best_price=1, vip_tier=0, stars_spent=0 WHERE id=$1", [id]);
     // optional fields — best-effort, ignore any that don't exist on this DB
     for (const c of ["piggy", "pnl_won", "pnl_lost", "war_score", "streak", "coin_xp"]) { try { await db.query("UPDATE players SET " + c + "=0 WHERE id=$1", [id]); } catch (e) {} }
-    for (const kv of [["war_claim", "FALSE"], ["season_pass", "FALSE"], ["first_buy_used", "FALSE"], ["starter_bought", "FALSE"], ["gifts_seen_at", "NULL"], ["war_week", "NULL"], ["last_day", "NULL"], ["deal_day", "NULL"], ["coin_level", "1"], ["vip_sub_until", "0"]]) { try { await db.query("UPDATE players SET " + kv[0] + "=" + kv[1] + " WHERE id=$1", [id]); } catch (e) {} }
+    for (const kv of [["war_claim", "FALSE"], ["season_pass", "FALSE"], ["first_buy_used", "FALSE"], ["starter_bought", "FALSE"], ["gifts_seen_at", "NULL"], ["war_week", "NULL"], ["last_day", "NULL"], ["deal_day", "NULL"], ["coin_level", "1"], ["vip_sub_until", "0"], ["combo_day", "NULL"], ["vip_day", "NULL"], ["crew_id", "NULL"], ["skin", "'gold'"], ["season_days", "'{}'"], ["season_start", "NULL"], ["season_claim_day", "NULL"]]) { try { await db.query("UPDATE players SET " + kv[0] + "=" + kv[1] + " WHERE id=$1", [id]); } catch (e) {} }
+    try { await db.query("UPDATE players SET skins='[\"gold\"]'::jsonb WHERE id=$1", [id]); } catch (e) {}
+    try { await db.query("UPDATE players SET ach='[]'::jsonb WHERE id=$1", [id]); } catch (e) {}
     try { await db.query("DELETE FROM upgrades WHERE player_id=$1", [id]); await db.query("INSERT INTO upgrades (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [id]); } catch (e) {}
     try { await db.query("DELETE FROM quests WHERE player_id=$1", [id]); } catch (e) {}
     try { await db.query("DELETE FROM ranked WHERE player_id=$1", [id]); } catch (e) {}

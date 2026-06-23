@@ -5029,6 +5029,7 @@
       let crewLoaded = false;
       let syncInProgress = false;
       let syncTimeout = null;
+      let _resetting = false;   // when true, block ALL cloud sync/save so a reset can't be clobbered by a stale in-memory upload
       let startupClaimsChecked = false;
       const cloudSettings = state => ({
         name: state && state.name,
@@ -5096,6 +5097,7 @@
       async function syncWithCloud(stateToSave = null) {
         const tg = window.Telegram && window.Telegram.WebApp;
         if (!tg || !tg.initData) return;
+        if (_resetting) return;   // mid-reset: never upload (or even pull) so the server reset stands
         if (syncInProgress) return;
         syncInProgress = true;
         try {
@@ -5218,6 +5220,7 @@
       }
 
       function save() {
+        if (_resetting) return;   // mid-reset: don't persist or re-queue a sync of the old state
         markSeasonActive();
         clampEconomyState();
         try { if (typeof energy === "number") { S.energy = Math.max(0, Math.floor(energy)); S.energyTs = Date.now(); } } catch (e) { }   // persist energy + timestamp so it recharges over real time
@@ -7567,11 +7570,12 @@
       // Custom 2-step reset confirmation (Telegram's WebView silently blocks a 2nd back-to-back native confirm())
       let resetStep = 0;
       function doResetProgress() {
+        _resetting = true; try { clearTimeout(syncTimeout); } catch (e) {}   // freeze all sync/save first, so nothing re-uploads the old state over the reset
         const b = $("resetProgress"); if (b) { b.disabled = true; b.textContent = "Resetting…"; }
         cloudAction("/api/reset", {}).then(r => {
           if (r && r.ok) { try { localStorage.removeItem("moontap"); localStorage.removeItem("moontap_tut"); } catch (e) {} toast("🧹", "Progress reset", "Starting fresh — reloading…"); setTimeout(() => location.reload(), 900); }
-          else { if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", (r && r.error) || "Try again"); }
-        }).catch(err => { if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", err.message); });
+          else { _resetting = false; if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", (r && r.error) || "Try again"); }
+        }).catch(err => { _resetting = false; if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", err.message); });
       }
       $("resetProgress") && $("resetProgress").addEventListener("click", () => {
         const m = $("resetModal");
