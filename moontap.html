@@ -4836,6 +4836,15 @@
       </div>
     </div>
 
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-label="Reset progress">
+      <div class="box" style="max-width:360px;text-align:center">
+        <div style="font-size:42px;line-height:1">⚠️</div>
+        <h3 style="margin:4px 0 2px">Permanent reset</h3>
+        <div class="ds" id="resetBody" style="font-size:13px;line-height:1.6;margin:8px 2px;text-align:left"></div>
+        <div class="mbtns" style="margin-top:12px"><button class="ok" id="resetConfirmBtn" style="flex:1;background:#ff4d4d;color:#fff;border:none">Continue →</button><button id="resetCancelBtn">Cancel</button></div>
+      </div>
+    </div>
+
     <div id="tut">
       <div class="em" id="tutEm">📈</div>
       <h3 id="tutH"></h3>
@@ -5275,7 +5284,7 @@
       const tapPower = () => 1 + lvl("power") * 0.45;
       const effVip = () => Math.max(S.vip || 0, (S.vipSubUntil && Date.now() < S.vipSubUntil) ? 4 : 0);   // 30-day VIP Pass grants Diamond perks while active
       const maxEnergy = () => 100 + lvl("energy") * 40 + effVip() * 25 + (rankPerk().eb || 0);
-      const RECHARGE_SECS = () => Math.max(7200, 14400 - lvl("regen") * 1500);   // ~4h full recharge, faster with the Regen upgrade (floor ~2h)
+      const RECHARGE_SECS = () => Math.max(5400, 14400 - lvl("regen") * 1500 - rankIdx() * 600 - effVip() * 400);   // ~4h base; faster with Regen upgrade AND higher rank/VIP (Megalodon -1h, Diamond -27min); floor ~1.5h
       const regenRate = () => maxEnergy() / RECHARGE_SECS();   // energy recharges over HOURS now — a real "come back later or grab a ⚡ refill" gate
       const tapCost = (stake) => Math.min(12, 1 + Math.floor((stake || 0) / 60000));   // energy cost scales with bet size: small bets ~1, whale-size bets up to 12 — keeps energy a real sink (and refill buy-driver) at high stakes
       const autoRate = () => lvl("auto") * 1.2;   // idle nerf — active skill matters more than AFK stacking
@@ -7555,14 +7564,28 @@
       $("adminRefresh") && $("adminRefresh").addEventListener("click", openAdmin);
       $("adminClose") && $("adminClose").addEventListener("click", () => $("adminModal").classList.remove("show"));
       $("adminModal") && $("adminModal").addEventListener("click", e => { if (e.target.id === "adminModal") $("adminModal").classList.remove("show"); });
-      $("resetProgress") && $("resetProgress").addEventListener("click", () => {
-        if (!confirm("⚠️ PERMANENT RESET\n\nThis wipes YOUR account back to zero — balance, banks, VIP, upgrades, rank and all progress — and reopens the intro walkthrough.\n\nThis CANNOT be undone. Continue?")) return;
-        if (!confirm("Last chance — are you absolutely sure? All of your progress will be permanently erased.")) return;
-        const b = $("resetProgress"); b.disabled = true; b.textContent = "Resetting…";
+      // Custom 2-step reset confirmation (Telegram's WebView silently blocks a 2nd back-to-back native confirm())
+      let resetStep = 0;
+      function doResetProgress() {
+        const b = $("resetProgress"); if (b) { b.disabled = true; b.textContent = "Resetting…"; }
         cloudAction("/api/reset", {}).then(r => {
           if (r && r.ok) { try { localStorage.removeItem("moontap"); localStorage.removeItem("moontap_tut"); } catch (e) {} toast("🧹", "Progress reset", "Starting fresh — reloading…"); setTimeout(() => location.reload(), 900); }
-          else { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; toast("⚠️", "Reset failed", (r && r.error) || "Try again"); }
-        }).catch(err => { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; toast("⚠️", "Reset failed", err.message); });
+          else { if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", (r && r.error) || "Try again"); }
+        }).catch(err => { if (b) { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; } toast("⚠️", "Reset failed", err.message); });
+      }
+      $("resetProgress") && $("resetProgress").addEventListener("click", () => {
+        const m = $("resetModal");
+        if (!m) { if (confirm("Permanently reset ALL your progress? This cannot be undone.")) doResetProgress(); return; }
+        resetStep = 1;
+        $("resetBody").innerHTML = "This <b>permanently erases everything</b> — balance, banks, rank, airdrop progress, VIP, upgrades — back to a brand-new account, and reopens the intro walkthrough.<br><br>This <b>cannot be undone</b>.";
+        $("resetConfirmBtn").textContent = "Continue →";
+        m.classList.add("show");
+      });
+      $("resetCancelBtn") && $("resetCancelBtn").addEventListener("click", () => $("resetModal").classList.remove("show"));
+      $("resetModal") && $("resetModal").addEventListener("click", e => { if (e.target.id === "resetModal") $("resetModal").classList.remove("show"); });
+      $("resetConfirmBtn") && $("resetConfirmBtn").addEventListener("click", () => {
+        if (resetStep === 1) { resetStep = 2; $("resetBody").innerHTML = "⚠️ <b>Last chance.</b> This is permanent and irreversible.<br><br>Erase everything and start over as a brand-new player?"; $("resetConfirmBtn").textContent = "Yes, permanently erase"; }
+        else { $("resetModal").classList.remove("show"); doResetProgress(); }
       });
       function shareTo(p) {
         const url = inviteLink(); const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
