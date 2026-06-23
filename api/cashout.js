@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
 const PIGGY_CAP = 150000;
 const PRICE_CAP = 1000;

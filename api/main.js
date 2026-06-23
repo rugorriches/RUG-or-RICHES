@@ -19,6 +19,7 @@ const routes = {
   duel: require("./duel"),
   admin: require("./admin"),
   ranked: require("./ranked"),
+  reset: require("./reset"),
 };
 
 module.exports = async (req, res) => {

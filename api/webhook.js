@@ -2,7 +2,7 @@ const db = require("./db");
 const { buildPurchase } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
 
 // /start message config — override any of these with Vercel env vars

@@ -26,6 +26,7 @@
     { "src": "/api/duel", "dest": "/api/main.js?route=duel" },
     { "src": "/api/admin", "dest": "/api/main.js?route=admin" },
     { "src": "/api/ranked", "dest": "/api/main.js?route=ranked" },
+    { "src": "/api/reset", "dest": "/api/main.js?route=reset" },
     { "src": "/favicon.ico", "dest": "/assets/brand/favicon.ico" },
     { "src": "/play", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/moontap.html" },
     { "src": "/", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/index.html" },

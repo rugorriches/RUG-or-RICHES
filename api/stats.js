@@ -1,5 +1,5 @@
 const db = require("./db");
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
 
 module.exports = async (req, res) => {

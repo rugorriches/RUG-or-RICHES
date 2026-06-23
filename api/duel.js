@@ -9,7 +9,7 @@ const db = require("./db");
 const ranked = require("./ranked");   // ranked ladder MMR (fed only by genuine both-submitted duels)
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const MAX_WAGER = 10000000;          // 10M $MOON max per side
 const MAX_OPEN_DUELS = 20;           // anti-spam: open (un-accepted) duels a challenger may hold
 const DUEL_TTL_HOURS = 24;           // open/active duels auto-resolve after this

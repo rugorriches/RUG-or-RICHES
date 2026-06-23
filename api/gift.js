@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const MIN_GIFT = 1000;
 // Standard caps protect the economy from abuse. Admins (ADMIN_IDS env, comma-separated
 // Telegram ids) get raised caps for airdrop distribution. All values are env-overridable

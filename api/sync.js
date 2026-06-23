@@ -3,7 +3,7 @@ const db = require("./db");
 const { payloadOf, VIPSUB } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
-const MOON_CAP = 1000000000;
+const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
 const PRICE_CAP = 100;
 const REFERRAL_REWARD = 5000;

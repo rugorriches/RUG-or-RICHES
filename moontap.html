@@ -4577,9 +4577,10 @@
         <div class="row">
           <div class="emo">📈</div>
           <div class="grow">
-            <div class="nm">Live market</div>
-            <div class="ds">Real-time order flow from other traders moves the chart on its own — green candles when
+            <div class="nm">Live-style market</div>
+            <div class="ds">A simulated market of buyers and sellers moves the chart on its own — green candles when
               buyers win, red when sellers do. Your taps add buy pressure. 🐋 Whale dumps can crash it without warning.
+              (A shared real-time chart driven by all live players is coming in a later phase.)
             </div>
           </div>
         </div>
@@ -4690,6 +4691,7 @@
         </div>
       </div>
       <button class="big-btn" id="replayTut">▶️ Replay tutorial</button>
+      <button id="resetProgress" style="width:100%;margin-top:10px;background:transparent;color:#ff6b6b;border:1px solid #5a1a2a;border-radius:12px;padding:11px;font-weight:800;cursor:pointer">🧹 Reset my progress (start over)</button>
     </div>
 
     <nav>
@@ -4891,7 +4893,7 @@
       let audioUnlocked = false;
       let lastHapticZone = null;
 
-      const MOON_CAP = 1000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
+      const MOON_CAP = 1000000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
 
       function getHeatZone(heatPercent) {
         const h = clamp(Number(heatPercent) || 0, 0, 100);
@@ -5099,6 +5101,7 @@
             if (data && data.player) {
               hasCloudAuth = true;
               mergeState(data.player);
+              try { applyUnlocks(false); } catch (e) {}   // re-baseline gating to the authoritative bank count (fixes first-bank-unlocks-everything)
               renderLive();
               renderStats();
               runStartupClaims();
@@ -5207,6 +5210,7 @@
       function save() {
         markSeasonActive();
         clampEconomyState();
+        try { if (typeof energy === "number") { S.energy = Math.max(0, Math.floor(energy)); S.energyTs = Date.now(); } } catch (e) { }   // persist energy + timestamp so it recharges over real time
         try { localStorage.setItem("moontap", JSON.stringify(S)); } catch (e) { }
         if (hasCloudAuth) {
           clearTimeout(syncTimeout);
@@ -5270,7 +5274,8 @@
       const tapPower = () => 1 + lvl("power") * 0.45;
       const effVip = () => Math.max(S.vip || 0, (S.vipSubUntil && Date.now() < S.vipSubUntil) ? 4 : 0);   // 30-day VIP Pass grants Diamond perks while active
       const maxEnergy = () => 100 + lvl("energy") * 40 + effVip() * 25 + (rankPerk().eb || 0);
-      const regenRate = () => Math.min(0.8 + lvl("regen") * 0.25, 3);   // slower regen for ALL tiers — energy is a real resource again
+      const RECHARGE_SECS = () => Math.max(7200, 14400 - lvl("regen") * 1500);   // ~4h full recharge, faster with the Regen upgrade (floor ~2h)
+      const regenRate = () => maxEnergy() / RECHARGE_SECS();   // energy recharges over HOURS now — a real "come back later or grab a ⚡ refill" gate
       const tapCost = (stake) => Math.min(12, 1 + Math.floor((stake || 0) / 60000));   // energy cost scales with bet size: small bets ~1, whale-size bets up to 12 — keeps energy a real sink (and refill buy-driver) at high stakes
       const autoRate = () => lvl("auto") * 1.2;   // idle nerf — active skill matters more than AFK stacking
       const comboCap = () => 40 + lvl("combo") * 12;
@@ -5329,6 +5334,8 @@
 
       // ---------- RUNTIME ----------
       let energy = maxEnergy();
+      // energy now persists across sessions and recharges over real time — restore saved energy + offline regen
+      (function () { try { if (S.energy != null && S.energyTs) { const el = Math.max(0, (Date.now() - Number(S.energyTs)) / 1000); energy = clamp((Number(S.energy) || 0) + el * regenRate(), 0, maxEnergy()); } } catch (e) { } })();
       let pot = 0, price = 1.0, ath = 1.0, combo = 0, comboTimer = 0;
       let predActive = false, predDir = 0, predLock = 0, predT = 0, predStake = 0, predRoundId = null;   // long/short prediction round
       let dPot = 0, dBal = S.balance, dAir = S.airdrop;
@@ -5567,7 +5574,7 @@
         const cur = invested > 0 ? roundCur : S.betCur;
         const stake = Math.max(1, Math.min(S.bet, betMax()));
         const eCost = tapCost(stake);
-        if (energy < eCost) { flashEnergy(); if (pot > 0 && !energyNudged) { energyNudged = true; toast("🔋", "Out of energy", "Keep this run alive — grab a ⚡ refill (25⭐) in the Store, or wait for regen"); } return; }
+        if (energy < eCost) { flashEnergy(); if (pot > 0 && !energyNudged) { energyNudged = true; toast("🔋", "Out of energy", "Grab a ⚡ refill to keep this run alive — or come back soon, your tank recharges on its own"); } return; }
         energyNudged = false;
         if (curBal(cur) < stake) { faucetOrWarn(cur); return; }
         if (roundClicks >= betsPerRound()) { if (panelOpen === "game" && Date.now() - lastLimitT > 2000) { lastLimitT = Date.now(); toast("🛑", "Round bet limit", "Cash out to start a fresh round — VIP raises the cap"); } return; }
@@ -5724,7 +5731,8 @@
         ac();
         const cur = roundCur || S.betCur; const r = risk();
         const streakMul = 1 + Math.min(winStreak, 10) * 0.05;
-        const rawPayout = Math.floor(pot * (1 + r * cashBonus()) * streakMul);
+        const clutchBoost = r >= 0.95 ? 1.6 : r >= 0.85 ? 1.3 : r >= 0.7 ? 1.12 : 1;   // REWARD: banking deep in the danger zone pays a premium — nerve is worth it
+        const rawPayout = Math.floor(pot * (1 + r * cashBonus() * clutchBoost) * streakMul);
         const payout = Math.floor(Math.min(rawPayout, Math.max(1, invested * maxRoundRoi())) * eventMult()); addCur(cur, payout);
         const profit = payout - invested;
         const settlement = { cur: "moon", payout: payout, invested: Math.max(1, Math.floor(invested)), roundInvested: Math.max(1, Math.floor(roundInvestedTotal || invested)), peak: roundPeak, clicks: roundClicks, outcome: "cashout", roundId: roundId || actionToken() };
@@ -5814,9 +5822,14 @@
           pot *= price / preP;   // your position rides the price both ways
           if (price > ath) { ath = price; if (ath > S.bestPrice) S.bestPrice = ath; }
         }
+        // DRAMA: frequent small fakeout dips (not rugs) keep every ride tense — chance & size scale with heat
+        if (pot > 0 && price > 1.25 && Math.random() < 0.015 + (heat / 100) * 0.04) {
+          const dP = price; price = Math.max(1, price * (0.94 - Math.random() * 0.05)); capPrice(); pot *= price / dP;
+          if (panelOpen === "game" && navigator.vibrate) navigator.vibrate(12);
+        }
         if (price > roundPeak) roundPeak = price;
         const over = clamp((price - 1) / 6, 0, 1), posRisk = pot > 0 ? clamp(invested / liq, 0, 1) : 0, sellers = clamp(0.5 - mktBuy, 0, 0.5) * 2, frenzy = clamp(combo / 120, 0, 1);
-        const blowoff = price >= roundPeak * 0.985 ? 0.12 : 0;   // riding the very top is extra fragile
+        const blowoff = price >= roundPeak * 0.985 ? 0.2 : 0;   // BLOW-OFF TOP: riding the very top is extra fragile (stronger now)
         const overextended = clamp((price - 8) / 20, 0, 1);
         const target = over * 45 + overextended * 35 + posRisk * 28 + sellers * 18 + frenzy * 8;
         
@@ -5827,7 +5840,7 @@
         if (roundsPlayed < BEGINNER_ROUNDS) {
           growthMult *= BEGINNER_HEAT_MULT;
         }
-        let heatDiff = (target - heat) * 0.045 + pumpVel * 10 + blowoff * 4;   // slower passive heat climb → cautious rounds can stretch toward ~2 min (rare); aggressive tapping still spikes fast
+        let heatDiff = (target - heat) * 0.07 + pumpVel * 10 + blowoff * 4;   // faster heat climb → tighter, more dangerous rounds; aggressive tapping spikes fast
         if (heatDiff > 0) {
           heatDiff *= growthMult;
         }
@@ -5835,13 +5848,14 @@
         pumpVel *= 0.85;
         heat = clamp(heat, 0, 100);
 
-        if (pot > 0 && price > 8) heat = Math.min(100, heat + Math.min(6, price - 8) * 0.02);   // high multipliers heat up on their own — can't park at 300x risk-free
+        if (pot > 0 && price > 8) heat = Math.min(100, heat + Math.min(6, price - 8) * 0.03);   // high multipliers heat up on their own — can't park at 300x risk-free
+        if (pot > 0) heat = Math.min(100, heat + clamp(roundDuration - 18, 0, 90) * 0.022);   // TIME PRESSURE: heat escalates after ~18s so rounds resolve — caps the tail near ~2 min (rare), kills 10-min parked rounds
         if (pot > 0 && !busting && heat >= 90 && Math.random() < 0.008) startBust("hard");  // extreme-heat surprise rug, no warning
         feedAcc++; if (feedAcc >= 2) { feedAcc = 0; spawnTrade(); }
         const whaleSafe = effVip() >= 4 ? 0.4 : 1;
         if (Math.random() < (0.003 + (heat / 100) * 0.012) * whaleSafe) { pushFeed("🐋 " + pick(WHALES) + " DUMPED", false, true); heat = Math.min(100, heat + 22); price *= 0.9; capPrice(); }
         if (pot > 0 && heat >= CONFIG.warnHeat && dumpWarn <= 0) { dumpWarn = 1.7; if (panelOpen === "game") { toast("🚨", "DUMP INCOMING", "Sell NOW or get rugged!"); sfxRug(); } }
-        if (Math.random() < Math.pow(heat / 100, 3) * CONFIG.heatHazard * rugResist()) triggerRug();
+        if (Math.random() < Math.pow(heat / 100, 2.4) * CONFIG.heatHazard * rugResist()) triggerRug();   // danger curve starts earlier (was ^3) — mid-heat is no longer a free ride
         
         // Haptics and Telemetry on zone transition:
         if (pot > 0) {
@@ -7540,6 +7554,15 @@
       $("adminRefresh") && $("adminRefresh").addEventListener("click", openAdmin);
       $("adminClose") && $("adminClose").addEventListener("click", () => $("adminModal").classList.remove("show"));
       $("adminModal") && $("adminModal").addEventListener("click", e => { if (e.target.id === "adminModal") $("adminModal").classList.remove("show"); });
+      $("resetProgress") && $("resetProgress").addEventListener("click", () => {
+        if (!confirm("⚠️ PERMANENT RESET\n\nThis wipes YOUR account back to zero — balance, banks, VIP, upgrades, rank and all progress — and reopens the intro walkthrough.\n\nThis CANNOT be undone. Continue?")) return;
+        if (!confirm("Last chance — are you absolutely sure? All of your progress will be permanently erased.")) return;
+        const b = $("resetProgress"); b.disabled = true; b.textContent = "Resetting…";
+        cloudAction("/api/reset", {}).then(r => {
+          if (r && r.ok) { try { localStorage.removeItem("moontap"); localStorage.removeItem("moontap_tut"); } catch (e) {} toast("🧹", "Progress reset", "Starting fresh — reloading…"); setTimeout(() => location.reload(), 900); }
+          else { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; toast("⚠️", "Reset failed", (r && r.error) || "Try again"); }
+        }).catch(err => { b.disabled = false; b.textContent = "🧹 Reset my progress (start over)"; toast("⚠️", "Reset failed", err.message); });
+      });
       function shareTo(p) {
         const url = inviteLink(); const txt = "I'm farming the $MOON airdrop on RUG OR RICHES 🪙💀 Tap my link to join — we both get 5,000 $MOON:";
         const t = encodeURIComponent(txt), u = encodeURIComponent(url);
@@ -7677,7 +7700,7 @@
 
       // ---------- TUTORIAL ----------
       const TUT = [{ em: "🪙", h: "Every tap is a bet", p: "Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered." },
-      { em: "👥", h: "It's a live market", p: "Other traders buy & sell in real time, moving the price on their own. Whales can dump and crash it." },
+      { em: "👥", h: "It's a live-style market", p: "A simulated market of buyers & sellers moves the price on its own in real time. Whales can dump and crash it." },
       { em: "💰", h: "Sell before it rugs", p: "CASH OUT banks your position (stake + profit). If it rugs first, you lose what you invested — so time it." },
       { em: "👑", h: "Bank to unlock more", p: "Each round you bank reveals a new feature — Upgrades, then Crews, then Duels, Ranked & Wars. Climb the ranks and invite friends — you both get 5,000 $MOON." }];
       let tutI = 0;

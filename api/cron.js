@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
       // weekly leaderboard prizes — top 10 banked + top 10 inviters get tiered $MOON, paid once per week
       const week = "" + Math.floor(Date.now() / (7 * 864e5));
       const PRIZES = [1000000, 600000, 400000, 250000, 150000, 100000, 75000, 50000, 30000, 20000];
-      const MOON_CAP = 1000000000;
+      const MOON_CAP = 1000000000000;
       await db.query(`CREATE TABLE IF NOT EXISTS payouts (
         period TEXT, kind TEXT, player_id BIGINT, amount BIGINT, created_at TIMESTAMPTZ DEFAULT now(),
         PRIMARY KEY (period, kind, player_id))`);
