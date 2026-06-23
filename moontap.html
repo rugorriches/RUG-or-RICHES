@@ -7321,6 +7321,10 @@
           how: "Spend your banked $MOON on <b>8 permanent upgrades</b> — bigger pumps, more energy, rug insurance, an idle Auto-Trader and more. Every level makes future runs stronger.<br><br>Tap <b>🛠️ Upgrades</b> in the bottom menu to start.",
           go: () => { if (typeof openPanel === "function") openPanel("shop"); }
         },
+        { key: "ranks", need: 1, sel: '[data-p="ranks"]', label: "🏆 Ranks & leaderboards" },
+        { key: "airdrop", need: 2, sel: '[data-p="airdrop"]', label: "🪂 Airdrop & Season Points" },
+        { key: "invite", need: 2, sel: '[data-p="invite"]', label: "🤝 Invite & Earn" },
+        { key: "vip", need: 3, sel: '[data-p="vip"]', label: "👑 VIP" },
         {
           key: "crews", need: 3, sel: '.rtab[data-grp="crews"]', icon: "🤝", title: "Crews unlocked!",
           how: "Team up! <b>Join or create a crew</b>, chat, and pool your scores on the crew leaderboard. Crews also battle in the weekly all-crews <b>Crew Wars</b> league for $MOON chests.<br><br>Open <b>Ranks → 🤝 Crews</b> to find your squad.",
@@ -7355,7 +7359,8 @@
             S.unlocks.push(u.key); save();
             if (announce !== false) {
               try { sfxCash && sfxCash(); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) {}
-              setTimeout(() => showUnlockWalkthrough(u), 700);   // let the bank celebration land first, then walk them through the new feature
+              if (u.how) setTimeout(() => showUnlockWalkthrough(u), 700);   // big features get a full walkthrough popup
+              else toast("🔓", "Unlocked!", (u.label || u.key) + " is now available");   // simple nav reveals get a quick toast
             }
           }
         });
@@ -7674,7 +7679,7 @@
       const TUT = [{ em: "🪙", h: "Every tap is a bet", p: "Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered." },
       { em: "👥", h: "It's a live market", p: "Other traders buy & sell in real time, moving the price on their own. Whales can dump and crash it." },
       { em: "💰", h: "Sell before it rugs", p: "CASH OUT banks your position (stake + profit). If it rugs first, you lose what you invested — so time it." },
-      { em: "👑", h: "Rank up & invite", p: "Upgrades & VIP raise your bet limits and edge. Climb the ranks and invite friends — you both get 5,000 $MOON." }];
+      { em: "👑", h: "Bank to unlock more", p: "Each round you bank reveals a new feature — Upgrades, then Crews, then Duels, Ranked & Wars. Climb the ranks and invite friends — you both get 5,000 $MOON." }];
       let tutI = 0;
       function renderTut() {
         const t = TUT[tutI]; $("tutEm").textContent = t.em; $("tutH").textContent = t.h; $("tutP").textContent = t.p;
