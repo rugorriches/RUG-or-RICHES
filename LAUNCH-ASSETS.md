@@ -4,7 +4,7 @@ Ready-to-post copy. Swap in your real links. Keep the "entertainment only, not f
 
 Links to fill in:
 - Bot / play: `https://t.me/RugorRichesBot/play`
-- Channel: `https://t.me/rugorricheslounge`
+- Channel: `https://t.me/rugorrichesofficial`
 - X: `https://x.com/RUGorRICHESApp`
 - Site: `https://rugorriches.app`
 
@@ -52,7 +52,7 @@ Links to fill in:
 > Free to play. No wallet needed. Open it and tap.
 >
 > 👉 rugorriches.app
-> 💬 t.me/rugorricheslounge
+> 💬 t.me/rugorrichesofficial
 >
 > *Entertainment only. Not financial advice.*
 
