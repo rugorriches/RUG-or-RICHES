@@ -4824,6 +4824,15 @@
       </div>
     </div>
 
+    <div class="modal" id="unlockModal" role="dialog" aria-modal="true" aria-label="Feature unlocked">
+      <div class="box" style="max-width:360px;text-align:center">
+        <div id="unlockIcon" style="font-size:48px;line-height:1;margin-bottom:6px">🔓</div>
+        <h3 id="unlockTitle" style="margin-bottom:4px"></h3>
+        <div class="ds" id="unlockBody" style="font-size:13px;line-height:1.65;text-align:left;margin:8px 2px 4px"></div>
+        <div class="mbtns" style="margin-top:14px"><button class="ok" id="unlockGo" style="flex:1">Show me →</button><button id="unlockClose">Got it</button></div>
+      </div>
+    </div>
+
     <div id="tut">
       <div class="em" id="tutEm">📈</div>
       <h3 id="tutH"></h3>
@@ -5731,7 +5740,7 @@
         }
         mktBuy = clamp(mktBuy - 0.12, 0.05, 0.9);   // your sell adds sell pressure
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; heat = 0; pumpVel = 0; dumpWarn = 0; bonusBets = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; price = Math.max(1.0, 1 + (price - 1) * 0.25); ath = price; roundPeak = price;
-        save(); achCheck(); renderLive(); renderStats(); renderDash(); settleRoundCloud(settlement);
+        save(); achCheck(); renderLive(); renderStats(); renderDash(); applyUnlocks(true); settleRoundCloud(settlement);
       }
       $("cashout").addEventListener("click", () => cashOut(false));
       function energyRefillCost() { return Math.floor(maxEnergy() * 8); }   // $MOON sink: full refill price scales with tank size
@@ -7304,6 +7313,54 @@
       }
       function resetRankTab() { showRtGroup("ranks"); }
       document.querySelectorAll(".rtab[data-grp]").forEach(b => b.addEventListener("click", () => showRtGroup(b.dataset.grp)));
+
+      // ---------- Progressive onboarding: reveal depth as the player banks (keeps first session simple) ----------
+      const UNLOCKS = [
+        {
+          key: "shop", need: 1, sel: '[data-p="shop"]', icon: "🛠️", title: "Upgrades unlocked!",
+          how: "Spend your banked $MOON on <b>8 permanent upgrades</b> — bigger pumps, more energy, rug insurance, an idle Auto-Trader and more. Every level makes future runs stronger.<br><br>Tap <b>🛠️ Upgrades</b> in the bottom menu to start.",
+          go: () => { if (typeof openPanel === "function") openPanel("shop"); }
+        },
+        {
+          key: "crews", need: 3, sel: '.rtab[data-grp="crews"]', icon: "🤝", title: "Crews unlocked!",
+          how: "Team up! <b>Join or create a crew</b>, chat, and pool your scores on the crew leaderboard. Crews also battle in the weekly all-crews <b>Crew Wars</b> league for $MOON chests.<br><br>Open <b>Ranks → 🤝 Crews</b> to find your squad.",
+          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("crews"); } catch (e) {} }, 70); }
+        },
+        {
+          key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "💥", title: "Compete unlocked!",
+          how: "You're ready for the big leagues:<br>• <b>⚔️ Duels</b> — challenge anyone 1v1 on the same chart; winner takes the $MOON.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons.<br>• <b>💥 Daily Crash</b> — one provably-fair pick a day.<br>• <b>🐋 Live Boards</b> — chase Whale of the Day.<br><br>Open <b>Ranks → 💥 Compete</b> to jump in.",
+          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) {} }, 70); }
+        }
+      ];
+      let unlockTarget = null;
+      function showUnlockWalkthrough(u) {
+        unlockTarget = u;
+        const m = $("unlockModal"); if (!m) { toast("🔓", "Unlocked!", u.title); return; }
+        $("unlockIcon").textContent = u.icon || "🔓";
+        $("unlockTitle").textContent = "🔓 " + u.title;
+        $("unlockBody").innerHTML = u.how || "";
+        m.classList.add("show");
+      }
+      $("unlockClose") && $("unlockClose").addEventListener("click", () => $("unlockModal").classList.remove("show"));
+      $("unlockGo") && $("unlockGo").addEventListener("click", () => { $("unlockModal").classList.remove("show"); if (unlockTarget && unlockTarget.go) try { unlockTarget.go(); } catch (e) {} });
+      $("unlockModal") && $("unlockModal").addEventListener("click", e => { if (e.target.id === "unlockModal") $("unlockModal").classList.remove("show"); });
+      function applyUnlocks(announce) {
+        const banks = S.cashouts || 0;
+        // first run ever: set a baseline of already-earned unlocks so existing players don't get spammed
+        if (!Array.isArray(S.unlocks)) { S.unlocks = UNLOCKS.filter(u => banks >= u.need).map(u => u.key); save(); announce = false; }
+        UNLOCKS.forEach(u => {
+          const on = banks >= u.need;
+          document.querySelectorAll(u.sel).forEach(el => { el.style.display = on ? "" : "none"; });
+          if (on && S.unlocks.indexOf(u.key) < 0) {
+            S.unlocks.push(u.key); save();
+            if (announce !== false) {
+              try { sfxCash && sfxCash(); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) {}
+              setTimeout(() => showUnlockWalkthrough(u), 700);   // let the bank celebration land first, then walk them through the new feature
+            }
+          }
+        });
+      }
+      applyUnlocks(false);
 
       // ---------- INVITE ----------
       $("refCode").textContent = S.refCode;
