@@ -4101,6 +4101,7 @@
         <div class="react-amt" id="reactAmt"></div>
         <div class="react-sub" id="reactSub"></div>
         <button class="big-btn" id="reactBtn">Continue</button>
+        <button id="reactShare" style="display:none;width:100%;margin-top:8px;background:linear-gradient(90deg,var(--neon),var(--cyan));color:#0a0420;border:none;border-radius:12px;padding:11px;font-weight:900;cursor:pointer">📤 Share this win</button>
       </div>
     </div>
 
@@ -7776,10 +7777,22 @@
         const img = $("reactImg"); img.src = win ? "/assets/brand/win-card.webp" : "/assets/brand/loss-card.webp"; img.style.display = "";
         $("reactAmt").textContent = amount || ""; $("reactAmt").style.color = win ? "var(--green)" : "var(--red)";
         $("reactSub").textContent = sub || ""; $("reactBtn").textContent = win ? "Continue" : "Try again";
+        const sh = $("reactShare");
+        if (sh) {
+          if (win && amount) { reactShareTxt = "I just banked " + amount + " in one run on RUG OR RICHES 🦈📈 — pump the chart, bank before the rug. Free, no wallet. We both get 5,000 $MOON:"; sh.style.display = ""; }
+          else sh.style.display = "none";
+        }
         m.classList.add("show");
       }
       function closeReaction() { const m = $("reactModal"); if (m) m.classList.remove("show"); }
       $("reactBtn") && $("reactBtn").addEventListener("click", closeReaction);
+      let reactShareTxt = "";
+      $("reactShare") && $("reactShare").addEventListener("click", () => {
+        const url = inviteLink(); const txt = reactShareTxt || "I'm banking $MOON on RUG OR RICHES 🦈📈 — we both get 5,000 $MOON:";
+        try { if (navigator.share) { navigator.share({ title: "RUG OR RICHES", text: txt, url }).catch(() => {}); return; } } catch (e) {}
+        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) { tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(txt)); return; } } catch (e) {}
+        try { navigator.clipboard.writeText(txt + " " + url); toast("📋", "Win copied!", "Paste it in your group 👀"); } catch (e) {}
+      });
       $("reactModal") && $("reactModal").addEventListener("click", e => { if (e.target.id === "reactModal") closeReaction(); });
 
       function init() {
