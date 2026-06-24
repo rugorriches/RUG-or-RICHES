@@ -41,6 +41,7 @@
     { "src": "/litepaper", "dest": "/litepaper.html" },
     { "src": "/guide", "dest": "/guide.html" },
     { "src": "/vip", "dest": "/vip.html" },
+    { "src": "/referrals", "dest": "/referrals.html" },
     { "src": "/airdrop", "dest": "/airdrop.html" },
     { "src": "/tokenomics", "dest": "/tokenomics.html" },
     { "src": "/faq", "dest": "/faq.html" },

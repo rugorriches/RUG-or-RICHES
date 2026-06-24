@@ -4614,10 +4614,10 @@
 
     <div class="panel" id="panel-invite">
       <h2>🤝 Invite & Earn</h2>
-      <p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join (premium
-        friends <b style="color:var(--gold)">25,000</b>) — plus <b style="color:var(--gold)">+10,000 Airdrop Points</b>
-        per invite. And when someone you invited goes <b style="color:#36a9ff">VIP</b>, you earn
-        <b style="color:var(--gold)">VIP Points + 10× $MOON</b>.
+      <p class="sub">Invite a friend: <b style="color:var(--gold)">you get 10,000 $MOON + 5,000 Airdrop Points</b>
+        (premium friends <b style="color:var(--gold)">25,000 + 10,000</b>), and they get 5,000 $MOON to start. Then when
+        someone you invited goes <b style="color:#36a9ff">VIP</b>, you earn <b style="color:var(--gold)">10 VIP Points +
+          10× $MOON for every $1 they spend</b> on VIP — every time they upgrade.
       </p>
       <img src="/assets/brand/inv-hero.webp" alt="Bring friends. Climb faster." loading="lazy"
         style="width:min(90%,360px);height:auto;border-radius:16px;display:block;margin:4px auto 14px;border:1px solid var(--line)"
@@ -6500,10 +6500,13 @@
         for (let i = 1; i < VIP.length; i++) {
           const v = VIP[i]; const owned = cur >= i;
           const d = document.createElement("div"); d.className = "vipcard " + (v.cls || "t1") + (cur === i ? " active" : "");
-          const ton = VIP_TON[i] || 0; const tonStr = fmt(ton);
+          const fullTon = VIP_TON[i] || 0;
+          const needPts = Math.max(0, (v.vstars || 0) - (S.vipPoints || 0));   // VIP Points you've earned (referrals etc.) prorate the price
+          const ton = (v.vstars > 0) ? fullTon * (needPts / v.vstars) : fullTon;
+          const tonStr = fmt(Math.round(ton * 100) / 100), discounted = ton < fullTon - 0.001;
           const buys = owned ? '<div style="margin-top:10px"><span class="pill">✓ Active</span></div>' :
-            '<button class="vbuy-ton buy" style="margin-top:11px;width:100%;background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">🪙 Unlock — ' + tonStr + ' TON</button>';
-          const note = '<div class="ds">🪙 ' + tonStr + ' TON · ' + fmt(v.vstars) + ' VIP pts to reach</div>';
+            '<button class="vbuy-ton buy" style="margin-top:11px;width:100%;background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">🪙 Unlock — ' + tonStr + ' TON' + (discounted ? ' <span style="opacity:.8;font-size:11px">(' + fmt(fullTon) + ' − your VIP Points)</span>' : '') + '</button>';
+          const note = '<div class="ds">🪙 ' + tonStr + ' TON' + (discounted ? ' <span style="opacity:.7">(prorated)</span>' : '') + ' · needs ' + fmt(v.vstars) + ' VIP pts</div>';
           d.innerHTML = '<div class="vtag">' + (owned ? "OWNED" : "LV " + i) + '</div><div class="row"><div class="emo">' + (v.emo || "👑") + '</div><div class="grow"><div class="nm">' + v.nm + '</div>' + note + '</div></div><div class="vh-ben" style="margin-top:9px">' + vipBenefits(i).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>' + buys;
           if (!owned) {
             const tb = d.querySelector(".vbuy-ton");

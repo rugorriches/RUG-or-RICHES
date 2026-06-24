@@ -17,7 +17,7 @@ const MAX_ROI = 30;                  // theoretical single-round ceiling (mirror
 // Score ceiling pieces — keep in sync with cashout.js (RANK_BET / VIP_BET_MULT / clickLimit).
 const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
 const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
-const VIP_BET_MULT = [1, 1.5, 2, 3, 5];
+const VIP_BET_MULT = [1, 1.3, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0, 6.5, 8.0, 10.0, 12.5, 15.0, 18.0, 21.0, 25.0, 29.0, 33.0, 38.0];
 function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 
 let schemaReady;
@@ -110,8 +110,8 @@ function shapeDuel(d, me) {
 
 // Score ceiling for one duel run by this player (anti-cheat upper bound).
 function scoreCeil(player) {
-  const vip = Math.max(0, Math.min(4, Number(player.vip_tier) || 0));
-  const clickLimit = 20 + vip * 10 + 20;
+  const vip = Math.max(0, Math.min(18, Number(player.vip_tier) || 0));
+  const clickLimit = 20 + vip * 2 + 30;
   const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
   const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
   return maxBet * clickLimit * MAX_ROI;
