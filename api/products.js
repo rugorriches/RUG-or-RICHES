@@ -8,11 +8,26 @@ const MOON_PACKS = new Map([
   [1000, { moon: 2000000 }]
 ]);
 
+// Depth Zones — 18 Stars-only VIP levels (6 tiers × I/II/III). KEEP STARS IN SYNC WITH moontap.html VIP[].vstars
 const VIP_TIERS = new Map([
-  [1, { stars: 150, name: "Bronze VIP" }],
-  [2, { stars: 600, name: "Silver VIP" }],
-  [3, { stars: 2500, name: "Gold VIP" }],
-  [4, { stars: 10000, name: "Diamond VIP" }]
+  [1, { stars: 300, name: "Shallows I" }],
+  [2, { stars: 600, name: "Shallows II" }],
+  [3, { stars: 1000, name: "Shallows III" }],
+  [4, { stars: 2500, name: "Reef I" }],
+  [5, { stars: 4500, name: "Reef II" }],
+  [6, { stars: 7000, name: "Reef III" }],
+  [7, { stars: 12000, name: "Twilight I" }],
+  [8, { stars: 18000, name: "Twilight II" }],
+  [9, { stars: 27000, name: "Twilight III" }],
+  [10, { stars: 45000, name: "Midnight I" }],
+  [11, { stars: 70000, name: "Midnight II" }],
+  [12, { stars: 100000, name: "Midnight III" }],
+  [13, { stars: 160000, name: "Abyss I" }],
+  [14, { stars: 240000, name: "Abyss II" }],
+  [15, { stars: 350000, name: "Abyss III" }],
+  [16, { stars: 500000, name: "Trench I" }],
+  [17, { stars: 720000, name: "Trench II" }],
+  [18, { stars: 1000000, name: "Trench III" }]
 ]);
 
 const BOOSTS = new Map([

@@ -10,7 +10,9 @@ const AIRDROP_BANK_RATE = 0.08;
 // Max bet = rank-based base × VIP multiplier. KEEP IN SYNC WITH moontap.html (RANK_BET / VIP_BET_MULT).
 const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
 const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
-const VIP_BET_MULT = [1, 1.5, 2, 3, 5];
+// Depth Zones VIP (0 = None, 1-18). KEEP IN SYNC WITH moontap.html VIP[].bet / VIP[].air
+const VIP_BET_MULT = [1, 1.3, 1.5, 1.7, 2.0, 2.3, 2.7, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0];
+const VIP_AIR_BOOST = [1, 1.10, 1.18, 1.28, 1.45, 1.60, 1.78, 2.00, 2.25, 2.55, 2.85, 3.20, 3.55, 3.95, 4.40, 4.90, 5.45, 5.95, 6.50];
 function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 const EARN_PER_MINUTE = [250000, 1000000, 5000000, 25000000, 100000000];
 const MAX_ROI = 4000;   // per-round payout ceiling (multiple of invested). High safety net only — must stay above client maxRoundRoi(1500) × max event mult(1.5) ≈ 2250 so legit banks never get rejected. Real reward is governed by pot/multiplier + the heat/rug risk model, not this clamp.
@@ -192,8 +194,8 @@ module.exports = async (req, res) => {
       }
 
       const player = rows[0];
-      const vip = Math.max(0, Math.min(4, Number(player.vip_tier) || 0));
-      const clickLimit = 20 + vip * 10 + 20;
+      const vip = Math.max(0, Math.min(18, Number(player.vip_tier) || 0));
+      const clickLimit = 20 + vip * 2 + 30;
       const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
       const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
       const maxInvested = maxBet * clickLimit;
@@ -277,7 +279,7 @@ module.exports = async (req, res) => {
       // so this stays cheat-safe without throttling honest play. earn_window_* is still recorded for
       // telemetry but no longer rejects.
 
-      const airdrop = Math.floor(profit * AIRDROP_BANK_RATE);
+      const airdrop = Math.floor(profit * AIRDROP_BANK_RATE * (VIP_AIR_BOOST[vip] || 1));   // VIP Depth Zone airdrop-point boost
       const piggy = profit > 0 ? Math.floor(payout * 0.04) : 0;
       const successfulCashout = outcome !== "rug";
       await client.query(

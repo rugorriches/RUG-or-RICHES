@@ -7,6 +7,8 @@ const TG_GROUP_ID = process.env.TG_GROUP_ID || "";
 const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
 const AIRDROP_BANK_RATE = 0.08;
+// Depth Zones VIP airdrop-point boost (0 = None, 1-18). KEEP IN SYNC WITH cashout.js / moontap.html VIP[].air
+const VIP_AIR_BOOST = [1, 1.10, 1.18, 1.28, 1.45, 1.60, 1.78, 2.00, 2.25, 2.55, 2.85, 3.20, 3.55, 3.95, 4.40, 4.90, 5.45, 5.95, 6.50];
 const SOCIAL_REWARD = 5000;
 const COMBO_REWARD = 10000;
 const COMBO_TAPS = 300;
@@ -174,7 +176,9 @@ function crewHash(value) {
 }
 
 async function creditReward(client, playerId, reward) {
-  const airdrop = Math.floor(reward * AIRDROP_BANK_RATE);
+  const { rows: vr } = await client.query("SELECT vip_tier FROM players WHERE id = $1", [playerId]);
+  const vip = Math.max(0, Math.min(18, (vr[0] && Number(vr[0].vip_tier)) || 0));
+  const airdrop = Math.floor(reward * AIRDROP_BANK_RATE * (VIP_AIR_BOOST[vip] || 1));   // VIP boosts quest/daily/achievement airdrop points too
   await client.query(
     `UPDATE players SET
        balance = LEAST(balance + $2, $3),

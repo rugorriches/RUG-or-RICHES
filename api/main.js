@@ -20,6 +20,7 @@ const routes = {
   admin: require("./admin"),
   ranked: require("./ranked"),
   reset: require("./reset"),
+  tonverify: require("./tonverify"),
 };
 
 module.exports = async (req, res) => {

@@ -4225,8 +4225,7 @@
       <h2>👑 VIP Club</h2>
       <p class="sub" id="vipStatus">Unlock permanent perks & multipliers.</p>
       <div class="card" style="background:rgba(255,212,0,.08)">
-        <div class="ds" style="line-height:1.7">Two ways to unlock each tier:<br>💰 <b>$MOON</b> — earn it (needs the
-          listed rank) = the free grind<br>⭐ <b>Stars</b> — skip the grind, unlock instantly</div>
+        <div class="ds" style="line-height:1.7">🌊 <b>Depth Zones</b> — 18 premium levels. The deeper you go, the bigger your <b>🪂 airdrop-point boost</b>, earnings, bet cap & energy.<br>⭐ Unlock any level instantly with Telegram Stars.</div>
       </div>
       <div id="vipList"></div>
     </div>
@@ -5283,26 +5282,41 @@
       const upCost = u => Math.floor(u.base * Math.pow(u.mul, S.up[u.k]));
       const lvl = k => S.up[k] || 0;
       const tapPower = () => 1 + lvl("power") * 0.45;
-      const effVip = () => Math.max(S.vip || 0, (S.vipSubUntil && Date.now() < S.vipSubUntil) ? 4 : 0);   // 30-day VIP Pass grants Diamond perks while active
-      const maxEnergy = () => 100 + lvl("energy") * 40 + effVip() * 25 + (rankPerk().eb || 0);
-      const RECHARGE_SECS = () => Math.max(5400, 14400 - lvl("regen") * 1500 - rankIdx() * 600 - effVip() * 400);   // ~4h base; faster with Regen upgrade AND higher rank/VIP (Megalodon -1h, Diamond -27min); floor ~1.5h
+      const effVip = () => Math.max(S.vip || 0, (S.vipSubUntil && Date.now() < S.vipSubUntil) ? 6 : 0);   // 30-day VIP Pass grants Reef III–level perks while active
+      const maxEnergy = () => 100 + lvl("energy") * 40 + ((VIP[effVip()] && VIP[effVip()].energy) || 0) + (rankPerk().eb || 0);
+      const RECHARGE_SECS = () => Math.max(5400, 14400 - lvl("regen") * 1500 - rankIdx() * 600 - Math.min(3600, effVip() * 250));   // ~4h base; faster with Regen upgrade AND higher rank/VIP; floor ~1.5h
       const regenRate = () => maxEnergy() / RECHARGE_SECS();   // energy recharges over HOURS now — a real "come back later or grab a ⚡ refill" gate
       const tapCost = (stake) => Math.min(12, 1 + Math.floor((stake || 0) / 60000));   // energy cost scales with bet size: small bets ~1, whale-size bets up to 12 — keeps energy a real sink (and refill buy-driver) at high stakes
       const autoRate = () => lvl("auto") * 1.2;   // idle nerf — active skill matters more than AFK stacking
       const comboCap = () => 40 + lvl("combo") * 12;
       const comboGain = () => 0.025 + lvl("combo") * 0.004;
-      const vaultPct = () => Math.min(.45, lvl("vault") * 0.045 + (effVip() >= 3 ? 0.18 : 0));
-      const cashBonus = () => 0.35 + lvl("cashbonus") * 0.06 + effVip() * 0.15;   // VIP payout edge: higher tiers bank a bigger % when cashing at high heat (risk-gated, no hard clamp)
+      const vaultPct = () => Math.min(.45, lvl("vault") * 0.045 + (effVip() >= 7 ? 0.18 : effVip() >= 4 ? 0.10 : 0));
+      const cashBonus = () => 0.35 + lvl("cashbonus") * 0.06 + Math.min(0.9, effVip() * 0.05);   // VIP payout edge scales with tier (risk-gated)
       // bust resistance: lower = safer (insurance + VIP shield)
-      const rugResist = () => Math.max(.28, UP[3].val(lvl("insure")) * (1 - effVip() * 0.045));
+      const rugResist = () => Math.max(.28, UP[3].val(lvl("insure")) * (1 - Math.min(0.7, effVip() * 0.04)));
 
       // ---------- VIP ----------
-      const VIP = [{ nm: "None" },
-      { nm: "Bronze VIP", emo: "🥉", cost: 250000, vstars: 150, req: 1, cls: "t1", perks: "+12% earnings · +25 energy · 1.5× bet cap · faster pumps" },
-      { nm: "Silver VIP", emo: "🥈", cost: 2000000, vstars: 600, req: 2, cls: "t2", perks: "+30% earnings · lower rug risk · 2× bet cap · silver badge" },
-      { nm: "Gold VIP", emo: "🥇", cost: 12000000, vstars: 2500, req: 3, buyOnly: true, cls: "t3", perks: "+60% earnings · 25% rug auto-rescue · 3× bet cap · gold badge" },
-      { nm: "Diamond VIP", emo: "💎", cost: 75000000, vstars: 10000, req: 4, buyOnly: true, cls: "t4", perks: "+120% earnings · whale shield · 5× bet cap · diamond badge" }];
-      const vipMult = () => [1, 1.12, 1.3, 1.6, 2.2][effVip()] || 1;
+      // ---------- VIP: Depth Zones — 18 Stars-only levels (6 tiers × I/II/III). air=airdrop-point mult · earn=earnings mult · bet=bet-cap mult · energy=flat bonus ----------
+      const VIP = [{ nm: "None", air: 1, earn: 1, bet: 1, energy: 0 },
+      { nm: "Shallows I", emo: "🌊", vstars: 300, air: 1.10, earn: 1.10, bet: 1.3, energy: 25, cls: "t1", buyOnly: true },
+      { nm: "Shallows II", emo: "🌊", vstars: 600, air: 1.18, earn: 1.18, bet: 1.5, energy: 35, cls: "t1", buyOnly: true },
+      { nm: "Shallows III", emo: "🌊", vstars: 1000, air: 1.28, earn: 1.28, bet: 1.7, energy: 45, cls: "t1", buyOnly: true },
+      { nm: "Reef I", emo: "🐠", vstars: 2500, air: 1.45, earn: 1.45, bet: 2.0, energy: 60, cls: "t2", buyOnly: true },
+      { nm: "Reef II", emo: "🐠", vstars: 4500, air: 1.60, earn: 1.60, bet: 2.3, energy: 75, cls: "t2", buyOnly: true },
+      { nm: "Reef III", emo: "🐠", vstars: 7000, air: 1.78, earn: 1.78, bet: 2.7, energy: 90, cls: "t2", buyOnly: true },
+      { nm: "Twilight I", emo: "🌑", vstars: 12000, air: 2.00, earn: 2.00, bet: 3.0, energy: 110, cls: "t3", buyOnly: true },
+      { nm: "Twilight II", emo: "🌑", vstars: 18000, air: 2.25, earn: 2.20, bet: 3.5, energy: 130, cls: "t3", buyOnly: true },
+      { nm: "Twilight III", emo: "🌑", vstars: 27000, air: 2.55, earn: 2.45, bet: 4.0, energy: 150, cls: "t3", buyOnly: true },
+      { nm: "Midnight I", emo: "🦑", vstars: 45000, air: 2.85, earn: 2.70, bet: 4.5, energy: 170, cls: "t4", buyOnly: true },
+      { nm: "Midnight II", emo: "🦑", vstars: 70000, air: 3.20, earn: 2.95, bet: 5.0, energy: 190, cls: "t4", buyOnly: true },
+      { nm: "Midnight III", emo: "🦑", vstars: 100000, air: 3.55, earn: 3.25, bet: 5.5, energy: 210, cls: "t4", buyOnly: true },
+      { nm: "Abyss I", emo: "🕳️", vstars: 160000, air: 3.95, earn: 3.55, bet: 6.0, energy: 235, cls: "t4", buyOnly: true },
+      { nm: "Abyss II", emo: "🕳️", vstars: 240000, air: 4.40, earn: 3.90, bet: 7.0, energy: 260, cls: "t4", buyOnly: true },
+      { nm: "Abyss III", emo: "🕳️", vstars: 350000, air: 4.90, earn: 4.25, bet: 8.0, energy: 285, cls: "t4", buyOnly: true },
+      { nm: "Trench I", emo: "🌋", vstars: 500000, air: 5.45, earn: 4.65, bet: 9.0, energy: 310, cls: "t4", buyOnly: true },
+      { nm: "Trench II", emo: "🌋", vstars: 720000, air: 5.95, earn: 5.10, bet: 10.0, energy: 340, cls: "t4", buyOnly: true },
+      { nm: "Trench III", emo: "🌋", vstars: 1000000, air: 6.50, earn: 5.60, bet: 12.0, energy: 375, cls: "t4", buyOnly: true }];
+      const vipMult = () => (VIP[effVip()] && VIP[effVip()].earn) || 1;
       // ---- $MOON packs purchasable with Telegram Stars ----
       // $MOON granted = 10 x the Stars price (flat, predictable rate)
       const STORE = [{ stars: 50, moon: 50000, tag: "" }, { stars: 100, moon: 120000, tag: "MOST POPULAR" },
@@ -5311,16 +5325,15 @@
       const BOOSTS = [{ id: "energy", emo: "🔋", nm: "Full energy refill", ds: "Instantly refill your energy", stars: 25 },
       { id: "turbo", emo: "⚡", nm: "Turbo — 2× pumps", ds: "Double every pump for ~30s", stars: 35 },
       { id: "bets", emo: "➕", nm: "+20 bets this round", ds: "Raise this round's click cap", stars: 30 }];
-      const STARTER = { stars: 150, moon: 500000, vip: 1 }, WHALE = { stars: 5000, moon: 12000000, vip: 3 },
+      const STARTER = { stars: 150, moon: 500000, vip: 1 }, WHALE = { stars: 5000, moon: 12000000, vip: 9 },
         VIPSUB = { stars: 800, days: 30 }, DEAL = { stars: 250, moon: 700000 }, COMEBACK = { stars: 50, moon: 200000 },
         SEASON = { stars: 400 }, PIGGYCAP = 150000;
       // ---- max bet = rank-based base × VIP multiplier (VIP's bet-cap perk) ----
       // KEEP THESE ARRAYS IN SYNC WITH /api/cashout.js (server enforces the same cap).
       const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];   // by rank index 0-6
-      const VIP_BET_MULT = [1, 1.5, 2, 3, 5];                                  // by VIP tier 0-4
-      const betMax = () => Math.floor((RANK_BET[rankIdx()] || 1000) * (VIP_BET_MULT[effVip()] || 1));
+      const betMax = () => Math.floor((RANK_BET[rankIdx()] || 1000) * ((VIP[effVip()] && VIP[effVip()].bet) || 1));
       let bonusBets = 0;   // temporary +bets from a boost (resets each round)
-      const betsPerRound = () => 20 + effVip() * 10 + bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
+      const betsPerRound = () => 20 + effVip() * 2 + bonusBets;   // clicks allowed per round; VIP raises the cap (paid lever)
       const curBal = c => c === "pts" ? S.airdrop : S.balance;
       function addCur(c, a) { a = Math.floor(a); if (c === "pts") addAirdrop(a); else S.balance = Math.min(MOON_CAP, S.balance + a); }
       function subCur(c, a) { a = Math.floor(a); if (c === "pts") S.airdrop = Math.max(0, S.airdrop - a); else S.balance = Math.max(0, S.balance - a); }
@@ -6212,12 +6225,14 @@
 
       // ---------- VIP ----------
       function vipBenefits(i) {
-        const m = [0, 12, 30, 60, 120][i] || 0; const b = ["💰 +" + m + "% earnings", "🔋 +" + (i * 25) + " energy", "🛡️ " + (i * 7) + "% safer rug", "🎯 " + (VIP_BET_MULT[i] || 1) + "× bet cap"];
-        if (i >= 3) b.push("💎 25% rug rescue"); if (i >= 4) b.push("🐋 whale shield"); return b;
+        const v = VIP[i] || {}; if (!i) return ["🆓 Base rates"];
+        const pct = x => Math.round(((x || 1) - 1) * 100);
+        const b = ["🪂 +" + pct(v.air) + "% airdrop pts", "💰 +" + pct(v.earn) + "% earnings", "🔋 +" + (v.energy || 0) + " energy", "🎯 " + (v.bet || 1) + "× bet cap"];
+        if (i >= 7) b.push("💎 rug rescue"); if (i >= 13) b.push("🐋 whale shield"); return b;
       }
       function renderVip() {
         const cur = S.vip;
-        $("vipStatus").textContent = cur > 0 ? ("You're " + VIP[cur].nm + " — " + ([0, 12, 30, 60, 120][cur]) + "% bonus earnings active") : "Unlock permanent perks & higher bet limits.";
+        $("vipStatus").textContent = cur > 0 ? ("You're " + VIP[cur].nm + " — +" + Math.round(((VIP[cur].air || 1) - 1) * 100) + "% airdrop & +" + Math.round(((VIP[cur].earn || 1) - 1) * 100) + "% earnings active") : "Unlock airdrop-point boosts, perks & higher bet limits.";
         const wrap = $("vipList"); wrap.innerHTML = "";
         const hero = document.createElement("div"); hero.className = "viphero";
         hero.innerHTML = '<div class="vh-tier">' + (cur > 0 ? VIP[cur].emo + " " + VIP[cur].nm : "🆓 Free Tier") + '</div><div class="vh-ben">' + vipBenefits(cur).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>';
@@ -6250,14 +6265,12 @@
           });
         } else { const t = document.createElement("div"); t.className = "card"; t.innerHTML = '<div class="ds">🔒 Unlock any VIP tier to enter the <b>VIP Lounge</b> — daily $MOON bonuses & instant energy refills.</div>'; wrap.appendChild(t); }
         for (let i = 1; i < VIP.length; i++) {
-          const v = VIP[i]; const owned = cur >= i; const reqOk = rankIdx() >= v.req; const can = S.balance >= v.cost && cur === i - 1 && reqOk;
-          const d = document.createElement("div"); d.className = "vipcard " + v.cls + (cur === i ? " active" : "");
-          const moonLabel = cur < i - 1 ? ("💰 Unlock " + VIP[i - 1].nm + " first") : (!reqOk ? ("🔒 Reach " + RANKS[v.req].e + " " + RANKS[v.req].nm + " rank") : ("💰 " + fmt(v.cost) + " $MOON"));
-          const moonBtn = v.buyOnly ? '' : '<button class="vbuy-moon buy" style="margin-top:11px;width:100%"' + (can ? "" : " disabled") + '>' + moonLabel + '</button>';
+          const v = VIP[i]; const owned = cur >= i;
+          const d = document.createElement("div"); d.className = "vipcard " + (v.cls || "t1") + (cur === i ? " active" : "");
           const buys = owned ? '<div style="margin-top:10px"><span class="pill">✓ Active</span></div>' :
-            moonBtn + '<button class="vbuy-stars buy" style="margin-top:' + (v.buyOnly ? "11" : "7") + 'px;width:100%;background:linear-gradient(90deg,#ffd400,#ff9e00)">⭐ ' + (v.buyOnly ? "Unlock" : "Skip the grind") + ' — ' + v.vstars + ' Stars</button>';
-          const note = v.buyOnly ? '<div class="ds">⭐ Stars-only premium tier</div>' : '<div class="ds">$MOON route needs ' + RANKS[v.req].nm + ' rank</div>';
-          d.innerHTML = '<div class="vtag">' + (owned ? "OWNED" : "TIER " + i) + '</div><div class="row"><div class="emo">' + v.emo + '</div><div class="grow"><div class="nm">' + v.nm + '</div>' + note + '</div></div><div class="vh-ben" style="margin-top:9px">' + vipBenefits(i).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>' + buys;
+            '<button class="buy" disabled style="margin-top:11px;width:100%;opacity:.65;cursor:default">🪙 TON unlock — coming soon</button>';
+          const note = '<div class="ds">⭐ Stars-only · ' + fmt(v.vstars) + ' Stars</div>';
+          d.innerHTML = '<div class="vtag">' + (owned ? "OWNED" : "LV " + i) + '</div><div class="row"><div class="emo">' + (v.emo || "👑") + '</div><div class="grow"><div class="nm">' + v.nm + '</div>' + note + '</div></div><div class="vh-ben" style="margin-top:9px">' + vipBenefits(i).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>' + buys;
           if (!owned) {
             const mb = d.querySelector(".vbuy-moon"), sb = d.querySelector(".vbuy-stars");
             if (mb) mb.addEventListener("click", () => {

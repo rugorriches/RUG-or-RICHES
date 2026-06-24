@@ -5,7 +5,8 @@
     { "src": "*.html", "use": "@vercel/static" },
     { "src": "assets/**", "use": "@vercel/static" },
     { "src": "robots.txt", "use": "@vercel/static" },
-    { "src": "sitemap.xml", "use": "@vercel/static" }
+    { "src": "sitemap.xml", "use": "@vercel/static" },
+    { "src": "tonconnect-manifest.json", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/leaderboard", "dest": "/api/main.js?route=leaderboard" },
@@ -28,6 +29,8 @@
     { "src": "/api/ranked", "dest": "/api/main.js?route=ranked" },
     { "src": "/api/reset", "dest": "/api/main.js?route=reset" },
     { "src": "/favicon.ico", "dest": "/assets/brand/favicon.ico" },
+    { "src": "/tonconnect-manifest.json", "headers": { "Access-Control-Allow-Origin": "*", "cache-control": "public, max-age=600" }, "dest": "/tonconnect-manifest.json" },
+    { "src": "/api/tonverify", "dest": "/api/main.js?route=tonverify" },
     { "src": "/play", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/moontap.html" },
     { "src": "/", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/index.html" },
     { "src": "/(.*\\.html)", "headers": { "cache-control": "no-cache, no-store, must-revalidate" }, "dest": "/$1" },
