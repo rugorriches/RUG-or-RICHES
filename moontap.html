@@ -4691,6 +4691,12 @@
             placeholder="Amount" style="width:104px"></div>
         <button class="big-btn" id="giftSend" style="margin-top:9px">💝 Send Gift</button>
       </div>
+      <div class="sec-h">🏅 Your referral rewards</div>
+      <div class="card" style="margin-top:0">
+        <div class="ds" id="refRewardSummary" style="margin-bottom:8px">Loading…</div>
+        <button class="big-btn" id="refClaimBtn" style="background:linear-gradient(90deg,#ffd400,#ff9e00);color:#05010f;display:none">🎁 Claim rewards</button>
+        <div id="refList" style="margin-top:10px"></div>
+      </div>
       <div class="sec-h">🤝 Top Inviters this week</div>
       <div id="inviteBoard">
         <div class="ds" style="color:#9c92c4">Loading…</div>
@@ -5502,24 +5508,24 @@
       // ---------- VIP ----------
       // ---------- VIP: Depth Zones — 18 Stars-only levels (6 tiers × I/II/III). air=airdrop-point mult · earn=earnings mult · bet=bet-cap mult · energy=flat bonus ----------
       const VIP = [{ nm: "None", air: 1, earn: 1, bet: 1, energy: 0 },
-      { nm: "Shallows I", emo: "🌊", vstars: 300, air: 1.10, earn: 1.10, bet: 1.3, energy: 25, cls: "t1", buyOnly: true },
-      { nm: "Shallows II", emo: "🌊", vstars: 600, air: 1.18, earn: 1.18, bet: 1.5, energy: 35, cls: "t1", buyOnly: true },
-      { nm: "Shallows III", emo: "🌊", vstars: 1000, air: 1.28, earn: 1.28, bet: 1.7, energy: 45, cls: "t1", buyOnly: true },
-      { nm: "Reef I", emo: "🐠", vstars: 2500, air: 1.45, earn: 1.45, bet: 2.0, energy: 60, cls: "t2", buyOnly: true },
-      { nm: "Reef II", emo: "🐠", vstars: 4500, air: 1.60, earn: 1.60, bet: 2.3, energy: 75, cls: "t2", buyOnly: true },
-      { nm: "Reef III", emo: "🐠", vstars: 7000, air: 1.78, earn: 1.78, bet: 2.7, energy: 90, cls: "t2", buyOnly: true },
-      { nm: "Twilight I", emo: "🌑", vstars: 12000, air: 2.00, earn: 2.00, bet: 3.0, energy: 110, cls: "t3", buyOnly: true },
-      { nm: "Twilight II", emo: "🌑", vstars: 18000, air: 2.25, earn: 2.20, bet: 3.5, energy: 130, cls: "t3", buyOnly: true },
-      { nm: "Twilight III", emo: "🌑", vstars: 27000, air: 2.55, earn: 2.45, bet: 4.0, energy: 150, cls: "t3", buyOnly: true },
-      { nm: "Midnight I", emo: "🦑", vstars: 45000, air: 2.85, earn: 2.70, bet: 4.5, energy: 170, cls: "t4", buyOnly: true },
-      { nm: "Midnight II", emo: "🦑", vstars: 70000, air: 3.20, earn: 2.95, bet: 5.0, energy: 190, cls: "t4", buyOnly: true },
-      { nm: "Midnight III", emo: "🦑", vstars: 100000, air: 3.55, earn: 3.25, bet: 5.5, energy: 210, cls: "t4", buyOnly: true },
-      { nm: "Abyss I", emo: "🕳️", vstars: 160000, air: 3.95, earn: 3.55, bet: 6.0, energy: 235, cls: "t4", buyOnly: true },
-      { nm: "Abyss II", emo: "🕳️", vstars: 240000, air: 4.40, earn: 3.90, bet: 7.0, energy: 260, cls: "t4", buyOnly: true },
-      { nm: "Abyss III", emo: "🕳️", vstars: 350000, air: 4.90, earn: 4.25, bet: 8.0, energy: 285, cls: "t4", buyOnly: true },
-      { nm: "Trench I", emo: "🌋", vstars: 500000, air: 5.45, earn: 4.65, bet: 9.0, energy: 310, cls: "t4", buyOnly: true },
-      { nm: "Trench II", emo: "🌋", vstars: 720000, air: 5.95, earn: 5.10, bet: 10.0, energy: 340, cls: "t4", buyOnly: true },
-      { nm: "Trench III", emo: "🌋", vstars: 1000000, air: 6.50, earn: 5.60, bet: 12.0, energy: 375, cls: "t4", buyOnly: true }];
+      { nm: "Shallows I", emo: "🌊", vstars: 300, air: 1.12, earn: 1.08, bet: 1.3, energy: 25, cls: "t1", buyOnly: true },
+      { nm: "Shallows II", emo: "🌊", vstars: 600, air: 1.24, earn: 1.15, bet: 1.6, energy: 40, cls: "t1", buyOnly: true },
+      { nm: "Shallows III", emo: "🌊", vstars: 1000, air: 1.45, earn: 1.28, bet: 2.0, energy: 60, cls: "t1", buyOnly: true },
+      { nm: "Reef I", emo: "🐠", vstars: 2500, air: 1.75, earn: 1.45, bet: 2.5, energy: 85, cls: "t2", buyOnly: true },
+      { nm: "Reef II", emo: "🐠", vstars: 4500, air: 2.15, earn: 1.70, bet: 3.2, energy: 115, cls: "t2", buyOnly: true },
+      { nm: "Reef III", emo: "🐠", vstars: 7000, air: 2.65, earn: 2.00, bet: 4.0, energy: 150, cls: "t2", buyOnly: true },
+      { nm: "Twilight I", emo: "🌑", vstars: 12000, air: 3.30, earn: 2.40, bet: 5.0, energy: 200, cls: "t3", buyOnly: true },
+      { nm: "Twilight II", emo: "🌑", vstars: 18000, air: 4.20, earn: 2.90, bet: 6.5, energy: 260, cls: "t3", buyOnly: true },
+      { nm: "Twilight III", emo: "🌑", vstars: 27000, air: 5.40, earn: 3.65, bet: 8.0, energy: 330, cls: "t3", buyOnly: true },
+      { nm: "Midnight I", emo: "🦑", vstars: 45000, air: 7.00, earn: 4.60, bet: 10.0, energy: 420, cls: "t4", buyOnly: true },
+      { nm: "Midnight II", emo: "🦑", vstars: 70000, air: 9.00, earn: 5.80, bet: 12.5, energy: 520, cls: "t4", buyOnly: true },
+      { nm: "Midnight III", emo: "🦑", vstars: 100000, air: 11.50, earn: 7.30, bet: 15.0, energy: 640, cls: "t4", buyOnly: true },
+      { nm: "Abyss I", emo: "🕳️", vstars: 160000, air: 14.50, earn: 9.10, bet: 18.0, energy: 780, cls: "t4", buyOnly: true },
+      { nm: "Abyss II", emo: "🕳️", vstars: 240000, air: 18.00, earn: 11.20, bet: 21.0, energy: 940, cls: "t4", buyOnly: true },
+      { nm: "Abyss III", emo: "🕳️", vstars: 350000, air: 21.50, earn: 13.30, bet: 25.0, energy: 1120, cls: "t4", buyOnly: true },
+      { nm: "Trench I", emo: "🌋", vstars: 500000, air: 26.00, earn: 16.00, bet: 29.0, energy: 1320, cls: "t4", buyOnly: true },
+      { nm: "Trench II", emo: "🌋", vstars: 720000, air: 30.50, earn: 18.70, bet: 33.0, energy: 1550, cls: "t4", buyOnly: true },
+      { nm: "Trench III", emo: "🌋", vstars: 1000000, air: 36.00, earn: 22.00, bet: 38.0, energy: 1800, cls: "t4", buyOnly: true }];
       const vipMult = () => (VIP[effVip()] && VIP[effVip()].earn) || 1;
       // Actual TON price per VIP level (0 = none, 1-18) — KEEP IN SYNC WITH api/tonverify.js VIP_TON & vip.html
       const VIP_TON = [0, 3, 6, 9, 24, 42, 66, 110, 170, 250, 420, 650, 940, 1500, 2250, 3280, 4700, 6750, 9375];
@@ -7695,7 +7701,42 @@
       // Telegram-native referral: startapp=<refCode> arrives server-side as start_param and is attributed in /api/sync
       const inviteLink = () => "https://t.me/" + BOT_USER + "/" + APP_NAME + "?startapp=" + encodeURIComponent(S.refCode);
       function nextMile() { return REF_MILE.find(m => S.friends.length < m.n); }
+      // ---------- REFERRAL REWARDS (VIP referral accrual + claim) ----------
+      function renderReferrals() {
+        const sum = $("refRewardSummary"), btn = $("refClaimBtn"), list = $("refList"); if (!sum) return;
+        if (!cloudAuth()) { sum.textContent = "Open via Telegram to see referral rewards."; if (btn) btn.style.display = "none"; if (list) list.innerHTML = ""; return; }
+        cloudAction("/api/referrals", { action: "list" }).then(data => {
+          if (!data || !data.ok) { sum.textContent = "Couldn't load referrals."; return; }
+          const p = data.pending || { moon: 0, airdrop: 0, vip_points: 0 };
+          const has = (p.moon + p.vip_points) > 0;
+          sum.innerHTML = has
+            ? "Unclaimed: <b style='color:var(--gold)'>" + fmt(p.moon) + " $MOON</b> · <b style='color:#36a9ff'>" + fmt(p.vip_points) + " VIP Pts</b>"
+            : "No referral rewards yet — when someone you invited goes VIP, your rewards stack up here.";
+          if (btn) { btn.style.display = has ? "" : "none"; }
+          const rows = (data.referrals || []).filter(r => r.vipTier > 0 || (r.pending && (r.pending.moon + r.pending.airdrop + r.pending.vip_points) > 0));
+          if (list) list.innerHTML = rows.length ? rows.map(r => {
+            const vip = r.vipTier > 0 ? ("👑 VIP Lv " + r.vipTier) : "—";
+            const pend = r.pending && r.pending.vip_points ? (" · +" + fmt(r.pending.vip_points) + " VIP pts pending") : "";
+            return '<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid #241a40;font-size:13px"><span>' + (r.premium ? "⭐ " : "") + (r.name || "degen") + '</span><span style="color:var(--mut)">' + vip + pend + '</span></div>';
+          }).join("") : '<div class="ds" style="font-size:12px;opacity:.7">Invite friends — when they go VIP you earn bonus $MOON, Airdrop Points & VIP Points here.</div>';
+        }).catch(() => { sum.textContent = "Couldn't load referrals."; });
+      }
+      $("refClaimBtn") && $("refClaimBtn").addEventListener("click", () => {
+        const btn = $("refClaimBtn"); btn.disabled = true; btn.textContent = "Claiming…";
+        cloudAction("/api/referrals", { action: "claim" }).then(data => {
+          btn.disabled = false; btn.textContent = "🎁 Claim rewards";
+          if (data && data.ok) {
+            const c = data.claimed || {};
+            if (data.vip_points != null) S.vipPoints = data.vip_points;
+            if (data.balance != null) S.balance = data.balance;
+            if (data.airdrop_pts != null) S.airdrop = data.airdrop_pts;
+            save(); sfxCash(); confetti(); renderReferrals(); renderLive(); renderStats();
+            toast("🎁", "Rewards claimed!", "+" + fmt(c.moon || 0) + " $MOON · +" + fmt(c.airdrop || 0) + " Airdrop · +" + fmt(c.vip_points || 0) + " VIP pts");
+          } else { toast("⚠️", "Nothing to claim", (data && data.error) || "Invite friends to VIP first"); }
+        }).catch(err => { btn.disabled = false; btn.textContent = "🎁 Claim rewards"; toast("⚠️", "Claim failed", err.message); });
+      });
       function renderInvite() {
+        try { renderReferrals(); } catch (e) { }
         const n = S.friends.length; $("invBig").textContent = n;
         $("invEarned").textContent = fmt(S.friends.reduce((a, f) => a + (f.b || 0), 0));
         const nm = nextMile(); $("invNext").textContent = nm ? (nm.n + (nm.n === 1 ? " friend" : " friends")) : "All done 👑";

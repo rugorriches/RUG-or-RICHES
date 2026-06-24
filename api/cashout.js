@@ -11,8 +11,8 @@ const AIRDROP_BANK_RATE = 0.08;
 const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
 const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
 // Depth Zones VIP (0 = None, 1-18). KEEP IN SYNC WITH moontap.html VIP[].bet / VIP[].air
-const VIP_BET_MULT = [1, 1.3, 1.5, 1.7, 2.0, 2.3, 2.7, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0];
-const VIP_AIR_BOOST = [1, 1.10, 1.18, 1.28, 1.45, 1.60, 1.78, 2.00, 2.25, 2.55, 2.85, 3.20, 3.55, 3.95, 4.40, 4.90, 5.45, 5.95, 6.50];
+const VIP_BET_MULT = [1, 1.3, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0, 6.5, 8.0, 10.0, 12.5, 15.0, 18.0, 21.0, 25.0, 29.0, 33.0, 38.0];
+const VIP_AIR_BOOST = [1, 1.12, 1.24, 1.45, 1.75, 2.15, 2.65, 3.30, 4.20, 5.40, 7.00, 9.00, 11.50, 14.50, 18.00, 21.50, 26.00, 30.50, 36.00];
 function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 const EARN_PER_MINUTE = [250000, 1000000, 5000000, 25000000, 100000000];
 const MAX_ROI = 4000;   // per-round payout ceiling (multiple of invested). High safety net only — must stay above client maxRoundRoi(1500) × max event mult(1.5) ≈ 2250 so legit banks never get rejected. Real reward is governed by pot/multiplier + the heat/rug risk model, not this clamp.

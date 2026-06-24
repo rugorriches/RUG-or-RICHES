@@ -69,9 +69,9 @@ async function applyGrant(buyerId, tier, pointsGranted) {
   if (referrer) {
     const tonPaid = (VIP_TON[tier] || 0) * (pts / thresh);            // prorated TON actually spent
     const dollars = tonPaid * TON_USD_REF;                            // ≈ USD value
-    const refAir = Math.round(750 * dollars);                        // +750 Airdrop Points per $
-    const refVp = Math.round(10 * dollars);                          // +10 VIP Points per $
-    const refMoon = Math.round(6670 * dollars);                      // 10× store $MOON value (~667 $MOON per $)
+    const refAir = 0;                                                // VIP purchases NEVER mint airdrop points — airdrop comes from PLAY (accelerated by the VIP multiplier), not from spend
+    const refVp = Math.round(10 * dollars);                          // +10 VIP Points per $ (in-game loyalty, not airdrop allocation)
+    const refMoon = Math.round(6670 * dollars);                      // 10× store $MOON value (~667 $MOON per $) — in-game $MOON, not airdrop
     if (refAir + refVp + refMoon > 0) {
       await db.query("INSERT INTO referral_rewards (referrer_id, referee_id, tier, moon, airdrop, vip_points) VALUES ($1,$2,$3,$4,$5,$6)", [referrer, buyerId, tier, refMoon, refAir, refVp]);
     }
