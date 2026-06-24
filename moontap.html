@@ -2,15 +2,15 @@
 <html lang="en">
 
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEN0H86B3N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KEN0H86B3N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
 
-  gtag('config', 'G-KEN0H86B3N');
-</script>
+    gtag('config', 'G-KEN0H86B3N');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -21,7 +21,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>RUG OR RICHES — $MOON</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
+  <script async src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
   <style>
     :root {
       --bg: #05010f;
@@ -136,52 +136,67 @@
       #chart {
         height: 52px;
       }
+
       header {
         padding: 3px 12px 1px;
       }
+
       .season {
         padding: 1px 14px 1px;
         font-size: 9px;
       }
+
       .stats {
         padding: 2px 12px;
         gap: 4px;
       }
+
       .stat {
         padding: 3px 4px;
       }
+
       .stat .v {
         font-size: 15px;
       }
+
       .chart-card {
         margin: 2px 10px 2px;
         padding: 4px 10px 3px;
       }
+
       .price-now {
         font-size: 24px;
       }
+
       .pressure {
         margin-top: 2px;
         font-size: 8.5px;
       }
+
       .pbar {
         height: 6px;
       }
+
       .rug-wrap {
         padding: 2px 14px 1px;
       }
+
       .rug-bar {
         height: 15px;
       }
+
       #rugSkull {
         font-size: 15px;
       }
+
       #rugPct {
         font-size: 10px;
       }
+
       #gameScroll>.coin-stage {
         min-height: 66px;
       }
+
       #coin {
         height: 64px;
         min-height: 56px;
@@ -190,70 +205,88 @@
         gap: 12px;
         padding: 0 18px;
       }
+
       #coin .coin-ico {
         font-size: 20px;
       }
+
       #coin .coin-cta b {
         font-size: 16px;
       }
+
       #coin .coin-cta span {
         font-size: 8px;
       }
+
       #coin .coin-val {
         font-size: 13px;
       }
+
       .console {
         margin: 2px 10px 2px;
         padding: 5px 10px 5px;
         border-radius: 14px;
       }
+
       .console .energy-row {
         margin-bottom: 3px;
       }
+
       .betbar {
         grid-template-columns: 32px 1fr 32px;
         gap: 6px;
         padding: 3px;
       }
+
       .betadj {
         width: 32px;
         height: 32px;
         border-radius: 10px;
         font-size: 18px;
       }
+
       .betbar .betadj {
         width: 28px;
         height: 28px;
       }
+
       .betval {
         font-size: 15px;
       }
+
       .betsub {
         font-size: 10px;
         margin-top: 3px;
         gap: 5px;
       }
+
       .actions {
         margin-top: 4px;
       }
+
       .btn {
         padding: 9px 8px;
         font-size: 12px;
       }
+
       .predict-toggle {
         margin: 1px 14px 2px;
         padding: 5px;
       }
+
       nav {
         min-height: 56px;
       }
+
       nav button {
         padding: 8px 0 9px;
         font-size: 9px;
       }
+
       nav button .ic {
         font-size: 16px;
       }
+
       #gameScroll {
         padding-bottom: calc(4px + env(safe-area-inset-bottom));
       }
@@ -2673,51 +2706,132 @@
     .pulse-danger {
       animation: containerPulseDanger 1s infinite alternate;
     }
+
     @keyframes containerPulseDanger {
-      from { box-shadow: 0 0 10px rgba(255, 59, 92, 0.2); }
-      to { box-shadow: 0 0 25px rgba(255, 59, 92, 0.45); }
+      from {
+        box-shadow: 0 0 10px rgba(255, 59, 92, 0.2);
+      }
+
+      to {
+        box-shadow: 0 0 25px rgba(255, 59, 92, 0.45);
+      }
     }
 
     .pulse-nuclear {
       animation: containerPulseNuclear 0.4s infinite alternate;
     }
+
     @keyframes containerPulseNuclear {
-      from { box-shadow: 0 0 15px rgba(255, 59, 92, 0.35); }
-      to { box-shadow: 0 0 35px rgba(255, 59, 92, 0.8); }
+      from {
+        box-shadow: 0 0 15px rgba(255, 59, 92, 0.35);
+      }
+
+      to {
+        box-shadow: 0 0 35px rgba(255, 59, 92, 0.8);
+      }
     }
 
     .pulse-btn-clutch {
       animation: buttonPulseClutch 0.8s infinite alternate;
     }
+
     @keyframes buttonPulseClutch {
-      from { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 59, 92, 0.3); }
-      to { transform: scale(1.03); box-shadow: 0 6px 18px rgba(255, 59, 92, 0.6); }
+      from {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(255, 59, 92, 0.3);
+      }
+
+      to {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(255, 59, 92, 0.6);
+      }
     }
 
     .pulse-btn-nuclear {
       animation: buttonPulseNuclear 0.35s infinite alternate;
     }
+
     @keyframes buttonPulseNuclear {
-      from { transform: scale(1.01); box-shadow: 0 4px 12px rgba(255, 59, 92, 0.45); }
-      to { transform: scale(1.05); box-shadow: 0 6px 24px rgba(255, 59, 92, 0.95); }
+      from {
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(255, 59, 92, 0.45);
+      }
+
+      to {
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(255, 59, 92, 0.95);
+      }
     }
 
     /* clutch-bank celebration — gold burst when you bank deep in the danger zone */
     #clutchFlash {
-      position: absolute; inset: 0; z-index: 56; pointer-events: none; opacity: 0;
-      display: flex; align-items: center; justify-content: center;
+      position: absolute;
+      inset: 0;
+      z-index: 56;
+      pointer-events: none;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: radial-gradient(circle at 50% 44%, rgba(255, 212, 0, .34), rgba(29, 255, 143, .12) 46%, transparent 72%);
     }
+
     #clutchFlash .cf-txt {
-      font-size: 30px; font-weight: 900; letter-spacing: .4px; color: #fff; text-align: center; transform: scale(.6);
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: .4px;
+      color: #fff;
+      text-align: center;
+      transform: scale(.6);
       text-shadow: 0 0 18px var(--gold), 0 0 38px var(--neon);
     }
-    #clutchFlash.show { animation: clutchFlashAnim .75s ease-out; }
-    #clutchFlash.show .cf-txt { animation: clutchTxtAnim .75s cubic-bezier(.2, 1.5, .4, 1); }
-    @keyframes clutchFlashAnim { 0% { opacity: 0; } 16% { opacity: 1; } 100% { opacity: 0; } }
-    @keyframes clutchTxtAnim { 0% { transform: scale(.6); opacity: 0; } 28% { transform: scale(1.14); opacity: 1; } 72% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.05); opacity: 0; } }
+
+    #clutchFlash.show {
+      animation: clutchFlashAnim .75s ease-out;
+    }
+
+    #clutchFlash.show .cf-txt {
+      animation: clutchTxtAnim .75s cubic-bezier(.2, 1.5, .4, 1);
+    }
+
+    @keyframes clutchFlashAnim {
+      0% {
+        opacity: 0;
+      }
+
+      16% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes clutchTxtAnim {
+      0% {
+        transform: scale(.6);
+        opacity: 0;
+      }
+
+      28% {
+        transform: scale(1.14);
+        opacity: 1;
+      }
+
+      72% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1.05);
+        opacity: 0;
+      }
+    }
 
     @media (prefers-reduced-motion: reduce) {
+
       #chartCard,
       .btn,
       .rug-bar,
@@ -3072,17 +3186,69 @@
     }
 
     /* secondary segmented control inside a top group */
-    .subtabs { display: flex; gap: 6px; margin: 0 0 12px; }
-    .subtabs:empty { display: none; }
-    .subtab { flex: 1; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); color: #b9a7e8; border-radius: 9px; padding: 7px 3px; font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s; }
-    .subtab.on { color: #fff; background: rgba(124, 77, 255, .28); border-color: rgba(124, 77, 255, .55); }
+    .subtabs {
+      display: flex;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+
+    .subtabs:empty {
+      display: none;
+    }
+
+    .subtab {
+      flex: 1;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--line);
+      color: #b9a7e8;
+      border-radius: 9px;
+      padding: 7px 3px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .subtab.on {
+      color: #fff;
+      background: rgba(124, 77, 255, .28);
+      border-color: rgba(124, 77, 255, .55);
+    }
 
     /* Duels UI — match brand theme for buttons & fonts (bare .rbtn is only styled inside .reward-card) */
-    #duelsView .rbtn { flex: 0 0 auto; border: none; border-radius: 11px; padding: 9px 14px; font-family: inherit; font-weight: 900; font-size: 12px; cursor: pointer; color: #13002a; background: linear-gradient(90deg, var(--cyan), var(--neon)); box-shadow: 0 2px 9px rgba(35, 240, 255, .3); transition: transform .08s, filter .15s; }
-    #duelsView .rbtn:active { transform: scale(.95); }
-    #duelsView .rbtn.locked { background: #2a1a44; color: #8b7fb0; box-shadow: none; }
-    #duelsView input { font-family: inherit; font-size: 13px; }
-    #duelsView input::placeholder { color: #9c92c4; }
+    #duelsView .rbtn {
+      flex: 0 0 auto;
+      border: none;
+      border-radius: 11px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 12px;
+      cursor: pointer;
+      color: #13002a;
+      background: linear-gradient(90deg, var(--cyan), var(--neon));
+      box-shadow: 0 2px 9px rgba(35, 240, 255, .3);
+      transition: transform .08s, filter .15s;
+    }
+
+    #duelsView .rbtn:active {
+      transform: scale(.95);
+    }
+
+    #duelsView .rbtn.locked {
+      background: #2a1a44;
+      color: #8b7fb0;
+      box-shadow: none;
+    }
+
+    #duelsView input {
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    #duelsView input::placeholder {
+      color: #9c92c4;
+    }
 
     .rtab {
       flex: 1;
@@ -4095,14 +4261,18 @@
   <div id="app">
     <div id="rugOverlay"></div>
     <div id="dangerVig"></div>
-    <div id="clutchFlash"><div class="cf-txt"></div></div>
+    <div id="clutchFlash">
+      <div class="cf-txt"></div>
+    </div>
     <div class="react-modal" id="reactModal">
       <div class="react-box">
         <img id="reactImg" src="" alt="" onerror="this.style.display='none'">
         <div class="react-amt" id="reactAmt"></div>
         <div class="react-sub" id="reactSub"></div>
         <button class="big-btn" id="reactBtn">Continue</button>
-        <button id="reactShare" style="display:none;width:100%;margin-top:8px;background:linear-gradient(90deg,var(--neon),var(--cyan));color:#0a0420;border:none;border-radius:12px;padding:11px;font-weight:900;cursor:pointer">📤 Share this win</button>
+        <button id="reactShare"
+          style="display:none;width:100%;margin-top:8px;background:linear-gradient(90deg,var(--neon),var(--cyan));color:#0a0420;border:none;border-radius:12px;padding:11px;font-weight:900;cursor:pointer">📤
+          Share this win</button>
       </div>
     </div>
 
@@ -4226,7 +4396,9 @@
       <h2>👑 VIP Club</h2>
       <p class="sub" id="vipStatus">Unlock permanent perks & multipliers.</p>
       <div class="card" style="background:rgba(255,212,0,.08)">
-        <div class="ds" style="line-height:1.7">🌊 <b>Depth Zones</b> — 18 premium levels. The deeper you go, the bigger your <b>🪂 airdrop-point boost</b>, earnings, bet cap & energy.<br>⭐ Unlock any level instantly with Telegram Stars.</div>
+        <div class="ds" style="line-height:1.7">🌊 <b>Depth Zones</b> — 18 premium levels. The deeper you go, the bigger
+          your <b>🪂 airdrop-point boost</b>, earnings, bet cap & energy.<br>⭐ Unlock any level instantly with Telegram
+          Stars.</div>
       </div>
       <div id="vipList"></div>
     </div>
@@ -4444,7 +4616,8 @@
       <p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join (premium
         friends <b style="color:var(--gold)">25,000</b>) — plus <b style="color:var(--gold)">+10,000 Airdrop Points</b>
         per invite. And when someone you invited goes <b style="color:#36a9ff">VIP</b>, you earn
-        <b style="color:var(--gold)">VIP Points + 10× $MOON</b>.</p>
+        <b style="color:var(--gold)">VIP Points + 10× $MOON</b>.
+      </p>
       <img src="/assets/brand/inv-hero.webp" alt="Bring friends. Climb faster." loading="lazy"
         style="width:min(90%,360px);height:auto;border-radius:16px;display:block;margin:4px auto 14px;border:1px solid var(--line)"
         onerror="this.style.display='none'">
@@ -4510,7 +4683,8 @@
       <div id="mileList"></div>
       <div class="sec-h">💝 Gift $MOON to a friend</div>
       <div class="card">
-        <div class="ds" id="giftDesc">Send $MOON to any player by their Telegram username. Min 1,000 · max 100,000 per gift · 250,000/day.
+        <div class="ds" id="giftDesc">Send $MOON to any player by their Telegram username. Min 1,000 · max 100,000 per
+          gift · 250,000/day.
         </div>
         <div class="gift-row"><input id="giftCode" maxlength="32" placeholder="RECIPIENT USERNAME"
             style="flex:1;text-transform:none"><input id="giftAmt" type="number" inputmode="numeric"
@@ -4518,7 +4692,9 @@
         <button class="big-btn" id="giftSend" style="margin-top:9px">💝 Send Gift</button>
       </div>
       <div class="sec-h">🤝 Top Inviters this week</div>
-      <div id="inviteBoard"><div class="ds" style="color:#9c92c4">Loading…</div></div>
+      <div id="inviteBoard">
+        <div class="ds" style="color:#9c92c4">Loading…</div>
+      </div>
       <div class="sec-h">👥 Friends you invited</div>
       <div id="friendList">
         <div class="ds" style="padding:4px 2px;">No friends invited yet — share your code!</div>
@@ -4528,7 +4704,9 @@
     <div class="panel" id="panel-profile">
       <h2>👤 Profile</h2>
       <p class="sub">Everything counts toward your airdrop allocation.</p>
-      <button class="big-btn" id="adminOpen" style="display:none;margin-bottom:10px;background:linear-gradient(90deg,#ff2bd6,#7b5bff)">🛠️ Admin · Live Stats</button>
+      <button class="big-btn" id="adminOpen"
+        style="display:none;margin-bottom:10px;background:linear-gradient(90deg,#ff2bd6,#7b5bff)">🛠️ Admin · Live
+        Stats</button>
       <div class="card">
         <div class="toggle"><span>Name: <b id="nameTxt" style="color:var(--cyan)"></b></span><button class="buy"
             id="renameBtn">Rename</button></div>
@@ -4563,7 +4741,8 @@
       <div class="card" style="margin-top:14px;">
         <div style="font-weight:800;margin-bottom:6px">🪙 TON Wallet</div>
         <div class="ds" id="tonStatus" style="margin-bottom:8px">Not connected</div>
-        <button class="big-btn" id="tonConnectBtn" style="background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">Connect TON Wallet</button>
+        <button class="big-btn" id="tonConnectBtn"
+          style="background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">Connect TON Wallet</button>
         <div id="tonHoldings" class="ds" style="margin-top:8px"></div>
         <div class="ds" id="tonVipPts" style="margin-top:6px;opacity:.7"></div>
       </div>
@@ -4633,7 +4812,9 @@
           <div class="emo">👑</div>
           <div class="grow">
             <div class="nm">VIP & bet limits</div>
-            <div class="ds">Your <b>max bet per click is set by rank × VIP multiplier</b> (rank sets the base: Shrimp 1K → Megalodon 1M; VIP multiplies it: None 1× → Diamond 5×, up to 5M). VIP also boosts earnings, energy, and rug protection.</div>
+            <div class="ds">Your <b>max bet per click is set by rank × VIP multiplier</b> (rank sets the base: Shrimp 1K
+              → Megalodon 1M; VIP multiplies it: None 1× → Diamond 5×, up to 5M). VIP also boosts earnings, energy, and
+              rug protection.</div>
           </div>
         </div>
       </div>
@@ -4797,17 +4978,22 @@
     <div class="modal" id="duelModal" role="dialog" aria-modal="true" aria-label="Duel run">
       <div class="box" style="max-width:380px">
         <h3 style="margin-bottom:2px">⚔️ <span id="duelTitle">Duel Run</span></h3>
-        <div class="ds" id="duelVs" style="font-size:11px;color:#a78fd6;margin-bottom:8px">Same chart. Higher bank wins.</div>
-        <canvas id="duelChart" width="340" height="120" style="width:100%;height:120px;background:#120a26;border-radius:12px;display:block"></canvas>
+        <div class="ds" id="duelVs" style="font-size:11px;color:#a78fd6;margin-bottom:8px">Same chart. Higher bank wins.
+        </div>
+        <canvas id="duelChart" width="340" height="120"
+          style="width:100%;height:120px;background:#120a26;border-radius:12px;display:block"></canvas>
         <div style="display:flex;justify-content:space-between;margin:10px 2px 4px;font-weight:800">
           <div>📈 <span id="duelMult" style="color:var(--gold)">1.00x</span></div>
           <div>💰 <span id="duelPot">0</span></div>
           <div>⚡ <span id="duelTaps">40</span></div>
         </div>
         <div style="height:8px;background:#241544;border-radius:6px;overflow:hidden;margin:4px 2px 10px">
-          <div id="duelHeatBar" style="height:100%;width:0%;background:linear-gradient(90deg,#3ad17e,#ffcf33,#ff4d4d);transition:width .1s"></div>
+          <div id="duelHeatBar"
+            style="height:100%;width:0%;background:linear-gradient(90deg,#3ad17e,#ffcf33,#ff4d4d);transition:width .1s">
+          </div>
         </div>
-        <div class="ds" id="duelStatus" style="min-height:16px;font-weight:800;text-align:center;margin-bottom:8px">Tap PUMP to ride it — BANK before the rug.</div>
+        <div class="ds" id="duelStatus" style="min-height:16px;font-weight:800;text-align:center;margin-bottom:8px">Tap
+          PUMP to ride it — BANK before the rug.</div>
         <div class="mbtns">
           <button class="ok" id="duelTapBtn" style="flex:2;font-size:17px">PUMP 🚀</button>
           <button id="duelBankBtn" style="flex:1;background:var(--gold);color:#1a1030;font-weight:900">BANK 💰</button>
@@ -4821,8 +5007,10 @@
         <h3>💝 Gift $MOON</h3>
         <div class="ds" id="giftModalTo" style="font-weight:800;margin-bottom:2px"></div>
         <div class="ds" id="giftModalDesc" style="font-size:11px;color:#a78fd6;margin-bottom:8px"></div>
-        <input id="giftModalAmt" type="number" inputmode="numeric" placeholder="Amount $MOON" style="width:100%;padding:10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff">
-        <div class="mbtns" style="margin-top:10px"><button class="ok" id="giftModalSend" style="flex:1">Send 💝</button><button id="giftModalClose">Cancel</button></div>
+        <input id="giftModalAmt" type="number" inputmode="numeric" placeholder="Amount $MOON"
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff">
+        <div class="mbtns" style="margin-top:10px"><button class="ok" id="giftModalSend" style="flex:1">Send
+            💝</button><button id="giftModalClose">Cancel</button></div>
       </div>
     </div>
 
@@ -4830,7 +5018,8 @@
       <div class="box" style="max-width:420px;max-height:82vh;overflow:auto">
         <h3>🛠️ Admin · Live Stats</h3>
         <div class="ds" id="adminBody" style="font-size:12px">Loading…</div>
-        <div class="mbtns" style="margin-top:10px"><button class="ok" id="adminRefresh" style="flex:1">↻ Refresh</button><button id="adminClose">Close</button></div>
+        <div class="mbtns" style="margin-top:10px"><button class="ok" id="adminRefresh" style="flex:1">↻
+            Refresh</button><button id="adminClose">Close</button></div>
       </div>
     </div>
 
@@ -4838,8 +5027,10 @@
       <div class="box" style="max-width:360px;text-align:center">
         <div id="unlockIcon" style="font-size:48px;line-height:1;margin-bottom:6px">🔓</div>
         <h3 id="unlockTitle" style="margin-bottom:4px"></h3>
-        <div class="ds" id="unlockBody" style="font-size:13px;line-height:1.65;text-align:left;margin:8px 2px 4px"></div>
-        <div class="mbtns" style="margin-top:14px"><button class="ok" id="unlockGo" style="flex:1">Show me →</button><button id="unlockClose">Got it</button></div>
+        <div class="ds" id="unlockBody" style="font-size:13px;line-height:1.65;text-align:left;margin:8px 2px 4px">
+        </div>
+        <div class="mbtns" style="margin-top:14px"><button class="ok" id="unlockGo" style="flex:1">Show me
+            →</button><button id="unlockClose">Got it</button></div>
       </div>
     </div>
 
@@ -4848,7 +5039,9 @@
         <div style="font-size:42px;line-height:1">⚠️</div>
         <h3 style="margin:4px 0 2px">Permanent reset</h3>
         <div class="ds" id="resetBody" style="font-size:13px;line-height:1.6;margin:8px 2px;text-align:left"></div>
-        <div class="mbtns" style="margin-top:12px"><button class="ok" id="resetConfirmBtn" style="flex:1;background:#ff4d4d;color:#fff;border:none">Continue →</button><button id="resetCancelBtn">Cancel</button></div>
+        <div class="mbtns" style="margin-top:12px"><button class="ok" id="resetConfirmBtn"
+            style="flex:1;background:#ff4d4d;color:#fff;border:none">Continue →</button><button
+            id="resetCancelBtn">Cancel</button></div>
       </div>
     </div>
 
@@ -4939,7 +5132,7 @@
           if (navigator.vibrate) {
             navigator.vibrate(type === "heavy" ? 40 : 20);
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       const DEBUG_TELEMETRY = false;
@@ -4948,7 +5141,7 @@
         const h = heat;
         const zone = getHeatZone(h);
         const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
-        
+
         let durationBucket = "< 5s";
         if (roundDuration >= 35) durationBucket = "35s+";
         else if (roundDuration >= 20) durationBucket = "20-35s";
@@ -4979,7 +5172,7 @@
             toast("💰", "Nice bank!", "Higher heat means higher risk.");
           }
           localStorage.setItem("coach_" + type, "1");
-        } catch (_) {}
+        } catch (_) { }
       }
       const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
       const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };
@@ -5120,12 +5313,12 @@
             if (data && data.player) {
               hasCloudAuth = true;
               mergeState(data.player);
-              try { applyUnlocks(false); } catch (e) {}   // re-baseline gating to the authoritative bank count (fixes first-bank-unlocks-everything)
+              try { applyUnlocks(false); } catch (e) { }   // re-baseline gating to the authoritative bank count (fixes first-bank-unlocks-everything)
               renderLive();
               renderStats();
               runStartupClaims();
               if (data.giftsReceived && data.giftsReceived > 0) {
-                try { sfxCash && sfxCash(); } catch (e) {}
+                try { sfxCash && sfxCash(); } catch (e) { }
                 toast("🎁", "Gift received!", "+" + fmt(data.giftsReceived) + " $MOON from a friend");
               }
             }
@@ -5415,7 +5608,7 @@
           try {
             c.resume();
             audioUnlocked = true;
-          } catch (_) {}
+          } catch (_) { }
         } else if (c) {
           audioUnlocked = true;
         }
@@ -5436,7 +5629,7 @@
         if (!S.sound || !audioUnlocked || prefersReducedMotion()) return;
         const c = ac(); if (!c) return;
         if (c.state === "suspended") {
-          c.resume().catch(() => {});
+          c.resume().catch(() => { });
         }
         const vol = isNuclear ? 0.05 : 0.035;
         beep(75, 45, 0.08, "sine", vol);
@@ -5687,7 +5880,7 @@
       function triggerRug() {
         if (busting) return;
         const r = Math.random();
-        
+
         const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
         const minHardMult = (roundsPlayed < BEGINNER_ROUNDS) ? MIN_HARD_RUG_MULT_BEGINNER : MIN_HARD_RUG_MULT_NORMAL;
         const isProtected = (roundDuration < SAFE_RAMP_SECONDS) || (price < minHardMult);
@@ -5715,16 +5908,16 @@
       }
       function startBust(type) {
         if (busting) return;
-        
+
         const roundsPlayed = (S.cashouts || 0) + (S.rugs || 0);
         const minHardMult = (roundsPlayed < BEGINNER_ROUNDS) ? MIN_HARD_RUG_MULT_BEGINNER : MIN_HARD_RUG_MULT_NORMAL;
         const isProtected = (roundDuration < SAFE_RAMP_SECONDS) || (price < minHardMult);
-        
+
         let resolvedType = type || "hard";
         if (resolvedType === "hard" && isProtected) {
           resolvedType = "soft";
         }
-        
+
         busting = true; bustFrames = 14; S.rugs++; unlock("first");
         logTelemetry("rug_hit", { rugType: resolvedType });
         triggerCoaching("first_rug");
@@ -5869,7 +6062,7 @@
         const blowoff = price >= roundPeak * 0.985 ? 0.2 : 0;   // BLOW-OFF TOP: riding the very top is extra fragile (stronger now)
         const overextended = clamp((price - 8) / 20, 0, 1);
         const target = over * 45 + overextended * 35 + posRisk * 28 + sellers * 18 + frenzy * 8;
-        
+
         // Paced heat growth scaling:
         const currentZoneObj = getHeatZone(heat);
         let growthMult = HEAT_GROWTH_MULT[currentZoneObj.id] || 1.0;
@@ -5893,7 +6086,7 @@
         if (Math.random() < (0.003 + (heat / 100) * 0.012) * whaleSafe) { pushFeed("🐋 " + pick(WHALES) + " DUMPED", false, true); heat = Math.min(100, heat + 22); price *= 0.9; capPrice(); }
         if (pot > 0 && heat >= CONFIG.warnHeat && dumpWarn <= 0) { dumpWarn = 1.7; if (panelOpen === "game") { toast("🚨", "DUMP INCOMING", "Sell NOW or get rugged!"); sfxRug(); } }
         if (Math.random() < Math.pow(heat / 100, 2.4) * CONFIG.heatHazard * rugResist()) triggerRug();   // danger curve starts earlier (was ^3) — mid-heat is no longer a free ride
-        
+
         // Haptics and Telemetry on zone transition:
         if (pot > 0) {
           const nextZoneObj = getHeatZone(heat);
@@ -5930,13 +6123,13 @@
         requestAnimationFrame(loop); try {
           const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;   // clamp dt so a backgrounded tab can't spike the sim
           if (energy < maxEnergy()) energy = Math.min(maxEnergy(), energy + regenRate() * dt);
-          
+
           if (pot > 0) {
             roundDuration += dt;
           } else {
             roundDuration = 0;
           }
-          
+
           if (pot > 0 && !busting && S.sound && audioUnlocked && !prefersReducedMotion()) {
             const h = heat;
             if (h >= 95) {
@@ -5985,15 +6178,15 @@
         const r = risk() * 100; $("rugFill").style.width = r + "%"; $("rugPct").textContent = Math.floor(r) + "%";
         $("rugSkull").style.left = clamp(r, 2, 98) + "%";
         const rb = $("rugBar"); rb.classList.toggle("risky", r >= 35); rb.classList.toggle("danger", r >= 70);
-        
+
         const zone = getHeatZone(r);
         const cc = $("chartCard");
         const co = $("cashout");
-        
+
         cc.classList.remove("pulse-danger", "pulse-nuclear");
         co.classList.remove("pulse-btn-clutch", "pulse-btn-nuclear");
         cc.classList.toggle("danger", r >= 70);
-        
+
         if (pot > 0) {
           if (zone.id === "clutch") {
             cc.classList.add("pulse-danger");
@@ -6003,7 +6196,7 @@
             co.classList.add("pulse-btn-nuclear");
           }
         }
-        
+
         const dv = $("dangerVig");
         if (dv) {
           let opacity = 0;
@@ -6015,7 +6208,7 @@
           dv.style.opacity = opacity;
           dv.classList.toggle("crit", pot > 0 && r >= 80);
         }
-        
+
         const rs = $("rugState");
         if (dumpWarn > 0) {
           rs.textContent = "🚨 SELL NOW!";
@@ -6025,7 +6218,7 @@
           if (zone.id === "clutch") zoneLabel = "🚨 CLUTCH ZONE";
           else if (zone.id === "nuclear") zoneLabel = "☢️ NUCLEAR";
           rs.textContent = zoneLabel + " — " + zone.copy;
-          
+
           if (zone.severity === "low") rs.style.color = "var(--green)";
           else if (zone.severity === "medium") rs.style.color = "var(--gold)";
           else rs.style.color = "var(--red)";
@@ -6036,7 +6229,7 @@
         $("athTxt").textContent = ath.toFixed(2) + "x"; $("mktTxt").textContent = "mcap $" + fmt(price * liq * 12);
         const tr = trend > 0.06 ? "📈 bullish" : trend < -0.06 ? "📉 bearish" : "➖ flat";
         $("mstats").innerHTML = "👥 <b>" + fmt(holders) + "</b> holders   💧 <b>$" + fmt(liq) + "</b> liq   " + tr;
-        
+
         let cashoutLabel = "💰 Bank";
         if (pot >= 1) {
           if (zone.id === "danger") cashoutLabel = "💰 Bank now?";
@@ -6156,7 +6349,7 @@
             lastFaucet = now;
             if (cloudAuth()) {
               claimCloud("faucet", "hourly").then(data => { if (data && data.ok) { save(); renderLive(); renderDash(); toast("🪙", "Comeback faucet!", "You went broke — here's " + fmt(data.reward || 500) + " $MOON"); } })
-              .catch(err => toast("⏳", "Faucet unavailable", err.message)); return;
+                .catch(err => toast("⏳", "Faucet unavailable", err.message)); return;
             }
             bank(500); save(); renderLive(); renderDash();
             toast("🪙", "Comeback faucet!", "You went broke — here's 500 $MOON to get back in");
@@ -6317,7 +6510,7 @@
         if (tg && tg.openInvoice && resolvedInvoiceEndpoint) {
           try {
             fetch(resolvedInvoiceEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ payload: payload, initData: tg.initData }) })
-            .then(r => r.json()).then(d => { if (d && d.link) tg.openInvoice(d.link, st => { if (st === "paid") grant(); }); else toast("⚠️", "Store unavailable", (d && d.error) || "Try again soon"); }).catch(() => toast("⚠️", "Store unavailable", "Try again soon"));
+              .then(r => r.json()).then(d => { if (d && d.link) tg.openInvoice(d.link, st => { if (st === "paid") grant(); }); else toast("⚠️", "Store unavailable", (d && d.error) || "Try again soon"); }).catch(() => toast("⚠️", "Store unavailable", "Try again soon"));
           } catch (e) { toast("⚠️", "Store unavailable", "Try again soon"); }
           return;
         }
@@ -6358,7 +6551,7 @@
         if (!window.TON_CONNECT_UI) return null;
         try {
           tcUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: "https://rugorriches.app/tonconnect-manifest.json" });
-          tcUI.onStatusChange(() => { try { renderTon(); } catch (e) {} });
+          tcUI.onStatusChange(() => { try { renderTon(); } catch (e) { } });
         } catch (e) { console.warn("TON init failed", e); }
         return tcUI;
       }
@@ -6366,13 +6559,13 @@
       function tonShort(a) { return a ? (a.slice(0, 4) + "…" + a.slice(-4)) : ""; }
       async function tonConnect() {
         const u = tonReady(); if (!u) { toast("⚠️", "TON unavailable", "Reopen the app and try again"); return; }
-        try { if (tonAccount()) await u.disconnect(); else await u.openModal(); } catch (e) {}
-        try { renderTon(); } catch (e) {}
+        try { if (tonAccount()) await u.disconnect(); else await u.openModal(); } catch (e) { }
+        try { renderTon(); } catch (e) { }
       }
       async function tonBuyTier(i) {
         const u = tonReady(); if (!u) { toast("⚠️", "TON unavailable", "Reopen the app"); return; }
         if (!cloudAuth()) { toast("⚠️", "Open via Telegram", "Sign-in needed to pay"); return; }
-        if (!tonAccount()) { try { await u.openModal(); } catch (e) {} if (!tonAccount()) return; }
+        if (!tonAccount()) { try { await u.openModal(); } catch (e) { } if (!tonAccount()) return; }
         const v = VIP[i];
         try {
           const inv = await cloudAction("/api/tonverify", { action: "invoice", tier: i });
@@ -6690,7 +6883,7 @@
           if (resolvedVerifyEndpoint && tg && tg.initData) {
             try {
               fetch(resolvedVerifyEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ task: q.id, initData: tg.initData }) })
-              .then(r => r.json()).then(d => { (d && d.ok) ? pass() : fail("Join the " + (q.id === "tg_group" ? "group" : "channel") + " first, then tap Verify."); }).catch(() => fail());
+                .then(r => r.json()).then(d => { (d && d.ok) ? pass() : fail("Join the " + (q.id === "tg_group" ? "group" : "channel") + " first, then tap Verify."); }).catch(() => fail());
             } catch (e) { fail(); }
           } else { fail("Open inside Telegram to verify membership."); }
           return;
@@ -6998,7 +7191,7 @@
         const wrap = $("liveBoards"); if (!wrap) return;
         wrap.innerHTML = '<div class="dly-load">Loading boards…</div>';
         let d = null;
-        try { const r = await fetch("/api/boards"); d = await r.json(); } catch (e) {}
+        try { const r = await fetch("/api/boards"); d = await r.json(); } catch (e) { }
         if (!d || !d.boards) { wrap.innerHTML = '<div class="dly-load">Boards unavailable — try again soon.</div>'; return; }
         const sec = (title, arr, fmtVal) => {
           if (!arr || !arr.length) return "";
@@ -7050,44 +7243,44 @@
         }
         const secs = d.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
         let html = '<div class="dly-head"><div class="dly-title">💥 Daily Crash Pick</div><div class="dly-sub">Resets in ' + hh + 'h ' + mm + 'm</div></div>';
-        
+
         html += '<div class="card"><div class="ds" style="line-height:1.5;font-size:12px">' +
-                'Pick a multiplier from <b>1.01x</b> to <b>100.00x</b>. Today\'s secret crash point is already committed on the server. ' +
-                'If the crash point is <b>equal to or above</b> your pick, you survive! Otherwise, you get rekt. ' +
-                '<br><span style="color:var(--gold);font-weight:bold">Provably Fair:</span> yesterday\'s seed is revealed below so you can verify the results.' +
-                '</div></div>';
+          'Pick a multiplier from <b>1.01x</b> to <b>100.00x</b>. Today\'s secret crash point is already committed on the server. ' +
+          'If the crash point is <b>equal to or above</b> your pick, you survive! Otherwise, you get rekt. ' +
+          '<br><span style="color:var(--gold);font-weight:bold">Provably Fair:</span> yesterday\'s seed is revealed below so you can verify the results.' +
+          '</div></div>';
 
         if (d.myPlay) {
           html += '<div class="card" style="border:1px dashed var(--gold);background:rgba(255,212,0,0.04);margin-top:10px;text-align:center;padding:12px 10px">' +
-                  '<div style="font-size:16px;font-weight:900;color:var(--gold);margin-bottom:4px">🔒 Locked — Pending Reveal</div>' +
-                  '<div class="ds">Your target: <b style="color:#fff">' + d.myPlay.target.toFixed(2) + 'x</b></div>' +
-                  '<div class="ds" style="font-size:10px;color:#a78fd6;margin-top:6px">Your pick is locked. Tomorrow\'s seed reveal will prove if the crash point cleared your target.</div>' +
-                  '</div>';
+            '<div style="font-size:16px;font-weight:900;color:var(--gold);margin-bottom:4px">🔒 Locked — Pending Reveal</div>' +
+            '<div class="ds">Your target: <b style="color:#fff">' + d.myPlay.target.toFixed(2) + 'x</b></div>' +
+            '<div class="ds" style="font-size:10px;color:#a78fd6;margin-top:6px">Your pick is locked. Tomorrow\'s seed reveal will prove if the crash point cleared your target.</div>' +
+            '</div>';
         } else {
           html += '<div class="card" style="margin-top:10px;padding:12px">' +
-                  '<div class="sec-h" style="margin:0 0 8px;font-size:12px">Lock in your pick</div>' +
-                  '<div class="ds" style="margin-bottom:8px">Enter target multiplier (1.01x to 100.00x):</div>' +
-                  '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">' +
-                  '<input id="crashTarget" type="number" step="0.01" min="1.01" max="100.00" placeholder="2.00" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid var(--line);border-radius:10px;padding:9px;color:#fff;font-weight:900;font-size:16px;text-align:center">' +
-                  '<span style="font-weight:bold;color:#a78fd6">x</span>' +
-                  '</div>' +
-                  '<button class="big-btn" id="crashSubmit" style="margin:0">🔒 Lock in multiplier</button>' +
-                  '<div class="ds" style="font-size:10px;color:var(--red);margin-top:8px;text-align:center">⚠️ Warning: you get only ONE pick per day. Cannot be changed!</div>' +
-                  '</div>';
+            '<div class="sec-h" style="margin:0 0 8px;font-size:12px">Lock in your pick</div>' +
+            '<div class="ds" style="margin-bottom:8px">Enter target multiplier (1.01x to 100.00x):</div>' +
+            '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">' +
+            '<input id="crashTarget" type="number" step="0.01" min="1.01" max="100.00" placeholder="2.00" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid var(--line);border-radius:10px;padding:9px;color:#fff;font-weight:900;font-size:16px;text-align:center">' +
+            '<span style="font-weight:bold;color:#a78fd6">x</span>' +
+            '</div>' +
+            '<button class="big-btn" id="crashSubmit" style="margin:0">🔒 Lock in multiplier</button>' +
+            '<div class="ds" style="font-size:10px;color:var(--red);margin-top:8px;text-align:center">⚠️ Warning: you get only ONE pick per day. Cannot be changed!</div>' +
+            '</div>';
         }
 
         html += '<div class="sec-h">Provable Fairness</div>' +
-                '<div class="card" style="font-size:10px;line-height:1.4;word-break:break-all;padding:10px 12px">' +
-                '<b>Today\'s Committed Hash:</b><br><code style="color:var(--cyan)">' + d.today.commitHash + '</code><br><br>';
+          '<div class="card" style="font-size:10px;line-height:1.4;word-break:break-all;padding:10px 12px">' +
+          '<b>Today\'s Committed Hash:</b><br><code style="color:var(--cyan)">' + d.today.commitHash + '</code><br><br>';
 
         if (d.latestReveal && d.latestReveal.seed) {
           html += '<b>Yesterday\'s Reveal (' + d.latestReveal.day + '):</b><br>' +
-                  'Seed: <code style="color:var(--gold)">' + d.latestReveal.seed + '</code><br>' +
-                  'Crash Point: <b style="color:var(--green)">' + d.latestReveal.crashPoint.toFixed(2) + 'x</b><br>';
+            'Seed: <code style="color:var(--gold)">' + d.latestReveal.seed + '</code><br>' +
+            'Crash Point: <b style="color:var(--green)">' + d.latestReveal.crashPoint.toFixed(2) + 'x</b><br>';
           if (d.myLatestReveal) {
             const isWin = d.myLatestReveal.win;
             html += '<div style="margin-top:6px;font-weight:bold;color:' + (isWin ? 'var(--green)' : 'var(--red)') + '">' +
-                    'Your Pick: ' + d.myLatestReveal.target.toFixed(2) + 'x — ' + (isWin ? '🏆 SURVIVED' : '💀 REKT') + '</div>';
+              'Your Pick: ' + d.myLatestReveal.target.toFixed(2) + 'x — ' + (isWin ? '🏆 SURVIVED' : '💀 REKT') + '</div>';
           } else {
             html += '<div style="margin-top:6px;color:#a78fd6">You did not participate yesterday.</div>';
           }
@@ -7095,13 +7288,13 @@
           html += 'Yesterday\'s reveal will appear here tomorrow.';
         }
         html += '<div style="margin-top:8px;font-size:9.5px;color:#a78fd6;line-height:1.35">' +
-                'Today\'s hash proves the server committed to the crash seed before picks were made. Tomorrow, the raw seed is revealed so anyone can verify the crash point.' +
-                '</div></div>';
+          'Today\'s hash proves the server committed to the crash seed before picks were made. Tomorrow, the raw seed is revealed so anyone can verify the crash point.' +
+          '</div></div>';
 
         html += '<div class="sec-h" style="display:flex;justify-content:space-between;align-items:center">' +
-                '<span>🏆 Yesterday\'s Survivors</span>' +
-                '<span style="font-size:9.5px;text-transform:none;color:#a78fd6">Picks locked today: ' + (d.todayLockedCount || 0) + '</span>' +
-                '</div>';
+          '<span>🏆 Yesterday\'s Survivors</span>' +
+          '<span style="font-size:9.5px;text-transform:none;color:#a78fd6">Picks locked today: ' + (d.todayLockedCount || 0) + '</span>' +
+          '</div>';
 
         if (!d.leaderboard || !d.leaderboard.length) {
           html += '<div class="dly-empty">No survivors recorded yesterday.</div>';
@@ -7109,10 +7302,10 @@
           d.leaderboard.forEach(r => {
             const isMe = S.name && r.name && S.name.toLowerCase() === r.name.toLowerCase();
             html += '<div class="crewrow' + (isMe ? ' me' : '') + '">' +
-                    '<div class="rk">' + r.rank + '</div>' +
-                    '<div class="nm">' + esc(r.name) + (r.vip ? (' <span class="vip-badge" style="font-size:8px;padding:0px 4px;border-radius:4px;background:var(--gold);color:#000">VIP ' + r.vip + '</span>') : '') + '</div>' +
-                    '<div class="sc">' + r.target.toFixed(2) + 'x</div>' +
-                    '</div>';
+              '<div class="rk">' + r.rank + '</div>' +
+              '<div class="nm">' + esc(r.name) + (r.vip ? (' <span class="vip-badge" style="font-size:8px;padding:0px 4px;border-radius:4px;background:var(--gold);color:#000">VIP ' + r.vip + '</span>') : '') + '</div>' +
+              '<div class="sc">' + r.target.toFixed(2) + 'x</div>' +
+              '</div>';
           });
         }
         wrap.innerHTML = html;
@@ -7247,7 +7440,7 @@
         if (!DR || !DR.active || DR.rug || DR.banked) return;
         if (DR.taps <= 0) { $("duelStatus").textContent = "Out of energy — BANK it!"; return; }
         duelTapStep(DR);
-        try { ac && ac(); } catch (e) {}
+        try { ac && ac(); } catch (e) { }
         duelRender();
       }
       function duelDoBank() {
@@ -7260,8 +7453,8 @@
         DR.ended = true; DR.active = false;
         const score = reason === "bank" ? Math.floor(DR.pot) : 0;
         $("duelTapBtn").disabled = true; $("duelBankBtn").disabled = true;
-        if (reason === "rug") { $("duelStatus").textContent = "💀 RUGGED — banked 0. Tough seed."; $("duelStatus").style.color = "#ff6b6b"; try { sfxRug && sfxRug(); triggerHaptic && triggerHaptic("error"); } catch (e) {} }
-        else if (reason === "bank") { $("duelStatus").textContent = "💰 Banked " + fmt(score) + "! Submitting…"; $("duelStatus").style.color = "var(--gold)"; try { sfxCash && sfxCash(); triggerHaptic && triggerHaptic("success"); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) {} }
+        if (reason === "rug") { $("duelStatus").textContent = "💀 RUGGED — banked 0. Tough seed."; $("duelStatus").style.color = "#ff6b6b"; try { sfxRug && sfxRug(); triggerHaptic && triggerHaptic("error"); } catch (e) { } }
+        else if (reason === "bank") { $("duelStatus").textContent = "💰 Banked " + fmt(score) + "! Submitting…"; $("duelStatus").style.color = "var(--gold)"; try { sfxCash && sfxCash(); triggerHaptic && triggerHaptic("success"); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) { } }
         else { $("duelStatus").textContent = "⏱️ Time — banked " + fmt(score) + ". Submitting…"; }
         duelRender();
         cloudAction("/api/duel", { action: "submit", code: DR.code, score: score }).then(r => {
@@ -7270,8 +7463,8 @@
             if (dd.status === "settled") {
               const msg = dd.result === "won" ? "🏆 You WON the duel!" + (dd.wager > 0 ? " +" + fmt(dd.wager * 2) + " $MOON" : "") : dd.result === "lost" ? "😤 You lost this one." : "🤝 Draw — wagers refunded.";
               $("duelStatus").textContent = msg;
-              if (dd.result === "won" && !prefersReducedMotion()) { try { confetti && confetti(); } catch (e) {} }
-              if (dd.wager > 0) syncWithCloud().catch(() => {});
+              if (dd.result === "won" && !prefersReducedMotion()) { try { confetti && confetti(); } catch (e) { } }
+              if (dd.wager > 0) syncWithCloud().catch(() => { });
             } else {
               $("duelStatus").textContent = "✅ Score locked: " + fmt(score) + ". Waiting for opponent…";
             }
@@ -7294,7 +7487,7 @@
         cloudAction("/api/duel", { action: "create", wager: w }).then(r => {
           if (r && r.duel) {
             const link = duelLink(r.duel.code);
-            try { navigator.clipboard && navigator.clipboard.writeText(link); } catch (e) {}
+            try { navigator.clipboard && navigator.clipboard.writeText(link); } catch (e) { }
             toast("⚔️", "Duel created!", "Share link copied — send it to a rival");
             renderDuels();
           }
@@ -7317,14 +7510,14 @@
       }
       function duelShare(code) {
         const link = duelLink(code);
-        try { navigator.clipboard && navigator.clipboard.writeText(link); toast("🔗", "Link copied", "Send it to your opponent"); } catch (e) {}
-        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("⚔️ I challenge you to a RUG OR RICHES duel!")); } catch (e) {}
+        try { navigator.clipboard && navigator.clipboard.writeText(link); toast("🔗", "Link copied", "Send it to your opponent"); } catch (e) { }
+        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("⚔️ I challenge you to a RUG OR RICHES duel!")); } catch (e) { }
       }
       async function renderDuels() {
         const wrap = $("duelsView"); if (!wrap) return;
         if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">⚔️ Duels need Telegram. Open the game inside Telegram to challenge rivals.</div>'; return; }
         let data = null;
-        try { data = await cloudAction("/api/duel", { action: "list" }); } catch (e) {}
+        try { data = await cloudAction("/api/duel", { action: "list" }); } catch (e) { }
         const duels = (data && data.duels) || [];
         let html = '<div class="dly-head"><div class="dly-title">⚔️ Async Duels</div><div class="dly-sub">Same chart, head-to-head. Higher bank wins the pot.</div></div>';
         html += '<div class="card" style="margin-bottom:10px"><div class="ds" style="margin-bottom:6px;font-weight:800">Challenge someone</div>' +
@@ -7381,8 +7574,8 @@
             } else {
               if (typeof showRtGroup === "function") showRtGroup("compete");
             }
-          }).catch(() => {});
-        } catch (e) {}
+          }).catch(() => { });
+        } catch (e) { }
       }
       setTimeout(checkDuelDeepLink, 2600);
 
@@ -7391,7 +7584,7 @@
         const wrap = $("rankedView"); if (!wrap) return;
         if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">📊 Ranked needs Telegram. Play duels inside Telegram to earn a rating.</div>'; return; }
         let d = null;
-        try { d = await cloudAction("/api/ranked", {}); } catch (e) {}
+        try { d = await cloudAction("/api/ranked", {}); } catch (e) { }
         if (!d || !d.ok) { wrap.innerHTML = '<div class="dly-load">Ranked unavailable — try again soon.</div>'; return; }
         let html = '<div class="dly-head"><div class="dly-title">📊 Ranked Ladder</div><div class="dly-sub">Win duels to climb · Season ' + d.season + ' · resets monthly</div></div>';
         if (d.me) {
@@ -7454,12 +7647,12 @@
         {
           key: "crews", need: 3, sel: '.rtab[data-grp="crews"]', icon: "🤝", title: "Crews unlocked!",
           how: "Team up! <b>Join or create a crew</b>, chat, and pool your scores on the crew leaderboard. Crews also battle in the weekly all-crews <b>Crew Wars</b> league for $MOON chests.<br><br>Open <b>Ranks → 🤝 Crews</b> to find your squad.",
-          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("crews"); } catch (e) {} }, 70); }
+          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("crews"); } catch (e) { } }, 70); }
         },
         {
           key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "💥", title: "Compete unlocked!",
           how: "You're ready for the big leagues:<br>• <b>⚔️ Duels</b> — challenge anyone 1v1 on the same chart; winner takes the $MOON.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons.<br>• <b>💥 Daily Crash</b> — one provably-fair pick a day.<br>• <b>🐋 Live Boards</b> — chase Whale of the Day.<br><br>Open <b>Ranks → 💥 Compete</b> to jump in.",
-          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) {} }, 70); }
+          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) { } }, 70); }
         }
       ];
       let unlockTarget = null;
@@ -7472,7 +7665,7 @@
         m.classList.add("show");
       }
       $("unlockClose") && $("unlockClose").addEventListener("click", () => $("unlockModal").classList.remove("show"));
-      $("unlockGo") && $("unlockGo").addEventListener("click", () => { $("unlockModal").classList.remove("show"); if (unlockTarget && unlockTarget.go) try { unlockTarget.go(); } catch (e) {} });
+      $("unlockGo") && $("unlockGo").addEventListener("click", () => { $("unlockModal").classList.remove("show"); if (unlockTarget && unlockTarget.go) try { unlockTarget.go(); } catch (e) { } });
       $("unlockModal") && $("unlockModal").addEventListener("click", e => { if (e.target.id === "unlockModal") $("unlockModal").classList.remove("show"); });
       function applyUnlocks(announce) {
         const banks = S.cashouts || 0;
@@ -7484,7 +7677,7 @@
           if (on && S.unlocks.indexOf(u.key) < 0) {
             S.unlocks.push(u.key); save();
             if (announce !== false) {
-              try { sfxCash && sfxCash(); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) {}
+              try { sfxCash && sfxCash(); if (!prefersReducedMotion()) confetti && confetti(); } catch (e) { }
               if (u.how) setTimeout(() => showUnlockWalkthrough(u), 700);   // big features get a full walkthrough popup
               else toast("🔓", "Unlocked!", (u.label || u.key) + " is now available");   // simple nav reveals get a quick toast
             }
@@ -7597,7 +7790,7 @@
           : "Min 1,000 · max 100,000 per gift · 250,000/day";
         $("giftModalAmt").value = "";
         $("giftModal").classList.add("show");
-        setTimeout(() => { try { $("giftModalAmt").focus(); } catch (e) {} }, 60);
+        setTimeout(() => { try { $("giftModalAmt").focus(); } catch (e) { } }, 60);
       }
       function giftModalSend() {
         const tg = window.Telegram && window.Telegram.WebApp;
@@ -7669,12 +7862,12 @@
       // Custom 2-step reset confirmation (Telegram's WebView silently blocks a 2nd back-to-back native confirm())
       let resetStep = 0;
       function doResetProgress() {
-        _resetting = true; try { clearTimeout(syncTimeout); } catch (e) {}   // freeze all sync/save first, so nothing re-uploads the old state over the reset
+        _resetting = true; try { clearTimeout(syncTimeout); } catch (e) { }   // freeze all sync/save first, so nothing re-uploads the old state over the reset
         const b = $("resetProgress"); if (b) { b.disabled = true; b.textContent = "Resetting…"; }
         const tgw = window.Telegram && window.Telegram.WebApp;
         cloudAction("/api/reset", {}).then(r => {
           if (r && r.ok) {
-            try { Object.keys(localStorage).filter(k => k.indexOf("moontap") === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+            try { Object.keys(localStorage).filter(k => k.indexOf("moontap") === 0).forEach(k => localStorage.removeItem(k)); } catch (e) { }
             const done = () => location.reload();
             if (tgw && tgw.showAlert) tgw.showAlert("✅ Account reset to a brand-new player. Reloading…", done);
             else { toast("🧹", "Progress reset", "Starting fresh — reloading…"); setTimeout(done, 900); }
@@ -7926,9 +8119,9 @@
       let reactShareTxt = "";
       $("reactShare") && $("reactShare").addEventListener("click", () => {
         const url = inviteLink(); const txt = reactShareTxt || "I'm banking $MOON on RUG OR RICHES 🦈📈 — we both get 5,000 $MOON:";
-        try { if (navigator.share) { navigator.share({ title: "RUG OR RICHES", text: txt, url }).catch(() => {}); return; } } catch (e) {}
-        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) { tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(txt)); return; } } catch (e) {}
-        try { navigator.clipboard.writeText(txt + " " + url); toast("📋", "Win copied!", "Paste it in your group 👀"); } catch (e) {}
+        try { if (navigator.share) { navigator.share({ title: "RUG OR RICHES", text: txt, url }).catch(() => { }); return; } } catch (e) { }
+        try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) { tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(txt)); return; } } catch (e) { }
+        try { navigator.clipboard.writeText(txt + " " + url); toast("📋", "Win copied!", "Paste it in your group 👀"); } catch (e) { }
       });
       $("reactModal") && $("reactModal").addEventListener("click", e => { if (e.target.id === "reactModal") closeReaction(); });
 
@@ -7951,7 +8144,7 @@
       window.addEventListener("resize", fitViewport);
       window.addEventListener("orientationchange", () => setTimeout(fitViewport, 250));
       $("tonConnectBtn") && $("tonConnectBtn").addEventListener("click", tonConnect);
-      setTimeout(() => { try { tonReady(); renderTon(); } catch (e) {} }, 1200);
+      setTimeout(() => { try { tonReady(); renderTon(); } catch (e) { } }, 1200);
       setInterval(achCheck, 2000); seasonTick(); setInterval(seasonTick, 1000);
       init();
     })();
