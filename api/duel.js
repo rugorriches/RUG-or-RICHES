@@ -111,7 +111,8 @@ function shapeDuel(d, me) {
 
 // Score ceiling for one duel run by this player (anti-cheat upper bound).
 function scoreCeil(player) {
-  const vip = Math.max(0, Math.min(18, Number(player.vip_tier) || 0));
+  const passActive = player.vip_sub_until && Date.now() < Number(player.vip_sub_until);
+  const vip = Math.max(Math.min(18, Number(player.vip_tier) || 0), passActive ? 6 : 0);
   const clickLimit = 20 + vip * 2 + 30;
   const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
   const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
@@ -289,7 +290,7 @@ module.exports = async (req, res) => {
         if (new Date(d.expires_at) < new Date()) { d = await settleExpired(client, d); await client.query("COMMIT"); return json(res, 410, { error: "Duel expired" }); }
         if ((isChal && d.challenger_score != null) || (isOpp && d.opponent_score != null)) { await client.query("ROLLBACK"); return json(res, 409, { error: "You already submitted your run" }); }
         // bound score by this player's server-side single-run ceiling (anti-cheat)
-        const { rows: pr } = await client.query("SELECT vip_tier, lifetime_banked FROM players WHERE id = $1", [playerId]);
+        const { rows: pr } = await client.query("SELECT vip_tier, vip_sub_until, lifetime_banked FROM players WHERE id = $1", [playerId]);
         const ceil = scoreCeil(pr[0] || {});
         const finalScore = Math.max(0, Math.min(score, ceil));
         const col = isChal ? "challenger_score" : "opponent_score";

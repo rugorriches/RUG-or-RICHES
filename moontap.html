@@ -5551,10 +5551,10 @@
       // ---------- RANKS ----------
       const RANKS = [
         { min: 0, nm: "Shrimp", e: "🦐", p: "Where every degen starts. Tap, bet, and bank your first $MOON.", eb: 0, db: 1, ben: ["Tap, bet & bank — the journey begins"] },
-        { min: 500000, nm: "Crab", e: "🦀", p: "You're climbing.", eb: 20, db: 1, ben: ["⚡ +20 max energy", "🥉 Unlocks Bronze VIP $MOON route"] },
-        { min: 7500000, nm: "Fish", e: "🐟", p: "A real trader now.", eb: 40, db: 1.1, ben: ["⚡ +40 max energy", "🎁 +10% daily login bonus", "🥈 Unlocks Silver VIP $MOON route"] },
-        { min: 50000000, nm: "Dolphin", e: "🐬", p: "Smart money.", eb: 65, db: 1.25, ben: ["⚡ +65 max energy", "🎁 +25% daily login bonus", "🥇 Unlocks Gold VIP $MOON route", "🏆 Bigger leaderboard & airdrop standing"] },
-        { min: 200000000, nm: "Shark", e: "🦈", p: "Apex predator.", eb: 90, db: 1.5, ben: ["⚡ +90 max energy", "🎁 +50% daily login bonus", "💎 Unlocks Diamond VIP $MOON route", "🦈 Shark achievement"] },
+        { min: 500000, nm: "Crab", e: "🦀", p: "You're climbing.", eb: 20, db: 1, ben: ["⚡ +20 max energy", "💰 Higher bet cap"] },
+        { min: 7500000, nm: "Fish", e: "🐟", p: "A real trader now.", eb: 40, db: 1.1, ben: ["⚡ +40 max energy", "🎁 +10% daily login bonus", "💰 Higher bet cap"] },
+        { min: 50000000, nm: "Dolphin", e: "🐬", p: "Smart money.", eb: 65, db: 1.25, ben: ["⚡ +65 max energy", "🎁 +25% daily login bonus", "💰 Higher bet cap", "🏆 Bigger leaderboard & airdrop standing"] },
+        { min: 200000000, nm: "Shark", e: "🦈", p: "Apex predator.", eb: 90, db: 1.5, ben: ["⚡ +90 max energy", "🎁 +50% daily login bonus", "💰 Much higher bet cap", "🦈 Shark achievement"] },
         { min: 600000000, nm: "Orca", e: "🐋", p: "Elite whale tier.", eb: 120, db: 1.75, ben: ["⚡ +120 max energy", "🎁 +75% daily login bonus", "🐋 Elite whale status"] },
         { min: 1000000000, nm: "Megalodon", e: "🦖", p: "Max rank — apex of the food chain. 👑", eb: 160, db: 2, ben: ["⚡ +160 max energy", "🎁 2× daily login bonus", "👑 Apex badge — top of the food chain"] }];
       function rankPerk() { return RANKS[rankIdx()] || RANKS[0]; }
@@ -5680,9 +5680,9 @@
       const QUESTS_M = [{ id: "m_taps", emo: "🔥", label: "Tap 20,000 times this month", goal: 20000, reward: 75000, track: "taps" },
       { id: "m_cash", emo: "🐋", label: "Bank 2M in one sell", goal: 2000000, reward: 120000, track: "bigSell" },
       { id: "m_invite", emo: "📣", label: "Invite 10 friends this month", goal: 10, reward: 200000, track: "invites" }];
-      const QUESTS_VIP = [{ id: "v_silver", emo: "🥈", label: "Silver: Pump to 20x", goal: 20, reward: 60000, track: "maxPrice", vip: 2 },
-      { id: "v_gold", emo: "🥇", label: "Gold: Bank 5M in one sell", goal: 5000000, reward: 175000, track: "bigSell", vip: 3 },
-      { id: "v_diamond", emo: "💎", label: "Diamond: Tap 50,000 times", goal: 50000, reward: 400000, track: "taps", vip: 4 }];
+      const QUESTS_VIP = [{ id: "v_silver", emo: "🌊", label: "VIP: Pump to 20x", goal: 20, reward: 60000, track: "maxPrice", vip: 2 },
+      { id: "v_gold", emo: "🐠", label: "VIP: Bank 5M in one sell", goal: 5000000, reward: 175000, track: "bigSell", vip: 3 },
+      { id: "v_diamond", emo: "🌑", label: "VIP: Tap 50,000 times", goal: 50000, reward: 400000, track: "taps", vip: 4 }];
       QUESTS.forEach(q => q.period = "daily"); QUESTS_W.forEach(q => q.period = "weekly"); QUESTS_M.forEach(q => q.period = "monthly"); QUESTS_VIP.forEach(q => q.period = "vip");
       const ALLQ = [].concat(QUESTS, QUESTS_W, QUESTS_M, QUESTS_VIP); const qById = {}; ALLQ.forEach(q => qById[q.id] = q);
       function normalizeQuestState() {

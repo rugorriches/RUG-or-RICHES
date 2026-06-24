@@ -183,7 +183,7 @@ module.exports = async (req, res) => {
     try {
       await client.query("BEGIN");
       const { rows } = await client.query(
-        `SELECT balance, vip_tier, lifetime_banked, earn_window_start, earn_window_amount
+        `SELECT balance, vip_tier, vip_sub_until, lifetime_banked, earn_window_start, earn_window_amount
          FROM players
          WHERE id = $1
          FOR UPDATE`,
@@ -195,7 +195,9 @@ module.exports = async (req, res) => {
       }
 
       const player = rows[0];
-      const vip = Math.max(0, Math.min(18, Number(player.vip_tier) || 0));
+      // honor the 30-day VIP Pass (vip_sub_until) the same way the client's effVip() does → grants tier-6 perks while active
+      const passActive = player.vip_sub_until && Date.now() < Number(player.vip_sub_until);
+      const vip = Math.max(Math.min(18, Number(player.vip_tier) || 0), passActive ? 6 : 0);
       const clickLimit = 20 + vip * 2 + 30;
       const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
       const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
