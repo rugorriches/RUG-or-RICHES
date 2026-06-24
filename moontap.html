@@ -8096,7 +8096,7 @@
         ["panel-shop", "panel-vip", "panel-store", "panel-dash", "panel-help", "panel-airdrop", "panel-ranks", "panel-invite", "panel-profile", "coin", "chart", "cashout", "sellHalf", "rugBar", "dashSpark", "nameModal", "upModal", "socialList", "adPoints"].forEach(id => ck(!!$(id), "#" + id));
         [renderShop, renderVip, renderStore, renderDash, renderRanks, renderInvite, renderQuests, renderAirdrop, renderSocial, renderCrews, renderMyCrew, shareTo, cashOut, sellHalf, triggerRug, startBust, openUpgrade, upEffect].forEach(fn => ck(typeof fn === "function", "fn"));
         ck(fmt(1500) === "1.50K", "fmt"); ck(clamp(5, 0, 3) === 3, "clamp"); ck(typeof upEffect(UP[0], 0).now === "string", "upEffect");
-        ck(VIP.length === 5 && RANKS.length === 7, "defs"); ck(RANK_BET.length === 7 && VIP_BET_MULT.length === 5, "betmax");
+        ck(VIP.length === 19 && RANKS.length === 7, "defs"); ck(RANK_BET.length === 7 && VIP_TON.length === 19, "betmax");
         if (window.console) console.log("[moontap] self-test: " + pass + " passed, " + fail + " failed" + (fail ? " — " + errs.join("; ") : " ✅"));
         if (/[?&]test/.test(location.search)) {
           const b = document.createElement("div"); b.textContent = fail ? ("⚠ " + fail + " FAIL") : ("✅ " + pass + " checks OK");
