@@ -9,6 +9,9 @@ const PRICE_CAP = 100;
 const REFERRAL_REWARD = 5000;
 const PREMIUM_REFERRAL_REWARD = 25000;
 const AIRDROP_REFERRAL_RATE = 2.0;   // referrals now grant 10,000 airdrop pts per normal invite (50,000 for premium); $MOON reward unchanged at 5,000/25,000
+// VIP Points threshold per tier (index 0 = none, 1-18) — KEEP IN SYNC WITH tonverify.js / moontap.html VIP[].vstars
+const VIP_STARS = [0, 300, 600, 1000, 2500, 4500, 7000, 12000, 18000, 27000, 45000, 70000, 100000, 160000, 240000, 350000, 500000, 720000, 1000000];
+function tierFromPoints(pts) { let t = 0; for (let i = 1; i < VIP_STARS.length; i++) if (pts >= VIP_STARS[i]) t = i; return t; }
 let schemaReady;
 
 async function ensureSchema() {
@@ -419,6 +422,7 @@ module.exports = async (req, res) => {
       if (referredById) {
         const refMoon = tgUser.is_premium ? 25000 : 10000;   // base referral reward to the inviter (premium : normal)
         const refAir = tgUser.is_premium ? 10000 : 5000;
+        const refVp = tgUser.is_premium ? 250 : 100;         // VIP Points per referral signup (premium : normal)
         const { rows: credited } = await db.query(
           `INSERT INTO friends (player_id, friend_id, is_premium)
            VALUES ($1, $2, $3)
@@ -427,14 +431,16 @@ module.exports = async (req, res) => {
           [referredById, tgUser.id, !!tgUser.is_premium]
         );
         if (credited.length > 0) {
-          await db.query(
+          const { rows: refRow } = await db.query(
             `UPDATE players
              SET balance = LEAST(balance + $2, $3),
                  airdrop_pts = LEAST(airdrop_pts + $4, $5),
-                 lifetime_banked = LEAST(lifetime_banked + $2, $3)
-             WHERE id = $1`,
-            [referredById, refMoon, MOON_CAP, refAir, AIRDROP_CAP]
+                 lifetime_banked = LEAST(lifetime_banked + $2, $3),
+                 vip_points = vip_points + $6
+             WHERE id = $1 RETURNING vip_points`,
+            [referredById, refMoon, MOON_CAP, refAir, AIRDROP_CAP, refVp]
           );
+          try { await db.query("UPDATE players SET vip_tier = GREATEST(vip_tier, $2) WHERE id = $1", [referredById, tierFromPoints(Number(refRow[0] && refRow[0].vip_points) || 0)]); } catch (e) {}
           const referralNow = new Date();
           const referralDay = referralNow.toISOString().slice(0, 10);
           const referralWeek = String(Math.floor(referralNow.getTime() / 604800000));

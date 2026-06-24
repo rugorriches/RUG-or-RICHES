@@ -55,19 +55,24 @@ module.exports = async (req, res) => {
   if (!ADMIN_IDS.has(String(data.user.id))) return json(res, 403, { error: "Admins only" });
 
   try {
-    const [tot, act, nu, qual, top, vip, gifts, duels, stars] = await Promise.all([
-      safe("SELECT COUNT(*)::int n, COALESCE(SUM(lifetime_banked),0)::bigint banked, COALESCE(SUM(taps),0)::bigint taps, COALESCE(SUM(rugs),0)::bigint rugs, COALESCE(SUM(cashouts),0)::bigint cashouts, COALESCE(SUM(balance),0)::bigint bal, COALESCE(SUM(airdrop_pts),0)::bigint air FROM players"),
+    const [tot, act, nu, qual, top, vip, gifts, duels, stars, ton, refs, refrw, topref] = await Promise.all([
+      safe("SELECT COUNT(*)::int n, COALESCE(SUM(lifetime_banked),0)::bigint banked, COALESCE(SUM(taps),0)::bigint taps, COALESCE(SUM(rugs),0)::bigint rugs, COALESCE(SUM(cashouts),0)::bigint cashouts, COALESCE(SUM(balance),0)::bigint bal, COALESCE(SUM(airdrop_pts),0)::bigint air, COALESCE(SUM(vip_points),0)::bigint vippts FROM players"),
       safe("SELECT COUNT(*) FILTER (WHERE last_cashout_at > now()-interval '1 day')::int d1, COUNT(*) FILTER (WHERE last_cashout_at > now()-interval '7 days')::int d7, COUNT(*) FILTER (WHERE last_cashout_at > now()-interval '30 days')::int d30 FROM players"),
       safe("SELECT COUNT(*) FILTER (WHERE created_at > now()-interval '1 day')::int d1, COUNT(*) FILTER (WHERE created_at > now()-interval '7 days')::int d7 FROM players"),
       safe("SELECT COUNT(*) FILTER (WHERE airdrop_pts>=$1)::int pts, COUNT(*) FILTER (WHERE airdrop_pts>=$1 AND taps>=$2 AND cashouts>=$3)::int ontrack FROM players", [AIRDROP_QUALIFY, AIRDROP_MIN_TAPS, AIRDROP_MIN_CASHOUTS]),
-      safe("SELECT COALESCE(name,'degen') AS name, lifetime_banked::bigint banked, COALESCE(vip_tier,0)::int vip FROM players ORDER BY lifetime_banked DESC LIMIT 10"),
+      safe("SELECT COALESCE(name,'degen') AS name, lifetime_banked::bigint banked, COALESCE(vip_tier,0)::int vip, COALESCE(vip_points,0)::bigint vippts FROM players ORDER BY lifetime_banked DESC LIMIT 10"),
       safe("SELECT COALESCE(vip_tier,0)::int tier, COUNT(*)::int n FROM players GROUP BY vip_tier ORDER BY vip_tier"),
       safe("SELECT COUNT(*)::int n, COALESCE(SUM(amount),0)::bigint vol, COUNT(*) FILTER (WHERE created_at>=CURRENT_DATE)::int today FROM gifts"),
       safe("SELECT status, COUNT(*)::int n FROM duels GROUP BY status"),
-      safe("SELECT COALESCE(SUM(stars_spent),0)::bigint spent, COUNT(*) FILTER (WHERE stars_spent>0)::int payers FROM players")
+      safe("SELECT COALESCE(SUM(stars_spent),0)::bigint spent, COUNT(*) FILTER (WHERE stars_spent>0)::int payers FROM players"),
+      safe("SELECT COALESCE(SUM(amount),0)::bigint nano, COUNT(*)::int txs, COUNT(DISTINCT player_id)::int buyers, COUNT(*) FILTER (WHERE created_at>=CURRENT_DATE)::int today FROM ton_tx"),
+      safe("SELECT COUNT(*)::int links, COUNT(DISTINCT player_id)::int inviters FROM friends"),
+      safe("SELECT COUNT(*)::int n, COALESCE(SUM(moon),0)::bigint moon, COALESCE(SUM(vip_points),0)::bigint vp, COUNT(*) FILTER (WHERE NOT claimed)::int pending FROM referral_rewards"),
+      safe("SELECT p.id::text id, COALESCE(p.name,'degen') AS name, COUNT(f.friend_id)::int refs FROM friends f JOIN players p ON p.id=f.player_id GROUP BY p.id, p.name ORDER BY COUNT(f.friend_id) DESC LIMIT 5")
     ]);
 
     const num = r => r && r[0] ? r[0] : null;
+    const tonRow = num(ton);
     return json(res, 200, {
       ok: true,
       generatedAt: new Date().toISOString(),
@@ -77,9 +82,12 @@ module.exports = async (req, res) => {
       qualified: num(qual),
       stars: num(stars),
       gifts: num(gifts),
+      ton: tonRow ? { ton: (Number(tonRow.nano) || 0) / 1e9, txs: Number(tonRow.txs) || 0, buyers: Number(tonRow.buyers) || 0, today: Number(tonRow.today) || 0 } : null,
+      referrals: { links: (num(refs) && Number(num(refs).links)) || 0, inviters: (num(refs) && Number(num(refs).inviters)) || 0, vipReferrals: (num(refrw) && Number(num(refrw).n)) || 0, vipRefMoon: (num(refrw) && Number(num(refrw).moon)) || 0, pendingClaims: (num(refrw) && Number(num(refrw).pending)) || 0 },
+      topReferrers: (topref || []).map((r, i) => ({ rank: i + 1, name: r.name, refs: Number(r.refs) || 0 })),
       vip: vip || [],
       duels: duels || [],
-      top: (top || []).map((r, i) => ({ rank: i + 1, name: r.name, banked: Number(r.banked) || 0, vip: Number(r.vip) || 0 }))
+      top: (top || []).map((r, i) => ({ rank: i + 1, name: r.name, banked: Number(r.banked) || 0, vip: Number(r.vip) || 0, vipPoints: Number(r.vippts) || 0 }))
     });
   } catch (err) {
     console.error("[admin] error:", err.message);
