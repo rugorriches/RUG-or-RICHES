@@ -18,6 +18,7 @@ const MAX_ROI = 30;                  // theoretical single-round ceiling (mirror
 const RANK_MIN = [0, 500000, 7500000, 50000000, 200000000, 600000000, 1000000000];
 const RANK_BET = [1000, 3000, 10000, 35000, 100000, 300000, 1000000];
 const VIP_BET_MULT = [1, 1.3, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0, 6.5, 8.0, 10.0, 12.5, 15.0, 18.0, 21.0, 25.0, 29.0, 33.0, 38.0];
+const VIP_EARN = [1, 1.08, 1.15, 1.28, 1.45, 1.70, 2.00, 2.40, 2.90, 3.65, 4.60, 5.80, 7.30, 9.10, 11.20, 13.30, 16.00, 18.70, 22.00];
 function rankIdxFromLifetime(lt) { let i = 0; for (let j = 0; j < RANK_MIN.length; j++) if (lt >= RANK_MIN[j]) i = j; return i; }
 
 let schemaReady;
@@ -114,7 +115,7 @@ function scoreCeil(player) {
   const clickLimit = 20 + vip * 2 + 30;
   const rankI = rankIdxFromLifetime(Number(player.lifetime_banked) || 0);
   const maxBet = Math.floor((RANK_BET[rankI] || 1000) * (VIP_BET_MULT[vip] || 1));
-  return maxBet * clickLimit * MAX_ROI;
+  return maxBet * clickLimit * MAX_ROI * (VIP_EARN[vip] || 1);
 }
 
 // Resolve an escrowed duel: pay the pot. winnerId null => draw/refund both. Idempotent (caller holds row lock).

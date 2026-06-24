@@ -5850,7 +5850,7 @@
           const mult = (boost > 0 ? 2 : 1) * (1 + Math.min(combo, comboCap()) * comboGain());
           const slip = clamp(stake / liq, 0, 0.25);
           const pumpBase = (0.018 + Math.min(price, 40) * 0.0018) * tapPower() * 0.25 + price * slip * 0.18;   // diminishing: price contribution caps at 40x so high climbs take real time
-          const pumpMult = (boost > 0 ? 1.25 : 1) * (1 + (mult - 1) * 0.18) * Math.min(vipMult(), 1.65) * (1 + Math.min(S.coinLevel - 1, 80) * 0.006) * (mevent && mevent.pumpMul ? mevent.pumpMul : 1);
+          const pumpMult = (boost > 0 ? 1.25 : 1) * (1 + (mult - 1) * 0.18) * (1 + Math.min(S.coinLevel - 1, 80) * 0.006) * (mevent && mevent.pumpMul ? mevent.pumpMul : 1);   // VIP earnings now applied to the cash-out payout, not pump speed
           price += pumpBase * pumpMult * priceDamp();
           capPrice();
           if (Math.random() < 0.5) holders++;
@@ -5966,8 +5966,8 @@
         const cur = roundCur || S.betCur; const r = risk();
         const streakMul = 1 + Math.min(winStreak, 10) * 0.05;
         const clutchBoost = r >= 0.95 ? 1.6 : r >= 0.85 ? 1.3 : r >= 0.7 ? 1.12 : 1;   // REWARD: banking deep in the danger zone pays a premium — nerve is worth it
-        const rawPayout = Math.floor(pot * (1 + r * cashBonus() * clutchBoost) * streakMul);
-        const payout = Math.floor(Math.min(rawPayout, Math.max(1, invested * maxRoundRoi())) * eventMult()); addCur(cur, payout);
+        const rawPayout = Math.floor(pot * (1 + r * cashBonus() * clutchBoost) * streakMul * vipMult());   // VIP earnings multiplier (full)
+        const payout = Math.floor(Math.min(rawPayout, Math.max(1, invested * maxRoundRoi() * vipMult())) * eventMult()); addCur(cur, payout);
         const profit = payout - invested;
         const settlement = { cur: "moon", payout: payout, invested: Math.max(1, Math.floor(invested)), roundInvested: Math.max(1, Math.floor(roundInvestedTotal || invested)), peak: roundPeak, clicks: roundClicks, outcome: "cashout", roundId: roundId || actionToken() };
         if (profit > 0) { S.pnlWon = Math.min(MOON_CAP, (S.pnlWon || 0) + profit); winStreak++; if (cur === "moon") S.lifetime = Math.min(MOON_CAP, S.lifetime + Math.floor(profit)); } else { S.pnlLost = Math.min(MOON_CAP, (S.pnlLost || 0) + (-profit)); winStreak = 0; }
@@ -6007,8 +6007,8 @@
         }
         ac();
         const cur = roundCur || S.betCur; const r = risk(); const half = pot * 0.5;
-        const rawPayout = Math.floor(half * (1 + r * cashBonus()));
-        const payout = Math.floor(Math.min(rawPayout, Math.max(1, invested * 0.5 * maxRoundRoi())) * eventMult()); addCur(cur, payout);
+        const rawPayout = Math.floor(half * (1 + r * cashBonus()) * vipMult());   // VIP earnings multiplier (full)
+        const payout = Math.floor(Math.min(rawPayout, Math.max(1, invested * 0.5 * maxRoundRoi() * vipMult())) * eventMult()); addCur(cur, payout);
         const soldInvested = Math.max(1, Math.floor(invested * 0.5)); const profit = payout - soldInvested; if (profit > 0) { S.pnlWon = Math.min(MOON_CAP, (S.pnlWon || 0) + profit); if (cur === "moon") S.lifetime = Math.min(MOON_CAP, S.lifetime + Math.floor(profit)); } else { S.pnlLost = Math.min(MOON_CAP, (S.pnlLost || 0) + (-profit)); }
         const settlement = { cur: "moon", payout: payout, invested: soldInvested, roundInvested: Math.max(1, Math.floor(roundInvestedTotal || invested)), peak: roundPeak, clicks: roundClicks, outcome: "half", roundId: roundId || actionToken() };
         pot -= half; invested *= 0.5; heat = Math.max(0, heat - 25);   // scaling out locks profit & cools the rug heat
