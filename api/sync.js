@@ -8,7 +8,7 @@ const AIRDROP_CAP = 100000000;
 const PRICE_CAP = 100;
 const REFERRAL_REWARD = 5000;
 const PREMIUM_REFERRAL_REWARD = 25000;
-const AIRDROP_REFERRAL_RATE = 0.2;
+const AIRDROP_REFERRAL_RATE = 2.0;   // referrals now grant 10,000 airdrop pts per normal invite (50,000 for premium); $MOON reward unchanged at 5,000/25,000
 let schemaReady;
 
 async function ensureSchema() {
