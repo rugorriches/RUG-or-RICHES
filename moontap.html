@@ -6162,7 +6162,10 @@
           if (predActive) { predT -= dt; if (panelOpen === "game") updatePredict(); if (predT <= 0) resolvePredict(); }   // prediction round timer
           if (panelOpen === "game") drawChart();   // chart only drawn on Trade tab; sim runs everywhere for live stats
           renderLive();
-        } catch (e) { if (window.console && console.warn) console.warn("[moontap] loop error:", e && e.message); }
+        } catch (e) {
+          if (window.console && console.warn) console.warn("[moontap] loop error:", e && (e.stack || e.message));
+          if (!window._loopErrShown) { window._loopErrShown = true; try { toast("⚠️", "Loop error (tell dev)", (e && e.message) ? String(e.message).slice(0, 120) : String(e)); } catch (_) { } }
+        }
       }
 
       // ---------- RENDER LIVE ----------
