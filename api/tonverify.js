@@ -14,8 +14,10 @@ const ADMIN_IDS = (process.env.ADMIN_IDS || "5028660194").split(",").map(s => s.
 
 // VIP level cost in Stars (index 0 = none, 1-18). TON = Stars / 200 (Telegram peg). VIP-Point threshold per tier = its Star cost.
 const VIP_STARS = [0, 300, 600, 1000, 2500, 4500, 7000, 12000, 18000, 27000, 45000, 70000, 100000, 160000, 240000, 350000, 500000, 720000, 1000000];
+// Actual TON price per level — priced to hit USD targets at ~$1.60/TON (top ≈ $15k). KEEP IN SYNC WITH moontap.html VIP_TON & vip.html
+const VIP_TON = [0, 3, 6, 9, 24, 42, 66, 110, 170, 250, 420, 650, 940, 1500, 2250, 3280, 4700, 6750, 9375];
 
-function tierNanotons(tier) { return BigInt(VIP_STARS[tier] || 0) * 5000000n; }   // Stars/200 TON, in nanotons (×1e9)
+function tierNanotons(tier) { return BigInt(Math.round((VIP_TON[tier] || 0) * 1e9)); }   // TON price → nanotons
 function tierFromPoints(pts) { let t = 0; for (let i = 1; i < VIP_STARS.length; i++) if (pts >= VIP_STARS[i]) t = i; return t; }
 
 function verifyInitData(initData) {

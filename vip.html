@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05010f" />
+  <meta name="robots" content="index,follow" />
+  <meta name="description"
+    content="RUG OR RICHES VIP — the Depth Zones membership. 18 levels across 6 tiers that boost your Season-Point earning, earnings, bet caps, energy and rug protection. Pay with Telegram Stars or TON. Community-funded, no VCs." />
+  <title>VIP — Depth Zones | RUG OR RICHES ($MOON)</title>
+  <style>
+    :root {
+      --bg: #05010f;
+      --card: #0f0a23;
+      --line: #241a40;
+      --txt: #ece8ff;
+      --mut: #9b93c4;
+      --gold: #ffd400;
+      --ton: #36a9ff;
+      --grad: linear-gradient(90deg, #ffd400, #ff9e00);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 50% -10%, #160a33 0%, var(--bg) 55%);
+      color: var(--txt);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 18px 18px 60px; }
+
+    nav { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 14px; padding: 6px 0 18px; border-bottom: 1px solid var(--line); }
+
+    nav .brand { font-weight: 900; letter-spacing: .5px; margin-right: auto; }
+
+    nav a { color: var(--mut); }
+
+    nav a.play { color: #05010f; background: var(--grad); padding: 6px 12px; border-radius: 10px; font-weight: 800; }
+
+    h1 { font-size: 40px; line-height: 1.1; margin: 26px 0 6px; }
+
+    .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .tag { color: var(--mut); font-size: 17px; margin-bottom: 8px; }
+
+    .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 6px; }
+
+    .pill { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+
+    .pill.ton { border-color: var(--ton); color: var(--ton); }
+
+    h2 { font-size: 24px; margin: 34px 0 10px; }
+
+    p { color: #cfc9ee; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+
+    @media (max-width:620px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0 6px; }
+
+    .stats div { background: linear-gradient(180deg, #130d2b, #0c0820); border: 1px solid var(--line); border-radius: 14px; padding: 15px 8px; text-align: center; }
+
+    .stats b { display: block; font-size: 23px; line-height: 1.1; background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .stats span { color: var(--mut); font-size: 11.5px; }
+
+    @media (max-width:620px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+    .feat { display: flex; gap: 13px; align-items: flex-start; background: linear-gradient(180deg, #130d2b, #0c0820); border: 1px solid var(--line); border-radius: 16px; padding: 16px; transition: transform .15s ease, border-color .15s ease; }
+
+    .feat:hover { transform: translateY(-2px); border-color: #3d2e69; }
+
+    .feat .fic { flex: 0 0 42px; height: 42px; display: grid; place-items: center; font-size: 21px; border-radius: 12px; background: rgba(124, 77, 255, .16); border: 1px solid var(--line); }
+
+    .feat b { display: block; margin-bottom: 3px; font-size: 15px; }
+
+    .feat span { color: var(--mut); font-size: 13.5px; line-height: 1.5; }
+
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 10px 0; overflow: hidden; }
+
+    summary { cursor: pointer; padding: 16px 18px; font-weight: 800; font-size: 17px; list-style: none; display: flex; align-items: center; gap: 10px; }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary .chev { margin-left: auto; color: var(--mut); transition: transform .2s; }
+
+    details[open] summary .chev { transform: rotate(90deg); }
+
+    summary .price { font-size: 13px; color: var(--ton); font-weight: 700; }
+
+    .lvls { padding: 0 18px 16px; }
+
+    .lvl { display: grid; grid-template-columns: 130px 1fr; gap: 10px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+
+    .lvl .nm { font-weight: 800; }
+
+    .lvl .nm small { display: block; color: var(--ton); font-weight: 700; }
+
+    .lvl .pk { color: var(--mut); }
+
+    .lvl .pk b { color: var(--gold); font-weight: 700; }
+
+    .cta { display: inline-block; margin: 8px 8px 0 0; background: var(--grad); color: #05010f; font-weight: 800; padding: 12px 20px; border-radius: 12px; }
+
+    .cta.ton { background: linear-gradient(90deg, #36a9ff, #0098ea); color: #fff; }
+
+    .note { margin-top: 30px; padding: 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--mut); font-size: 13px; }
+
+    footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--mut); font-size: 12.5px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <nav>
+      <span class="brand">🦈 RUG OR RICHES</span>
+      <a href="/">Home</a>
+      <a href="/guide">Guide</a>
+      <a href="/airdrop">Airdrop</a>
+      <a href="/tokenomics">Tokenomics</a>
+      <a href="/vip">VIP</a>
+      <a class="play" href="https://t.me/RugorRichesBot/play">▶ Play</a>
+    </nav>
+
+    <h1>VIP: <span class="grad">Depth Zones</span></h1>
+    <div class="tag">Dive deeper, earn faster. 18 membership levels across six tiers — the further down you go, the
+      stronger your edge.</div>
+
+    <div class="pillrow">
+      <span class="pill">🪂 Up to +550% Season-Point earning</span>
+      <span class="pill">💰 Up to +460% in-game earnings</span>
+      <span class="pill">🎯 Up to 12× bet cap</span>
+      <span class="pill ton">🪙 Pay with TON or ⭐ Stars</span>
+    </div>
+
+    <h2>What VIP does</h2>
+    <p>VIP is an optional membership that supercharges how you play. Every level stacks real, permanent in-game perks —
+      and the headline perk is a big <b>multiplier on how fast you earn Season Points</b> from gameplay.</p>
+
+    <div class="stats">
+      <div><b>+550%</b><span>Season-Point earning</span></div>
+      <div><b>12×</b><span>max bet cap</span></div>
+      <div><b>18</b><span>levels · 6 tiers</span></div>
+      <div><b>TON / ⭐</b><span>pay your way</span></div>
+    </div>
+
+    <div class="grid">
+      <div class="feat"><div class="fic">🪂</div><div><b>Faster Season Points</b><span>A multiplier on the points you
+            earn from banking, quests and dailies — the core VIP edge, scaling to +550% at the top tier.</span></div></div>
+      <div class="feat"><div class="fic">💰</div><div><b>Bigger earnings</b><span>A higher payout multiplier on every
+            cash-out, up to +460%.</span></div></div>
+      <div class="feat"><div class="fic">🎯</div><div><b>Higher bet caps</b><span>Stake more per click as you descend —
+            up to a 12× bet cap.</span></div></div>
+      <div class="feat"><div class="fic">🔋</div><div><b>More energy</b><span>A larger energy pool (up to +375) so you
+            play longer between recharges.</span></div></div>
+      <div class="feat"><div class="fic">💎</div><div><b>Rug protection</b><span>Mid tiers add rug rescue; the deepest
+            tiers add a full whale shield.</span></div></div>
+      <div class="feat"><div class="fic">🏅</div><div><b>VIP Points</b><span>Every purchase &amp; referral earns VIP
+            Points — they unlock items and prorate your next upgrade.</span></div></div>
+    </div>
+
+    <h2>The six tiers</h2>
+    <p>Tap a tier to see its three levels and exact perks. Prices are in TON, paid directly from your TON wallet in the
+      app. Dollar figures are approximate and move with TON's market price.</p>
+
+    <details>
+      <summary>🌊 Shallows <span class="price">3–9 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Shallows I<small>3 TON</small></div><div class="pk"><b>+10%</b> airdrop pts · <b>+10%</b> earnings · 1.3× bet cap · +25 energy</div></div>
+        <div class="lvl"><div class="nm">Shallows II<small>6 TON</small></div><div class="pk"><b>+18%</b> airdrop pts · <b>+18%</b> earnings · 1.5× bet cap · +35 energy</div></div>
+        <div class="lvl"><div class="nm">Shallows III<small>9 TON</small></div><div class="pk"><b>+28%</b> airdrop pts · <b>+28%</b> earnings · 1.7× bet cap · +45 energy</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🐠 Reef <span class="price">24–66 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Reef I<small>24 TON</small></div><div class="pk"><b>+45%</b> airdrop pts · <b>+45%</b> earnings · 2× bet cap · +60 energy</div></div>
+        <div class="lvl"><div class="nm">Reef II<small>42 TON</small></div><div class="pk"><b>+60%</b> airdrop pts · <b>+60%</b> earnings · 2.3× bet cap · +75 energy</div></div>
+        <div class="lvl"><div class="nm">Reef III<small>66 TON</small></div><div class="pk"><b>+78%</b> airdrop pts · <b>+78%</b> earnings · 2.7× bet cap · +90 energy</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🌑 Twilight <span class="price">110–250 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Twilight I<small>110 TON</small></div><div class="pk"><b>+100%</b> airdrop pts · +100% earnings · 3× bet cap · +110 energy · 💎 rug rescue</div></div>
+        <div class="lvl"><div class="nm">Twilight II<small>170 TON</small></div><div class="pk"><b>+125%</b> airdrop pts · +120% earnings · 3.5× bet cap · +130 energy · 💎 rug rescue</div></div>
+        <div class="lvl"><div class="nm">Twilight III<small>250 TON</small></div><div class="pk"><b>+155%</b> airdrop pts · +145% earnings · 4× bet cap · +150 energy · 💎 rug rescue</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🦑 Midnight <span class="price">420–940 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Midnight I<small>420 TON</small></div><div class="pk"><b>+185%</b> airdrop pts · +170% earnings · 4.5× bet cap · +170 energy</div></div>
+        <div class="lvl"><div class="nm">Midnight II<small>650 TON</small></div><div class="pk"><b>+220%</b> airdrop pts · +195% earnings · 5× bet cap · +190 energy</div></div>
+        <div class="lvl"><div class="nm">Midnight III<small>940 TON</small></div><div class="pk"><b>+255%</b> airdrop pts · +225% earnings · 5.5× bet cap · +210 energy</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🕳️ Abyss <span class="price">1,500–3,280 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Abyss I<small>1,500 TON</small></div><div class="pk"><b>+295%</b> airdrop pts · +255% earnings · 6× bet cap · +235 energy · 🐋 whale shield</div></div>
+        <div class="lvl"><div class="nm">Abyss II<small>2,250 TON</small></div><div class="pk"><b>+340%</b> airdrop pts · +290% earnings · 7× bet cap · +260 energy · 🐋 whale shield</div></div>
+        <div class="lvl"><div class="nm">Abyss III<small>3,280 TON</small></div><div class="pk"><b>+390%</b> airdrop pts · +325% earnings · 8× bet cap · +285 energy · 🐋 whale shield</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>🌋 Trench <span class="price">4,700–9,375 TON</span><span class="chev">▸</span></summary>
+      <div class="lvls">
+        <div class="lvl"><div class="nm">Trench I<small>4,700 TON</small></div><div class="pk"><b>+445%</b> airdrop pts · +365% earnings · 9× bet cap · +310 energy · 🐋 whale shield</div></div>
+        <div class="lvl"><div class="nm">Trench II<small>6,750 TON</small></div><div class="pk"><b>+495%</b> airdrop pts · +410% earnings · 10× bet cap · +340 energy · 🐋 whale shield</div></div>
+        <div class="lvl"><div class="nm">Trench III<small>9,375 TON</small></div><div class="pk"><b>+550%</b> airdrop pts · +460% earnings · 12× bet cap · +375 energy · 🐋 whale shield</div></div>
+      </div>
+    </details>
+
+    <h2>Refer a friend, earn together</h2>
+    <p>Invite friends and you <b>both</b> receive in-game $MOON. When someone you invited activates a VIP membership, you
+      also earn <b>VIP Points</b> and bonus $MOON. Bring real players, get real in-game rewards.</p>
+
+    <h2>Community-funded</h2>
+    <p><b>No VCs. No private sale.</b> RUG OR RICHES is independent — revenue from VIP, cosmetics and Telegram Stars / TON
+      goes straight back into building and operating the game. Players first, always.</p>
+
+    <div>
+      <a class="cta" href="https://t.me/RugorRichesBot/play">▶ Open the game</a>
+      <a class="cta ton" href="https://t.me/RugorRichesBot/play">🪙 Get VIP with TON</a>
+    </div>
+
+    <div class="note">VIP is an optional in-game entertainment benefit. VIP, Season Points, ranks, items and rewards have
+      <b>no guaranteed monetary value</b> and do not guarantee any token eligibility, allocation, odds, or prize. Prices
+      are set in TON and paid from your TON wallet; any dollar figures are approximate and move with TON's market price.
+      Nothing here is financial advice.</div>
+
+    <footer>
+      © 2026 RUG OR RICHES — for entertainment only. Not financial advice.<br />
+      <a href="/">Home</a> · <a href="/guide">Guide</a> · <a href="/airdrop">Airdrop</a> · <a
+        href="/tokenomics">Tokenomics</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+    </footer>
+  </div>
+</body>
+
+</html>

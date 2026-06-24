@@ -4441,8 +4441,10 @@
 
     <div class="panel" id="panel-invite">
       <h2>🤝 Invite & Earn</h2>
-      <p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join with your
-        link — premium friends are worth <b style="color:var(--gold)">25,000</b>.</p>
+      <p class="sub">You and your friend each get <b style="color:var(--gold)">5,000 $MOON</b> when they join (premium
+        friends <b style="color:var(--gold)">25,000</b>) — plus <b style="color:var(--gold)">+10,000 Airdrop Points</b>
+        per invite. And when someone you invited goes <b style="color:#36a9ff">VIP</b>, you earn
+        <b style="color:var(--gold)">VIP Points + 10× $MOON</b>.</p>
       <img src="/assets/brand/inv-hero.webp" alt="Bring friends. Climb faster." loading="lazy"
         style="width:min(90%,360px);height:auto;border-radius:16px;display:block;margin:4px auto 14px;border:1px solid var(--line)"
         onerror="this.style.display='none'">
@@ -5326,6 +5328,8 @@
       { nm: "Trench II", emo: "🌋", vstars: 720000, air: 5.95, earn: 5.10, bet: 10.0, energy: 340, cls: "t4", buyOnly: true },
       { nm: "Trench III", emo: "🌋", vstars: 1000000, air: 6.50, earn: 5.60, bet: 12.0, energy: 375, cls: "t4", buyOnly: true }];
       const vipMult = () => (VIP[effVip()] && VIP[effVip()].earn) || 1;
+      // Actual TON price per VIP level (0 = none, 1-18) — KEEP IN SYNC WITH api/tonverify.js VIP_TON & vip.html
+      const VIP_TON = [0, 3, 6, 9, 24, 42, 66, 110, 170, 250, 420, 650, 940, 1500, 2250, 3280, 4700, 6750, 9375];
       // ---- $MOON packs purchasable with Telegram Stars ----
       // $MOON granted = 10 x the Stars price (flat, predictable rate)
       const STORE = [{ stars: 50, moon: 50000, tag: "" }, { stars: 100, moon: 120000, tag: "MOST POPULAR" },
@@ -6239,12 +6243,29 @@
         const b = ["🪂 +" + pct(v.air) + "% airdrop pts", "💰 +" + pct(v.earn) + "% earnings", "🔋 +" + (v.energy || 0) + " energy", "🎯 " + (v.bet || 1) + "× bet cap"];
         if (i >= 7) b.push("💎 rug rescue"); if (i >= 13) b.push("🐋 whale shield"); return b;
       }
+      // live VIP-Points bar: current level + progress to the next tier (drives prorated upgrade pricing)
+      function vipPointsBar() {
+        const pts = Math.max(0, Math.floor(S.vipPoints || 0));
+        const cur = S.vip || 0;
+        const curThresh = cur > 0 ? (VIP[cur].vstars || 0) : 0;
+        const hasNext = cur < VIP.length - 1;
+        const nextThresh = hasNext ? (VIP[cur + 1].vstars || curThresh) : curThresh;
+        const span = Math.max(1, nextThresh - curThresh);
+        const prog = hasNext ? clamp((pts - curThresh) / span * 100, 0, 100) : 100;
+        const remaining = hasNext ? Math.max(0, nextThresh - pts) : 0;
+        const label = hasNext ? (fmt(remaining) + " pts → " + VIP[cur + 1].nm) : "Max tier 🌋";
+        return '<div style="margin-top:12px">' +
+          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>🏅 ' + fmt(pts) + ' VIP Points</span><span style="color:var(--gold)">' + label + '</span></div>' +
+          '<div style="height:10px;background:#1a1330;border-radius:6px;overflow:hidden"><div style="height:100%;width:' + prog.toFixed(1) + '%;background:linear-gradient(90deg,#33b1ff,#ffd400);transition:width .4s"></div></div>' +
+          (hasNext ? '<div class="ds" style="margin-top:5px;font-size:11px">Upgrades are prorated — your VIP Points count toward the next tier, so you only pay the remaining difference.</div>' : '') +
+          '</div>';
+      }
       function renderVip() {
         const cur = S.vip;
         $("vipStatus").textContent = cur > 0 ? ("You're " + VIP[cur].nm + " — +" + Math.round(((VIP[cur].air || 1) - 1) * 100) + "% airdrop & +" + Math.round(((VIP[cur].earn || 1) - 1) * 100) + "% earnings active") : "Unlock airdrop-point boosts, perks & higher bet limits.";
         const wrap = $("vipList"); wrap.innerHTML = "";
         const hero = document.createElement("div"); hero.className = "viphero";
-        hero.innerHTML = '<div class="vh-tier">' + (cur > 0 ? VIP[cur].emo + " " + VIP[cur].nm : "🆓 Free Tier") + '</div><div class="vh-ben">' + vipBenefits(cur).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>';
+        hero.innerHTML = '<div class="vh-tier">' + (cur > 0 ? VIP[cur].emo + " " + VIP[cur].nm : "🆓 Free Tier") + '</div><div class="vh-ben">' + vipBenefits(cur).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>' + vipPointsBar();
         wrap.appendChild(hero);
         wrap.insertAdjacentHTML("beforeend", airdropAccelHTML());   // show how VIP accelerates airdrop qualification
         if (cur > 0) {
@@ -6276,7 +6297,7 @@
         for (let i = 1; i < VIP.length; i++) {
           const v = VIP[i]; const owned = cur >= i;
           const d = document.createElement("div"); d.className = "vipcard " + (v.cls || "t1") + (cur === i ? " active" : "");
-          const ton = v.vstars / 200; const tonStr = (ton % 1 === 0 ? String(ton) : ton.toFixed(2));
+          const ton = VIP_TON[i] || 0; const tonStr = fmt(ton);
           const buys = owned ? '<div style="margin-top:10px"><span class="pill">✓ Active</span></div>' :
             '<button class="vbuy-ton buy" style="margin-top:11px;width:100%;background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">🪙 Unlock — ' + tonStr + ' TON</button>';
           const note = '<div class="ds">🪙 ' + tonStr + ' TON · ' + fmt(v.vstars) + ' VIP pts to reach</div>';
