@@ -7722,11 +7722,14 @@
       }
 
       // ---------- SEASON ----------
-      // Fixed global Season 1 end — same countdown on every device, and it actually ticks down
-      // (the old per-device localStorage value reset to +30d on every Telegram open, so it never moved).
-      const SEASON_END = Date.parse("2026-07-23T16:00:00Z");
+      // Global season clock, same on every device. Season 1 ends at the anchor below; when it passes,
+      // it auto-rolls into the next 30-day season so the countdown always ticks all the way down and
+      // never freezes at zero. (The old per-device localStorage value reset on every open, so it looked stuck.)
+      const SEASON_ANCHOR = Date.parse("2026-07-23T16:00:00Z");
+      const SEASON_LEN = 30 * 864e5;
+      function seasonEnd() { let end = SEASON_ANCHOR; const now = Date.now(); while (end <= now) end += SEASON_LEN; return end; }
       function seasonTick() {
-        const end = SEASON_END;
+        const end = seasonEnd();
         let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const d = Math.floor(s / 86400); s %= 86400; const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); const sec = s % 60;
         const txt = d + "d " + h + "h " + m + "m " + sec + "s"; $("seasonTimer").textContent = txt; const ad = $("adSeason"); if (ad) ad.textContent = txt;
         renderEventBanner();
