@@ -21,6 +21,7 @@ const routes = {
   ranked: require("./ranked"),
   reset: require("./reset"),
   tonverify: require("./tonverify"),
+  referrals: require("./referrals"),
 };
 
 module.exports = async (req, res) => {

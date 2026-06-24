@@ -39,7 +39,7 @@ const NORMAL_DIFF = 9000, PREMIUM_DIFF = 45000;
      SET airdrop_pts = LEAST(p.airdrop_pts + sub.bonus, $1)
      FROM (
        SELECT player_id,
-              SUM(CASE WHEN is_premium THEN $2 ELSE $3 END) AS bonus
+              SUM(CASE WHEN is_premium THEN $2::bigint ELSE $3::bigint END) AS bonus
        FROM friends GROUP BY player_id
      ) sub
      WHERE p.id = sub.player_id

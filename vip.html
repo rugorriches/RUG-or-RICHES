@@ -134,6 +134,7 @@
       stronger your edge.</div>
 
     <div class="pillrow">
+      <span class="pill ton">📈 1 TON ≈ <b id="tonusd" style="margin-left:4px">$—</b></span>
       <span class="pill">🪂 Up to +550% Season-Point earning</span>
       <span class="pill">💰 Up to +460% in-game earnings</span>
       <span class="pill">🎯 Up to 12× bet cap</span>
@@ -248,6 +249,41 @@
         href="/tokenomics">Tokenomics</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
     </footer>
   </div>
+
+  <script>
+    (function () {
+      var ID = "the-open-network";
+      function usd(n) { return n >= 1000 ? "$" + Math.round(n).toLocaleString() : "$" + n.toFixed(2); }
+      function tons(txt) { return (txt.match(/[\d.,]+/g) || []).map(function (s) { return parseFloat(s.replace(/,/g, "")); }).filter(function (n) { return !isNaN(n); }); }
+      function apply(price) {
+        var t = document.getElementById("tonusd"); if (t) t.textContent = "$" + price.toFixed(2);
+        document.querySelectorAll(".price").forEach(function (el) {
+          if (!el.dataset.base) el.dataset.base = el.textContent;
+          var v = tons(el.dataset.base); if (!v.length) return;
+          var u = v.map(function (x) { return usd(x * price); });
+          el.innerHTML = el.dataset.base + ' <span style="color:var(--mut);font-weight:600">(≈' + u.join("–") + ")</span>";
+        });
+        document.querySelectorAll(".lvl small").forEach(function (el) {
+          if (!el.dataset.base) el.dataset.base = el.textContent;
+          var v = tons(el.dataset.base); if (!v.length) return;
+          el.innerHTML = el.dataset.base + ' <span style="opacity:.65">≈' + usd(v[0] * price) + "</span>";
+        });
+      }
+      function load() {
+        fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + ID + "&vs_currencies=usd")
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            var p = j && j[ID] && j[ID].usd;
+            if (p) { try { localStorage.setItem("ton_usd", p); } catch (e) {} apply(p); }
+          })
+          .catch(function () { });
+      }
+      var cached = parseFloat(localStorage.getItem("ton_usd"));
+      apply(isNaN(cached) ? 1.60 : cached);   // show immediately from cache (or a sane default), then refresh live
+      load();
+      setInterval(load, 30 * 60 * 1000);       // refresh every 30 minutes
+    })();
+  </script>
 </body>
 
 </html>

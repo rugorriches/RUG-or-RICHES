@@ -417,7 +417,8 @@ module.exports = async (req, res) => {
       await db.query("INSERT INTO quests (player_id) VALUES ($1) ON CONFLICT DO NOTHING", [tgUser.id]);
       
       if (referredById) {
-        const reward = tgUser.is_premium ? PREMIUM_REFERRAL_REWARD : REFERRAL_REWARD;
+        const refMoon = tgUser.is_premium ? 25000 : 10000;   // base referral reward to the inviter (premium : normal)
+        const refAir = tgUser.is_premium ? 10000 : 5000;
         const { rows: credited } = await db.query(
           `INSERT INTO friends (player_id, friend_id, is_premium)
            VALUES ($1, $2, $3)
@@ -432,7 +433,7 @@ module.exports = async (req, res) => {
                  airdrop_pts = LEAST(airdrop_pts + $4, $5),
                  lifetime_banked = LEAST(lifetime_banked + $2, $3)
              WHERE id = $1`,
-            [referredById, reward, MOON_CAP, Math.floor(reward * AIRDROP_REFERRAL_RATE), AIRDROP_CAP]
+            [referredById, refMoon, MOON_CAP, refAir, AIRDROP_CAP]
           );
           const referralNow = new Date();
           const referralDay = referralNow.toISOString().slice(0, 10);
