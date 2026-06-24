@@ -10,6 +10,7 @@ const TON_API = "https://toncenter.com/api/v2";
 const WALLET = process.env.TON_WALLET || "UQDftT8GC3Agd4cHUOcjwwasqpdpKp26CyjgsDCVMwIMSL6V";
 const MOON_CAP = 1000000000000;
 const AIRDROP_CAP = 100000000;
+const ADMIN_IDS = (process.env.ADMIN_IDS || "5028660194").split(",").map(s => s.trim());
 
 // VIP level cost in Stars (index 0 = none, 1-18). TON = Stars / 200 (Telegram peg). VIP-Point threshold per tier = its Star cost.
 const VIP_STARS = [0, 300, 600, 1000, 2500, 4500, 7000, 12000, 18000, 27000, 45000, 70000, 100000, 160000, 240000, 350000, 500000, 720000, 1000000];
@@ -120,6 +121,14 @@ module.exports = async (req, res) => {
         return json(res, 200, { ok: true, ...grant });
       }
       return json(res, 200, { ok: false, pending: true });                         // not seen on-chain yet
+    }
+
+    if (action === "balance") {
+      const addr = String(body.address || "");
+      const out = { ok: true };
+      try { if (addr) { const rb = await fetch(`${TON_API}/getAddressBalance?address=${encodeURIComponent(addr)}&api_key=${TONCENTER_KEY}`); const jb = await rb.json(); if (jb && jb.ok) out.balance = Number(jb.result) / 1e9; } } catch (_) {}
+      if (ADMIN_IDS.includes(String(playerId))) { try { const rt = await fetch(`${TON_API}/getAddressBalance?address=${encodeURIComponent(WALLET)}&api_key=${TONCENTER_KEY}`); const jt = await rt.json(); if (jt && jt.ok) out.treasury = Number(jt.result) / 1e9; } catch (_) {} }
+      return json(res, 200, out);
     }
 
     return json(res, 400, { error: "Unknown action" });

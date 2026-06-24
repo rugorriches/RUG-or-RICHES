@@ -21,6 +21,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>RUG OR RICHES — $MOON</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
   <style>
     :root {
       --bg: #05010f;
@@ -4557,6 +4558,13 @@
       <div class="card" style="margin-top:14px;">
         <div class="toggle"><span>🔊 Sound effects</span><button class="sw on" id="soundSw"></button></div>
       </div>
+      <div class="card" style="margin-top:14px;">
+        <div style="font-weight:800;margin-bottom:6px">🪙 TON Wallet</div>
+        <div class="ds" id="tonStatus" style="margin-bottom:8px">Not connected</div>
+        <button class="big-btn" id="tonConnectBtn" style="background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">Connect TON Wallet</button>
+        <div id="tonHoldings" class="ds" style="margin-top:8px"></div>
+        <div class="ds" id="tonVipPts" style="margin-top:6px;opacity:.7"></div>
+      </div>
     </div>
 
     <div class="panel" id="panel-help">
@@ -5161,6 +5169,7 @@
         if (db.season_pass !== undefined) S.seasonPass = !!db.season_pass;
         if (db.season_claim_day) S.seasonClaimDay = dbDay(db.season_claim_day);
         if (db.vip_sub_until !== undefined) S.vipSubUntil = Number(db.vip_sub_until) || 0;
+        if (db.vip_points !== undefined) S.vipPoints = Number(db.vip_points) || 0;
         if (db.vip_day) S.vipDay = dbDay(db.vip_day);
         if (db.combo_day) S.comboDay = dbDay(db.combo_day);
         if (db.last_day) S.lastDay = dbDay(db.last_day);
@@ -6267,21 +6276,14 @@
         for (let i = 1; i < VIP.length; i++) {
           const v = VIP[i]; const owned = cur >= i;
           const d = document.createElement("div"); d.className = "vipcard " + (v.cls || "t1") + (cur === i ? " active" : "");
+          const ton = v.vstars / 200; const tonStr = (ton % 1 === 0 ? String(ton) : ton.toFixed(2));
           const buys = owned ? '<div style="margin-top:10px"><span class="pill">✓ Active</span></div>' :
-            '<button class="buy" disabled style="margin-top:11px;width:100%;opacity:.65;cursor:default">🪙 TON unlock — coming soon</button>';
-          const note = '<div class="ds">⭐ Stars-only · ' + fmt(v.vstars) + ' Stars</div>';
+            '<button class="vbuy-ton buy" style="margin-top:11px;width:100%;background:linear-gradient(90deg,#33b1ff,#0098ea);color:#fff">🪙 Unlock — ' + tonStr + ' TON</button>';
+          const note = '<div class="ds">🪙 ' + tonStr + ' TON · ' + fmt(v.vstars) + ' VIP pts to reach</div>';
           d.innerHTML = '<div class="vtag">' + (owned ? "OWNED" : "LV " + i) + '</div><div class="row"><div class="emo">' + (v.emo || "👑") + '</div><div class="grow"><div class="nm">' + v.nm + '</div>' + note + '</div></div><div class="vh-ben" style="margin-top:9px">' + vipBenefits(i).map(x => '<span class="bchip">' + x + '</span>').join("") + '</div>' + buys;
           if (!owned) {
-            const mb = d.querySelector(".vbuy-moon"), sb = d.querySelector(".vbuy-stars");
-            if (mb) mb.addEventListener("click", () => {
-              if (S.balance < v.cost || S.vip !== i - 1 || rankIdx() < v.req) return;
-              if (cloudAuth()) {
-                mb.disabled = true; mb.textContent = "Checking…"; claimCloud("vip_upgrade", String(i)).then(data => { if (data && data.ok) { save(); sfxCash(); renderVip(); renderLive(); renderStats(); achCheck(); energy = maxEnergy(); toast(v.emo, v.nm + " unlocked!", v.perks); } })
-                  .catch(err => { toast("⚠️", "VIP upgrade rejected", err.message); renderVip(); }); return;
-              }
-              S.balance -= v.cost; S.vip = i; save(); sfxCash(); renderVip(); renderLive(); renderStats(); achCheck(); energy = maxEnergy(); toast(v.emo, v.nm + " unlocked!", v.perks);
-            });
-            if (sb) sb.addEventListener("click", () => buyVipStars(i));
+            const tb = d.querySelector(".vbuy-ton");
+            if (tb) tb.addEventListener("click", () => tonBuyTier(i));
           }
           wrap.appendChild(d);
         }
@@ -6327,6 +6329,71 @@
         starsPurchase("Unlock " + v.nm + " for " + v.vstars + " ⭐ Telegram Stars?", { type: "vip", tier: i, stars: v.vstars }, () => {
           S.vip = i; S.starsSpent += v.vstars; save(); sfxCash(); renderVip(); renderLive(); renderStats(); achCheck(); energy = maxEnergy(); confetti(); toast(v.emo, v.nm + " unlocked!", "Thanks for supporting the game ⭐");
         });
+      }
+      // ---------- TON CONNECT (VIP purchases via TON) ----------
+      let tcUI = null;
+      function tonReady() {
+        if (tcUI) return tcUI;
+        if (!window.TON_CONNECT_UI) return null;
+        try {
+          tcUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: "https://rugorriches.app/tonconnect-manifest.json" });
+          tcUI.onStatusChange(() => { try { renderTon(); } catch (e) {} });
+        } catch (e) { console.warn("TON init failed", e); }
+        return tcUI;
+      }
+      function tonAccount() { try { return tcUI && tcUI.account ? tcUI.account.address : null; } catch (e) { return null; } }
+      function tonShort(a) { return a ? (a.slice(0, 4) + "…" + a.slice(-4)) : ""; }
+      async function tonConnect() {
+        const u = tonReady(); if (!u) { toast("⚠️", "TON unavailable", "Reopen the app and try again"); return; }
+        try { if (tonAccount()) await u.disconnect(); else await u.openModal(); } catch (e) {}
+        try { renderTon(); } catch (e) {}
+      }
+      async function tonBuyTier(i) {
+        const u = tonReady(); if (!u) { toast("⚠️", "TON unavailable", "Reopen the app"); return; }
+        if (!cloudAuth()) { toast("⚠️", "Open via Telegram", "Sign-in needed to pay"); return; }
+        if (!tonAccount()) { try { await u.openModal(); } catch (e) {} if (!tonAccount()) return; }
+        const v = VIP[i];
+        try {
+          const inv = await cloudAction("/api/tonverify", { action: "invoice", tier: i });
+          if (!inv || !inv.ok) { toast("⚠️", "Couldn't start", (inv && inv.error) || "Try again"); return; }
+          toast("🪙", "Confirm in wallet", v.nm + " — " + (inv.ton).toFixed(3) + " TON");
+          await u.sendTransaction({ validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: inv.address, amount: String(inv.amount) }] });
+          toast("⏳", "Confirming on-chain…", "Takes ~30s — keep the app open");
+          let done = false;
+          for (let n = 0; n < 24 && !done; n++) {
+            await new Promise(r => setTimeout(r, 5000));
+            const res = await cloudAction("/api/tonverify", { action: "verify", tier: i }).catch(() => null);
+            if (res && res.ok) {
+              done = true;
+              S.vip = Math.max(S.vip || 0, res.tier || i);
+              if (res.vip_points != null) S.vipPoints = res.vip_points;
+              save(); sfxCash(); confetti(); renderVip(); renderLive(); renderStats(); achCheck(); energy = maxEnergy();
+              toast(v.emo, v.nm + " unlocked! 🪙", "Thanks for supporting the game");
+            }
+          }
+          if (!done) toast("⌛", "Still confirming", "Your VIP unlocks once the payment lands — reopen VIP shortly");
+        } catch (e) { toast("⚠️", "Payment cancelled", (e && e.message) ? e.message : "No charge made"); }
+      }
+      async function renderTon() {
+        const st = $("tonStatus"), btn = $("tonConnectBtn"), hold = $("tonHoldings"), vp = $("tonVipPts"); if (!st) return;
+        if (vp) vp.textContent = (S.vipPoints ? ("🏅 " + fmt(S.vipPoints) + " VIP Points") : "");
+        const acc = tonAccount();
+        if (acc) {
+          st.innerHTML = "✅ Connected: <b>" + tonShort(acc) + "</b>";
+          if (btn) btn.textContent = "Disconnect wallet";
+          if (hold) {
+            hold.textContent = "Loading balance…";
+            try {
+              const b = await cloudAction("/api/tonverify", { action: "balance", address: acc });
+              if (b && b.ok) hold.innerHTML = "💎 Wallet: <b>" + (b.balance != null ? b.balance.toFixed(3) : "?") + " TON</b>" + (b.treasury != null ? "<br>🏦 Treasury: <b>" + b.treasury.toFixed(3) + " TON</b>" : "");
+              else hold.textContent = "";
+            } catch (e) { hold.textContent = ""; }
+          }
+        } else {
+          st.textContent = "Not connected";
+          if (btn) btn.textContent = "Connect TON Wallet";
+          if (hold) hold.textContent = "";
+        }
       }
       const SKINS = [{ id: "gold", nm: "Classic Gold", stars: 0, c: "#ffd400", rar: "common" }, { id: "neon", nm: "Neon Pink", stars: 80, c: "#ff2bd6", rar: "rare" }, { id: "ice", nm: "Ice Cyan", stars: 80, c: "#23f0ff", rar: "rare" }, { id: "emerald", nm: "Emerald", stars: 120, c: "#1dff8f", rar: "epic" }, { id: "diamond", nm: "Diamond", stars: 250, c: "#cfe8ff", rar: "epic" },
       { id: "cosmic", nm: "Cosmic Nebula", stars: 0, c: "#a06bff", rar: "legendary", win: true }, { id: "molten", nm: "Molten Core", stars: 0, c: "#ff7a18", rar: "legendary", win: true }];
@@ -7862,6 +7929,8 @@
       }
       window.addEventListener("resize", fitViewport);
       window.addEventListener("orientationchange", () => setTimeout(fitViewport, 250));
+      $("tonConnectBtn") && $("tonConnectBtn").addEventListener("click", tonConnect);
+      setTimeout(() => { try { tonReady(); renderTon(); } catch (e) {} }, 1200);
       setInterval(achCheck, 2000); seasonTick(); setInterval(seasonTick, 1000);
       init();
     })();
