@@ -2862,7 +2862,7 @@
     #tut {
       position: absolute;
       inset: 0;
-      background: rgba(4, 0, 12, .94);
+      background: transparent;
       z-index: 80;
       display: none;
       flex-direction: column;
@@ -2874,6 +2874,57 @@
 
     #tut.show {
       display: flex;
+    }
+
+    #tutSpot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      box-sizing: border-box;
+      box-shadow: 0 0 0 9999px rgba(4, 0, 12, .93);
+      border: 2px solid var(--cyan);
+      border-radius: 16px;
+      pointer-events: none;
+      transition: left .25s ease, top .25s ease, width .25s ease, height .25s ease;
+    }
+
+    #tutCard {
+      position: static;
+      z-index: 1;
+      background: linear-gradient(180deg, #1a0f33, #11081f);
+      border: 1px solid rgba(35, 240, 255, .3);
+      border-radius: 18px;
+      padding: 16px 20px 18px;
+      max-width: 340px;
+      width: calc(100% - 44px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 14px 50px rgba(0, 0, 0, .6);
+    }
+
+    #tutCard .em {
+      font-size: 42px;
+    }
+
+    .tut-btns {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #tutSkip {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: #9c92c4;
+      border-radius: 14px;
+      padding: 13px 22px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
     }
 
     #tut .em {
@@ -4606,8 +4657,9 @@
       </details>
       <details class="faq">
         <summary>How do points become $MOON tokens?</summary>
-        <div class="a">At season end the token pool is split proportionally across all players by points. Your estimate
-          is shown above and updates as you earn.</div>
+        <div class="a">At season end the pool is split by points earned — <b>capped by your VIP tier</b> (max share
+          ~0.83%, up to 5% at the top tier). Your live estimate is shown above. Points are earned by playing, never
+          bought.</div>
       </details>
       <details class="faq">
         <summary>When is the airdrop?</summary>
@@ -4617,6 +4669,12 @@
       <details class="faq">
         <summary>Can I lose my points?</summary>
         <div class="a">No — Airdrop Points are locked season score. Rugs only affect your unbanked $MOON position.</div>
+      </details>
+      <details class="faq">
+        <summary>Does buying VIP give me more airdrop?</summary>
+        <div class="a">No — VIP never gives you points, and points can't be bought. VIP raises your <b>earn rate</b> and
+          your <b>allocation cap</b> (the max share you can reach), but you still <b>earn every point by playing</b>. You
+          can also climb VIP tiers for free with VIP points from 🏅 quests & referrals.</div>
       </details>
       <details class="faq">
         <summary>Is $MOON a real token?</summary>
@@ -4886,10 +4944,11 @@
         <div class="row">
           <div class="emo">👑</div>
           <div class="grow">
-            <div class="nm">VIP & bet limits</div>
-            <div class="ds">Your <b>max bet per click is set by rank × VIP multiplier</b> (rank sets the base: Shrimp 1K
-              → Megalodon 1M; VIP multiplies it: None 1× → Trench III 38×). VIP also boosts earnings, energy, airdrop
-              cap, and rug protection.</div>
+            <div class="nm">VIP tiers & your airdrop cap</div>
+            <div class="ds"><b>18 VIP tiers</b> (Shallows → Trench III). VIP raises your max bet (None 1× → Trench III
+              38×), earnings, energy, rug protection, <b>and your airdrop allocation cap (~0.83% → up to 5%)</b>. Airdrop
+              points are always <b>earned by playing</b> — VIP only lifts your ceiling, never sells points. Climb tiers
+              with <b>VIP points</b> from referrals & 🏅 VIP-point quests, or unlock instantly with TON.</div>
           </div>
         </div>
       </div>
@@ -4898,8 +4957,10 @@
           <div class="emo">🏆</div>
           <div class="grow">
             <div class="nm">Ranks, quests & invites</div>
-            <div class="ds">Lifetime banked $MOON levels your rank (🦐→🦖). Clear daily quests for bonuses, and invite
-              friends — you both get 5,000 $MOON, with milestone rewards as your crew grows.</div>
+            <div class="ds">Lifetime banked $MOON levels your rank (🦐→🦖). Clear daily, weekly & 🏅 VIP-point
+              quests for bonuses. Invite friends and you get <b>10,000 $MOON + 5,000 airdrop pts + 100 VIP points</b>
+              per friend (<b>25,000 / 10,000 / 250</b> if they're Telegram Premium), plus milestone rewards as your crew
+              grows.</div>
           </div>
         </div>
       </div>
@@ -4952,6 +5013,30 @@
             <div class="nm">Store</div>
             <div class="ds">Out of $MOON? The ⭐ Store tops up your balance instantly with Telegram Stars — bigger packs
               give bonus value.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card help-sec">
+        <div class="row">
+          <div class="emo">🪂</div>
+          <div class="grow">
+            <div class="nm">Airdrop points (Season 1 score)</div>
+            <div class="ds">You earn airdrop points by <b>playing</b> — 8% of every profitable bank, plus quests & social
+              tasks. They're your Season 1 score, <b>not</b> betting fuel and <b>never</b> for sale. To qualify you need
+              sustained play: 10M points, 20 active days, 5,000 taps & 100 cash-outs. Your VIP tier sets the maximum
+              share you can be allocated (~0.83% → up to 5%).</div>
+          </div>
+        </div>
+      </div>
+      <div class="card help-sec">
+        <div class="row">
+          <div class="emo">⚔️</div>
+          <div class="grow">
+            <div class="nm">Duels, Ranked & Daily</div>
+            <div class="ds">In <b>Ranks → ⚔️ Duels</b>: the <b>🌐 Duel Board</b> lets you post or accept 1v1 duels (same
+              chart, higher bank wins the whole pot) with live global chat; <b>⚔️ My Duels</b> tracks your record &
+              rounds; <b>📊 Ranked</b> is an Elo ladder with monthly seasons and automatic $MOON prizes. Under <b>Ranks →
+                🐋 Live</b>, the <b>🏆 Daily Challenge</b> pays the top 10 biggest banks automatically every day.</div>
           </div>
         </div>
       </div>
@@ -5121,10 +5206,14 @@
     </div>
 
     <div id="tut">
-      <div class="em" id="tutEm">📈</div>
-      <h3 id="tutH"></h3>
-      <p id="tutP"></p>
-      <div class="dots" id="tutDots"></div><button id="tutNext">Next</button>
+      <div id="tutSpot"></div>
+      <div id="tutCard">
+        <div class="em" id="tutEm">📈</div>
+        <h3 id="tutH"></h3>
+        <p id="tutP"></p>
+        <div class="dots" id="tutDots"></div>
+        <div class="tut-btns"><button id="tutSkip">Skip</button><button id="tutNext">Next</button></div>
+      </div>
     </div>
   </div>
 
@@ -8326,17 +8415,43 @@
       }
 
       // ---------- TUTORIAL ----------
-      const TUT = [{ em: "🪙", h: "Every tap is a bet", p: "Each click stakes your $MOON bet into the round and pumps the live price. Airdrop Points are your Season 1 score and cannot be wagered." },
-      { em: "👥", h: "It's a live-style market", p: "A simulated market of buyers & sellers moves the price on its own in real time. Whales can dump and crash it." },
-      { em: "💰", h: "Sell before it rugs", p: "CASH OUT banks your position (stake + profit). If it rugs first, you lose what you invested — so time it." },
-      { em: "👑", h: "Bank to unlock more", p: "Each round you bank reveals a new feature — Upgrades, then Crews, then Duels, Ranked & Wars. Climb the ranks and invite friends — you both get 5,000 $MOON." }];
+      const TUT = [
+        { em: "🦈", h: "Welcome to RUG or RICHES", p: "Quick 60-second tour. You buy into a live meme-coin run, pump it up, and cash out BEFORE it rugs. Let's walk the screen." },
+        { em: "🪙", h: "Tap to BUY & pump", p: "Every tap stakes your bet and pumps the price. Stack taps to ride it higher.", t: "#coin" },
+        { em: "📈", h: "It's a live market", p: "A simulated crowd of buyers & sellers moves the price on its own — whales can dump it without warning.", t: "#chartCard" },
+        { em: "🪤", h: "Watch the RUG RISK", p: "As this bar climbs, a rug gets more likely — and higher multipliers are scarier. Don't get greedy.", t: "#rugBar" },
+        { em: "🎚️", h: "Set your bet", p: "This is how much $MOON each tap stakes. Your max bet rises with your rank and VIP tier.", t: ".betbar" },
+        { em: "💰", h: "SELL ALL to bank it", p: "Cash out your stake + profit. If it rugs first you lose what you put in — so time it. 8% of every profit becomes airdrop points.", t: "#cashout" },
+        { em: "✂️", h: "…or SELL 50%", p: "Take half off the table and let the rest ride for a bigger win.", t: "#sellHalf" },
+        { em: "🚀", h: "Bank runs to unlock everything", p: "Each run you bank reveals more: Upgrades, Crews, Duels, Ranked, the Daily Challenge & VIP. Points are earned by playing. Good luck 🦈" }
+      ];
       let tutI = 0;
+      function positionTut() {
+        const t = TUT[tutI], spot = $("tutSpot"), card = $("tutCard");
+        const el = t && t.t ? document.querySelector(t.t) : null;
+        const r = el ? el.getBoundingClientRect() : null;
+        if (r && r.width > 0 && el.offsetParent !== null) {
+          const pad = 8;
+          spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
+          spot.style.left = (r.left - pad) + "px"; spot.style.top = (r.top - pad) + "px"; spot.style.borderRadius = "14px";
+          card.style.position = "absolute"; card.style.left = "50%"; card.style.transform = "translateX(-50%)";
+          if (window.innerHeight - r.bottom > 250) { card.style.top = (r.bottom + 14) + "px"; card.style.bottom = "auto"; }
+          else { card.style.top = "auto"; card.style.bottom = (window.innerHeight - r.top + 14) + "px"; }
+        } else {
+          spot.style.width = "0px"; spot.style.height = "0px"; spot.style.left = "50%"; spot.style.top = "50%"; spot.style.borderRadius = "0";
+          card.style.position = "static"; card.style.left = ""; card.style.top = ""; card.style.bottom = ""; card.style.transform = "";
+        }
+      }
       function renderTut() {
         const t = TUT[tutI]; $("tutEm").textContent = t.em; $("tutH").textContent = t.h; $("tutP").textContent = t.p;
         const dd = $("tutDots"); dd.innerHTML = ""; TUT.forEach((_, i) => { const s = document.createElement("i"); if (i === tutI) s.className = "on"; dd.appendChild(s); });
         $("tutNext").textContent = tutI < TUT.length - 1 ? "Next" : "Let's go 🚀";
+        positionTut();
       }
-      $("tutNext").addEventListener("click", () => { if (tutI < TUT.length - 1) { tutI++; renderTut(); } else { $("tut").classList.remove("show"); try { localStorage.setItem("moontap_tut", "1"); } catch (e) { } } });
+      function endTut() { $("tut").classList.remove("show"); try { localStorage.setItem("moontap_tut", "1"); } catch (e) { } }
+      $("tutNext").addEventListener("click", () => { if (tutI < TUT.length - 1) { tutI++; renderTut(); } else endTut(); });
+      $("tutSkip") && $("tutSkip").addEventListener("click", endTut);
+      window.addEventListener("resize", () => { if ($("tut").classList.contains("show")) positionTut(); });
       $("replayTut").addEventListener("click", () => { tutI = 0; renderTut(); $("tut").classList.add("show"); });
 
       // ---------- INIT ----------
