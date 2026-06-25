@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://rugorriches.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://rugorriches.app/guide</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://rugorriches.app/airdrop</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://rugorriches.app/tokenomics</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://rugorriches.app/litepaper</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://rugorriches.app/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://rugorriches.app/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://rugorriches.app/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://rugorriches.app/cookies</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rugorriches.app/</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://rugorriches.app/guide</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rugorriches.app/airdrop</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rugorriches.app/vip</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rugorriches.app/referrals</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rugorriches.app/tokenomics</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rugorriches.app/litepaper</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rugorriches.app/faq</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rugorriches.app/terms</loc><lastmod>2026-06-25</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rugorriches.app/privacy</loc><lastmod>2026-06-25</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rugorriches.app/cookies</loc><lastmod>2026-06-25</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
