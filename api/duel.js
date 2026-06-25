@@ -231,15 +231,17 @@ module.exports = async (req, res) => {
       } catch (e) { await client.query("ROLLBACK"); throw e; } finally { client.release(); }
     }
 
-    // ---------- BOARD (public list of OPEN duels anyone can accept) ----------
+    // ---------- BOARD (public list of OPEN duels) ----------
+    // Includes the caller's OWN open duels (flagged `mine`) so they get visible confirmation
+    // and a cancel handle; own duels sort first. You still can't accept your own (server blocks it).
     if (action === "board") {
       const { rows } = await db.query(
-        `SELECT d.code, d.wager, EXTRACT(EPOCH FROM d.created_at)*1000 AS ts,
+        `SELECT d.code, d.wager, d.challenger_id, EXTRACT(EPOCH FROM d.created_at)*1000 AS ts,
                 COALESCE(p.name, p.username, 'degen') AS name, COALESCE(p.vip_tier,0)::int AS vip
            FROM duels d JOIN players p ON p.id = d.challenger_id
-          WHERE d.status = 'open' AND d.challenger_id <> $1 AND d.expires_at > now()
-          ORDER BY d.created_at DESC LIMIT 30`, [playerId]);
-      return json(res, 200, { ok: true, open: rows.map(r => ({ code: r.code, wager: Number(r.wager) || 0, name: r.name, vip: Number(r.vip) || 0, ts: Number(r.ts) || 0 })) });
+          WHERE d.status = 'open' AND d.expires_at > now()
+          ORDER BY (d.challenger_id = $1) DESC, d.created_at DESC LIMIT 40`, [playerId]);
+      return json(res, 200, { ok: true, open: rows.map(r => ({ code: r.code, wager: Number(r.wager) || 0, name: r.name, vip: Number(r.vip) || 0, ts: Number(r.ts) || 0, mine: String(r.challenger_id) === String(playerId) })) });
     }
 
     // ---------- GLOBAL CHAT ----------
