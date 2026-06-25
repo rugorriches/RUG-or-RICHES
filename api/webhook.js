@@ -254,12 +254,12 @@ module.exports = async (req, res) => {
           `🦈 <b>Welcome to RUG OR RICHES</b> ($MOON)\n` +
           `<i>Pump it. Bank it. Before it rugs.</i>\n\n` +
           `📈 Tap to pump a live $MOON chart, ride the gains, then cash out before the rug wipes your bag.\n` +
-          `🎭 Earn <b>Airdrop Points</b> during Season 1.\n` +
-          `🤝 Invite friends and climb faster.\n` +
-          `🏆 Climb the global leaderboard from Shrimp to Megalodon.\n\n` +
+          `⚔️ Duel other degens 1v1, climb the Ranked ladder &amp; win the auto-paid Daily Challenge.\n` +
+          `🪂 Stack <b>Season Points</b> by playing — climb from Shrimp to Megalodon.\n` +
+          `🤝 Invite friends for $MOON, points &amp; VIP perks — climb faster together.\n\n` +
           `Free to play. No wallet needed.\n` +
           `Tap <b>Play</b> and don't get rekt. 💀\n\n` +
-          `<i>Beta build — some features may have small issues while we polish. No financial advice. No token value promises.</i>`;
+          `<i>Beta build — some features may have small issues while we polish. Not financial advice. No token value promises.</i>`;
         const keyboard = {
           inline_keyboard: [
             [{ text: "🎮 Play RUG OR RICHES", web_app: { url: WEBAPP_URL } }],
