@@ -8458,7 +8458,7 @@
       $("tutNext").addEventListener("click", () => { if (tutI < TUT.length - 1) { tutI++; renderTut(); } else endTut(); });
       $("tutSkip") && $("tutSkip").addEventListener("click", endTut);
       window.addEventListener("resize", () => { if ($("tut").classList.contains("show")) positionTut(); });
-      $("replayTut").addEventListener("click", () => { tutI = 0; renderTut(); $("tut").classList.add("show"); });
+      $("replayTut").addEventListener("click", () => { if (typeof openPanel === "function") openPanel("game"); tutI = 0; $("tut").classList.add("show"); setTimeout(() => { renderTut(); }, 90); });
 
       // ---------- INIT ----------
       // global safety net — never let one stray error white-screen the app
