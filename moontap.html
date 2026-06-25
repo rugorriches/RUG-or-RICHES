@@ -4789,6 +4789,7 @@
           <div class="grow">
             <div class="nm" id="pRankName">Shrimp</div>
             <div class="ds">VIP: <b id="pVip" style="color:var(--gold)">None</b></div>
+            <div class="ds" id="pVipPts" style="margin-top:2px;color:var(--cyan)"></div>
             <div class="pbar2"><i id="pRankBar" style="width:0%"></i></div>
             <div class="ds" id="pRankNext" style="margin-top:4px"></div>
           </div>
@@ -4806,6 +4807,8 @@
         <div class="scell"><b id="m-taps">0</b><span>Total taps</span></div>
         <div class="scell"><b id="m-streak">0</b><span>Day streak</span></div>
         <div class="scell"><b id="m-refs">0</b><span>Friends</span></div>
+        <div class="scell"><b id="m-vippts">0</b><span>VIP points</span></div>
+        <div class="scell"><b id="m-aircap">0%</b><span>Airdrop cap</span></div>
       </div>
       <div class="card" style="margin-top:14px;">
         <div class="toggle"><span>🔊 Sound effects</span><button class="sw on" id="soundSw"></button></div>
@@ -4885,8 +4888,8 @@
           <div class="grow">
             <div class="nm">VIP & bet limits</div>
             <div class="ds">Your <b>max bet per click is set by rank × VIP multiplier</b> (rank sets the base: Shrimp 1K
-              → Megalodon 1M; VIP multiplies it: None 1× → Diamond 5×, up to 5M). VIP also boosts earnings, energy, and
-              rug protection.</div>
+              → Megalodon 1M; VIP multiplies it: None 1× → Trench III 38×). VIP also boosts earnings, energy, airdrop
+              cap, and rug protection.</div>
           </div>
         </div>
       </div>
@@ -6017,7 +6020,7 @@
           toast(bustType === "soft" ? "🩸" : "💀", bustType === "soft" ? "SOFT RUG" : "RUGGED!", (bustType === "soft" ? "Saved " + fmt(rescued) + " · lost " : "Lost ") + fmt(balanceLoss) + " " + (cur === "pts" ? "pts" : "$MOON"));
           sfxRug(); if (navigator.vibrate) navigator.vibrate(bustType === "soft" ? [40, 30, 60] : [60, 40, 140]);
           if (bustType !== "soft" && cur === "moon") showReaction(false, "−" + fmt(balanceLoss) + " $MOON", "The chart dumped on you. Bank earlier next time.");
-          if (bustType !== "soft" && effVip() === 0 && S.rugs % 3 === 0) setTimeout(() => toast("👑", "Rugged again?", "Silver+ VIP lowers rug risk & auto-rescues your stake — check the VIP tab"), 1100);   // moment-of-need: VIP nudge at the frustration peak
+          if (bustType !== "soft" && effVip() === 0 && S.rugs % 3 === 0) setTimeout(() => toast("👑", "Rugged again?", "VIP lowers rug risk & auto-rescues your stake — check the VIP tab"), 1100);   // moment-of-need: VIP nudge at the frustration peak
         }
         holders = Math.floor(holders * (bustType === "soft" ? 0.93 : 0.85));
         pot = 0; invested = 0; roundClicks = 0; roundCur = null; combo = 0; winStreak = 0; heat = 0; pumpVel = 0; dumpWarn = 0; roundId = null; roundInvestedTotal = 0; $("combo").textContent = ""; save(); renderStats(); renderDash(); settleRoundCloud(settlement);
@@ -6335,6 +6338,10 @@
         $("m-ath").textContent = S.bestPrice.toFixed(2) + "x"; $("m-best").textContent = fmt(S.bestPot); $("m-rugs").textContent = S.rugs;
         $("m-cash").textContent = S.cashouts; $("m-taps").textContent = fmt(S.taps); $("m-streak").textContent = S.streak; $("m-refs").textContent = S.friends.length;
         $("nameTxt").textContent = S.name; $("pRankEmo").innerHTML = '<img src="' + rankIconURL(RANKS[ri]) + '" alt="" style="width:36px;height:36px;object-fit:contain" onerror="this.parentNode.textContent=\'' + RANKS[ri].e + '\'">'; $("pRankName").textContent = RANKS[ri].nm; $("pVip").textContent = VIP[S.vip].nm;
+        const vp = S.vipPoints || 0, nextV = VIP[S.vip + 1];
+        if ($("m-vippts")) $("m-vippts").textContent = fmt(vp);
+        if ($("m-aircap")) $("m-aircap").textContent = airCapPct().toFixed(2) + "%";
+        if ($("pVipPts")) $("pVipPts").textContent = nextV ? (fmt(vp) + " VIP pts · " + fmt(Math.max(0, (nextV.vstars || 0) - vp)) + " to " + nextV.nm) : (fmt(vp) + " VIP pts · max tier 👑");
         const nx = RANKS[ri + 1]; if (nx) { const span = nx.min - RANKS[ri].min; $("pRankBar").style.width = clamp((S.lifetime - RANKS[ri].min) / span * 100, 0, 100) + "%"; $("pRankNext").textContent = fmt(nx.min - S.lifetime) + " $MOON to " + nx.nm + " " + nx.e; } else { $("pRankBar").style.width = "100%"; $("pRankNext").textContent = "Max rank reached 👑"; }
       }
 
@@ -6608,9 +6615,9 @@
           toast("⭐", "Purchase complete!", "+" + fmt(moon) + " $MOON" + (dbl ? " (2× first buy!)" : ""));
         });
       }
-      function buyStarter() { if (S.starterBought) return; starsPurchase("Starter Pack — " + fmt(STARTER.moon) + " $MOON + Bronze VIP for " + STARTER.stars + " ⭐?", { type: "starter", stars: STARTER.stars }, () => { S.starterBought = true; addCur("moon", STARTER.moon); if (S.vip < STARTER.vip) S.vip = STARTER.vip; S.starsSpent += STARTER.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("🎁", "Starter Pack!", "+" + fmt(STARTER.moon) + " $MOON + Bronze VIP"); }); }
-      function buyWhale() { starsPurchase("Whale Pack — " + fmt(WHALE.moon) + " $MOON + Gold VIP for " + fmt(WHALE.stars) + " ⭐?", { type: "whale", stars: WHALE.stars }, () => { addCur("moon", WHALE.moon); if (S.vip < WHALE.vip) S.vip = WHALE.vip; S.starsSpent += WHALE.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("🐋", "Whale Pack!", "+" + fmt(WHALE.moon) + " $MOON + Gold VIP"); }); }
-      function buyVipSub() { starsPurchase("VIP Pass — 30 days of Diamond perks for " + VIPSUB.stars + " ⭐?", { type: "vipsub", stars: VIPSUB.stars }, () => { S.vipSubUntil = Math.max(Date.now(), S.vipSubUntil || 0) + VIPSUB.days * 864e5; S.starsSpent += VIPSUB.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("👑", "VIP Pass active!", "30 days of Diamond-level perks"); }); }
+      function buyStarter() { if (S.starterBought) return; starsPurchase("Starter Pack — " + fmt(STARTER.moon) + " $MOON + " + VIP[STARTER.vip].nm + " VIP for " + STARTER.stars + " ⭐?", { type: "starter", stars: STARTER.stars }, () => { S.starterBought = true; addCur("moon", STARTER.moon); if (S.vip < STARTER.vip) S.vip = STARTER.vip; S.starsSpent += STARTER.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("🎁", "Starter Pack!", "+" + fmt(STARTER.moon) + " $MOON + " + VIP[STARTER.vip].nm + " VIP"); }); }
+      function buyWhale() { starsPurchase("Whale Pack — " + fmt(WHALE.moon) + " $MOON + " + VIP[WHALE.vip].nm + " VIP for " + fmt(WHALE.stars) + " ⭐?", { type: "whale", stars: WHALE.stars }, () => { addCur("moon", WHALE.moon); if (S.vip < WHALE.vip) S.vip = WHALE.vip; S.starsSpent += WHALE.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("🐋", "Whale Pack!", "+" + fmt(WHALE.moon) + " $MOON + " + VIP[WHALE.vip].nm + " VIP"); }); }
+      function buyVipSub() { starsPurchase("VIP Pass — 30 days of " + VIP[6].nm + "-level perks for " + VIPSUB.stars + " ⭐? (temporary perks — does not raise your permanent VIP tier or airdrop cap)", { type: "vipsub", stars: VIPSUB.stars }, () => { S.vipSubUntil = Math.max(Date.now(), S.vipSubUntil || 0) + VIPSUB.days * 864e5; S.starsSpent += VIPSUB.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("👑", "VIP Pass active!", "30 days of " + VIP[6].nm + "-level perks"); }); }
       function buyDeal() { const td = new Date().toDateString(); if (S.dealDay === td) return; starsPurchase("Daily Deal — " + fmt(DEAL.moon) + " $MOON (2× value) for " + DEAL.stars + " ⭐?", { type: "deal", stars: DEAL.stars }, () => { S.dealDay = td; addCur("moon", DEAL.moon); S.starsSpent += DEAL.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("⏰", "Daily Deal!", "+" + fmt(DEAL.moon) + " $MOON"); }); }
       function buyComeback() { starsPurchase("Comeback Pack — " + fmt(COMEBACK.moon) + " $MOON for " + COMEBACK.stars + " ⭐?", { type: "comeback", stars: COMEBACK.stars }, () => { addCur("moon", COMEBACK.moon); S.starsSpent += COMEBACK.stars; save(); renderStore(); renderLive(); renderStats(); sfxCash(); confetti(); toast("🆘", "Comeback!", "+" + fmt(COMEBACK.moon) + " $MOON"); }); }
       function buyBoost(b) {
@@ -6827,10 +6834,10 @@
 
       function pickOffer() {
         const today = new Date().toDateString();
-        if (!S.starterBought && S.lifetime < 50000) return { emo: "🎁", nm: "Starter Pack", ds: "Best first boost: 500K $MOON + Bronze VIP", stars: STARTER.stars, fn: buyStarter };
+        if (!S.starterBought && S.lifetime < 50000) return { emo: "🎁", nm: "Starter Pack", ds: "Best first boost: 500K $MOON + " + VIP[STARTER.vip].nm + " VIP", stars: STARTER.stars, fn: buyStarter };
         if (S.balance < 5000) return { emo: "🆘", nm: "Comeback Pack", ds: "Low balance rescue: 200K $MOON", stars: COMEBACK.stars, fn: buyComeback };
         if (S.dealDay !== today) return { emo: "⏰", nm: "Daily Deal", ds: "700K $MOON at 2× value today", stars: DEAL.stars, fn: buyDeal };
-        if ((S.vipSubUntil || 0) < Date.now()) return { emo: "👑", nm: "VIP Pass", ds: "30 days of Diamond-level perks", stars: VIPSUB.stars, fn: buyVipSub };
+        if ((S.vipSubUntil || 0) < Date.now()) return { emo: "👑", nm: "VIP Pass", ds: "30 days of " + VIP[6].nm + "-level perks", stars: VIPSUB.stars, fn: buyVipSub };
         if (S.piggy >= 25000) return { emo: "🐷", nm: "Crack Piggy", ds: "Claim " + fmt(S.piggy) + " saved $MOON", stars: Math.max(20, Math.round(S.piggy / 3000)), fn: crackPiggy };
         return { emo: "⚡", nm: "Turbo Boost", ds: "Double every pump for the next rush", stars: 35, fn: () => buyBoost(BOOSTS[1]) };
       }
@@ -6851,9 +6858,9 @@
         const today = new Date().toDateString();
         storeSection(wrap, "🔥 Limited drops");
         storeCard(wrap, { emo: "⏰", nm: "Daily Deal", ds: S.dealDay === today ? "Claimed today" : "700K $MOON at 2× value", stars: DEAL.stars, fn: buyDeal, disabled: S.dealDay === today, label: S.dealDay === today ? "✓" : "⭐ " + DEAL.stars });
-        storeCard(wrap, { emo: "🎁", nm: "Starter Pack", ds: "One-time 500K $MOON + Bronze VIP", stars: STARTER.stars, fn: buyStarter, disabled: S.starterBought, label: S.starterBought ? "✓" : "⭐ " + STARTER.stars });
-        storeCard(wrap, { emo: "🐋", nm: "Whale Pack", ds: "12M $MOON + Gold VIP instant unlock", stars: WHALE.stars, fn: buyWhale });
-        storeCard(wrap, { emo: "👑", nm: "VIP Pass", ds: (S.vipSubUntil > Date.now() ? "Active until " + new Date(S.vipSubUntil).toLocaleDateString() : "30 days of Diamond-level perks"), stars: VIPSUB.stars, fn: buyVipSub });
+        storeCard(wrap, { emo: "🎁", nm: "Starter Pack", ds: "One-time 500K $MOON + " + VIP[STARTER.vip].nm + " VIP", stars: STARTER.stars, fn: buyStarter, disabled: S.starterBought, label: S.starterBought ? "✓" : "⭐ " + STARTER.stars });
+        storeCard(wrap, { emo: "🐋", nm: "Whale Pack", ds: "12M $MOON + " + VIP[WHALE.vip].nm + " VIP instant unlock", stars: WHALE.stars, fn: buyWhale });
+        storeCard(wrap, { emo: "👑", nm: "VIP Pass", ds: (S.vipSubUntil > Date.now() ? "Active until " + new Date(S.vipSubUntil).toLocaleDateString() : "30 days of " + VIP[6].nm + "-level perks"), stars: VIPSUB.stars, fn: buyVipSub });
         storeCard(wrap, { emo: "🎟️", nm: "Season 1 Pass", ds: S.seasonPass ? "Active for this season" : "1M $MOON + premium season perks", stars: SEASON.stars, fn: buySeason, disabled: S.seasonPass, label: S.seasonPass ? "✓" : "⭐ " + SEASON.stars });
         if (S.balance < 5000) storeCard(wrap, { emo: "🆘", nm: "Comeback Pack", ds: "Low-balance rescue: 200K $MOON", stars: COMEBACK.stars, fn: buyComeback });
         storeCard(wrap, { emo: "🐷", nm: "Piggy Bank", ds: S.piggy > 0 ? "Crack " + fmt(S.piggy) + " saved $MOON" : "Fills with 4% of profitable cash-outs", stars: Math.max(20, Math.round((S.piggy || 0) / 3000)), fn: crackPiggy, disabled: S.piggy < 1, label: S.piggy > 0 ? "⭐ " + Math.max(20, Math.round(S.piggy / 3000)) : "Empty" });
