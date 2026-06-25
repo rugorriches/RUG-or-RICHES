@@ -244,6 +244,21 @@ module.exports = async (req, res) => {
       return json(res, 200, { ok: true, open: rows.map(r => ({ code: r.code, wager: Number(r.wager) || 0, name: r.name, vip: Number(r.vip) || 0, ts: Number(r.ts) || 0, mine: String(r.challenger_id) === String(playerId) })) });
     }
 
+    // ---------- STATS (my all-time duel totals for the My Duels header) ----------
+    if (action === "stats") {
+      const { rows } = await db.query(
+        `SELECT
+           COUNT(*) FILTER (WHERE status = 'settled')::int AS played,
+           COUNT(*) FILTER (WHERE status IN ('open','active'))::int AS pending,
+           COALESCE(SUM(CASE WHEN status='settled' AND winner_id = $1 THEN wager
+                             WHEN status='settled' AND winner_id IS NOT NULL AND winner_id <> $1 THEN -wager
+                             ELSE 0 END), 0)::bigint AS net,
+           COALESCE(SUM(CASE WHEN status='settled' AND winner_id = $1 THEN wager*2 ELSE 0 END), 0)::bigint AS pot_won
+         FROM duels WHERE challenger_id = $1 OR opponent_id = $1`, [playerId]);
+      const s = rows[0] || {};
+      return json(res, 200, { ok: true, stats: { played: Number(s.played) || 0, pending: Number(s.pending) || 0, net: Number(s.net) || 0, potWon: Number(s.pot_won) || 0 } });
+    }
+
     // ---------- GLOBAL CHAT ----------
     if (action === "chat_list") {
       const { rows } = await db.query("SELECT name, msg, EXTRACT(EPOCH FROM created_at)*1000 AS ts FROM global_chat ORDER BY created_at DESC LIMIT 40");

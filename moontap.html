@@ -3266,7 +3266,7 @@
       color: #8b82b4;
     }
 
-    #boardView details.bdrop {
+    details.bdrop {
       border: 1px solid var(--line);
       border-radius: 12px;
       background: rgba(255, 255, 255, .025);
@@ -3274,7 +3274,7 @@
       overflow: hidden;
     }
 
-    #boardView details.bdrop>summary {
+    details.bdrop>summary {
       list-style: none;
       cursor: pointer;
       padding: 11px 12px;
@@ -3287,26 +3287,26 @@
       user-select: none;
     }
 
-    #boardView details.bdrop>summary::-webkit-details-marker {
+    details.bdrop>summary::-webkit-details-marker {
       display: none;
     }
 
-    #boardView details.bdrop>summary::after {
+    details.bdrop>summary::after {
       content: "▾";
       margin-left: auto;
       transition: transform .18s;
       opacity: .65;
     }
 
-    #boardView details.bdrop[open]>summary::after {
+    details.bdrop[open]>summary::after {
       transform: rotate(180deg);
     }
 
-    #boardView .bdbody {
+    .bdbody {
       padding: 2px 11px 11px;
     }
 
-    #boardView .bcount {
+    .bcount {
       font-size: 11px;
       font-weight: 700;
       color: #9c92c4;
@@ -7273,6 +7273,8 @@
         html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
         html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
         html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
+        html += sec("⚔️ Top duelists (30d)", d.boards.topDuelists, v => v + (Number(v) === 1 ? " win" : " wins"));
+        html += sec("🏆 Biggest duel pots today", d.boards.biggestDuelPots, fmt);
         wrap.innerHTML = html || '<div class="dly-load">No board activity yet today — be the first! 🦈</div>';
       }
       async function renderDaily() {
@@ -7653,32 +7655,75 @@
       async function renderDuels() {
         const wrap = $("duelsView"); if (!wrap) return;
         if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">⚔️ Duels need Telegram. Open the game inside Telegram to challenge rivals.</div>'; return; }
-        let data = null;
-        try { data = await cloudAction("/api/duel", { action: "list" }); } catch (e) { }
+        const [data, stats, rk] = await Promise.all([
+          cloudAction("/api/duel", { action: "list" }).catch(() => null),
+          cloudAction("/api/duel", { action: "stats" }).catch(() => null),
+          cloudAction("/api/ranked", {}).catch(() => null)
+        ]);
         const duels = (data && data.duels) || [];
-        let html = '<div class="dly-head"><div class="dly-title">⚔️ Async Duels</div><div class="dly-sub">Same chart, head-to-head. Higher bank wins the pot.</div></div>';
-        html += '<div class="card" style="margin-bottom:10px"><div class="ds" style="margin-bottom:6px;font-weight:800">Challenge someone</div>' +
-          '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><input id="duelWager" type="number" min="0" placeholder="Wager $MOON (0 = friendly)" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff"></div>' +
-          '<button class="big-btn" id="duelCreateBtn" style="width:100%">⚔️ Create Duel</button>' +
-          '<div style="display:flex;gap:6px;margin-top:8px"><input id="duelJoinCode" placeholder="Have a code? Enter it" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid #3a2a5e;background:#1a1030;color:#fff;text-transform:uppercase"><button id="duelJoinBtn" class="rbtn">Join</button></div></div>';
-        if (!duels.length) html += '<div class="ds" style="text-align:center;color:#9c92c4;padding:10px">No duels yet. Create one and send the link to a friend or crewmate.</div>';
-        duels.forEach(d => {
-          let line, action = "";
-          if (d.status === "open") {
-            line = (d.role === "challenger") ? "🟡 Waiting for opponent" : "🟡 Open challenge";
-            if (d.role === "challenger") action = '<button class="rbtn" data-share="' + d.code + '">🔗 Share</button><button class="rbtn locked" data-cancel="' + d.code + '">Cancel</button>';
+        const st = (stats && stats.stats) || {};
+        const me = rk && rk.me;
+        const card = (label, big, sub, color) => '<div style="background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:13px;padding:10px 12px"><div style="font-size:9.5px;color:#9c92c4;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">' + label + '</div><div style="font-weight:900;font-size:16px;color:' + color + ';line-height:1.15">' + big + '</div><div style="font-size:10px;color:#9c92c4;margin-top:3px">' + sub + '</div></div>';
+
+        let html = '<div class="dly-head"><div class="dly-title">⚔️ My Duels</div><div class="dly-sub">Your record, active rounds &amp; history.</div></div>';
+
+        // ---- stats header ----
+        const net = Number(st.net) || 0;
+        const netStr = (net > 0 ? '+' : '') + fmt(net);
+        const netColor = net > 0 ? '#3ad17e' : net < 0 ? '#ff6b6b' : '#cfc9ee';
+        const divTxt = me ? (me.divisionEmoji + ' ' + me.division) : '🥉 Unranked';
+        const rankSub = me ? (fmt(me.mmr) + ' MMR' + (me.rank ? ' · #' + me.rank : '')) : 'Play a ranked duel to enter';
+        const recTxt = me ? (me.wins + 'W · ' + me.losses + 'L · ' + me.draws + 'D') : '0W · 0L';
+        const recSub = me && me.games ? (me.winRate + '% win rate') : 'No ranked games yet';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px">' +
+          card('Division', divTxt, rankSub, 'var(--cyan)') +
+          card('Ranked record', recTxt, recSub, 'var(--gold)') +
+          card('Net $MOON', netStr, (st.played || 0) + ' duels settled', netColor) +
+          card('Pot won', fmt(Number(st.potWon) || 0), (st.pending || 0) + ' rounds active', '#cfc9ee') +
+          '</div>';
+
+        const active = duels.filter(d => d.status === 'open' || d.status === 'active');
+        const past = duels.filter(d => d.status === 'settled' || d.status === 'cancelled');
+        const rowHtml = (line, sub, action) => '<div class="card" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:10px 11px"><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px">' + line + '</div><div class="ds" style="font-size:10px;color:#9c92c4">' + sub + '</div></div><div style="display:flex;gap:4px">' + action + '</div></div>';
+
+        // ---- active rounds ----
+        html += '<div class="sec-h" style="margin-top:6px">🔥 Active rounds</div>';
+        if (!active.length) html += '<div class="ds" style="opacity:.6;padding:6px 2px 4px">Nothing live. Post or accept a duel on the 🌐 Duel Board.</div>';
+        active.forEach(d => {
+          let line, action = '';
+          if (d.status === 'open') {
+            line = (d.role === 'challenger') ? '🟡 Waiting for a challenger' : '🟡 Open challenge';
+            if (d.role === 'challenger') action = '<button class="rbtn" data-share="' + d.code + '">🔗 Share</button><button class="rbtn locked" data-cancel="' + d.code + '">Cancel</button>';
             else action = '<button class="rbtn" data-accept="' + d.code + '">Accept</button>';
-          } else if (d.status === "active") {
-            if (!d.iSubmitted) { line = "🔥 Your turn — play your run"; action = '<button class="rbtn" data-play="' + d.code + '">▶ Play</button>'; }
-            else if (d.oppScore == null) { line = "⏳ You banked " + fmt(d.myScore) + " — waiting for opponent"; action = '<button class="rbtn" data-share="' + d.code + '">🔗 Nudge</button>'; }
-            else { line = "Scores in — settling…"; }
-          } else if (d.status === "settled") {
-            const tag = d.result === "won" ? '<span style="color:#3ad17e;font-weight:900">WON 🏆</span>' : d.result === "lost" ? '<span style="color:#ff6b6b;font-weight:900">LOST</span>' : '<span style="color:var(--gold);font-weight:900">DRAW</span>';
-            line = tag + " · you " + fmt(d.myScore || 0) + " vs " + fmt(d.oppScore || 0);
-          } else { line = (d.status === "cancelled") ? "🚫 Cancelled" : d.status; }
-          const stake = d.wager > 0 ? '<span style="color:var(--gold)">💰 ' + fmt(d.wager) + '</span>' : '<span style="color:#9c92c4">friendly</span>';
-          html += '<div class="card" style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div class="grow" style="flex:1"><div style="font-weight:800;font-size:13px">' + line + '</div><div class="ds" style="font-size:10px;color:#9c92c4">Code ' + d.code + ' · ' + stake + '</div></div><div style="display:flex;gap:4px">' + action + '</div></div>';
+          } else {
+            if (!d.iSubmitted) { line = '🔥 Your turn — play your run'; action = '<button class="rbtn" data-play="' + d.code + '">▶ Play</button>'; }
+            else if (d.oppScore == null) { line = '⏳ You banked ' + fmt(d.myScore) + ' — waiting on opponent'; action = '<button class="rbtn" data-share="' + d.code + '">🔗 Nudge</button>'; }
+            else line = 'Scores in — settling…';
+          }
+          const stake = d.wager > 0 ? '💰 ' + fmt(d.wager) + ' $MOON' : 'friendly';
+          html += rowHtml(line, 'Code ' + d.code + ' · ' + stake, action);
         });
+
+        // ---- past rounds ----
+        html += '<div class="sec-h" style="margin-top:12px">📜 Past rounds</div>';
+        if (!past.length) html += '<div class="ds" style="opacity:.6;padding:6px 2px 4px">No finished duels yet — your history shows here.</div>';
+        past.slice(0, 20).forEach(d => {
+          let line;
+          if (d.status === 'settled') {
+            const tag = d.result === 'won' ? '<span style="color:#3ad17e;font-weight:900">WON 🏆</span>' : d.result === 'lost' ? '<span style="color:#ff6b6b;font-weight:900">LOST</span>' : '<span style="color:var(--gold);font-weight:900">DRAW</span>';
+            line = tag + ' · ' + fmt(d.myScore || 0) + ' vs ' + fmt(d.oppScore || 0);
+          } else line = '🚫 Cancelled';
+          const stake = d.wager > 0 ? '💰 ' + fmt(d.wager) + ' $MOON' : 'friendly';
+          html += rowHtml(line, 'Code ' + d.code + ' · ' + stake, '');
+        });
+
+        // ---- private challenge (collapsible; public posting lives on the Duel Board) ----
+        html += '<details class="bdrop" style="margin-top:14px"><summary>🔒 Private challenge <span class="bcount">friend link</span></summary><div class="bdbody">' +
+          '<div class="ds" style="font-size:11px;margin-bottom:7px;opacity:.85">Create a duel and share the link directly — only whoever you send it to can accept. For a public post, use the 🌐 Duel Board.</div>' +
+          '<div style="display:flex;gap:6px;margin-bottom:7px"><input id="duelWager" type="number" min="0" placeholder="Wager $MOON (0 = friendly)" style="flex:1;min-width:0"><button class="buy" id="duelCreateBtn" style="padding:0 15px">Create</button></div>' +
+          '<div style="display:flex;gap:6px"><input id="duelJoinCode" placeholder="Have a code? Enter it" style="flex:1;min-width:0;text-transform:uppercase"><button class="buy" id="duelJoinBtn" style="padding:0 15px">Join</button></div>' +
+          '</div></details>';
+
         wrap.innerHTML = html;
         const cb = $("duelCreateBtn"); if (cb) cb.addEventListener("click", () => duelCreate($("duelWager") ? $("duelWager").value : 0));
         const jb = $("duelJoinBtn"); if (jb) jb.addEventListener("click", () => { const v = $("duelJoinCode") ? $("duelJoinCode").value : ""; if (v) duelAccept(v.trim().toUpperCase(), true); });
@@ -7746,9 +7791,9 @@
 
       // ---- grouped rank tabs: 3 top groups, each with a small sub-toggle ----
       const RT_GROUPS = {
-        ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
+        ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }, { k: "live", l: "🐋 Live" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "board", l: "🌐 Duel Board" }, { k: "duels", l: "⚔️ My Duels" }, { k: "ranked", l: "📊 Ranked" }, { k: "live", l: "🐋 Live" }]
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "board", l: "🌐 Duel Board" }, { k: "duels", l: "⚔️ My Duels" }, { k: "ranked", l: "📊 Ranked" }]
       };
       const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), board: () => renderDuelBoard(), duels: () => renderDuels(), ranked: () => renderRanked(), live: () => renderBoards() };
       const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "board", "duels", "ranked", "live"];

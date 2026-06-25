@@ -71,7 +71,22 @@ module.exports = async (req, res) => {
          FROM players WHERE streak > 0
         ORDER BY streak DESC LIMIT 5`);
 
-    const [whales, bigBanks, mults, streaks] = await Promise.all([whalesQ, bigBankQ, multQ, streakQ]);
+    // Biggest duel pots won today (settled, real wager). .catch keeps boards alive if duels table is cold.
+    const duelPotsQ = db.query(
+      `SELECT COALESCE(p.name,'degen') AS name, p.vip_tier, (d.wager*2) AS pot
+         FROM duels d JOIN players p ON p.id = d.winner_id
+        WHERE d.status = 'settled' AND d.winner_id IS NOT NULL AND d.wager > 0 AND d.settled_at >= $1::date
+        ORDER BY d.wager DESC LIMIT 5`, [day]).catch(() => ({ rows: [] }));
+
+    // Top duelists by wins over the last 30 days
+    const topDuelistsQ = db.query(
+      `SELECT COALESCE(p.name,'degen') AS name, p.vip_tier, COUNT(*) AS wins
+         FROM duels d JOIN players p ON p.id = d.winner_id
+        WHERE d.status = 'settled' AND d.winner_id IS NOT NULL AND d.settled_at >= now() - interval '30 days'
+        GROUP BY p.id, p.name, p.vip_tier
+        ORDER BY COUNT(*) DESC LIMIT 5`).catch(() => ({ rows: [] }));
+
+    const [whales, bigBanks, mults, streaks, duelPots, topDuelists] = await Promise.all([whalesQ, bigBankQ, multQ, streakQ, duelPotsQ, topDuelistsQ]);
 
     return json(res, 200, {
       day,
@@ -80,7 +95,9 @@ module.exports = async (req, res) => {
         topBankedToday: whales.rows.map(r => row(r, "banked_total")),
         biggestBankToday: bigBanks.rows.map(r => row(r, "best_bank")),
         highestMultToday: mults.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.best_mult) || 1 })),
-        longestStreaks: streaks.rows.map(r => row(r, "streak"))
+        longestStreaks: streaks.rows.map(r => row(r, "streak")),
+        topDuelists: topDuelists.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.wins) || 0 })),
+        biggestDuelPots: duelPots.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.pot) || 0 }))
       }
     });
   } catch (err) {
