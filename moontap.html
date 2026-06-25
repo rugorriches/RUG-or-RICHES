@@ -7613,7 +7613,7 @@
       }
       function loadDuelBoardList() {
         cloudAction("/api/duel", { action: "board" }).then(r => {
-          const box = $("boardList"); if (!box || !r) return; const open = r.open || [];
+          const box = $("duelBoardList"); if (!box || !r) return; const open = r.open || [];
           box.innerHTML = open.length ? open.map(d =>
             '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 11px;margin-bottom:6px;border:1px solid ' + (d.mine ? 'rgba(255,180,40,.5)' : 'var(--line)') + ';border-radius:11px;background:' + (d.mine ? 'rgba(255,180,40,.06)' : 'rgba(255,255,255,.03)') + '">' +
             '<div style="min-width:0"><b>' + esc(d.name) + (d.mine ? ' <span style="color:var(--gold);font-size:11px">· you</span>' : (d.vip ? ' 👑' + d.vip : '')) + '</b><br><span style="color:#9c92c4;font-size:12px">' + (d.wager > 0 ? '💰 ' + fmt(d.wager) + ' $MOON' : 'Free duel') + (d.mine ? ' · waiting for a challenger…' : '') + '</span></div>' +
@@ -7632,7 +7632,7 @@
             '<div class="card" style="margin-bottom:8px;padding:11px 12px"><div style="font-weight:800;margin-bottom:6px;font-size:14px">⚔️ Post a duel</div>' +
             '<div style="display:flex;gap:7px"><input id="boardWager" type="number" min="0" inputmode="numeric" placeholder="Wager $MOON (0 = free)" style="flex:1;min-width:0"><button class="buy" id="boardCreate" style="padding:0 16px">Post</button></div>' +
             '<div class="ds" style="font-size:10.5px;margin-top:5px;opacity:.8">Opponent matches your wager · <b>winner takes the whole pot</b> · same chart, higher bank wins.</div></div>' +
-            '<details class="bdrop" id="boardDuelsD" open><summary>🌐 Open duels <span class="bcount" id="boardCount"></span></summary><div class="bdbody"><div id="boardList"></div></div></details>' +
+            '<details class="bdrop" id="boardDuelsD" open><summary>🌐 Open duels <span class="bcount" id="boardCount"></span></summary><div class="bdbody"><div id="duelBoardList"></div></div></details>' +
             '<details class="bdrop" id="boardChatD"><summary>💬 Global chat <span class="bcount" id="gcCount"></span></summary><div class="bdbody">' +
             '<div id="gcLog" style="height:140px;overflow-y:auto;border:1px solid var(--line);border-radius:11px;padding:8px;background:rgba(0,0,0,.22);margin-bottom:6px"></div>' +
             '<div style="display:flex;gap:7px"><input id="gcInput" maxlength="200" placeholder="Say something…" style="flex:1;min-width:0"><button class="buy" id="gcSend" style="padding:0 16px">Send</button></div></div></details>';
@@ -7641,7 +7641,7 @@
           $("gcSend").addEventListener("click", postGlobalChat);
           $("gcInput").addEventListener("keydown", e => { if (e.key === "Enter") postGlobalChat(); });
           $("boardChatD").addEventListener("toggle", e => { if (e.target.open) { const b = $("gcLog"); if (b) b.scrollTop = b.scrollHeight; } });
-          $("boardList").addEventListener("click", e => {
+          $("duelBoardList").addEventListener("click", e => {
             const a = e.target.closest("[data-accept]"); if (a) return boardAccept(a.getAttribute("data-accept"), Number(a.getAttribute("data-wager")) || 0);
             const c = e.target.closest("[data-cancel]"); if (c) boardCancel(c.getAttribute("data-cancel"));
           });
