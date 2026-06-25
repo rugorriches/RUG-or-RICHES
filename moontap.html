@@ -8440,10 +8440,13 @@
           const pad = 8;
           spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
           spot.style.left = (r.left - pad) + "px"; spot.style.top = (r.top - pad) + "px"; spot.style.borderRadius = "14px";
-          // Pin the card to whichever half is OPPOSITE the highlight so it never covers it and Next is always on-screen.
+          // Place the card adjacent to the highlight using its REAL height — prefer below, flip above only if it fits,
+          // so it never covers the highlighted control and Next stays fully on-screen.
           card.style.position = "fixed"; card.style.left = "50%"; card.style.transform = "translateX(-50%)";
-          if (r.top + r.height / 2 < window.innerHeight / 2) { card.style.top = "auto"; card.style.bottom = "22px"; }
-          else { card.style.top = "22px"; card.style.bottom = "auto"; }
+          const cardH = card.offsetHeight || 240, gap = 16;
+          if (window.innerHeight - r.bottom >= cardH + gap) { card.style.top = (r.bottom + gap) + "px"; card.style.bottom = "auto"; }
+          else if (r.top >= cardH + gap) { card.style.top = "auto"; card.style.bottom = (window.innerHeight - r.top + gap) + "px"; }
+          else { card.style.top = "auto"; card.style.bottom = "16px"; }
         } else {
           // no target (welcome / outro): dim everything, center the card
           spot.style.width = "0px"; spot.style.height = "0px"; spot.style.left = "50%"; spot.style.top = "50%"; spot.style.borderRadius = "0";
