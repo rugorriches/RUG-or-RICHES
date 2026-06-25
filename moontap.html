@@ -60,6 +60,15 @@
       touch-action: manipulation;
     }
 
+    /* Re-enable caret + selection on inputs — body's user-select:none otherwise blocks
+       typing in desktop Telegram (WebKit webview won't place a caret in a non-selectable subtree). */
+    input,
+    textarea {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+      -webkit-touch-callout: default;
+    }
+
     body::after {
       content: "";
       position: fixed;
