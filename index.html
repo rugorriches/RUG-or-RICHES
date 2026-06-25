@@ -272,7 +272,7 @@
   <div class="wrap row">
     <div class="logo"><img src="/assets/brand/shark-pfp.webp" alt="" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:9px;border:1.5px solid rgba(35,240,255,.5)" onerror="this.style.display='none'">RUG <small>OR</small> RICHES</div>
     <div class="navlinks" id="navlinks" onclick="if(event.target.tagName==='A'){this.classList.remove('open');var b=document.querySelector('.burger');if(b){b.textContent='☰';b.setAttribute('aria-expanded',false);}}">
-      <a href="#how">How it works</a><a href="#features">Features</a><a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/vip">VIP</a><a href="/referrals">Refer</a><a href="/tokenomics">Tokenomics</a><a href="/litepaper">Litepaper</a><a href="/faq">FAQ</a>
+      <a href="#how">How it works</a><a href="/guide">Guide</a><a href="/airdrop">Airdrop</a><a href="/vip">VIP</a><a href="/tokenomics">Tokenomics</a><a href="/faq">FAQ</a>
     </div>
     <div class="navcta">
       <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free</a>
@@ -290,10 +290,10 @@
       <span class="badge">Telegram-Native</span>
     </div>
     <h1>Pump the chart.<br><span class="grad">Bank before it rugs.</span></h1>
-    <p class="lead">A free Telegram tapper where every tap pushes in-game $MOON higher. Cash out before the rug, climb the ranks, and stack Season Points. No wallet needed.</p>
+    <p class="lead">A free Telegram mini-game where you tap to pump in-game $MOON, bank before the rug, climb the ranks, and stack Season Points. No wallet needed.</p>
     <div class="cta">
       <a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play on Telegram</a>
-      <a class="btn ghost" href="/guide">Read the Guide</a>
+      <a class="btn ghost" href="#how">How It Works</a>
     </div>
   </div>
   </div>
@@ -309,11 +309,12 @@
     <div class="stat" style="padding:14px;"><div class="n grad" style="font-size:18px;">Free to Play</div><div class="l" style="font-size:10px;">No cost to join</div></div>
     <div class="stat" style="padding:14px;"><div class="n grad" style="font-size:18px;">No Seed Phrase</div><div class="l" style="font-size:10px;">Security first</div></div>
     <div class="stat" style="padding:14px;"><div class="n grad" style="font-size:18px;">Server-Auth</div><div class="l" style="font-size:10px;">Cheating blocked</div></div>
-    <div class="stat" style="padding:14px;"><div class="n grad" style="font-size:18px;">$MOON Token</div><div class="l" style="font-size:10px;">Earn the airdrop</div></div>
+    <div class="stat" style="padding:14px;"><div class="n grad" style="font-size:18px;">Season Points</div><div class="l" style="font-size:10px;">Airdrop tracking</div></div>
   </div>
 </div>
 
 <div class="wrap stats-sec">
+  <div class="eyebrow reveal" style="text-align:center;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px"><span class="dot"></span>Live on Telegram</div>
   <div class="stats reveal">
     <div class="stat"><div class="n grad" id="statTaps" data-count="0">0</div><div class="l">Taps & counting</div></div>
     <div class="stat"><div class="n grad" id="statPlayers" data-count="0">0</div><div class="l">Degens playing</div></div>
@@ -336,28 +337,51 @@
 
 <section id="features" class="wrap">
   <div class="eyebrow reveal">Why it's addictive</div>
-  <h2 class="reveal">Why people keep playing</h2>
-  <p class="sub reveal">Concise systems engineered for fast-paced risk and reward.</p>
-  <div class="features">
-    <div class="feat reveal"><div class="ic">👆</div><h3>One-tap loop</h3><p>Every tap bet stakes your position and pumps the chart. Pure risk-reward adrenaline.</p></div>
-    <div class="feat reveal"><div class="ic">🌡️</div><h3>Fast risk/reward</h3><p>The heat meter rises as you ride. Exiting at high risk triggers clutch bonuses, but hard rugs wipe the unbanked pot.</p></div>
-    <div class="feat reveal"><div class="ic">🎰</div><h3>Daily spin & streaks</h3><p>Free spins and consecutive daily streaks grant in-game $MOON, ticket jackpots, and mystery boxes.</p></div>
-    <div class="feat reveal"><div class="ic">🤝</div><h3>Ranks, VIP, crews</h3><p>Grind from Shrimp to Megalodon, unlock VIP Bet Caps, form crews, and compete on leaderboards.</p></div>
-    <div class="feat reveal"><div class="ic">⚔️</div><h3>Duels, Ranked &amp; Wars</h3><p>Challenge anyone to a same-seed 1v1 duel, climb the Elo ranked ladder, and rally your crew in the weekly all-crews War Standings. Live boards crown the Whale of the Day.</p></div>
-    <div class="feat reveal"><div class="ic">🪂</div><h3>Season Points</h3><p>Complete daily and social quests to earn Season Points tracking your overall seasonal activity.</p></div>
+  <h2 class="reveal">Every run is a <span class="grad">greed test</span></h2>
+  <p class="sub reveal">Fast rounds, daily pulls, and a social climb you can't put down.</p>
+  <div class="features" style="grid-template-columns:repeat(3,1fr)">
+    <div class="feat reveal"><div class="ic">⚡</div><h3>Fast rounds</h3><p>Every run is a quick greed test — pump, watch the heat, and bank before it rugs.</p></div>
+    <div class="feat reveal"><div class="ic">🎁</div><h3>Daily rewards</h3><p>Spin, streak, quest, and open boxes — there's always a reason to come back tomorrow.</p></div>
+    <div class="feat reveal"><div class="ic">🏆</div><h3>Social climb</h3><p>Ranks, crews, duels, referrals, and live leaderboards. Out-greed everyone.</p></div>
+  </div>
+  <div class="ccta reveal" style="margin-top:24px"><a class="btn primary" href="https://t.me/RugorRichesBot/play">▶ Play Free on Telegram</a></div>
+</section>
+
+<section id="airdrop" class="wrap">
+  <div class="airdrop reveal">
+    <div>
+      <div class="eyebrow" style="text-align:left">Proposed Cycles · Active Now</div>
+      <h2>Season 1 Points are <span class="grad">live</span></h2>
+      <p style="color:var(--muted); margin-bottom:14px">Play rounds, clear quests, spin daily, invite friends, and join crews to build your gameplay history. Every bank and quest tracks toward your <strong>Season Points</strong>.</p>
+      <p style="color:#cbb6ff; margin-bottom:12px;font-size:13.5px"><b>Season Points are in-game tracking only and do not guarantee tokens, cash value, allocation, prizes, or future rewards.</b></p>
+      <p style="color:var(--muted); margin-bottom:18px;font-size:14px">No wallet or purchase needed. All proposed features are subject to legal, technical, anti-cheat, platform, jurisdiction, and eligibility review. Terms may change.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn gold" href="https://t.me/RugorRichesBot/play">▶ Play &amp; Stack Points</a>
+        <a class="btn ghost" href="/airdrop">View Airdrop Cycles</a>
+      </div>
+    </div>
+    <div class="alloc">
+      <div class="bar"><span class="t">🪂 Proposed Airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
+      <div class="bar"><span class="t">🎮 Proposed P2E emissions</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
+      <div class="bar"><span class="t">🤝 Referral &amp; crew bonuses</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
+      <div class="bar"><span class="t">💧 Liquidity allocation</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
+      <div class="bar"><span class="t">🛠️ Vested Team/Ops reserves</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.45)"></i></span><b>10%</b></div>
+      <div class="bar"><span class="t">🏛️ Proposed Ecosystem treasury</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,#7c4dff,var(--cyan))"></i></span><b>10%</b></div>
+    </div>
   </div>
 </section>
 
 <section id="vipzones" class="wrap glowsec">
   <div class="eyebrow reveal">Premium · Depth Zones</div>
   <h2 class="reveal">Dive deeper. <span class="grad">Earn faster.</span></h2>
-  <p class="sub reveal">18 VIP levels across six tiers. The deeper you descend, the more your airdrop-point earning,
-    payouts, bet caps, energy &amp; protection multiply — and VIP only multiplies the points you earn by <b>playing</b>.</p>
+  <p class="sub reveal">18 VIP levels across six tiers. The deeper you descend, the faster you <b>earn airdrop points by
+    playing</b> and the higher your <b>airdrop allocation cap</b> — VIP never hands you points, it just lets you earn them
+    faster and raises your ceiling.</p>
   <div class="chips reveal">
-    <span class="chip">🪂 up to <b>+3,500%</b> airdrop earning</span>
+    <span class="chip">🪂 earn points up to <b>+3,500%</b> faster</span>
+    <span class="chip t">🧢 airdrop cap up to <b>5%</b></span>
     <span class="chip">💰 up to <b>+2,100%</b> payouts</span>
     <span class="chip">🎯 up to <b>38×</b> bet cap</span>
-    <span class="chip t">🪙 pay with <b>TON</b></span>
   </div>
   <div class="dz">
     <div class="tier reveal" style="--depth:#23f0ff"><span class="glow"></span><div class="emo">🌊</div><h4>Shallows</h4><div class="lv">Levels I–III</div><div class="boost">+10–45%<small>airdrop boost</small></div></div>
@@ -397,6 +421,20 @@
   </div>
 </section>
 
+<section id="compete" class="wrap">
+  <div class="eyebrow reveal">Don't just play</div>
+  <h2 class="reveal">Out-greed <span class="grad">everyone</span></h2>
+  <p class="sub reveal">Run solo, squad up, or challenge other degens — then climb the boards.</p>
+  <div class="features" style="grid-template-columns:repeat(3,1fr)">
+    <div class="feat reveal"><div class="ic">⚔️</div><h3>Duels</h3><p>Post or accept a 1v1 on the same chart with live chat — higher bank wins the whole pot.</p></div>
+    <div class="feat reveal"><div class="ic">📊</div><h3>Ranked ladder</h3><p>Climb the Elo ranked ladder across monthly seasons for automatic $MOON prizes.</p></div>
+    <div class="feat reveal"><div class="ic">🐺</div><h3>Crews &amp; Wars</h3><p>Join a crew, chat, and rally in the weekly all-crews War standings for $MOON chests.</p></div>
+    <div class="feat reveal"><div class="ic">🐋</div><h3>Live boards</h3><p>Daily Challenge, biggest banks, top multipliers &amp; all-time whales — top banks auto-paid daily.</p></div>
+    <div class="feat reveal"><div class="ic">🤝</div><h3>Referrals</h3><p>Invite friends for $MOON, airdrop points &amp; VIP points — and earn more as they climb.</p></div>
+    <div class="feat reveal"><div class="ic">🏅</div><h3>Leaderboards</h3><p>Weekly banked + inviter prizes paid automatically. Whale of the Day crowns the top dog.</p></div>
+  </div>
+</section>
+
 <section class="wrap">
   <div class="eyebrow reveal">Transparent Example Rounds</div>
   <h2 class="reveal">Sample Plays</h2>
@@ -419,29 +457,6 @@
       <div class="win rug">💀 ngmi_chad held too long — <span class="amt">rekt</span></div>
       <div class="win">🎟️ moonboy_420 hit the <span class="amt">jackpot</span></div>
       <div class="win">👑 rugproof.eth reached <span class="amt">Megalodon</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="airdrop" class="wrap">
-  <div class="airdrop reveal">
-    <div>
-      <div class="eyebrow" style="text-align:left">Proposed Cycles · Active Now</div>
-      <h2>Season Points</h2>
-      <p style="color:var(--muted); margin-bottom:14px">Every round you bank and every quest you clear tracks toward your <strong>Season Points</strong>. If a future token distribution is approved, legitimate gameplay history, Season Points, anti-cheat reviews, and eligibility terms may be considered.</p>
-      <p style="color:var(--muted); margin-bottom:18px;font-size:14px">No wallet connection or purchase is required to participate. All proposed features are subject to legal, technical, anti-cheat, platform, jurisdiction, and eligibility review. Terms may change.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="btn gold" href="https://t.me/RugorRichesBot/play">▶ Play &amp; Earn Points</a>
-        <a class="btn ghost" href="/airdrop">View Airdrop Page</a>
-      </div>
-    </div>
-    <div class="alloc">
-      <div class="bar"><span class="t">🪂 Proposed Airdrops (6 cycles)</span><span class="track"><i style="width:40%;background:linear-gradient(90deg,var(--cyan),var(--green))"></i></span><b>40%</b></div>
-      <div class="bar"><span class="t">🎮 Proposed P2E emissions</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--green),var(--cyan))"></i></span><b>15%</b></div>
-      <div class="bar"><span class="t">🤝 Referral &amp; crew bonuses</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,var(--neon),var(--purple))"></i></span><b>10%</b></div>
-      <div class="bar"><span class="t">💧 Liquidity allocation</span><span class="track"><i style="width:15%;background:linear-gradient(90deg,var(--gold),#ffae00)"></i></span><b>15%</b></div>
-      <div class="bar"><span class="t">🛠️ Vested Team/Ops reserves</span><span class="track"><i style="width:10%;background:rgba(255,255,255,.45)"></i></span><b>10%</b></div>
-      <div class="bar"><span class="t">🏛️ Proposed Ecosystem treasury</span><span class="track"><i style="width:10%;background:linear-gradient(90deg,#7c4dff,var(--cyan))"></i></span><b>10%</b></div>
     </div>
   </div>
 </section>
@@ -489,45 +504,42 @@
   @keyframes coinp{50%{transform:scale(1.18) rotate(6deg);}}
 </style>
 
+<section id="tokenomics" class="wrap glowsec">
+  <div class="eyebrow reveal">The model</div>
+  <h2 class="reveal">Two-layer <span class="grad">$MOON</span></h2>
+  <p class="sub reveal">In-game $MOON powers gameplay now. A proposed on-chain $MOON would only follow legal review &amp; launch
+    readiness — no guaranteed value until then.</p>
+  <div class="chips reveal">
+    <span class="chip">🪙 proposed <b>1B</b> fixed supply</span>
+    <span class="chip">🚫 <b>0%</b> private / VC</span>
+    <span class="chip">🤝 community-directed</span>
+    <span class="chip t">⛓️ <b>TON</b> proposed</span>
+  </div>
+  <div class="ccta reveal"><a class="btn gold" href="/tokenomics">View Tokenomics →</a> <a class="btn ghost"
+      href="/litepaper">Read Litepaper</a></div>
+</section>
+
 <section id="roadmap" class="wrap">
   <div class="eyebrow reveal">Ecosystem Development</div>
   <h2 class="reveal">Roadmap</h2>
   <p class="sub reveal">From a live game to a sustainable token — tap any stage for the full detail.</p>
-  <div class="rmap">
+  <div class="rmap" style="grid-template-columns:repeat(3,1fr)">
     <a class="rnode reveal" href="/litepaper#phase1">
-      <div class="rnum" style="background:var(--green)">1</div>
-      <h4>Foundation <span class="rpill" style="background:rgba(29,255,143,.18);color:var(--green)">Live</span></h4>
-      <p>Telegram game loop, permanent upgrades, VIP tiers, the rank ladder, the energy economy, and Season Points.</p>
-      <span class="rmore">View details →</span>
-    </a>
-    <a class="rnode reveal" href="/litepaper#phase2">
-      <div class="rnum" style="background:var(--green)">2</div>
-      <h4>Competitive layer <span class="rpill" style="background:rgba(29,255,143,.18);color:var(--green)">Live</span></h4>
-      <p>Async same-seed duels, an Elo ranked ladder, all-crews weekly Crew Wars, live boards, gifting, and provably-fair Daily Crash.</p>
+      <div class="rnum" style="background:var(--green)">✓</div>
+      <h4>Live Now <span class="rpill" style="background:rgba(29,255,143,.18);color:var(--green)">Live</span></h4>
+      <p>The tap game, ranks, upgrades, VIP tiers &amp; VIP points, daily rewards and Season Points — plus duels with a public Duel Board, the Elo ranked ladder, Crew Wars, live boards, and the auto-paid Daily Challenge.</p>
       <span class="rmore">View details →</span>
     </a>
     <a class="rnode reveal" href="/litepaper#phase3">
-      <div class="rnum" style="background:var(--cyan)">3</div>
-      <h4>Real-time &amp; depth <span class="rpill" style="background:rgba(35,240,255,.18);color:var(--cyan)">Next</span></h4>
-      <p>Real-time PvP on a shared live chart, synchronized communal rounds, scheduled tournaments, and spectate/replays.</p>
+      <div class="rnum" style="background:var(--cyan)">→</div>
+      <h4>Next <span class="rpill" style="background:rgba(35,240,255,.18);color:var(--cyan)">Next</span></h4>
+      <p>Deeper crews, scheduled tournaments, richer quests, and real-time PvP on a shared live chart with spectate &amp; replays.</p>
       <span class="rmore">View details →</span>
     </a>
     <a class="rnode reveal" href="/litepaper#phase4">
-      <div class="rnum" style="background:#7c4dff">4</div>
-      <h4>Pre-launch seasons <span class="rpill" style="background:rgba(124,77,255,.22);color:#c3a8ff">Proposed</span></h4>
-      <p>The six pre-launch airdrop snapshot cycles, qualification audits, and Sybil / anti-bot filtering.</p>
-      <span class="rmore">View details →</span>
-    </a>
-    <a class="rnode reveal" href="/litepaper#phase5">
-      <div class="rnum" style="background:#7c4dff">5</div>
-      <h4>Compliance &amp; token <span class="rpill" style="background:rgba(124,77,255,.22);color:#c3a8ff">Proposed</span></h4>
-      <p>Legal &amp; jurisdictional review, smart-contract audit, TGE on TON, deep locked liquidity, and the Stars-funded buyback-and-burn.</p>
-      <span class="rmore">View details →</span>
-    </a>
-    <a class="rnode reveal" href="/litepaper#phase6">
-      <div class="rnum" style="background:var(--gold)">6</div>
-      <h4>Ecosystem &amp; growth <span class="rpill" style="background:rgba(255,212,0,.2);color:var(--gold)">Proposed</span></h4>
-      <p>Phased DEX/CEX listings, staking &amp; holder perks, governance-lite, partnerships, and ongoing user acquisition.</p>
+      <div class="rnum" style="background:#7c4dff">◇</div>
+      <h4>Proposed <span class="rpill" style="background:rgba(124,77,255,.22);color:#c3a8ff">Proposed</span></h4>
+      <p>Pre-launch airdrop snapshot cycles &amp; anti-bot audits, then — subject to legal review — a smart-contract audit, TGE on TON, locked liquidity, and phased listings.</p>
       <span class="rmore">View details →</span>
     </a>
   </div>
