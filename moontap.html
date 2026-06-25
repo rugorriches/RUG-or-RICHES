@@ -4658,7 +4658,7 @@
       <details class="faq">
         <summary>How do points become $MOON tokens?</summary>
         <div class="a">At season end the pool is split by points earned — <b>capped by your VIP tier</b> (max share
-          ~0.83%, up to 5% at the top tier). Your live estimate is shown above. Points are earned by playing, never
+          ~0.30%, up to 5% at the top tier). Your live estimate is shown above. Points are earned by playing, never
           bought.</div>
       </details>
       <details class="faq">
@@ -4945,7 +4945,7 @@
           <div class="grow">
             <div class="nm">VIP tiers & your airdrop cap</div>
             <div class="ds"><b>18 VIP tiers</b> (Shallows → Trench III). VIP raises your max bet (None 1× → Trench III
-              38×), earnings, energy, rug protection, <b>and your airdrop allocation cap (~0.83% → up to 5%)</b>. Airdrop
+              38×), earnings, energy, rug protection, <b>and your airdrop allocation cap (~0.30% → up to 5%)</b>. Airdrop
               points are always <b>earned by playing</b> — VIP only lifts your ceiling, never sells points. Climb tiers
               with <b>VIP points</b> from referrals & 🏅 VIP-point quests, or unlock instantly with TON.</div>
           </div>
@@ -5023,7 +5023,7 @@
             <div class="ds">You earn airdrop points by <b>playing</b> — 8% of every profitable bank, plus quests & social
               tasks. They're your Season 1 score, <b>not</b> betting fuel and <b>never</b> for sale. To qualify you need
               sustained play: 10M points, 20 active days, 5,000 taps & 100 cash-outs. Your VIP tier sets the maximum
-              share you can be allocated (~0.83% → up to 5%).</div>
+              share you can be allocated (~0.30% → up to 5%).</div>
           </div>
         </div>
       </div>
@@ -5268,9 +5268,11 @@
 
       const MOON_CAP = 1000000000000, AIRDROP_CAP = 600000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
       // Per-VIP-tier airdrop ALLOCATION cap: the max share of the ~12B-pt season pool an account can be allocated at snapshot.
-      // Tier 0 (None) ≈ 0.83% → Trench III (18) = 5.00%, scaling up by tier. Points are EARNED only by playing; VIP just raises your ceiling.
+      // Per-VIP-tier airdrop ALLOCATION cap, CONVEX & cost-aligned (tracks VIP_TON price). Cheap early tiers barely move the
+      // cap; the gains accelerate where the cost does, so the biggest jumps land on the most expensive tiers.
+      // %: None 0.30 · Shallows 0.34→0.38 · Reef 0.43→0.55 · Twilight 0.63→0.83 · Midnight 1.03→1.50 · Abyss 1.86→2.80 · Trench 3.40→4.15→5.00.
       const AIRDROP_POOL = 12000000000;
-      const AIRDROP_CAP_BY_VIP = [100000000, 120000000, 145000000, 175000000, 205000000, 240000000, 275000000, 315000000, 355000000, 395000000, 430000000, 465000000, 495000000, 525000000, 550000000, 570000000, 585000000, 595000000, 600000000];
+      const AIRDROP_CAP_BY_VIP = [36000000, 40800000, 43200000, 45600000, 51600000, 57600000, 66000000, 75600000, 86400000, 99600000, 123600000, 150000000, 180000000, 223200000, 276000000, 336000000, 408000000, 498000000, 600000000];
       function airCap() { return AIRDROP_CAP_BY_VIP[Math.max(0, Math.min(18, S.vip || 0))] || AIRDROP_CAP; }
       function airCapPct() { return (airCap() / AIRDROP_POOL * 100); }
 
@@ -7991,7 +7993,7 @@
         },
         {
           key: "vipcap", need: 10, sel: '[data-onboarding-noop]', icon: "👑", title: "VIP & your airdrop cap",
-          how: "VIP is never pay-to-win on points — <b>airdrop points are always earned by playing</b>. What VIP gives you:<br>• A higher <b>earn rate</b> (more $MOON & airdrop points per run).<br>• A higher <b>airdrop allocation cap</b> — from ~0.83% up to <b>5%</b> at the top tier.<br>• Bigger bet caps, more energy, rug protection + a daily VIP bonus.<br><br>See the tiers in the <b>👑 VIP</b> tab.",
+          how: "VIP is never pay-to-win on points — <b>airdrop points are always earned by playing</b>. What VIP gives you:<br>• A higher <b>earn rate</b> (more $MOON & airdrop points per run).<br>• A higher <b>airdrop allocation cap</b> — from ~0.30% up to <b>5%</b> at the top tier.<br>• Bigger bet caps, more energy, rug protection + a daily VIP bonus.<br><br>See the tiers in the <b>👑 VIP</b> tab.",
           go: () => { if (typeof openPanel === "function") openPanel("vip"); }
         },
         {
