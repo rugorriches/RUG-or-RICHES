@@ -43,6 +43,9 @@ async function ensureSchema() {
         )`);
       await db.query("CREATE INDEX IF NOT EXISTS duels_challenger ON duels(challenger_id, status)");
       await db.query("CREATE INDEX IF NOT EXISTS duels_opponent ON duels(opponent_id, status)");
+      await db.query("CREATE INDEX IF NOT EXISTS duels_open ON duels(status, created_at DESC)");
+      await db.query("CREATE TABLE IF NOT EXISTS global_chat (id BIGSERIAL PRIMARY KEY, player_id BIGINT, name TEXT, msg TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT now() NOT NULL)");
+      await db.query("CREATE INDEX IF NOT EXISTS global_chat_idx ON global_chat(created_at DESC)");
     })();
   }
   return schemaReady;
@@ -226,6 +229,33 @@ module.exports = async (req, res) => {
         await client.query("COMMIT");
         return json(res, 200, { ok: true, duel: shapeDuel(inserted, playerId) });
       } catch (e) { await client.query("ROLLBACK"); throw e; } finally { client.release(); }
+    }
+
+    // ---------- BOARD (public list of OPEN duels anyone can accept) ----------
+    if (action === "board") {
+      const { rows } = await db.query(
+        `SELECT d.code, d.wager, EXTRACT(EPOCH FROM d.created_at)*1000 AS ts,
+                COALESCE(p.name, p.username, 'degen') AS name, COALESCE(p.vip_tier,0)::int AS vip
+           FROM duels d JOIN players p ON p.id = d.challenger_id
+          WHERE d.status = 'open' AND d.challenger_id <> $1 AND d.expires_at > now()
+          ORDER BY d.created_at DESC LIMIT 30`, [playerId]);
+      return json(res, 200, { ok: true, open: rows.map(r => ({ code: r.code, wager: Number(r.wager) || 0, name: r.name, vip: Number(r.vip) || 0, ts: Number(r.ts) || 0 })) });
+    }
+
+    // ---------- GLOBAL CHAT ----------
+    if (action === "chat_list") {
+      const { rows } = await db.query("SELECT name, msg, EXTRACT(EPOCH FROM created_at)*1000 AS ts FROM global_chat ORDER BY created_at DESC LIMIT 40");
+      return json(res, 200, { ok: true, chat: rows.reverse().map(r => ({ name: r.name, msg: r.msg, ts: Number(r.ts) || 0 })) });
+    }
+    if (action === "chat_post") {
+      const msg = String(body.msg || "").replace(/\s+/g, " ").trim().slice(0, 200);
+      if (!msg) return json(res, 400, { error: "Empty message" });
+      const { rows: rl } = await db.query("SELECT COUNT(*)::int c FROM global_chat WHERE player_id = $1 AND created_at > now() - interval '3 seconds'", [playerId]);
+      if ((rl[0] && rl[0].c) > 0) return json(res, 429, { error: "Slow down a sec" });
+      const { rows: pr } = await db.query("SELECT COALESCE(name, username, first_name, 'degen') AS name FROM players WHERE id = $1", [playerId]);
+      await db.query("INSERT INTO global_chat (player_id, name, msg) VALUES ($1,$2,$3)", [playerId, (pr[0] && pr[0].name) || "degen", msg]);
+      await db.query("DELETE FROM global_chat WHERE id < (SELECT MIN(id) FROM (SELECT id FROM global_chat ORDER BY id DESC LIMIT 500) t)").catch(() => {});
+      return json(res, 200, { ok: true });
     }
 
     // For the remaining actions we need a code.

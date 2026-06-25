@@ -4594,8 +4594,8 @@
       <div class="rt" id="rt-daily" style="display:none">
         <div id="dailyView"></div>
       </div>
-      <div class="rt" id="rt-crash" style="display:none">
-        <div id="crashView"></div>
+      <div class="rt" id="rt-board" style="display:none">
+        <div id="boardView"></div>
       </div>
       <div class="rt" id="rt-duels" style="display:none">
         <div id="duelsView"></div>
@@ -7520,6 +7520,62 @@
         try { navigator.clipboard && navigator.clipboard.writeText(link); toast("🔗", "Link copied", "Send it to your opponent"); } catch (e) { }
         try { const tg = window.Telegram && window.Telegram.WebApp; if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("⚔️ I challenge you to a RUG OR RICHES duel!")); } catch (e) { }
       }
+      // ---------- DUEL BOARD (public open duels + global live chat) ----------
+      let _boardPoll = null;
+      function boardCreate() {
+        const inp = $("boardWager"); const wager = Math.max(0, Math.floor(Number(inp && inp.value) || 0));
+        cloudAction("/api/duel", { action: "create", wager: wager }).then(r => {
+          if (r && r.duel) { toast("⚔️", "Duel posted!", wager > 0 ? fmt(wager) + " $MOON staked — waiting for a challenger" : "Posted to the board"); if (inp) inp.value = ""; loadDuelBoardList(); }
+        }).catch(err => toast("⚠️", "Couldn't post", err.message || "Try again"));
+      }
+      function boardAccept(code, wager) {
+        if (wager > 0 && !confirm("Accept this duel and stake " + fmt(wager) + " $MOON?")) return;
+        cloudAction("/api/duel", { action: "accept", code: code }).then(r => {
+          if (r && r.duel) { toast("✅", "Duel accepted!", wager > 0 ? fmt(wager) + " $MOON staked" : "Good luck 🦈"); loadDuelBoardList(); if (typeof duelStartRun === "function") duelStartRun(r.duel); }
+        }).catch(err => toast("⚠️", "Couldn't accept", err.message || "Try again"));
+      }
+      function postGlobalChat() {
+        const inp = $("gcInput"); const msg = ((inp && inp.value) || "").trim(); if (!msg) return; inp.value = "";
+        cloudAction("/api/duel", { action: "chat_post", msg: msg }).then(loadGlobalChat).catch(err => toast("⚠️", "Chat", err.message || "Try again"));
+      }
+      function loadGlobalChat() {
+        cloudAction("/api/duel", { action: "chat_list" }).then(r => {
+          const box = $("gcLog"); if (!box || !r) return;
+          box.innerHTML = (r.chat || []).map(m => '<div style="margin:3px 0;font-size:12.5px;word-break:break-word"><b style="color:var(--cyan)">' + esc(m.name) + ':</b> <span style="color:#cfc9ee">' + esc(m.msg) + '</span></div>').join("") || '<div class="ds" style="opacity:.6">Be the first to say something 🦈</div>';
+          box.scrollTop = box.scrollHeight;
+        }).catch(() => {});
+      }
+      function loadDuelBoardList() {
+        cloudAction("/api/duel", { action: "board" }).then(r => {
+          const box = $("boardList"); if (!box || !r) return; const open = r.open || [];
+          box.innerHTML = open.length ? open.map(d =>
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;margin-bottom:7px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)">' +
+            '<div><b>' + esc(d.name) + '</b>' + (d.vip ? ' 👑' + d.vip : '') + '<br><span style="color:#9c92c4;font-size:12px">' + (d.wager > 0 ? '💰 ' + fmt(d.wager) + ' $MOON' : 'Free duel') + '</span></div>' +
+            '<button class="buy" data-accept="' + d.code + '" data-wager="' + d.wager + '" style="padding:7px 14px">⚔️ Accept</button></div>').join("")
+            : '<div class="ds" style="opacity:.6;padding:8px 2px">No open duels right now — post one above! 🦈</div>';
+        }).catch(() => {});
+      }
+      function renderDuelBoard() {
+        const wrap = $("boardView"); if (!wrap) return;
+        if (!wrap.dataset.built) {
+          wrap.innerHTML =
+            '<div class="card" style="margin-bottom:10px"><div style="font-weight:800;margin-bottom:7px">⚔️ Post a duel</div>' +
+            '<div style="display:flex;gap:8px"><input id="boardWager" type="number" min="0" inputmode="numeric" placeholder="Wager $MOON (0 = free)" style="flex:1;min-width:0"><button class="buy" id="boardCreate" style="padding:9px 14px">Post</button></div>' +
+            '<div class="ds" style="font-size:11px;margin-top:5px">Set a wager — your opponent matches it. <b>Winner takes the whole pot.</b> Same chart, higher bank wins.</div></div>' +
+            '<div class="sec-h">🌐 Open duels</div><div id="boardList"></div>' +
+            '<div class="sec-h">💬 Global chat</div>' +
+            '<div id="gcLog" style="height:160px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:8px;background:rgba(0,0,0,.22);margin-bottom:7px"></div>' +
+            '<div style="display:flex;gap:8px"><input id="gcInput" maxlength="200" placeholder="Say something…" style="flex:1;min-width:0"><button class="buy" id="gcSend" style="padding:9px 14px">Send</button></div>';
+          wrap.dataset.built = "1";
+          $("boardCreate").addEventListener("click", boardCreate);
+          $("gcSend").addEventListener("click", postGlobalChat);
+          $("gcInput").addEventListener("keydown", e => { if (e.key === "Enter") postGlobalChat(); });
+          $("boardList").addEventListener("click", e => { const b = e.target.closest("[data-accept]"); if (b) boardAccept(b.getAttribute("data-accept"), Number(b.getAttribute("data-wager")) || 0); });
+        }
+        loadDuelBoardList(); loadGlobalChat();
+        clearInterval(_boardPoll);
+        _boardPoll = setInterval(() => { const v = $("rt-board"); if (v && v.style.display !== "none" && panelOpen === "ranks") { loadDuelBoardList(); loadGlobalChat(); } else { clearInterval(_boardPoll); _boardPoll = null; } }, 5000);
+      }
       async function renderDuels() {
         const wrap = $("duelsView"); if (!wrap) return;
         if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">⚔️ Duels need Telegram. Open the game inside Telegram to challenge rivals.</div>'; return; }
@@ -7618,10 +7674,10 @@
       const RT_GROUPS = {
         ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "crash", l: "💥 Crash" }, { k: "duels", l: "⚔️ Duels" }, { k: "ranked", l: "📊 Ranked" }, { k: "live", l: "🐋 Live" }]
+        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "board", l: "🌐 Duel Board" }, { k: "duels", l: "⚔️ My Duels" }, { k: "ranked", l: "📊 Ranked" }, { k: "live", l: "🐋 Live" }]
       };
-      const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), crash: () => renderCrash(), duels: () => renderDuels(), ranked: () => renderRanked(), live: () => renderBoards() };
-      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "crash", "duels", "ranked", "live"];
+      const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), board: () => renderDuelBoard(), duels: () => renderDuels(), ranked: () => renderRanked(), live: () => renderBoards() };
+      const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "board", "duels", "ranked", "live"];
       function showRtView(k) {
         RT_ALL.forEach(x => { const el = $("rt-" + x); if (el) el.style.display = (x === k) ? "block" : "none"; });
         document.querySelectorAll("#subTabs .subtab").forEach(b => b.classList.toggle("on", b.dataset.rt === k));
@@ -7658,7 +7714,7 @@
         },
         {
           key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "💥", title: "Compete unlocked!",
-          how: "You're ready for the big leagues:<br>• <b>⚔️ Duels</b> — challenge anyone 1v1 on the same chart; winner takes the $MOON.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons.<br>• <b>💥 Daily Crash</b> — one provably-fair pick a day.<br>• <b>🐋 Live Boards</b> — chase Whale of the Day.<br><br>Open <b>Ranks → 💥 Compete</b> to jump in.",
+          how: "You're ready for the big leagues:<br>• <b>🌐 Duel Board</b> — post a public duel, accept anyone's, and chat live with the whole pond.<br>• <b>⚔️ Duels</b> — challenge a rival 1v1 on the same chart; winner takes the whole pot.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons for $MOON prizes.<br>• <b>🐋 Live Boards</b> — chase Whale of the Day.<br><br>Open <b>Ranks → 🏆 Compete</b> to jump in.",
           go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) { } }, 70); }
         }
       ];
