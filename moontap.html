@@ -6612,9 +6612,11 @@
 
       // ---------- VIP ----------
       function vipBenefits(i) {
-        const v = VIP[i] || {}; if (!i) return ["🆓 Base rates"];
+        if (!i) return ["📊 ~" + (AIRDROP_CAP_BY_VIP[0] / AIRDROP_POOL * 100).toFixed(2) + "% airdrop cap", "🆓 Base rates"];
+        const v = VIP[i] || {};
         const pct = x => Math.round(((x || 1) - 1) * 100);
-        const b = ["🪂 +" + pct(v.air) + "% airdrop pts", "💰 +" + pct(v.earn) + "% earnings", "🔋 +" + (v.energy || 0) + " energy", "🎯 " + (v.bet || 1) + "× bet cap"];
+        const capPct = (AIRDROP_CAP_BY_VIP[Math.min(18, i)] / AIRDROP_POOL * 100);
+        const b = ["📊 up to " + capPct.toFixed(2) + "% airdrop cap", "🪂 +" + pct(v.air) + "% airdrop pts", "💰 +" + pct(v.earn) + "% earnings", "🔋 +" + (v.energy || 0) + " energy", "🎯 " + (v.bet || 1) + "× bet cap"];
         if (i >= 7) b.push("💎 rug rescue"); if (i >= 13) b.push("🐋 whale shield"); return b;
       }
       // live VIP-Points bar: current level + progress to the next tier (drives prorated upgrade pricing)

@@ -131,13 +131,16 @@
       <tr style="border-bottom:1px solid var(--line);"><td>Telegram Mini App</td><td><b>Live</b> (Beta-stage game client)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>In-game $MOON</td><td><b>Live</b> as off-chain gameplay points</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Season Points</td><td><b>Live</b> as off-chain engagement tracking</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>VIP Depth Zones (18 tiers)</td><td><b>Live</b> (boosts earn rate, bet caps, energy &amp; rug protection)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>VIP Points (earn tiers by play)</td><td><b>Live</b> (from quests &amp; referrals; or buy with TON / Stars)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Per-VIP-tier airdrop cap</td><td><b>Live</b> (~0.83% &rarr; 5% max share per account; points earned by play)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Token contract</td><td><b>Proposed</b> (Subject to launch approvals)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Claim portal</td><td><b>Proposed</b> (Not Live)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Buyback/burn</td><td><b>Proposed / Subject to Review</b></td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Staking</td><td><b>Proposed / Subject to Review</b></td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Governance</td><td><b>Proposed / Subject to Review</b></td></tr>
-      <tr style="border-bottom:1px solid var(--line);"><td>Provably-fair Daily Crash</td><td><b>Live</b> (commit-reveal, verifiable next day)</td></tr>
-      <tr style="border-bottom:1px solid var(--line);"><td>Async Duels (same-seed 1v1, escrow)</td><td><b>Live</b></td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Daily Challenge (biggest single bank wins)</td><td><b>Live</b> (top 10 paid automatically each day)</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td>Async Duels + public Duel Board &amp; live chat</td><td><b>Live</b> (same-seed 1v1, escrowed pot to the winner)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Ranked Ladder (Elo, monthly seasons)</td><td><b>Live</b></td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Crews, Crew Wars &amp; live boards</td><td><b>Live</b> (all-crews weekly War Standings)</td></tr>
       <tr style="border-bottom:1px solid var(--line);"><td>Peer gifting</td><td><b>Live</b> (spendable $MOON only; never affects the airdrop)</td></tr>
@@ -161,6 +164,10 @@
   <h2 id="points">5. Season Points &amp; Proposed Airdrop</h2>
   <p>Season Points measure seasonal engagement. Points are off-chain and carry no monetary value or conversion guarantees. If a future token distribution is approved, snapshot cycles (Genesis to Launch) may consider Season Points and gameplay logs, subject to eligibility audits. For details, see the <a href="/airdrop">Airdrop Page</a>.</p>
 
+  <h3 id="vip">5.1 VIP economy &amp; the tier-scaled cap</h3>
+  <p><b>VIP Depth Zones</b> are an optional membership of <b>18 levels across six tiers</b> (Shallows &rarr; Reef &rarr; Twilight &rarr; Midnight &rarr; Abyss &rarr; Trench). VIP can be bought with TON or Telegram Stars, <b>or earned for free</b> by accumulating <b>VIP Points</b> from VIP-point quests and referrals. For the proposed airdrop, VIP does two compliant things: it <b>multiplies the Season Points you earn by playing</b> (up to ~36&times; at the top tier), and it <b>raises your per-account allocation cap</b> &mdash; the maximum share of a cycle's pool one account can be allocated &mdash; from about <b>0.83%</b> with no VIP up to a maximum of <b>5%</b> at the top tier, scaling smoothly by tier in between.</p>
+  <p>Critically, <b>VIP never grants Season Points, and points can never be bought</b> &mdash; every point is earned through gameplay. VIP only raises your earn <em>rate</em> and your <em>ceiling</em>. The cap is tied to your <b>permanent</b> tier; a temporary VIP Pass does not raise it. Because tiers are also reachable for free (via VIP-point quests and referrals), the cap rewards sustained play rather than spend alone, and keeps any single account from dominating a cycle. VIP perks (cosmetics, bet caps, energy, rug protection, lounge bonuses) are entertainment benefits and guarantee no token eligibility, allocation, prizes, or monetary value. Any cap enforcement applies at the snapshot and is subject to legal, anti-cheat, jurisdiction, and eligibility review.</p>
+
   <!-- SECTION 6 -->
   <h2 id="tokenomics">6. Proposed Tokenomics Overview</h2>
   <p>The proposed token model has a fixed supply of 1,000,000,000 $MOON tokens. Roughly 65% is allocated for community-led systems (airdrops, seasons, referral bonuses), with team and treasury allocations subject to multi-year linear vesting cliffs. The full allocation chart is available on the <a href="/tokenomics">Tokenomics Page</a>.</p>
@@ -177,7 +184,7 @@
   <h2 id="roadmap">9. Roadmap</h2>
   <ul>
     <li id="phase1"><strong>Phase 1 — Foundation (Live):</strong> Telegram game loop, permanent upgrades, VIP tiers &amp; the rank ladder, the energy economy, and Season Points tracking.</li>
-    <li id="phase2"><strong>Phase 2 — Competitive layer (Live):</strong> Server-authoritative economy, anti-cheat, provably-fair Daily Crash (commit-reveal), async same-seed duels, an Elo ranked ladder, all-crews weekly Crew Wars, live boards, and peer gifting.</li>
+    <li id="phase2"><strong>Phase 2 — Competitive layer (Live):</strong> Server-authoritative economy, anti-cheat, the auto-paid Daily Challenge, async same-seed duels with a public Duel Board &amp; live chat, an Elo ranked ladder with automatic weekly prizes, all-crews weekly Crew Wars, live boards, and peer gifting.</li>
     <li id="phase3"><strong>Phase 3 — Real-time &amp; depth (Next):</strong> Real-time PvP on a shared live chart, synchronized communal rounds, scheduled tournaments, spectate/replays, and deeper crew tooling.</li>
     <li id="phase4"><strong>Phase 4 — Pre-launch seasons (Proposed):</strong> The six pre-launch airdrop snapshot cycles, qualification audits, and Sybil/anti-bot filtering ahead of any token event.</li>
     <li id="phase5"><strong>Phase 5 — Compliance &amp; token (Proposed):</strong> Legal, tax &amp; jurisdictional review, smart-contract audit, TGE on TON, deep locked liquidity, and the Stars-funded buyback-and-burn program.</li>
