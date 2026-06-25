@@ -7294,8 +7294,6 @@
           html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
           html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
           html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
-          html += sec("⚔️ Top duelists (30d)", d.boards.topDuelists, v => v + (Number(v) === 1 ? " win" : " wins"));
-          html += sec("🏆 Biggest duel pots today", d.boards.biggestDuelPots, fmt);
         }
         wrap.innerHTML = html || '<div class="dly-load">No board activity yet today — be the first! 🦈</div>';
       }
@@ -7787,8 +7785,11 @@
       async function renderRanked() {
         const wrap = $("rankedView"); if (!wrap) return;
         if (!cloudAuth()) { wrap.innerHTML = '<div class="dly-load">📊 Ranked needs Telegram. Play duels inside Telegram to earn a rating.</div>'; return; }
-        let d = null;
-        try { d = await cloudAction("/api/ranked", {}); } catch (e) { }
+        let d = null, bd = null;
+        [d, bd] = await Promise.all([
+          cloudAction("/api/ranked", {}).catch(() => null),
+          fetch("/api/boards").then(r => r.json()).catch(() => null)
+        ]);
         if (!d || !d.ok) { wrap.innerHTML = '<div class="dly-load">Ranked unavailable — try again soon.</div>'; return; }
         let html = '<div class="dly-head"><div class="dly-title">📊 Ranked Ladder</div><div class="dly-sub">Win duels to climb · Season ' + d.season + ' · resets monthly</div></div>';
         if (d.me) {
@@ -7808,6 +7809,17 @@
           html += '<div class="lb-row' + (me ? ' me' : '') + '"><div class="rk">' + rk + '</div><div class="nm">' + r.divisionEmoji + ' ' + esc(r.name) + '</div><div class="sc">' + r.mmr + ' <span style="font-size:9px;color:#9c92c4">(' + r.wins + '-' + r.losses + ')</span></div></div>';
         });
         html += '<div class="ds" style="font-size:10px;color:#9c92c4;margin-top:8px">Ratings move only on duels where both players submit a run (Elo). New season = soft reset toward the middle.</div>';
+        // Duel leaderboards (moved here from Live) — shown under the Elo ladder
+        if (bd && bd.boards) {
+          const dsec = (title, arr, fmtVal) => {
+            if (!arr || !arr.length) return "";
+            let h = '<div class="sec-h" style="margin-top:14px">' + title + '</div>';
+            arr.forEach((r, i) => { h += '<div class="lb-row"><div class="rk">' + (i + 1) + '</div><div class="nm">' + esc(r.name) + '</div><div class="sc">' + fmtVal(r.value) + '</div></div>'; });
+            return h;
+          };
+          html += dsec("⚔️ Top duelists (30d)", bd.boards.topDuelists, v => v + (Number(v) === 1 ? " win" : " wins"));
+          html += dsec("🏆 Biggest duel pots today", bd.boards.biggestDuelPots, fmt);
+        }
         wrap.innerHTML = html;
       }
 
