@@ -3,7 +3,7 @@ const { buildPurchase } = require("./products");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000000;
-const AIRDROP_CAP = 100000000;
+const AIRDROP_CAP = 600000000; // absolute accumulation ceiling = max VIP-tier allocation cap; per-tier % applied at snapshot. KEEP IN SYNC across api files.
 
 // /start message config — override any of these with Vercel env vars
 const WEBAPP_URL = process.env.WEBAPP_URL || "https://rugorriches.app/play?v=5";

@@ -5,7 +5,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const TG_CHAT_ID = process.env.TG_CHAT_ID || "";
 const TG_GROUP_ID = process.env.TG_GROUP_ID || "";
 const MOON_CAP = 1000000000000;
-const AIRDROP_CAP = 100000000;
+const AIRDROP_CAP = 600000000; // absolute accumulation ceiling = max VIP-tier allocation cap; per-tier % applied at snapshot. KEEP IN SYNC across api files.
 const AIRDROP_BANK_RATE = 0.08;
 // Depth Zones VIP airdrop-point boost (0 = None, 1-18). KEEP IN SYNC WITH cashout.js / moontap.html VIP[].air
 const VIP_AIR_BOOST = [1, 1.12, 1.24, 1.45, 1.75, 2.15, 2.65, 3.30, 4.20, 5.40, 7.00, 9.00, 11.50, 14.50, 18.00, 21.50, 26.00, 30.50, 36.00];

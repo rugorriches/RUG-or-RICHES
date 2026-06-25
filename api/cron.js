@@ -81,6 +81,30 @@ module.exports = async (req, res) => {
       await award("banked", banked, PRIZES);
       await award("referral", invs, PRIZES);
       await award("ranked", rankTop, RANKED_PRIZES);
+    } else if (job === "daily") {
+      // Daily Challenge payout — top 10 by biggest single bank for the day that just ended (UTC). Idempotent.
+      const DAILY_PRIZES = [1500000, 900000, 600000, 450000, 350000, 300000, 250000, 250000, 200000, 200000]; // sums to 5,000,000 (matches DAILY_PRIZE_POOL)
+      const MOON_CAP = 1000000000000;
+      const yday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      await db.query(`CREATE TABLE IF NOT EXISTS payouts (
+        period TEXT, kind TEXT, player_id BIGINT, amount BIGINT, created_at TIMESTAMPTZ DEFAULT now(),
+        PRIMARY KEY (period, kind, player_id))`);
+      const { rows: dtop } = await db.query(
+        "SELECT player_id AS id FROM daily_scores WHERE day = $1::date AND best_bank > 0 ORDER BY best_bank DESC LIMIT 10", [yday]);
+      for (let i = 0; i < dtop.length; i++) {
+        const pid = dtop[i].id, amt = DAILY_PRIZES[i] || 0;
+        if (!amt) continue;
+        const ins = await db.query(
+          "INSERT INTO payouts (period, kind, player_id, amount) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING RETURNING player_id",
+          ["daily:" + yday, "daily", pid, amt]);
+        if (ins.rows.length) {
+          await db.query(
+            "UPDATE players SET balance = LEAST(balance + $2, $3), lifetime_banked = LEAST(lifetime_banked + $2, $3) WHERE id = $1",
+            [pid, amt, MOON_CAP]);
+          sent++;
+          await sendDM(pid, "🏆 You placed #" + (i + 1) + " in yesterday's Daily Challenge!\n\n💰 +" + amt.toLocaleString() + " $MOON. Defend your throne today 👉 " + APP_URL);
+        }
+      }
     } else if (job === "recap") {
       // weekly recap to players active in the last 7 days
       const { rows } = await db.query(

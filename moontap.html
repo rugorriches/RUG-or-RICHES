@@ -5175,7 +5175,13 @@
       let audioUnlocked = false;
       let lastHapticZone = null;
 
-      const MOON_CAP = 1000000000000, AIRDROP_CAP = 100000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
+      const MOON_CAP = 1000000000000, AIRDROP_CAP = 600000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
+      // Per-VIP-tier airdrop ALLOCATION cap: the max share of the ~12B-pt season pool an account can be allocated at snapshot.
+      // Tier 0 (None) ≈ 0.83% → Trench III (18) = 5.00%, scaling up by tier. Points are EARNED only by playing; VIP just raises your ceiling.
+      const AIRDROP_POOL = 12000000000;
+      const AIRDROP_CAP_BY_VIP = [100000000, 120000000, 145000000, 175000000, 205000000, 240000000, 275000000, 315000000, 355000000, 395000000, 430000000, 465000000, 495000000, 525000000, 550000000, 570000000, 585000000, 595000000, 600000000];
+      function airCap() { return AIRDROP_CAP_BY_VIP[Math.max(0, Math.min(18, S.vip || 0))] || AIRDROP_CAP; }
+      function airCapPct() { return (airCap() / AIRDROP_POOL * 100); }
 
       function getHeatZone(heatPercent) {
         const h = clamp(Number(heatPercent) || 0, 0, 100);
@@ -6986,15 +6992,16 @@
         const pointOk = A >= AIRDROP_QUALIFY, dayOk = days >= AIRDROP_MIN_DAYS, tapOk = taps >= AIRDROP_MIN_TAPS, cashOk = cash >= AIRDROP_MIN_CASHOUTS;
         const qualified = pointOk && dayOk && tapOk && cashOk, elite = A >= AIRDROP_ELITE && qualified;
         const reqPct = Math.min(A / AIRDROP_QUALIFY, days / AIRDROP_MIN_DAYS, taps / AIRDROP_MIN_TAPS, cash / AIRDROP_MIN_CASHOUTS) * 100;
-        const share = (Math.min(A, AIRDROP_CAP) / 12000000000 * 100);
+        const share = (Math.min(A, airCap()) / AIRDROP_POOL * 100);
         const sr = 'style="display:flex;justify-content:space-between;font-size:12px;margin-top:7px;color:#cdbff0"';
         box.innerHTML = '<div class="card"><div class="sec-h" style="margin-top:0">🏆 Season 1 stakes</div>' +
-          '<div class="ds">Airdrop qualification is separate from VIP and rank. You need sustained play during your first 30-day season, not just one huge lucky run.</div>' +
+          '<div class="ds">Points are <b>earned only by playing</b> — never bought. Your VIP tier raises your <b>allocation cap</b> (the max share you can be allocated); you still grind the points by playing through your 30-day season.</div>' +
           '<div ' + sr + '><span>Status</span><b style="color:' + (qualified ? 'var(--green)' : 'var(--red)') + '">' + (elite ? '👑 Elite qualified' : qualified ? '✅ Qualified' : '⛏ Not qualified yet') + '</b></div>' +
           '<div ' + sr + '><span>Points</span><b style="color:' + (pointOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(A) + ' / ' + fmt(AIRDROP_QUALIFY) + '</b></div>' +
           '<div ' + sr + '><span>Active days</span><b style="color:' + (dayOk ? 'var(--green)' : 'var(--gold)') + '">' + days + ' / ' + AIRDROP_MIN_DAYS + '</b></div>' +
           '<div ' + sr + '><span>Taps</span><b style="color:' + (tapOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(taps) + ' / ' + fmt(AIRDROP_MIN_TAPS) + '</b></div>' +
           '<div ' + sr + '><span>Cash-outs</span><b style="color:' + (cashOk ? 'var(--green)' : 'var(--gold)') + '">' + fmt(cash) + ' / ' + fmt(AIRDROP_MIN_CASHOUTS) + '</b></div>' +
+          '<div ' + sr + '><span>VIP allocation cap</span><b style="color:var(--gold)">' + VIP[Math.max(0, Math.min(18, S.vip || 0))].nm + ' · up to ' + airCapPct().toFixed(2) + '%</b></div>' +
           '<div ' + sr + '><span>Est. pool share</span><b style="color:var(--cyan)">' + share.toFixed(4) + '%</b></div>' +
           '<div class="pbar2" style="margin-top:9px"><i style="width:' + clamp(reqPct, 3, 100) + '%;background:linear-gradient(90deg,var(--cyan),var(--gold))"></i></div></div>';
       }
@@ -7294,6 +7301,7 @@
           html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
           html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
           html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
+          html += sec("🐋 Biggest whales (all-time)", d.boards.allTimeWhales, fmt);
         }
         wrap.innerHTML = html || '<div class="dly-load">No board activity yet today — be the first! 🦈</div>';
       }

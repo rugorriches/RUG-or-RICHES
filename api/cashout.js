@@ -3,7 +3,7 @@ const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000000;
-const AIRDROP_CAP = 100000000;
+const AIRDROP_CAP = 600000000; // absolute accumulation ceiling = max VIP-tier allocation cap; per-tier % applied at snapshot. KEEP IN SYNC across api files.
 const PIGGY_CAP = 150000;
 const PRICE_CAP = 1000;
 const AIRDROP_BANK_RATE = 0.08;

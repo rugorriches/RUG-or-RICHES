@@ -1,6 +1,6 @@
 const db = require("./db");
 const MOON_CAP = 1000000000000;
-const AIRDROP_CAP = 100000000;
+const AIRDROP_CAP = 600000000; // KEEP IN SYNC with claim/cashout/referrals/sync/webhook (absolute airdrop accumulation ceiling)
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

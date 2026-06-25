@@ -6,7 +6,7 @@ const db = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "";
 const MOON_CAP = 1000000000000;
-const AIRDROP_CAP = 100000000;
+const AIRDROP_CAP = 600000000; // absolute accumulation ceiling = max VIP-tier allocation cap; per-tier % applied at snapshot. KEEP IN SYNC across api files.
 const VIP_STARS = [0, 300, 600, 1000, 2500, 4500, 7000, 12000, 18000, 27000, 45000, 70000, 100000, 160000, 240000, 350000, 500000, 720000, 1000000];
 function tierFromPoints(pts) { let t = 0; for (let i = 1; i < VIP_STARS.length; i++) if (pts >= VIP_STARS[i]) t = i; return t; }
 

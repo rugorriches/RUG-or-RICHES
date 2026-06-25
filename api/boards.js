@@ -71,6 +71,12 @@ module.exports = async (req, res) => {
          FROM players WHERE streak > 0
         ORDER BY streak DESC LIMIT 5`);
 
+    // All-time biggest whales — NOT day-gated, so Live always has content even right after the daily reset
+    const allTimeQ = db.query(
+      `SELECT COALESCE(name,'degen') AS name, vip_tier, lifetime_banked
+         FROM players WHERE lifetime_banked > 0
+        ORDER BY lifetime_banked DESC LIMIT 5`);
+
     // Biggest duel pots won today (settled, real wager). .catch keeps boards alive if duels table is cold.
     const duelPotsQ = db.query(
       `SELECT COALESCE(p.name,'degen') AS name, p.vip_tier, (d.wager*2) AS pot
@@ -86,7 +92,7 @@ module.exports = async (req, res) => {
         GROUP BY p.id, p.name, p.vip_tier
         ORDER BY COUNT(*) DESC LIMIT 5`).catch(() => ({ rows: [] }));
 
-    const [whales, bigBanks, mults, streaks, duelPots, topDuelists] = await Promise.all([whalesQ, bigBankQ, multQ, streakQ, duelPotsQ, topDuelistsQ]);
+    const [whales, bigBanks, mults, streaks, duelPots, topDuelists, allTime] = await Promise.all([whalesQ, bigBankQ, multQ, streakQ, duelPotsQ, topDuelistsQ, allTimeQ]);
 
     return json(res, 200, {
       day,
@@ -96,6 +102,7 @@ module.exports = async (req, res) => {
         biggestBankToday: bigBanks.rows.map(r => row(r, "best_bank")),
         highestMultToday: mults.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.best_mult) || 1 })),
         longestStreaks: streaks.rows.map(r => row(r, "streak")),
+        allTimeWhales: allTime.rows.map(r => row(r, "lifetime_banked")),
         topDuelists: topDuelists.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.wins) || 0 })),
         biggestDuelPots: duelPots.rows.map(r => ({ name: r.name, vip: Number(r.vip_tier) || 0, value: Number(r.pot) || 0 }))
       }
