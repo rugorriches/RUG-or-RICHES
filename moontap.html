@@ -7887,9 +7887,24 @@
           go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("crews"); } catch (e) { } }, 70); }
         },
         {
+          key: "liveboards", need: 5, sel: '[data-onboarding-noop]', icon: "🐋", title: "Live boards & Daily Challenge!",
+          how: "Under <b>Ranks → 🐋 Live</b> you'll find:<br>• <b>🏆 Daily Challenge</b> — the biggest single bank each day wins from a $MOON prize pool, <b>paid out automatically</b>.<br>• <b>🐋 Biggest whales (all-time)</b> plus today's top banks, multipliers & streaks.<br><br>Bank a big run to climb today's board.",
+          go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("ranks"); showRtView("live"); } catch (e) { } }, 70); }
+        },
+        {
           key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "⚔️", title: "Duels unlocked!",
           how: "You're ready for the big leagues:<br>• <b>🌐 Duel Board</b> — post a public duel, accept anyone's, and chat live with the whole pond.<br>• <b>⚔️ My Duels</b> — your record, active rounds, and history.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons for $MOON prizes.<br><br>Open <b>Ranks → ⚔️ Duels</b> to jump in. The 🏆 Daily Challenge now lives under <b>Ranks → 🐋 Live</b>.",
           go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) { } }, 70); }
+        },
+        {
+          key: "vipcap", need: 10, sel: '[data-onboarding-noop]', icon: "👑", title: "VIP & your airdrop cap",
+          how: "VIP is never pay-to-win on points — <b>airdrop points are always earned by playing</b>. What VIP gives you:<br>• A higher <b>earn rate</b> (more $MOON & airdrop points per run).<br>• A higher <b>airdrop allocation cap</b> — from ~0.83% up to <b>5%</b> at the top tier.<br>• Bigger bet caps, more energy, rug protection + a daily VIP bonus.<br><br>See the tiers in the <b>👑 VIP</b> tab.",
+          go: () => { if (typeof openPanel === "function") openPanel("vip"); }
+        },
+        {
+          key: "vippoints", need: 12, sel: '[data-onboarding-noop]', icon: "🏅", title: "VIP points — climb tiers free",
+          how: "You don't have to pay for VIP. <b>Earn VIP points by playing:</b><br>• <b>🏅 VIP-point quests</b> in the Quests tab (daily & weekly).<br>• <b>Referrals</b> — 100 VIP pts per friend (250 if they're Telegram Premium).<br>Enough VIP points = a higher tier = a higher airdrop cap.<br><br>Track your VIP points on your <b>👤 Profile</b>.",
+          go: () => { if (typeof openPanel === "function") openPanel("airdrop"); }
         }
       ];
       let unlockTarget = null;
