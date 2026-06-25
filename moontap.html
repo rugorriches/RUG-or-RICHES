@@ -1633,7 +1633,7 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #8fdcff;
-      margin: 16px 2px 8px;
+      margin: 24px 2px 13px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -2860,7 +2860,7 @@
     }
 
     #tut {
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: transparent;
       z-index: 80;
@@ -8440,10 +8440,12 @@
           const pad = 8;
           spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
           spot.style.left = (r.left - pad) + "px"; spot.style.top = (r.top - pad) + "px"; spot.style.borderRadius = "14px";
-          card.style.position = "absolute"; card.style.left = "50%"; card.style.transform = "translateX(-50%)";
-          if (window.innerHeight - r.bottom > 250) { card.style.top = (r.bottom + 14) + "px"; card.style.bottom = "auto"; }
-          else { card.style.top = "auto"; card.style.bottom = (window.innerHeight - r.top + 14) + "px"; }
+          // Pin the card to whichever half is OPPOSITE the highlight so it never covers it and Next is always on-screen.
+          card.style.position = "fixed"; card.style.left = "50%"; card.style.transform = "translateX(-50%)";
+          if (r.top + r.height / 2 < window.innerHeight / 2) { card.style.top = "auto"; card.style.bottom = "22px"; }
+          else { card.style.top = "22px"; card.style.bottom = "auto"; }
         } else {
+          // no target (welcome / outro): dim everything, center the card
           spot.style.width = "0px"; spot.style.height = "0px"; spot.style.left = "50%"; spot.style.top = "50%"; spot.style.borderRadius = "0";
           card.style.position = "static"; card.style.left = ""; card.style.top = ""; card.style.bottom = ""; card.style.transform = "";
         }
