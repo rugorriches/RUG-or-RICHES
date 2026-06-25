@@ -4630,7 +4630,7 @@
       <div class="rtabs">
         <button class="rtab on" data-grp="ranks">🏆 Ranks</button>
         <button class="rtab" data-grp="crews">🤝 Crews</button>
-        <button class="rtab" data-grp="compete">💥 Compete</button>
+        <button class="rtab" data-grp="compete">⚔️ Duels</button>
       </div>
       <div class="subtabs" id="subTabs"></div>
       <div class="rt" id="rt-rank">
@@ -5350,7 +5350,8 @@
         try { localStorage.setItem("moontap", JSON.stringify(S)); } catch (e) { }
         renderLive(); renderStats(); renderDash();
         if (panelOpen === "shop") renderShop();
-        if (panelOpen === "airdrop") renderAirdrop();
+        // Full airdrop refresh (mirrors openPanel) so a claim updates its button instantly — not only on tab switch.
+        if (panelOpen === "airdrop") { renderAirdrop(); try { renderQuests(); renderAch(); updateQuestDot(); } catch (e) { } }
         if (panelOpen === "vip") renderVip();
         if (panelOpen === "invite") renderInvite();
       }
@@ -7256,7 +7257,7 @@
           '<b style="color:var(--cyan)">5.</b> Contribute 5,000+ war pts to claim your <b>🏆 War Chest</b> — it scales with your crew\'s rank + contribution (up to 500K $MOON).' +
           '</div></div>' +
           '<div class="sec-h">❔ Crew Wars FAQ</div>' +
-          '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Every crew is ranked together by total <b>war points</b> this week — the sum of its members\' points. Top crews win the biggest chests when the timer ends. (1v1 head-to-head lives in the <b>Compete → Duels</b> tab.)</div></details>' +
+          '<details class="faq"><summary>How is the winner decided?</summary><div class="a">Every crew is ranked together by total <b>war points</b> this week — the sum of its members\' points. Top crews win the biggest chests when the timer ends. (1v1 head-to-head lives in the <b>⚔️ Duels</b> tab.)</div></details>' +
           '<details class="faq"><summary>How do I earn war points?</summary><div class="a">Tap <b>⚔️ Rally</b> to spend $MOON for instant war points. It\'s the main way to contribute — spend only what you\'re comfortable with.</div></details>' +
           '<details class="faq"><summary>Do I need a crew?</summary><div class="a">Yes — join or create one on the <b>My Crew</b> tab. Solo players can\'t enter wars.</div></details>' +
           '<details class="faq"><summary>Does VIP help?</summary><div class="a">Yes — higher VIP tiers give more war points per rally.</div></details>' +
@@ -7268,9 +7269,10 @@
       async function renderBoards() {
         const wrap = $("liveBoards"); if (!wrap) return;
         wrap.innerHTML = '<div class="dly-load">Loading boards…</div>';
-        let d = null;
-        try { const r = await fetch("/api/boards"); d = await r.json(); } catch (e) { }
-        if (!d || !d.boards) { wrap.innerHTML = '<div class="dly-load">Boards unavailable — try again soon.</div>'; return; }
+        const [d, daily] = await Promise.all([
+          fetch("/api/boards").then(r => r.json()).catch(() => null),
+          cloudAction("/api/daily", {}).catch(() => fetch("/api/daily").then(r => r.json()).catch(() => null))
+        ]);
         const sec = (title, arr, fmtVal) => {
           if (!arr || !arr.length) return "";
           let h = '<div class="sec-h" style="margin-top:10px">' + title + '</div>';
@@ -7278,12 +7280,23 @@
           return h;
         };
         let html = "";
-        if (d.whaleOfTheDay) html += '<div class="dly-prize">🐋 Whale of the Day: <b>' + esc(d.whaleOfTheDay.name) + '</b> · ' + fmt(d.whaleOfTheDay.value) + ' $MOON</div>';
-        html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
-        html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
-        html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
-        html += sec("⚔️ Top duelists (30d)", d.boards.topDuelists, v => v + (Number(v) === 1 ? " win" : " wins"));
-        html += sec("🏆 Biggest duel pots today", d.boards.biggestDuelPots, fmt);
+        // 🏆 Daily Challenge — moved here from the old Compete tab; leaderboard + prize pool
+        if (daily && daily.top) {
+          const secs = daily.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
+          html += '<div class="sec-h">🏆 Daily Challenge</div>';
+          html += '<div class="dly-prize">💰 Prize pool: ' + fmt(daily.prizePool || 0) + ' $MOON · top 10 · resets in ' + hh + 'h ' + mm + 'm</div>';
+          if (daily.me) html += '<div class="dly-me">You: ' + (daily.me.rank ? ('#' + daily.me.rank + ' of ' + daily.me.players) : 'unranked — bank a run to enter') + (daily.me.bank ? (' · best ' + fmt(daily.me.bank) + ' (' + (daily.me.mult || 1).toFixed(2) + 'x)') : '') + '</div>';
+          if (!daily.top.length) html += '<div class="dly-empty">No banks yet today — be the first! 🦈</div>';
+          else daily.top.slice(0, 5).forEach(r => { html += '<div class="crewrow' + (daily.me && daily.me.rank === r.rank ? ' me' : '') + '"><div class="rk">' + r.rank + '</div><div class="nm">' + esc(r.name) + '<div class="ds">' + (r.mult || 1).toFixed(2) + 'x · ' + (r.runs || 0) + ' runs</div></div><div class="sc">' + fmt(r.bank) + '</div></div>'; });
+        }
+        if (d && d.boards) {
+          if (d.whaleOfTheDay) html += '<div class="dly-prize" style="margin-top:10px">🐋 Whale of the Day: <b>' + esc(d.whaleOfTheDay.name) + '</b> · ' + fmt(d.whaleOfTheDay.value) + ' $MOON</div>';
+          html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
+          html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
+          html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
+          html += sec("⚔️ Top duelists (30d)", d.boards.topDuelists, v => v + (Number(v) === 1 ? " win" : " wins"));
+          html += sec("🏆 Biggest duel pots today", d.boards.biggestDuelPots, fmt);
+        }
         wrap.innerHTML = html || '<div class="dly-load">No board activity yet today — be the first! 🦈</div>';
       }
       async function renderDaily() {
@@ -7802,7 +7815,7 @@
       const RT_GROUPS = {
         ranks: [{ k: "rank", l: "My Rank" }, { k: "players", l: "Leaderboard" }, { k: "live", l: "🐋 Live" }],
         crews: [{ k: "crews", l: "Top Crews" }, { k: "mycrew", l: "My Crew" }, { k: "wars", l: "⚔️ Wars" }],
-        compete: [{ k: "daily", l: "🏆 Daily" }, { k: "board", l: "🌐 Duel Board" }, { k: "duels", l: "⚔️ My Duels" }, { k: "ranked", l: "📊 Ranked" }]
+        compete: [{ k: "board", l: "🌐 Duel Board" }, { k: "duels", l: "⚔️ My Duels" }, { k: "ranked", l: "📊 Ranked" }]
       };
       const RT_RENDER = { rank: () => renderRanks(), players: () => renderRanks(), crews: () => renderCrews(), mycrew: () => renderMyCrew(), wars: () => renderWars(), daily: () => renderDaily(), board: () => renderDuelBoard(), duels: () => renderDuels(), ranked: () => renderRanked(), live: () => renderBoards() };
       const RT_ALL = ["rank", "players", "crews", "mycrew", "wars", "daily", "board", "duels", "ranked", "live"];
@@ -7841,8 +7854,8 @@
           go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("crews"); } catch (e) { } }, 70); }
         },
         {
-          key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "💥", title: "Compete unlocked!",
-          how: "You're ready for the big leagues:<br>• <b>🌐 Duel Board</b> — post a public duel, accept anyone's, and chat live with the whole pond.<br>• <b>⚔️ Duels</b> — challenge a rival 1v1 on the same chart; winner takes the whole pot.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons for $MOON prizes.<br>• <b>🐋 Live Boards</b> — chase Whale of the Day.<br><br>Open <b>Ranks → 🏆 Compete</b> to jump in.",
+          key: "compete", need: 8, sel: '.rtab[data-grp="compete"]', icon: "⚔️", title: "Duels unlocked!",
+          how: "You're ready for the big leagues:<br>• <b>🌐 Duel Board</b> — post a public duel, accept anyone's, and chat live with the whole pond.<br>• <b>⚔️ My Duels</b> — your record, active rounds, and history.<br>• <b>📊 Ranked</b> — climb the Elo ladder across seasons for $MOON prizes.<br><br>Open <b>Ranks → ⚔️ Duels</b> to jump in. The 🏆 Daily Challenge now lives under <b>Ranks → 🐋 Live</b>.",
           go: () => { if (typeof openPanel === "function") openPanel("ranks"); setTimeout(() => { try { showRtGroup("compete"); } catch (e) { } }, 70); }
         }
       ];
