@@ -5761,8 +5761,12 @@
       const QUESTS_VIP = [{ id: "v_silver", emo: "🌊", label: "VIP: Pump to 20x", goal: 20, reward: 60000, track: "maxPrice", vip: 2 },
       { id: "v_gold", emo: "🐠", label: "VIP: Bank 5M in one sell", goal: 5000000, reward: 175000, track: "bigSell", vip: 3 },
       { id: "v_diamond", emo: "🌑", label: "VIP: Tap 50,000 times", goal: 50000, reward: 400000, track: "taps", vip: 4 }];
+      // VIP-point quests — grind VIP tier by PLAYING (grant VIP points, not $MOON). KEEP IN SYNC with claim.js vp_* quests.
+      const QUESTS_VP = [{ id: "vp_d_taps", emo: "👑", label: "Tap 500 times today", goal: 500, reward: 0, vp: 15, track: "taps", period: "daily" },
+      { id: "vp_d_cash", emo: "👑", label: "Bank 50K in one sell today", goal: 50000, reward: 0, vp: 20, track: "bigSell", period: "daily" },
+      { id: "vp_w_taps", emo: "👑", label: "Tap 5,000 times this week", goal: 5000, reward: 0, vp: 250, track: "taps", period: "weekly" }];
       QUESTS.forEach(q => q.period = "daily"); QUESTS_W.forEach(q => q.period = "weekly"); QUESTS_M.forEach(q => q.period = "monthly"); QUESTS_VIP.forEach(q => q.period = "vip");
-      const ALLQ = [].concat(QUESTS, QUESTS_W, QUESTS_M, QUESTS_VIP); const qById = {}; ALLQ.forEach(q => qById[q.id] = q);
+      const ALLQ = [].concat(QUESTS, QUESTS_W, QUESTS_M, QUESTS_VIP, QUESTS_VP); const qById = {}; ALLQ.forEach(q => qById[q.id] = q);
       function normalizeQuestState() {
         if (!S.quests) S.quests = { date: null, prog: {}, claimed: [] }; if (!S.quests.prog) S.quests.prog = {}; if (!Array.isArray(S.quests.claimed)) S.quests.claimed = [];
         if (!S.qw || typeof S.qw !== "object") S.qw = { k: null, prog: {}, claimed: [] }; if (!S.qm || typeof S.qm !== "object") S.qm = { k: null, prog: {}, claimed: [] }; if (!S.qv || typeof S.qv !== "object") S.qv = { prog: {}, claimed: [] };
@@ -6898,16 +6902,17 @@
           const p = qprog(q.id), done = p >= q.goal, claimed = (b.claimed || []).indexOf(q.id) >= 0;
           const d = document.createElement("div"); d.className = "card row";
           const pct = q.track === "maxPrice" ? p.toFixed(1) + "/" + q.goal + "x" : fmt(p) + "/" + fmt(q.goal);
+          const rwd = q.vp ? ('+' + q.vp + ' VIP pts') : (fmt(q.reward) + ' $MOON');
           const btn = locked ? '<button class="qclaim" disabled>🔒 VIP ' + q.vip + '</button>' : '<button class="qclaim ' + (claimed ? "done" : "") + '"' + ((!done || claimed) ? " disabled" : "") + '>' + (claimed ? "✓" : "Claim") + '</button>';
-          d.innerHTML = '<div class="emo">' + q.emo + '</div><div class="grow"><div class="nm">' + q.label + '</div><div class="ds">' + (locked ? ("Unlocks at VIP tier " + q.vip + " · " + fmt(q.reward) + " $MOON") : (pct + ' · ' + fmt(q.reward) + ' $MOON')) + '</div><div class="pbar2"><i style="width:' + clamp(p / q.goal * 100, 0, 100) + '%"></i></div></div>' + btn;
+          d.innerHTML = '<div class="emo">' + q.emo + '</div><div class="grow"><div class="nm">' + q.label + '</div><div class="ds">' + (locked ? ("Unlocks at VIP tier " + q.vip + " · " + rwd) : (pct + ' · ' + rwd)) + '</div><div class="pbar2"><i style="width:' + clamp(p / q.goal * 100, 0, 100) + '%"></i></div></div>' + btn;
           if (!locked) d.querySelector(".qclaim").addEventListener("click", () => {
             const bb = qbucket(q); if (qprog(q.id) < q.goal || (bb.claimed || []).indexOf(q.id) >= 0) return;
             if (cloudAuth()) {
               const qb = d.querySelector(".qclaim"); qb.disabled = true; qb.textContent = "Checking…";
-              claimCloud("quest", q.id).then(data => { if (data && data.ok) { if (bb.claimed.indexOf(q.id) < 0) bb.claimed.push(q.id); save(); sfxCash(); renderQuests(); renderLive(); renderStats(); updateQuestDot(); confetti(); toast("🎯", "Quest complete!", "+" + fmt(data.reward || q.reward) + " $MOON"); } })
+              claimCloud("quest", q.id).then(data => { if (data && data.ok) { if (bb.claimed.indexOf(q.id) < 0) bb.claimed.push(q.id); save(); sfxCash(); renderQuests(); renderLive(); renderStats(); updateQuestDot(); confetti(); toast(q.vp ? "👑" : "🎯", q.vp ? "VIP points earned!" : "Quest complete!", q.vp ? ("+" + (data.vp || q.vp) + " VIP points") : ("+" + fmt(data.reward || q.reward) + " $MOON")); } })
                 .catch(err => { toast("⚠️", "Claim rejected", err.message); renderQuests(); }); return;
             }
-            bb.claimed.push(q.id); bank(q.reward); save(); sfxCash(); renderQuests(); renderLive(); renderStats(); updateQuestDot(); confetti(); toast("🎯", "Quest complete!", "+" + fmt(q.reward) + " $MOON");
+            bb.claimed.push(q.id); if (q.vp) { S.vipPoints = (S.vipPoints || 0) + q.vp; } else bank(q.reward); save(); sfxCash(); renderQuests(); renderLive(); renderStats(); updateQuestDot(); confetti(); toast(q.vp ? "👑" : "🎯", q.vp ? "VIP points earned!" : "Quest complete!", q.vp ? ("+" + q.vp + " VIP points") : ("+" + fmt(q.reward) + " $MOON"));
           });
           wrap.appendChild(d);
         };
@@ -6917,6 +6922,7 @@
         sec("📆 Weekly quests", "bigger rewards · resets weekly"); QUESTS_W.forEach(rowFor);
         sec("🗓️ Monthly quests", "huge rewards · " + dleft + "d left"); QUESTS_M.forEach(rowFor);
         sec("👑 VIP quests", "members only · season-long"); QUESTS_VIP.forEach(rowFor);
+        sec("🏅 VIP-point quests", "earn VIP points by playing — climb tiers & raise your airdrop cap"); QUESTS_VP.forEach(rowFor);
       }
       function renderAch() {
         const wrap = $("achList");

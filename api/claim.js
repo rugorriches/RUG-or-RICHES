@@ -9,6 +9,9 @@ const AIRDROP_CAP = 600000000; // absolute accumulation ceiling = max VIP-tier a
 const AIRDROP_BANK_RATE = 0.08;
 // Depth Zones VIP airdrop-point boost (0 = None, 1-18). KEEP IN SYNC WITH cashout.js / moontap.html VIP[].air
 const VIP_AIR_BOOST = [1, 1.12, 1.24, 1.45, 1.75, 2.15, 2.65, 3.30, 4.20, 5.40, 7.00, 9.00, 11.50, 14.50, 18.00, 21.50, 26.00, 30.50, 36.00];
+// VIP point thresholds per tier — KEEP IN SYNC with sync.js / referrals.js / moontap.html VIP[].vstars.
+const VIP_STARS = [0, 300, 600, 1000, 2500, 4500, 7000, 12000, 18000, 27000, 45000, 70000, 100000, 160000, 240000, 350000, 500000, 720000, 1000000];
+function tierFromPoints(p) { let t = 0; for (let i = 0; i < VIP_STARS.length; i++) if (p >= VIP_STARS[i]) t = i; return t; }
 const SOCIAL_REWARD = 5000;
 const COMBO_REWARD = 10000;
 const COMBO_TAPS = 300;
@@ -43,7 +46,11 @@ const QUESTS = {
   m_invite: { period: "monthly", track: "invite", goal: 10, reward: 200000 },
   v_silver: { period: "vip", track: "price", goal: 20, reward: 60000, vip: 2 },
   v_gold: { period: "vip", track: "cash", goal: 5000000, reward: 175000, vip: 3 },
-  v_diamond: { period: "vip", track: "taps", goal: 50000, reward: 400000, vip: 4 }
+  v_diamond: { period: "vip", track: "taps", goal: 50000, reward: 400000, vip: 4 },
+  // VIP-point quests — grind VIP tier by PLAYING (no $MOON reward; `vp` = VIP points granted)
+  vp_d_taps: { period: "daily", track: "taps", goal: 500, reward: 0, vp: 15 },
+  vp_d_cash: { period: "daily", track: "cash", goal: 50000, reward: 0, vp: 20 },
+  vp_w_taps: { period: "weekly", track: "taps", goal: 5000, reward: 0, vp: 250 }
 };
 
 let schemaReady;
@@ -239,6 +246,7 @@ module.exports = async (req, res) => {
       let reward = 0;
       let token = "";
       let socialColumn = null;
+      let vpGrant = 0;
 
       if (kind === "energy_refill") {
         const permanentVip = Number(player.vip_tier) || 0;
@@ -360,6 +368,7 @@ module.exports = async (req, res) => {
           return json(res, 422, { error: "Quest requirement not met", progress: status.value, goal: quest.goal });
         }
         reward = quest.reward;
+        vpGrant = quest.vp || 0;
       } else if (kind === "combo") {
         token = "combo:" + periods.day;
         if ((Number(progress.daily_taps) || 0) < COMBO_TAPS) {
@@ -436,6 +445,12 @@ module.exports = async (req, res) => {
       }
 
       await creditReward(client, playerId, reward);
+      if (vpGrant > 0) {
+        const { rows: vu } = await client.query(
+          "UPDATE players SET vip_points = vip_points + $2 WHERE id = $1 RETURNING vip_points", [playerId, vpGrant]);
+        const newTier = tierFromPoints(Number((vu[0] && vu[0].vip_points) || 0));
+        await client.query("UPDATE players SET vip_tier = GREATEST(COALESCE(vip_tier,0), $2) WHERE id = $1", [playerId, newTier]);
+      }
       if (token) {
         await client.query(
           "UPDATE quests SET claimed_ids = array_append(COALESCE(claimed_ids, '{}'), $2) WHERE player_id = $1",
@@ -455,13 +470,13 @@ module.exports = async (req, res) => {
       }
 
       const { rows: updated } = await client.query(
-        `SELECT balance, airdrop_pts, lifetime_banked, vip_tier, combo_day, vip_day,
+        `SELECT balance, airdrop_pts, lifetime_banked, vip_tier, vip_points, combo_day, vip_day,
                 last_day, streak, war_week, war_score, war_claim
          FROM players WHERE id = $1`,
         [playerId]
       );
       await client.query("COMMIT");
-      return json(res, 200, { ok: true, kind, id, reward, player: updated[0] });
+      return json(res, 200, { ok: true, kind, id, reward, vp: vpGrant, player: updated[0] });
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
