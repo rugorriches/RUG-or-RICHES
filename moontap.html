@@ -4730,7 +4730,6 @@
         <div id="duelsView"></div>
       </div>
       <div class="rt" id="rt-live" style="display:none">
-        <div class="sec-h">🐋 Live Boards</div>
         <div id="liveBoards"></div>
       </div>
       <div class="rt" id="rt-ranked" style="display:none">
@@ -7393,13 +7392,15 @@
         if (daily && daily.top) {
           const secs = daily.resetIn || 0, hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
           html += '<div class="sec-h">🏆 Daily Challenge</div>';
+          html += '<div class="ds" style="margin:-2px 0 8px;color:#9c92c4;font-size:11.5px">Your single biggest bank today competes for the prize pool — the top 10 are paid <b>automatically</b> when it resets. One free contest every day.</div>';
           html += '<div class="dly-prize">💰 Prize pool: ' + fmt(daily.prizePool || 0) + ' $MOON · top 10 · resets in ' + hh + 'h ' + mm + 'm</div>';
           if (daily.me) html += '<div class="dly-me">You: ' + (daily.me.rank ? ('#' + daily.me.rank + ' of ' + daily.me.players) : 'unranked — bank a run to enter') + (daily.me.bank ? (' · best ' + fmt(daily.me.bank) + ' (' + (daily.me.mult || 1).toFixed(2) + 'x)') : '') + '</div>';
           if (!daily.top.length) html += '<div class="dly-empty">No banks yet today — be the first! 🦈</div>';
           else daily.top.slice(0, 5).forEach(r => { html += '<div class="crewrow' + (daily.me && daily.me.rank === r.rank ? ' me' : '') + '"><div class="rk">' + r.rank + '</div><div class="nm">' + esc(r.name) + '<div class="ds">' + (r.mult || 1).toFixed(2) + 'x · ' + (r.runs || 0) + ' runs</div></div><div class="sc">' + fmt(r.bank) + '</div></div>'; });
         }
         if (d && d.boards) {
-          if (d.whaleOfTheDay) html += '<div class="dly-prize" style="margin-top:10px">🐋 Whale of the Day: <b>' + esc(d.whaleOfTheDay.name) + '</b> · ' + fmt(d.whaleOfTheDay.value) + ' $MOON</div>';
+          html += '<div class="sec-h" style="margin-top:18px">🐋 Live Boards</div>';
+          if (d.whaleOfTheDay) html += '<div class="dly-prize" style="margin-top:2px">🐋 Whale of the Day: <b>' + esc(d.whaleOfTheDay.name) + '</b> · ' + fmt(d.whaleOfTheDay.value) + ' $MOON</div>';
           html += sec("💰 Biggest bank today", d.boards.biggestBankToday, fmt);
           html += sec("📈 Highest multiplier today", d.boards.highestMultToday, v => (Number(v) || 1).toFixed(2) + "x");
           html += sec("🔥 Longest streaks", d.boards.longestStreaks, v => v + "🔥");
@@ -7902,6 +7903,7 @@
         ]);
         if (!d || !d.ok) { wrap.innerHTML = '<div class="dly-load">Ranked unavailable — try again soon.</div>'; return; }
         let html = '<div class="dly-head"><div class="dly-title">📊 Ranked Ladder</div><div class="dly-sub">Win duels to climb · Season ' + d.season + ' · resets monthly</div></div>';
+        html += '<div class="dly-prize" style="margin-bottom:10px">🏆 Weekly prizes — top 10 by MMR, <b>paid automatically every Monday</b>: 🥇 500K · 🥈 300K · 🥉 200K · then 125K → 10K $MOON for 4th–10th.</div>';
         if (d.me) {
           const m = d.me;
           html += '<div class="card" style="margin-bottom:10px;border:1px solid rgba(255,212,0,.3)">' +
