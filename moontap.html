@@ -5574,8 +5574,8 @@
           if (qs.day) S.quests.date = new Date(qs.day + "T00:00:00").toDateString();
           if (qs.week !== undefined && qs.week !== null) S.qw.k = Number(qs.week);
           if (qs.month) S.qm.k = qs.month;
-          if (qs.daily) { S.quests.prog = { taps: Number(qs.daily.taps) || 0, taps2: Number(qs.daily.taps) || 0, price: Number(qs.daily.price) || 1, cash: Number(qs.daily.cash) || 0, invite: Number(qs.daily.invite) || 0 }; }
-          if (qs.weekly) { S.qw.prog = { w_taps: Number(qs.weekly.taps) || 0, w_price: Number(qs.weekly.price) || 1, w_cash: Number(qs.weekly.cash) || 0, w_invite: Number(qs.weekly.invite) || 0 }; }
+          if (qs.daily) { S.quests.prog = { taps: Number(qs.daily.taps) || 0, taps2: Number(qs.daily.taps) || 0, price: Number(qs.daily.price) || 1, cash: Number(qs.daily.cash) || 0, invite: Number(qs.daily.invite) || 0, vp_d_taps: Number(qs.daily.taps) || 0, vp_d_cash: Number(qs.daily.cash) || 0 }; }
+          if (qs.weekly) { S.qw.prog = { w_taps: Number(qs.weekly.taps) || 0, w_price: Number(qs.weekly.price) || 1, w_cash: Number(qs.weekly.cash) || 0, w_invite: Number(qs.weekly.invite) || 0, vp_w_taps: Number(qs.weekly.taps) || 0 }; }
           if (qs.monthly) { S.qm.prog = { m_taps: Number(qs.monthly.taps) || 0, m_cash: Number(qs.monthly.cash) || 0, m_invite: Number(qs.monthly.invite) || 0 }; }
           const tokens = Array.isArray(qs.claimed) ? qs.claimed : [];
           const ids = tokens.map(x => String(x).split(":")[1]).filter(Boolean);
