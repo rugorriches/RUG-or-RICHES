@@ -18,8 +18,6 @@ node_modules/
 
 .vercel
 .vercel_bak/
-
-.vercel
-
-.vercel
+.vercel_temp/
 .env*
+generate-assets.js
