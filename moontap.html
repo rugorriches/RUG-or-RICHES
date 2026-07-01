@@ -2896,10 +2896,10 @@
       z-index: 1;
       background: linear-gradient(180deg, #1a0f33, #11081f);
       border: 1px solid rgba(35, 240, 255, .3);
-      border-radius: 18px;
-      padding: 16px 20px 18px;
-      max-width: 340px;
-      width: calc(100% - 44px);
+      border-radius: 16px;
+      padding: 12px 15px 13px;
+      max-width: 290px;
+      width: calc(100% - 48px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -2907,53 +2907,51 @@
       box-shadow: 0 14px 50px rgba(0, 0, 0, .6);
     }
 
-    #tutCard .em {
-      font-size: 42px;
+    #tutCard .em,
+    #tut .em {
+      font-size: 30px;
     }
 
     .tut-btns {
       display: flex;
-      gap: 10px;
+      gap: 9px;
       align-items: center;
+      margin-top: 2px;
     }
 
     #tutSkip {
       background: transparent;
       border: 1px solid rgba(255, 255, 255, .2);
       color: #9c92c4;
-      border-radius: 14px;
-      padding: 13px 22px;
+      border-radius: 12px;
+      padding: 9px 16px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
     }
 
-    #tut .em {
-      font-size: 60px;
-    }
-
     #tut h3 {
-      font-size: 24px;
-      margin: 12px 0 6px;
+      font-size: 17px;
+      margin: 6px 0 4px;
       color: var(--cyan);
     }
 
     #tut p {
-      font-size: 15px;
+      font-size: 12.5px;
       color: #cbb6ff;
-      max-width: 340px;
-      line-height: 1.5;
+      max-width: 260px;
+      line-height: 1.38;
     }
 
     #tut .dots {
       display: flex;
-      gap: 8px;
-      margin: 18px 0;
+      gap: 6px;
+      margin: 10px 0;
     }
 
     #tut .dots i {
-      width: 9px;
-      height: 9px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #3a2456;
     }
@@ -2964,10 +2962,10 @@
 
     #tutNext {
       border: none;
-      border-radius: 14px;
-      padding: 14px 40px;
+      border-radius: 12px;
+      padding: 9px 26px;
       font-weight: 900;
-      font-size: 16px;
+      font-size: 14px;
       color: #13002a;
       background: linear-gradient(90deg, var(--neon), var(--cyan));
       cursor: pointer;
@@ -4653,7 +4651,7 @@
       </details>
       <details class="faq">
         <summary>How do I qualify?</summary>
-        <div class="a">Reach 10M points, 20 active days, 5K taps, and 100 cash-outs during your first 30-day season.
+        <div class="a">Reach 10M points, 15 active days, 5K taps, and 100 cash-outs during your first 30-day season.
           Elite status starts at 30M points.</div>
       </details>
       <details class="faq">
@@ -5023,7 +5021,7 @@
             <div class="nm">Airdrop points (Season 1 score)</div>
             <div class="ds">You earn airdrop points by <b>playing</b> — 8% of every profitable bank, plus quests & social
               tasks. They're your Season 1 score, <b>not</b> betting fuel and <b>never</b> for sale. To qualify you need
-              sustained play: 10M points, 20 active days, 5,000 taps & 100 cash-outs. Your VIP tier sets the maximum
+              sustained play: 10M points, 15 active days, 5,000 taps & 100 cash-outs. Your VIP tier sets the maximum
               share you can be allocated (~0.30% → up to 5%).</div>
           </div>
         </div>
@@ -5267,7 +5265,7 @@
       let audioUnlocked = false;
       let lastHapticZone = null;
 
-      const MOON_CAP = 1000000000000, AIRDROP_CAP = 600000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 20, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
+      const MOON_CAP = 1000000000000, AIRDROP_CAP = 600000000, AIRDROP_QUALIFY = 10000000, AIRDROP_ELITE = 30000000, AIRDROP_MIN_DAYS = 15, AIRDROP_MIN_TAPS = 5000, AIRDROP_MIN_CASHOUTS = 100, AIRDROP_BANK_RATE = 0.08, PRICE_CAP = 1000, PRICE_SOFTCAP = 40;
       // Per-VIP-tier airdrop ALLOCATION cap: the max share of the ~12B-pt season pool an account can be allocated at snapshot.
       // Per-VIP-tier airdrop ALLOCATION cap, CONVEX & cost-aligned (tracks VIP_TON price). Cheap early tiers barely move the
       // cap; the gains accelerate where the cost does, so the biggest jumps land on the most expensive tiers.
